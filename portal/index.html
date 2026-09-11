@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CBG Karnal — Data Entry Portal</title>
   <style>
-    :root {
-      --bg:#f0f2f8; --surface:#fff; --border:#dde1ec; --text:#1a1d2e;
-      --muted:#6b7280; --accent:#1c52a3; --accent2:#2563eb;
-      --calc:#92400e; --calc-bg:#fffbeb;
-      --success:#16a34a; --danger:#dc2626;
-      --warn-bg:#fef3c7; --warn-text:#92400e;
-      --radius:8px; --header-h:54px;
+    :root{
+      --bg:#f0f2f8;--surface:#fff;--border:#dde1ec;--text:#1a1d2e;
+      --muted:#6b7280;--accent:#1c52a3;--accent2:#2563eb;
+      --calc:#92400e;--calc-bg:#fffbeb;
+      --success:#16a34a;--danger:#dc2626;
+      --warn-bg:#fef3c7;--warn-text:#92400e;
+      --radius:8px;--hh:54px;
     }
     @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
       --bg:#0f1117;--surface:#1a1d2e;--border:#2d3148;--text:#e8eaf6;
@@ -20,72 +20,56 @@
     }}
     *{box-sizing:border-box;margin:0;padding:0;}
     body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-
-    header{
-      height:var(--header-h);background:var(--accent);color:#fff;
-      display:flex;align-items:center;padding:0 18px;gap:10px;
-      position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);
-    }
+    header{height:var(--hh);background:var(--accent);color:#fff;display:flex;align-items:center;
+      padding:0 18px;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
     .logo{width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:6px;
       display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;}
-    header h1{font-size:.92rem;font-weight:600;flex:1;}
+    header h1{font-size:.9rem;font-weight:600;flex:1;}
     .hbtn{padding:5px 13px;border-radius:6px;border:1.5px solid rgba(255,255,255,.6);
       background:transparent;color:#fff;cursor:pointer;font-size:.8rem;font-weight:500;}
-    .hbtn.solid{background:#fff;color:var(--accent);border-color:#fff;font-weight:700;}
-
     #banner{background:var(--warn-bg);color:var(--warn-text);text-align:center;
-      padding:7px;font-size:.8rem;font-weight:500;border-bottom:1px solid rgba(0,0,0,.07);}
-
-    .layout{display:flex;height:calc(100vh - var(--header-h) - 35px);}
-
-    nav{width:205px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;}
-    .ng{padding:10px 13px 3px;font-size:.67rem;font-weight:700;letter-spacing:.09em;
-      text-transform:uppercase;color:var(--muted);}
-    nav button{display:block;width:100%;text-align:left;padding:7px 13px;border:none;
-      background:none;color:var(--text);cursor:pointer;font-size:.83rem;
-      border-left:3px solid transparent;transition:background .1s;}
+      padding:7px;font-size:.79rem;font-weight:500;border-bottom:1px solid rgba(0,0,0,.07);}
+    .layout{display:flex;height:calc(100vh - var(--hh) - 33px);}
+    nav{width:210px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;}
+    .ng{padding:10px 13px 3px;font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
+    nav button{display:block;width:100%;text-align:left;padding:7px 13px;border:none;background:none;
+      color:var(--text);cursor:pointer;font-size:.82rem;border-left:3px solid transparent;transition:background .1s;}
     nav button:hover{background:var(--bg);}
     nav button.active{border-left-color:var(--accent);color:var(--accent);font-weight:600;background:var(--bg);}
-
     .content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-    main{flex:1;overflow-y:auto;padding:18px 22px;}
-
-    .sh{margin-bottom:14px;}
-    .sh h2{font-size:1rem;font-weight:700;}
-    .sh .sub{font-size:.78rem;color:var(--muted);margin-top:2px;}
-
-    .date-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;
-      padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
-    .date-row label{font-size:.8rem;font-weight:600;}
-    .date-row input[type="date"]{padding:5px 9px;border:1px solid var(--border);border-radius:6px;
-      background:var(--bg);color:var(--text);font-size:.86rem;}
-
-    .sec{margin-bottom:22px;}
-    .sec-title{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-      color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:12px;}
-    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;}
+    main{flex:1;overflow-y:auto;padding:16px 20px;}
+    .sh{margin-bottom:12px;}
+    .sh h2{font-size:.98rem;font-weight:700;}
+    .sh .sub{font-size:.77rem;color:var(--muted);margin-top:2px;}
+    .date-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+      padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+    .date-row label{font-size:.79rem;font-weight:600;}
+    .date-row input[type="date"]{padding:5px 8px;border:1px solid var(--border);border-radius:6px;
+      background:var(--bg);color:var(--text);font-size:.85rem;}
+    .sec{margin-bottom:20px;}
+    .sec-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:11px;}
+    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px;}
     .fg{display:flex;flex-direction:column;gap:3px;}
-    .fg label{font-size:.72rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
-    .atag{font-size:.63rem;color:var(--calc);font-weight:700;letter-spacing:.04em;
+    .fg label{font-size:.71rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
+    .atag{font-size:.62rem;color:var(--calc);font-weight:700;letter-spacing:.04em;
       text-transform:uppercase;background:var(--calc-bg);padding:1px 4px;border-radius:3px;}
-    .fg input,.fg select,.fg textarea{
-      padding:6px 9px;border:1px solid var(--border);border-radius:6px;
-      background:var(--surface);color:var(--text);font-size:.88rem;
+    .fg input,.fg select,.fg textarea{padding:6px 8px;border:1px solid var(--border);border-radius:6px;
+      background:var(--surface);color:var(--text);font-size:.87rem;
       font-variant-numeric:tabular-nums;transition:border-color .15s;width:100%;}
     .fg input:focus,.fg select:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
     .fg input.cf{background:var(--calc-bg);color:var(--calc);font-weight:600;border-color:transparent;cursor:default;}
-    .fg textarea{resize:vertical;min-height:60px;}
-
-    .save-bar{padding:10px 22px;background:var(--surface);border-top:1px solid var(--border);
+    .fg textarea{resize:vertical;min-height:56px;}
+    .info-row{grid-column:1/-1;color:var(--muted);font-size:.78rem;font-style:italic;padding:3px 0;}
+    .save-bar{padding:9px 20px;background:var(--surface);border-top:1px solid var(--border);
       display:flex;align-items:center;gap:12px;}
     #saveBtn{padding:7px 22px;border:none;border-radius:6px;background:var(--accent);
-      color:#fff;cursor:pointer;font-size:.88rem;font-weight:600;}
+      color:#fff;cursor:pointer;font-size:.87rem;font-weight:600;}
     #saveBtn:disabled{opacity:.4;cursor:not-allowed;}
-    #saveNote{font-size:.78rem;color:var(--muted);}
-
-    #toast{position:fixed;bottom:22px;right:22px;padding:11px 18px;border-radius:var(--radius);
-      background:var(--success);color:#fff;font-size:.86rem;font-weight:500;
-      box-shadow:0 4px 16px rgba(0,0,0,.2);display:none;z-index:999;}
+    #saveNote{font-size:.77rem;color:var(--muted);}
+    #toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:var(--radius);
+      background:var(--success);color:#fff;font-size:.85rem;font-weight:500;
+      box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;z-index:999;}
     #toast.err{background:var(--danger);}
   </style>
 </head>
@@ -93,556 +77,655 @@
 <header>
   <div class="logo">CBG</div>
   <h1>LR Energy — CBG Karnal &nbsp;|&nbsp; Data Entry Portal</h1>
-  <button class="hbtn" id="signInBtn" onclick="handleSignIn()">Sign In to Save</button>
+  <button class="hbtn" onclick="handleSignIn()">Sign In to Save</button>
 </header>
-<div id="banner">⚠️ Demo mode — enter data freely. Sign in with Microsoft account to save to SharePoint.</div>
-
+<div id="banner">⚠️ Demo mode — all calculations run live. Sign in with Microsoft account to save data to SharePoint.</div>
 <div class="layout">
   <nav id="nav"></nav>
   <div class="content">
     <main id="main"></main>
     <div class="save-bar">
       <button id="saveBtn" disabled>Save to SharePoint</button>
-      <span id="saveNote">Sign in first to enable saving</span>
+      <span id="saveNote">Sign in to enable saving</span>
     </div>
   </div>
 </div>
 <div id="toast"></div>
 
 <script>
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // RATES
-// ════════════════════════════════════════════════════════════════
-const R = {
-  CD:{bpp:45}, GS:{bpp:220}, CSL:{bpp:270},
-  PM:{bpp:{11:95,12:95,1:95,2:95,3:95,4:95,5:85,6:70,7:70,8:70,9:50,10:50}},
-  DIGESTER:{radius:15,hWinter:7.8,hOther:7.5},
-  PSA:{basis:275},
-}
+// ══════════════════════════════════════════════════════════
+const PM_BPP = {1:95,2:95,3:95,4:95,5:85,6:70,7:70,8:70,9:50,10:50,11:95,12:95}
+const DENSITY = {CSL:1.15, GS:1.30}
+const RADIUS  = 15
+const H = {winter:7.8, other:7.5}  // slurry height defaults
+const PSA_BASIS = 275  // kg CBG per hour ideal
 
-// ════════════════════════════════════════════════════════════════
-// SHEET DEFINITIONS
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
+// SHEETS CONFIG
+// ══════════════════════════════════════════════════════════
 const SHEETS = [
 
-// ── DIGESTERS ────────────────────────────────────────────────────
-{id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1',
- sections:[
-  {title:'Expected Feeding',fields:[
-    {k:'cd_exp',   l:'CD Expected (MT)',        t:'num'},
-    {k:'pm_exp',   l:'PM Expected (MT)',         t:'num'},
-    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',t:'num'},
-    {k:'csl_exp',  l:'CSL Expected (KL)',         t:'num'},
-    {k:'fw_exp',   l:'Fresh Water Expected (m³)', t:'num'},
-    {k:'rs_exp',   l:'Recycle Slurry Exp (m³)',   t:'num'},
+// ─── DIGESTER 1 ───────────────────────────────────────────
+{id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1', hasDate:true, sections:[
+  {t:'Expected Feeding',f:[
+    {k:'cd_exp',   l:'CD Expected (MT)',              tp:'num'},
+    {k:'pm_exp',   l:'PM Expected (MT)',               tp:'num'},
+    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',      tp:'num'},
+    {k:'csl_exp',  l:'CSL Expected (KL)',              tp:'num'},
+    {k:'fw_exp',   l:'Fresh Water Expected (m³)',      tp:'num'},
+    {k:'rs_exp',   l:'Recycle Slurry Expected (m³)',   tp:'num'},
   ]},
-  {title:'Actual Feeding',fields:[
-    {k:'cd_act',   l:'CD Actual (MT)',            t:'num'},
-    {k:'pm_act',   l:'PM Actual (MT)',             t:'num'},
-    {k:'poultry',  l:'Poultry Actual (cu.m)',      t:'num'},
-    {k:'csl_act',  l:'CSL Actual (KL)',             t:'num'},
-    {k:'gs_act',   l:'Grain Syrup Actual (KL)',     t:'num'},
-    {k:'pm_ts',    l:'PM TS%',                      t:'num'},
-    {k:'pm_vs',    l:'PM VS%',                      t:'num'},
+  {t:'Actual Feeding',f:[
+    {k:'cd_act',   l:'CD Actual (MT)',                 tp:'num'},
+    {k:'pm_act',   l:'PM Actual (MT)',                 tp:'num'},
+    {k:'gs_act',   l:'Grain Syrup Actual (KL)',        tp:'num'},
+    {k:'csl_act',  l:'CSL Actual (KL)',                tp:'num'},
+    {k:'poultry',  l:'Poultry Actual (cu.m)',          tp:'num'},
+    {k:'fw_act',   l:'Fresh Water Actual (m³)',        tp:'num'},
+    {k:'rs_act',   l:'Recycle Slurry Actual (m³)',     tp:'num'},
+    {k:'flow_mtr', l:'Flow Meter Reading (m³)',        tp:'num'},
+    {k:'drain',    l:'Actual Drain',                   tp:'num'},
   ]},
-  {title:'Slurry & Water',fields:[
-    {k:'fw_act',   l:'Fresh Water Actual (m³)',    t:'num'},
-    {k:'rs_act',   l:'Recycle Slurry Actual (m³)', t:'num'},
-    {k:'flow_mtr', l:'Flow Meter Reading (m³)',    t:'num'},
-    {k:'drain',    l:'Actual Drain',               t:'num'},
-    {k:'sl_ht',    l:'Slurry Height (m)',           t:'num'},
+  {t:'Lab Values (from Cal Sheets)',f:[
+    {k:'cd_ts',    l:'CD TS%',                         tp:'num'},
+    {k:'cd_vs',    l:'CD VS%',                         tp:'num'},
+    {k:'pm_ts',    l:'PM TS%',                         tp:'num'},
+    {k:'pm_vs',    l:'PM VS%',                         tp:'num'},
+    {k:'gs_ts',    l:'GS TS%',                         tp:'num'},
+    {k:'gs_vs',    l:'GS VS%',                         tp:'num'},
+    {k:'csl_ts',   l:'CSL TS%',                        tp:'num'},
+    {k:'csl_vs',   l:'CSL VS%',                        tp:'num'},
   ]},
-  {title:'Gas Production',fields:[
-    {k:'rbg_psa',  l:'RBG at PSA Inlet (m³)',      t:'num'},
-    {k:'rbg_vent', l:'RBG Vent Loss (m³)',          t:'num'},
-    {k:'cbg_prod', l:'CBG Produced (kg)',            t:'num'},
-    {k:'cbg_vent', l:'CBG Vent (kg)',                t:'num'},
+  {t:'Slurry',f:[
+    {k:'sl_ht',    l:'Slurry Height — dipstick (m)',   tp:'num'},
   ]},
-  {title:'Auto Calculations',fields:[
-    {k:'cd_bpp',   l:'CD BPP (m³)',                 t:'calc', fn:'bpp_cd'},
-    {k:'pm_bpp',   l:'PM BPP (m³)',                  t:'calc', fn:'bpp_pm'},
-    {k:'gs_bpp',   l:'GS BPP (m³)',                  t:'calc', fn:'bpp_gs'},
-    {k:'csl_bpp',  l:'CSL BPP (m³)',                 t:'calc', fn:'bpp_csl'},
-    {k:'wv',       l:'Working Volume (m³)',            t:'calc', fn:'wv'},
-    {k:'olr',      l:'OLR (kg VS/m³/day)',             t:'calc', fn:'olr'},
-    {k:'psa_eff',  l:'PSA Efficiency (%)',             t:'calc', fn:'psa_eff'},
+  {t:'Gas Production',f:[
+    {k:'rbg_psa',  l:'RBG at PSA Inlet (m³)',          tp:'num'},
+    {k:'rbg_vent', l:'RBG Vent Loss (m³)',              tp:'num'},
+    {k:'cbg_prod', l:'CBG Produced (kg)',               tp:'num'},
+    {k:'cbg_vent', l:'CBG Vent (kg)',                   tp:'num'},
+    {k:'psa_hrs',  l:'PSA Running Hours',               tp:'num'},
   ]},
- ]},
+  {t:'Auto Calculations — BPP (m³)',f:[
+    {k:'cd_bpp',   l:'CD BPP',    tp:'calc', fn:'bpp_cd'},
+    {k:'pm_bpp',   l:'PM BPP',    tp:'calc', fn:'bpp_pm'},
+    {k:'gs_bpp',   l:'GS BPP',    tp:'calc', fn:'bpp_gs'},
+    {k:'csl_bpp',  l:'CSL BPP',   tp:'calc', fn:'bpp_csl'},
+    {k:'tot_bpp',  l:'Total BPP', tp:'calc', fn:'tot_bpp'},
+  ]},
+  {t:'Auto Calculations — TS & VS Tonnes',f:[
+    {k:'cd_ts_t',  l:'CD TS Tonnes',   tp:'calc', fn:'cd_ts_t'},
+    {k:'cd_vs_t',  l:'CD VS Tonnes',   tp:'calc', fn:'cd_vs_t'},
+    {k:'pm_ts_t',  l:'PM TS Tonnes',   tp:'calc', fn:'pm_ts_t'},
+    {k:'pm_vs_t',  l:'PM VS Tonnes',   tp:'calc', fn:'pm_vs_t'},
+    {k:'gs_ts_t',  l:'GS TS Tonnes',   tp:'calc', fn:'gs_ts_t'},
+    {k:'gs_vs_t',  l:'GS VS Tonnes',   tp:'calc', fn:'gs_vs_t'},
+    {k:'csl_ts_t', l:'CSL TS Tonnes',  tp:'calc', fn:'csl_ts_t'},
+    {k:'csl_vs_t', l:'CSL VS Tonnes',  tp:'calc', fn:'csl_vs_t'},
+    {k:'tot_vs_kg',l:'Total VS (kg)',   tp:'calc', fn:'tot_vs_kg'},
+  ]},
+  {t:'Auto Calculations — Digester Performance',f:[
+    {k:'wv',       l:'Working Volume (m³)',             tp:'calc', fn:'wv'},
+    {k:'olr',      l:'OLR (kg VS/m³/day)',              tp:'calc', fn:'olr'},
+    {k:'psa_eff',  l:'PSA Efficiency (%)',              tp:'calc', fn:'psa_eff'},
+    {k:'dig_eff',  l:'Digester Efficiency (%)',         tp:'calc', fn:'dig_eff'},
+  ]},
+  {t:'BPP Day-wise Distribution',f:[
+    {k:'bpp_d0',   l:'BPP Today — D0 (m³)',            tp:'calc', fn:'bpp_d0'},
+    {k:'bpp_d1',   l:'BPP D+1 contribution (m³)',      tp:'calc', fn:'bpp_d1'},
+    {k:'bpp_d2',   l:'BPP D+2 contribution (m³)',      tp:'calc', fn:'bpp_d2'},
+  ]},
+]},
 
-{id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2',
- sections:[
-  {title:'Expected Feeding',fields:[
-    {k:'cd_exp',   l:'CD Expected (MT)',        t:'num'},
-    {k:'pm_exp',   l:'PM Expected (MT)',         t:'num'},
-    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',t:'num'},
-    {k:'csl_exp',  l:'CSL Expected (KL)',         t:'num'},
-    {k:'fw_exp',   l:'Fresh Water Expected (m³)', t:'num'},
-    {k:'rs_exp',   l:'Recycle Slurry Exp (m³)',   t:'num'},
+// ─── DIGESTER 2 ───────────────────────────────────────────
+{id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2', hasDate:true, sections:[
+  {t:'Expected Feeding',f:[
+    {k:'cd_exp',   l:'CD Expected (MT)',              tp:'num'},
+    {k:'pm_exp',   l:'PM Expected (MT)',               tp:'num'},
+    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',      tp:'num'},
+    {k:'csl_exp',  l:'CSL Expected (KL)',              tp:'num'},
+    {k:'fw_exp',   l:'Fresh Water Expected (m³)',      tp:'num'},
+    {k:'rs_exp',   l:'Recycle Slurry Expected (m³)',   tp:'num'},
   ]},
-  {title:'Actual Feeding',fields:[
-    {k:'cd_act',   l:'CD Actual (MT)',            t:'num'},
-    {k:'pm_act',   l:'PM Actual (MT)',             t:'num'},
-    {k:'poultry',  l:'Poultry Actual (cu.m)',      t:'num'},
-    {k:'csl_act',  l:'CSL Actual (KL)',             t:'num'},
-    {k:'gs_act',   l:'Grain Syrup Actual (KL)',     t:'num'},
-    {k:'pm_ts',    l:'PM TS%',                      t:'num'},
-    {k:'pm_vs',    l:'PM VS%',                      t:'num'},
+  {t:'Actual Feeding',f:[
+    {k:'cd_act',   l:'CD Actual (MT)',                 tp:'num'},
+    {k:'pm_act',   l:'PM Actual (MT)',                 tp:'num'},
+    {k:'gs_act',   l:'Grain Syrup Actual (KL)',        tp:'num'},
+    {k:'csl_act',  l:'CSL Actual (KL)',                tp:'num'},
+    {k:'poultry',  l:'Poultry Actual (cu.m)',          tp:'num'},
+    {k:'fw_act',   l:'Fresh Water Actual (m³)',        tp:'num'},
+    {k:'rs_act',   l:'Recycle Slurry Actual (m³)',     tp:'num'},
+    {k:'flow_mtr', l:'Flow Meter Reading (m³)',        tp:'num'},
+    {k:'drain',    l:'Actual Drain',                   tp:'num'},
   ]},
-  {title:'Slurry & Water',fields:[
-    {k:'fw_act',   l:'Fresh Water Actual (m³)',    t:'num'},
-    {k:'rs_act',   l:'Recycle Slurry Actual (m³)', t:'num'},
-    {k:'flow_mtr', l:'Flow Meter Reading (m³)',    t:'num'},
-    {k:'drain',    l:'Actual Drain',               t:'num'},
-    {k:'sl_ht',    l:'Slurry Height (m)',           t:'num'},
+  {t:'Lab Values (from Cal Sheets)',f:[
+    {k:'cd_ts',    l:'CD TS%',                         tp:'num'},
+    {k:'cd_vs',    l:'CD VS%',                         tp:'num'},
+    {k:'pm_ts',    l:'PM TS%',                         tp:'num'},
+    {k:'pm_vs',    l:'PM VS%',                         tp:'num'},
+    {k:'gs_ts',    l:'GS TS%',                         tp:'num'},
+    {k:'gs_vs',    l:'GS VS%',                         tp:'num'},
+    {k:'csl_ts',   l:'CSL TS%',                        tp:'num'},
+    {k:'csl_vs',   l:'CSL VS%',                        tp:'num'},
   ]},
-  {title:'Gas Production',fields:[
-    {k:'rbg_psa',  l:'RBG at PSA Inlet (m³)',      t:'num'},
-    {k:'rbg_vent', l:'RBG Vent Loss (m³)',          t:'num'},
-    {k:'cbg_prod', l:'CBG Produced (kg)',            t:'num'},
-    {k:'cbg_vent', l:'CBG Vent (kg)',                t:'num'},
+  {t:'Slurry',f:[
+    {k:'sl_ht',    l:'Slurry Height — dipstick (m)',   tp:'num'},
   ]},
-  {title:'Auto Calculations',fields:[
-    {k:'cd_bpp',   l:'CD BPP (m³)',                 t:'calc', fn:'bpp_cd'},
-    {k:'pm_bpp',   l:'PM BPP (m³)',                  t:'calc', fn:'bpp_pm'},
-    {k:'gs_bpp',   l:'GS BPP (m³)',                  t:'calc', fn:'bpp_gs'},
-    {k:'csl_bpp',  l:'CSL BPP (m³)',                 t:'calc', fn:'bpp_csl'},
-    {k:'wv',       l:'Working Volume (m³)',            t:'calc', fn:'wv'},
-    {k:'olr',      l:'OLR (kg VS/m³/day)',             t:'calc', fn:'olr'},
-    {k:'psa_eff',  l:'PSA Efficiency (%)',             t:'calc', fn:'psa_eff'},
+  {t:'Gas Production',f:[
+    {k:'rbg_psa',  l:'RBG at PSA Inlet (m³)',          tp:'num'},
+    {k:'rbg_vent', l:'RBG Vent Loss (m³)',              tp:'num'},
+    {k:'cbg_prod', l:'CBG Produced (kg)',               tp:'num'},
+    {k:'cbg_vent', l:'CBG Vent (kg)',                   tp:'num'},
+    {k:'psa_hrs',  l:'PSA Running Hours',               tp:'num'},
   ]},
- ]},
+  {t:'Auto Calculations — BPP (m³)',f:[
+    {k:'cd_bpp',   l:'CD BPP',    tp:'calc', fn:'bpp_cd'},
+    {k:'pm_bpp',   l:'PM BPP',    tp:'calc', fn:'bpp_pm'},
+    {k:'gs_bpp',   l:'GS BPP',    tp:'calc', fn:'bpp_gs'},
+    {k:'csl_bpp',  l:'CSL BPP',   tp:'calc', fn:'bpp_csl'},
+    {k:'tot_bpp',  l:'Total BPP', tp:'calc', fn:'tot_bpp'},
+  ]},
+  {t:'Auto Calculations — TS & VS Tonnes',f:[
+    {k:'cd_ts_t',  l:'CD TS Tonnes',   tp:'calc', fn:'cd_ts_t'},
+    {k:'cd_vs_t',  l:'CD VS Tonnes',   tp:'calc', fn:'cd_vs_t'},
+    {k:'pm_ts_t',  l:'PM TS Tonnes',   tp:'calc', fn:'pm_ts_t'},
+    {k:'pm_vs_t',  l:'PM VS Tonnes',   tp:'calc', fn:'pm_vs_t'},
+    {k:'gs_ts_t',  l:'GS TS Tonnes',   tp:'calc', fn:'gs_ts_t'},
+    {k:'gs_vs_t',  l:'GS VS Tonnes',   tp:'calc', fn:'gs_vs_t'},
+    {k:'csl_ts_t', l:'CSL TS Tonnes',  tp:'calc', fn:'csl_ts_t'},
+    {k:'csl_vs_t', l:'CSL VS Tonnes',  tp:'calc', fn:'csl_vs_t'},
+    {k:'tot_vs_kg',l:'Total VS (kg)',   tp:'calc', fn:'tot_vs_kg'},
+  ]},
+  {t:'Auto Calculations — Digester Performance',f:[
+    {k:'wv',       l:'Working Volume (m³)',             tp:'calc', fn:'wv'},
+    {k:'olr',      l:'OLR (kg VS/m³/day)',              tp:'calc', fn:'olr'},
+    {k:'psa_eff',  l:'PSA Efficiency (%)',              tp:'calc', fn:'psa_eff'},
+    {k:'dig_eff',  l:'Digester Efficiency (%)',         tp:'calc', fn:'dig_eff'},
+  ]},
+  {t:'BPP Day-wise Distribution',f:[
+    {k:'bpp_d0',   l:'BPP Today — D0 (m³)',            tp:'calc', fn:'bpp_d0'},
+    {k:'bpp_d1',   l:'BPP D+1 contribution (m³)',      tp:'calc', fn:'bpp_d1'},
+    {k:'bpp_d2',   l:'BPP D+2 contribution (m³)',      tp:'calc', fn:'bpp_d2'},
+  ]},
+]},
 
-// ── PSA PRODUCTION ───────────────────────────────────────────────
-{id:'PSA',label:'PSA Production',group:'Operations',sheet:'PSA Production',
- sections:[
-  {title:'Running Hours',fields:[
-    {k:'psa_hrs',  l:'PSA Running Hours',          t:'num'},
-    {k:'comp_hrs', l:'Compressor Hours',            t:'num'},
-    {k:'pcut_hrs', l:'Power Cut Duration (hrs)',    t:'num'},
-    {k:'vent_hrs', l:'Vent Time (hrs)',              t:'num'},
+// ─── PSA PRODUCTION ───────────────────────────────────────
+{id:'PSA',label:'PSA Production',group:'Operations',sheet:'PSA Production', hasDate:true, sections:[
+  {t:'Running Hours',f:[
+    {k:'psa_hrs',   l:'PSA Running Hours',             tp:'num'},
+    {k:'comp_hrs',  l:'Compressor Hours',              tp:'num'},
+    {k:'pcut_hrs',  l:'Power Cut Duration (hrs)',      tp:'num'},
+    {k:'vent_hrs',  l:'Vent Time (hrs)',                tp:'num'},
   ]},
-  {title:'Raw Biogas',fields:[
-    {k:'rbg_d1',   l:'RBG Suction D1 (m³)',        t:'num'},
-    {k:'rbg_d2',   l:'RBG Suction D2 (m³)',        t:'num'},
-    {k:'rbg_total',l:'Total RBG (m³)',              t:'num'},
-    {k:'ch4_pct',  l:'CH4% at Inlet',              t:'num'},
+  {t:'Raw Biogas',f:[
+    {k:'rbg_d1',    l:'RBG Suction D1 (m³)',          tp:'num'},
+    {k:'rbg_d2',    l:'RBG Suction D2 (m³)',          tp:'num'},
+    {k:'rbg_total', l:'Total RBG (m³)',  tp:'calc', fn:'rbg_total'},
+    {k:'ch4_pct',   l:'CH4% at Inlet',                tp:'num'},
   ]},
-  {title:'CBG Production',fields:[
-    {k:'cbg_d1',   l:'CBG from D1 (kg)',           t:'num'},
-    {k:'cbg_d2',   l:'CBG from D2 (kg)',           t:'num'},
-    {k:'cbg_tot',  l:'Total CBG Purified (kg)',     t:'num'},
-    {k:'cbg_den',  l:'CBG Density (kg/m³)',         t:'num'},
-    {k:'cbg_pur',  l:'CBG Purity (%)',              t:'num'},
-    {k:'tail_gas', l:'Tail Gas (m³)',               t:'num'},
+  {t:'CBG Production',f:[
+    {k:'cbg_d1',    l:'CBG from D1 (kg)',              tp:'num'},
+    {k:'cbg_d2',    l:'CBG from D2 (kg)',              tp:'num'},
+    {k:'cbg_tot',   l:'Total CBG Purified (kg)',  tp:'calc', fn:'cbg_tot'},
+    {k:'cbg_den',   l:'CBG Density (kg/m³)',           tp:'num'},
+    {k:'cbg_pur',   l:'CBG Purity (%)',                tp:'num'},
+    {k:'tail_gas',  l:'Tail Gas (m³)',                 tp:'num'},
   ]},
-  {title:'Customer Dispatch (kg)',fields:[
-    {k:'veer_kg',    l:'Veer Gas (kg)',             t:'num'},
-    {k:'adinath_kg', l:'Adinath (kg)',              t:'num'},
-    {k:'gail_kg',    l:'GAIL (kg)',                 t:'num'},
-    {k:'sps_kg',     l:'SPS (kg)',                  t:'num'},
-    {k:'other1_kg',  l:'Other Customer 1 (kg)',     t:'num'},
-    {k:'other2_kg',  l:'Other Customer 2 (kg)',     t:'num'},
+  {t:'Customer Dispatch (kg)',f:[
+    {k:'veer_kg',    l:'Veer Gas (kg)',                tp:'num'},
+    {k:'adinath_kg', l:'Adinath (kg)',                 tp:'num'},
+    {k:'gail_kg',    l:'GAIL (kg)',                    tp:'num'},
+    {k:'sps_kg',     l:'SPS (kg)',                     tp:'num'},
+    {k:'other1_kg',  l:'Other Customer 1 (kg)',        tp:'num'},
+    {k:'other2_kg',  l:'Other Customer 2 (kg)',        tp:'num'},
+    {k:'tot_disp',   l:'Total Dispatched (kg)', tp:'calc', fn:'tot_disp'},
   ]},
-  {title:'Cascade Pressure',fields:[
-    {k:'casc1',    l:'Cascade Pressure 1 (bar)',    t:'num'},
-    {k:'casc2',    l:'Cascade Pressure 2 (bar)',    t:'num'},
+  {t:'Cascade Pressure',f:[
+    {k:'casc1',     l:'Cascade Pressure 1 (bar)',      tp:'num'},
+    {k:'casc2',     l:'Cascade Pressure 2 (bar)',      tp:'num'},
   ]},
- ]},
+  {t:'Auto Calculations — PSA Performance',f:[
+    {k:'ideal_rbg', l:'Ideal Raw Biogas (m³)',  tp:'calc', fn:'ideal_rbg'},
+    {k:'ideal_pur', l:'Ideal Purified Gas (m³)',tp:'calc', fn:'ideal_pur'},
+    {k:'ideal_cbg', l:'Ideal CBG (kg)',          tp:'calc', fn:'ideal_cbg'},
+    {k:'psa_eff',   l:'PSA Efficiency (%)',      tp:'calc', fn:'psa_eff_psa'},
+  ]},
+]},
 
-// ── pH / TEMPERATURE ─────────────────────────────────────────────
-{id:'PHTEMP',label:'pH / Temperature',group:'Operations',sheet:'pH Temp',
- sections:[
-  {title:'D1 Readings',fields:[
-    {k:'d1_ph_3m',  l:'D1 pH @ 3M',               t:'num'},
-    {k:'d1_ph_6m',  l:'D1 pH @ 6M',               t:'num'},
-    {k:'d1_ph_sl',  l:'D1 pH @ SL',               t:'num'},
-    {k:'d1_tmp_3m', l:'D1 Temp @ 3M (°C)',         t:'num'},
-    {k:'d1_tmp_6m', l:'D1 Temp @ 6M (°C)',         t:'num'},
-    {k:'d1_tmp_sl', l:'D1 Temp @ SL (°C)',         t:'num'},
+// ─── pH / TEMPERATURE ─────────────────────────────────────
+{id:'PHTEMP',label:'pH / Temperature',group:'Operations',sheet:'pH Temp', hasDate:true, sections:[
+  {t:'D1 Readings',f:[
+    {k:'d1_ph_3m',  l:'D1 pH @ 3M',    tp:'num'},
+    {k:'d1_ph_6m',  l:'D1 pH @ 6M',    tp:'num'},
+    {k:'d1_ph_sl',  l:'D1 pH @ SL',    tp:'num'},
+    {k:'d1_tmp_3m', l:'D1 Temp @ 3M (°C)', tp:'num'},
+    {k:'d1_tmp_6m', l:'D1 Temp @ 6M (°C)', tp:'num'},
+    {k:'d1_tmp_sl', l:'D1 Temp @ SL (°C)', tp:'num'},
   ]},
-  {title:'D2 Readings',fields:[
-    {k:'d2_ph_3m',  l:'D2 pH @ 3M',               t:'num'},
-    {k:'d2_ph_6m',  l:'D2 pH @ 6M',               t:'num'},
-    {k:'d2_ph_sl',  l:'D2 pH @ SL',               t:'num'},
-    {k:'d2_tmp_3m', l:'D2 Temp @ 3M (°C)',         t:'num'},
-    {k:'d2_tmp_6m', l:'D2 Temp @ 6M (°C)',         t:'num'},
-    {k:'d2_tmp_sl', l:'D2 Temp @ SL (°C)',         t:'num'},
+  {t:'D2 Readings',f:[
+    {k:'d2_ph_3m',  l:'D2 pH @ 3M',    tp:'num'},
+    {k:'d2_ph_6m',  l:'D2 pH @ 6M',    tp:'num'},
+    {k:'d2_ph_sl',  l:'D2 pH @ SL',    tp:'num'},
+    {k:'d2_tmp_3m', l:'D2 Temp @ 3M (°C)', tp:'num'},
+    {k:'d2_tmp_6m', l:'D2 Temp @ 6M (°C)', tp:'num'},
+    {k:'d2_tmp_sl', l:'D2 Temp @ SL (°C)', tp:'num'},
   ]},
- ]},
+]},
 
-// ── TS-VS ─────────────────────────────────────────────────────────
-{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'TS-VS',
- sections:[
-  {title:'D1 TS% & VS%',fields:[
-    {k:'d1_ts_3m',  l:'D1 TS% @ 3M',              t:'num'},
-    {k:'d1_vs_3m',  l:'D1 VS% @ 3M',              t:'num'},
-    {k:'d1_ts_6m',  l:'D1 TS% @ 6M',              t:'num'},
-    {k:'d1_vs_6m',  l:'D1 VS% @ 6M',              t:'num'},
-    {k:'d1_ts_sl',  l:'D1 TS% @ SL',              t:'num'},
-    {k:'d1_vs_sl',  l:'D1 VS% @ SL',              t:'num'},
+// ─── TS-VS ────────────────────────────────────────────────
+{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'TS-VS', hasDate:true, sections:[
+  {t:'D1 TS% & VS%',f:[
+    {k:'d1_ts_3m',  l:'D1 TS% @ 3M', tp:'num'},{k:'d1_vs_3m',  l:'D1 VS% @ 3M', tp:'num'},
+    {k:'d1_ts_6m',  l:'D1 TS% @ 6M', tp:'num'},{k:'d1_vs_6m',  l:'D1 VS% @ 6M', tp:'num'},
+    {k:'d1_ts_sl',  l:'D1 TS% @ SL', tp:'num'},{k:'d1_vs_sl',  l:'D1 VS% @ SL', tp:'num'},
   ]},
-  {title:'D2 TS% & VS%',fields:[
-    {k:'d2_ts_3m',  l:'D2 TS% @ 3M',              t:'num'},
-    {k:'d2_vs_3m',  l:'D2 VS% @ 3M',              t:'num'},
-    {k:'d2_ts_6m',  l:'D2 TS% @ 6M',              t:'num'},
-    {k:'d2_vs_6m',  l:'D2 VS% @ 6M',              t:'num'},
-    {k:'d2_ts_sl',  l:'D2 TS% @ SL',              t:'num'},
-    {k:'d2_vs_sl',  l:'D2 VS% @ SL',              t:'num'},
+  {t:'D2 TS% & VS%',f:[
+    {k:'d2_ts_3m',  l:'D2 TS% @ 3M', tp:'num'},{k:'d2_vs_3m',  l:'D2 VS% @ 3M', tp:'num'},
+    {k:'d2_ts_6m',  l:'D2 TS% @ 6M', tp:'num'},{k:'d2_vs_6m',  l:'D2 VS% @ 6M', tp:'num'},
+    {k:'d2_ts_sl',  l:'D2 TS% @ SL', tp:'num'},{k:'d2_vs_sl',  l:'D2 VS% @ SL', tp:'num'},
   ]},
- ]},
+]},
 
-// ── IA-PA ─────────────────────────────────────────────────────────
-{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'IA-PA',
- sections:[
-  {title:'D1 Zones',fields:[
-    {k:'d1_ia1',    l:'D1 Zone 1 IA',              t:'num'},
-    {k:'d1_pa1',    l:'D1 Zone 1 PA',              t:'num'},
-    {k:'d1_ia2',    l:'D1 Zone 2 IA',              t:'num'},
-    {k:'d1_pa2',    l:'D1 Zone 2 PA',              t:'num'},
+// ─── IA-PA ────────────────────────────────────────────────
+{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'IA-PA', hasDate:true, sections:[
+  {t:'D1 Zones',f:[
+    {k:'d1_ia1',l:'D1 Zone 1 IA',tp:'num'},{k:'d1_pa1',l:'D1 Zone 1 PA',tp:'num'},
+    {k:'d1_ta1',l:'D1 Zone 1 TA',tp:'calc',fn:'d1_ta1'},
+    {k:'d1_ia2',l:'D1 Zone 2 IA',tp:'num'},{k:'d1_pa2',l:'D1 Zone 2 PA',tp:'num'},
+    {k:'d1_ta2',l:'D1 Zone 2 TA',tp:'calc',fn:'d1_ta2'},
   ]},
-  {title:'D2 Zones',fields:[
-    {k:'d2_ia1',    l:'D2 Zone 1 IA',              t:'num'},
-    {k:'d2_pa1',    l:'D2 Zone 1 PA',              t:'num'},
-    {k:'d2_ia2',    l:'D2 Zone 2 IA',              t:'num'},
-    {k:'d2_pa2',    l:'D2 Zone 2 PA',              t:'num'},
+  {t:'D2 Zones',f:[
+    {k:'d2_ia1',l:'D2 Zone 1 IA',tp:'num'},{k:'d2_pa1',l:'D2 Zone 1 PA',tp:'num'},
+    {k:'d2_ta1',l:'D2 Zone 1 TA',tp:'calc',fn:'d2_ta1'},
+    {k:'d2_ia2',l:'D2 Zone 2 IA',tp:'num'},{k:'d2_pa2',l:'D2 Zone 2 PA',tp:'num'},
+    {k:'d2_ta2',l:'D2 Zone 2 TA',tp:'calc',fn:'d2_ta2'},
   ]},
-  {title:'Remarks',fields:[
-    {k:'remark',    l:'Remark',                    t:'txt'},
-  ]},
- ]},
+  {t:'Remarks',f:[{k:'remark',l:'Remark',tp:'txt'}]},
+]},
 
-// ── FEEDSTOCK SUPPLY ──────────────────────────────────────────────
-{id:'FS',label:'Feedstock Supply',group:'Feedstock',sheet:'Feedstock Supply',
- sections:[
-  {title:'Cow Dung Received',fields:[
-    {k:'cd_v1',  l:'CD Vendor 1 (MT)',   t:'num'},
-    {k:'cd_v2',  l:'CD Vendor 2 (MT)',   t:'num'},
-    {k:'cd_v3',  l:'CD Vendor 3 (MT)',   t:'num'},
-    {k:'cd_v4',  l:'CD Vendor 4 (MT)',   t:'num'},
-    {k:'cd_v5',  l:'CD Vendor 5 (MT)',   t:'num'},
-    {k:'cd_v6',  l:'CD Vendor 6 (MT)',   t:'num'},
-    {k:'cd_v7',  l:'CD Vendor 7 (MT)',   t:'num'},
-    {k:'cd_v8',  l:'CD Vendor 8 (MT)',   t:'num'},
-    {k:'cd_v9',  l:'CD Vendor 9 (MT)',   t:'num'},
-    {k:'cd_v10', l:'CD Vendor 10 (MT)',  t:'num'},
+// ─── FEEDSTOCK SUPPLY ─────────────────────────────────────
+{id:'FS',label:'Feedstock Supply',group:'Feedstock',sheet:'Feedstock Supply', hasDate:true, sections:[
+  {t:'Poultry Wastewater Received (KL)',f:[
+    {k:'pw_lather',  l:'Lather (KL)',           tp:'num'},
+    {k:'pw_narwal',  l:'Narwal (KL)',            tp:'num'},
+    {k:'pw_subhash', l:'Subhash (KL)',           tp:'num'},
+    {k:'pw_gk',      l:'GK Hatchery (KL)',       tp:'num'},
+    {k:'pw_dry',     l:'Dry Poultry (KL)',       tp:'num'},
+    {k:'pw_nazim',   l:'Nazim (KL)',             tp:'num'},
+    {k:'pw_total',   l:'Total Poultry (KL)',     tp:'calc', fn:'pw_total'},
   ]},
-  {title:'Pressmud Received',fields:[
-    {k:'pm_v1',  l:'PM Vendor 1 (MT)',   t:'num'},
-    {k:'pm_v2',  l:'PM Vendor 2 (MT)',   t:'num'},
-    {k:'pm_v3',  l:'PM Vendor 3 (MT)',   t:'num'},
-    {k:'pm_v4',  l:'PM Vendor 4 (MT)',   t:'num'},
-    {k:'pm_v5',  l:'PM Vendor 5 (MT)',   t:'num'},
-    {k:'pm_v6',  l:'PM Vendor 6 (MT)',   t:'num'},
-    {k:'pm_v7',  l:'PM Vendor 7 (MT)',   t:'num'},
-    {k:'pm_v8',  l:'PM Vendor 8 (MT)',   t:'num'},
-    {k:'pm_v9',  l:'PM Vendor 9 (MT)',   t:'num'},
+  {t:'Cow Dung Received (kg)',f:[
+    {k:'cd_gharaunda',    l:'Gharaunda',         tp:'num'},
+    {k:'cd_phoosgarh',   l:'Phoosgarh',         tp:'num'},
+    {k:'cd_radhakrishna', l:'Radha Krishna',    tp:'num'},
+    {k:'cd_total',        l:'Total CD (kg)',     tp:'calc', fn:'cd_total'},
   ]},
-  {title:'Other Feedstock',fields:[
-    {k:'gs_rcv', l:'Grain Syrup Received (KL)',  t:'num'},
-    {k:'csl_rcv',l:'CSL Received (KL)',           t:'num'},
-    {k:'gs_stk', l:'Grain Syrup Stock (KL)',      t:'num'},
-    {k:'csl_stk',l:'CSL Stock (KL)',              t:'num'},
-    {k:'cd_stk', l:'CD Stock (MT)',               t:'num'},
-    {k:'pm_stk', l:'PM Stock (MT)',               t:'num'},
+  {t:'CSL Received (KL)',f:[
+    {k:'csl_sadasat',  l:'Sadasat',             tp:'num'},
+    {k:'csl_pantnagar',l:'Pant Nagar',           tp:'num'},
+    {k:'csl_virangam', l:'Virangam',            tp:'num'},
+    {k:'csl_total',    l:'Total CSL (KL)',       tp:'calc', fn:'csl_total'},
   ]},
- ]},
+  {t:'Pressmud Received (kg)',f:[
+    {k:'pm_sonipat',   l:'Sonipat',             tp:'num'},
+    {k:'pm_malakpur',  l:'Malakpur Sugar Mill, Baraut',  tp:'num'},
+    {k:'pm_ramala',    l:'Ramala, Bhagpat (Vaibhav)',    tp:'num'},
+    {k:'pm_thana',     l:'Thana Bhavan',        tp:'num'},
+    {k:'pm_tikuala',   l:'Tikuala',             tp:'num'},
+    {k:'pm_shamli',    l:'Shamli Sugar Mill (Naveen)',    tp:'num'},
+    {k:'pm_laknour',   l:'Laknour Biogas (Vaibhav)',     tp:'num'},
+    {k:'pm_balyan',    l:'Balyan Tikuala',      tp:'num'},
+    {k:'pm_singh',     l:'Singh Associates',    tp:'num'},
+    {k:'pm_naveen',    l:'Naveen',              tp:'num'},
+    {k:'pm_gs',        l:'G.S.',                tp:'num'},
+    {k:'pm_sbec',      l:'SBEC',               tp:'num'},
+    {k:'pm_sahakumbri',l:'Sahakumbri',          tp:'num'},
+    {k:'pm_rathi',     l:'Rathi (Kathuali Sugar Mill)',  tp:'num'},
+    {k:'pm_unn',       l:'Unn Sugar Mill',      tp:'num'},
+    {k:'pm_devom',     l:'Devom',               tp:'num'},
+    {k:'pm_total',     l:'Total PM (kg)',        tp:'calc', fn:'pm_total'},
+  ]},
+  {t:'Other Feedstock',f:[
+    {k:'carlsberg',    l:'Carlsberg (kg)',       tp:'num'},
+    {k:'gs_rcv',       l:'Grain Syrup (KL)',    tp:'num'},
+    {k:'total_day',    l:'Total/Day (kg)',       tp:'calc', fn:'fs_total_day'},
+  ]},
+]},
 
-// ── FEED & BALANCE ────────────────────────────────────────────────
-{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance',
- sections:[
-  {title:'Qty Received Today',fields:[
-    {k:'cd_rcv',  l:'CD Received (MT)',           t:'num'},
-    {k:'pm_rcv',  l:'PM Received (MT)',            t:'num'},
-    {k:'gs_rcv',  l:'Grain Syrup Received (KL)',  t:'num'},
-    {k:'csl_rcv', l:'CSL Received (KL)',           t:'num'},
+// ─── FEED & BALANCE ───────────────────────────────────────
+{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance', hasDate:true, sections:[
+  {t:'Qty Received Today',f:[
+    {k:'pm_rcv',  l:'PM Received (MT)',           tp:'num'},
+    {k:'gs_rcv',  l:'Grain Syrup Received (KL)', tp:'num'},
+    {k:'csl_rcv', l:'CSL Received (KL)',          tp:'num'},
+    {k:'cd_rcv',  l:'CD Received (MT)',           tp:'num'},
   ]},
-  {title:'Qty Fed (D1+D2 Combined)',fields:[
-    {k:'cd_fed',  l:'CD Fed (MT)',                t:'num'},
-    {k:'pm_fed',  l:'PM Fed (MT)',                 t:'num'},
-    {k:'gs_fed',  l:'Grain Syrup Fed (KL)',       t:'num'},
-    {k:'csl_fed', l:'CSL Fed (KL)',                t:'num'},
+  {t:'Cost (₹) — Manual Entry',f:[
+    {k:'pm_cost', l:'PM Cost (₹)  [₹997–1449/MT by vendor]', tp:'num'},
+    {k:'gs_cost', l:'Grain Syrup Cost (₹)',       tp:'num'},
+    {k:'csl_cost',l:'CSL Cost (₹)  [₹1942–2257/KL]',        tp:'num'},
+    {k:'cd_cost', l:'CD Cost (₹)  [₹540/MT]',    tp:'num'},
+    {k:'tot_cost',l:'Total Cost (₹)',             tp:'calc', fn:'fb_tot_cost'},
   ]},
-  {title:'Cost (₹) — Manual Entry',fields:[
-    {k:'cd_cost', l:'CD Cost (₹)  [₹540/MT]',    t:'num'},
-    {k:'pm_cost', l:'PM Cost (₹)  [vendor rate]', t:'num'},
-    {k:'gs_cost', l:'Grain Syrup Cost (₹)',       t:'num'},
-    {k:'csl_cost',l:'CSL Cost (₹)',               t:'num'},
+  {t:'Qty Fed (D1+D2 Combined)',f:[
+    {k:'pm_fed',  l:'PM Fed (MT)',                tp:'num'},
+    {k:'gs_fed',  l:'Grain Syrup Fed (KL)',       tp:'num'},
+    {k:'csl_fed', l:'CSL Fed (KL)',               tp:'num'},
+    {k:'cd_fed',  l:'CD Fed (MT)',                tp:'num'},
+    {k:'tot_fed', l:'Total Feed (MT)',            tp:'calc', fn:'fb_tot_fed'},
   ]},
- ]},
+  {t:'Auto Calculations — Running Balance',f:[
+    {k:'pm_bal',  l:'PM Balance (MT)',            tp:'calc', fn:'fb_pm_bal'},
+    {k:'gs_bal',  l:'GS Balance (KL)',            tp:'calc', fn:'fb_gs_bal'},
+    {k:'csl_bal', l:'CSL Balance (KL)',           tp:'calc', fn:'fb_csl_bal'},
+    {k:'cd_bal',  l:'CD Balance (MT)',            tp:'calc', fn:'fb_cd_bal'},
+  ]},
+]},
 
-// ── CAL SHEETS ───────────────────────────────────────────────────
-{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal',
- sections:[
-  {title:'Sample Details',fields:[
-    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
-    {k:'location',l:'Sample Location',            t:'txt'},
-    {k:'ts_pct',  l:'TS%',                        t:'num'},
-    {k:'vs_pct',  l:'VS%',                        t:'num'},
-    {k:'remarks', l:'Remarks',                    t:'txt'},
+// ─── CAL SHEETS ───────────────────────────────────────────
+{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal', hasDate:false, sections:[
+  {t:'Sample Details',f:[
+    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
+    {k:'loc',    l:'Sample Location',     tp:'txt'},
+    {k:'ts_pct', l:'TS%',                 tp:'num'},
+    {k:'vs_pct', l:'VS%',                 tp:'num'},
+    {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
- ]},
-
-{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'CD Cal',
- sections:[
-  {title:'Sample Details',fields:[
-    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
-    {k:'location',l:'Sample Location',            t:'txt'},
-    {k:'ts_pct',  l:'TS%',                        t:'num'},
-    {k:'vs_pct',  l:'VS%',                        t:'num'},
-    {k:'remarks', l:'Remarks',                    t:'txt'},
+]},
+{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'CD Cal', hasDate:false, sections:[
+  {t:'Sample Details',f:[
+    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
+    {k:'loc',    l:'Sample Location',     tp:'txt'},
+    {k:'ts_pct', l:'TS%',                 tp:'num'},
+    {k:'vs_pct', l:'VS%',                 tp:'num'},
+    {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
- ]},
-
-{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'RGS Cal',
- sections:[
-  {title:'Sample Details',fields:[
-    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
-    {k:'location',l:'Sample Location',            t:'txt'},
-    {k:'ts_pct',  l:'TS%',                        t:'num'},
-    {k:'vs_pct',  l:'VS%',                        t:'num'},
-    {k:'remarks', l:'Remarks',                    t:'txt'},
+]},
+{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'RGS Cal', hasDate:false, sections:[
+  {t:'Sample Details',f:[
+    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
+    {k:'loc',    l:'Sample Location',     tp:'txt'},
+    {k:'ts_pct', l:'TS%',                 tp:'num'},
+    {k:'vs_pct', l:'VS%',                 tp:'num'},
+    {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
- ]},
-
-{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal',
- sections:[
-  {title:'Sample Details',fields:[
-    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
-    {k:'location',l:'Sample Location',            t:'txt'},
-    {k:'ts_pct',  l:'TS%',                        t:'num'},
-    {k:'vs_pct',  l:'VS%',                        t:'num'},
-    {k:'remarks', l:'Remarks',                    t:'txt'},
+]},
+{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal', hasDate:false, sections:[
+  {t:'Sample Details',f:[
+    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
+    {k:'loc',    l:'Sample Location',     tp:'txt'},
+    {k:'ts_pct', l:'TS%',                 tp:'num'},
+    {k:'vs_pct', l:'VS%',                 tp:'num'},
+    {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
- ]},
+]},
 
-// ── MANURE SALES ──────────────────────────────────────────────────
-{id:'MANURE',label:'Manure Sales',group:'Sales',sheet:'Manure Sales',
- sections:[
-  {title:'Sale Entry',fields:[
-    {k:'vehicle',  l:'Vehicle No.',               t:'txt'},
-    {k:'v_type',   l:'Vehicle Type',              t:'sel', opts:['Tractor','Mini Truck','Truck','Other']},
-    {k:'farmer',   l:'Farmer Name',               t:'txt'},
-    {k:'type',     l:'Manure Type',               t:'sel', opts:['SFOM','LFOM','Mixed']},
-    {k:'qty_mt',   l:'Quantity (MT)',              t:'num'},
-    {k:'rate',     l:'Rate (₹/MT)',               t:'num'},
-    {k:'amount',   l:'Amount (₹)',                t:'num'},
-    {k:'remarks',  l:'Remarks',                   t:'txt'},
+// ─── MANURE SALES ─────────────────────────────────────────
+{id:'MANURE',label:'Manure Sales',group:'Sales',sheet:'Manure Sales', hasDate:true, sections:[
+  {t:'Sale Entry',f:[
+    {k:'vehicle', l:'Vehicle No.',         tp:'txt'},
+    {k:'v_type',  l:'Vehicle Type',        tp:'sel', opts:['Tractor','Mini Truck','Truck','Other']},
+    {k:'farmer',  l:'Farmer Name',         tp:'txt'},
+    {k:'type',    l:'Manure Type',         tp:'sel', opts:['SFOM','LFOM','Mixed']},
+    {k:'qty_mt',  l:'Quantity (MT)',        tp:'num'},
+    {k:'rate',    l:'Rate (₹/MT)',         tp:'num'},
+    {k:'amount',  l:'Amount (₹)',          tp:'calc', fn:'manure_amount'},
+    {k:'remarks', l:'Remarks',             tp:'txt'},
   ]},
- ]},
+]},
 
-// ── SALES DETAIL ──────────────────────────────────────────────────
-{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail',
- sections:[
-  {title:'CBG Dispatch',fields:[
-    {k:'inv_no',    l:'Invoice No.',              t:'txt'},
-    {k:'customer',  l:'Customer Name',            t:'txt'},
-    {k:'qty_kg',    l:'Qty Dispatched (kg)',      t:'num'},
-    {k:'rate_kg',   l:'Rate (₹/kg)',              t:'num'},
-    {k:'amount',    l:'Amount (₹)',               t:'num'},
-    {k:'vehicle',   l:'Vehicle No.',              t:'txt'},
-    {k:'remarks',   l:'Remarks',                  t:'txt'},
+// ─── SALES DETAIL ─────────────────────────────────────────
+{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, sections:[
+  {t:'CBG Dispatch',f:[
+    {k:'inv_no',   l:'Invoice No.',         tp:'txt'},
+    {k:'customer', l:'Customer Name',       tp:'sel', opts:['Veer Gas','Adinath','GAIL','SPS','Other']},
+    {k:'qty_kg',   l:'Qty Dispatched (kg)', tp:'num'},
+    {k:'rate_kg',  l:'Rate (₹/kg)',         tp:'num'},
+    {k:'amount',   l:'Amount (₹)',          tp:'calc', fn:'sales_amount'},
+    {k:'vehicle',  l:'Vehicle No.',         tp:'txt'},
+    {k:'remarks',  l:'Remarks',             tp:'txt'},
   ]},
- ]},
+]},
 
-// ── MAINTENANCE ───────────────────────────────────────────────────
-{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance',
- sections:[
-  {title:'Work Order',fields:[
-    {k:'unit',      l:'Unit / Area',              t:'sel', opts:['D1','D2','PSA','Compressor','Utility','Civil','Electrical','Other']},
-    {k:'equipment', l:'Equipment',                t:'txt'},
-    {k:'work_type', l:'Work Type',                t:'sel', opts:['Preventive','Corrective','Breakdown','AMC']},
-    {k:'description',l:'Work Description',        t:'txt'},
-    {k:'vendor',    l:'Vendor / Contractor',      t:'txt'},
-    {k:'cost',      l:'Cost (₹)',                 t:'num'},
-    {k:'status',    l:'Status',                   t:'sel', opts:['Completed','Pending','In Progress']},
-    {k:'remarks',   l:'Remarks',                  t:'txt'},
+// ─── MAINTENANCE ──────────────────────────────────────────
+{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, sections:[
+  {t:'Work Order',f:[
+    {k:'unit',       l:'Unit / Area',       tp:'sel', opts:['D1','D2','PSA','Compressor','Utility','Civil','Electrical','Other']},
+    {k:'equipment',  l:'Equipment',         tp:'txt'},
+    {k:'work_type',  l:'Work Type',         tp:'sel', opts:['Preventive','Corrective','Breakdown','AMC']},
+    {k:'description',l:'Work Description',  tp:'txt'},
+    {k:'vendor',     l:'Vendor / Contractor',tp:'txt'},
+    {k:'cost',       l:'Cost (₹)',          tp:'num'},
+    {k:'status',     l:'Status',            tp:'sel', opts:['Completed','Pending','In Progress']},
+    {k:'remarks',    l:'Remarks',           tp:'txt'},
   ]},
- ]},
+]},
 
-// ── REVENUE & COSTS ───────────────────────────────────────────────
-{id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs',
- sections:[
-  {title:'Transport Cost (manual only)',fields:[
-    {k:'transport', l:'Transportation Cost (₹)',  t:'num'},
-    {k:'remarks',   l:'Remarks',                  t:'txt'},
+// ─── FINANCE ──────────────────────────────────────────────
+{id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs', hasDate:true, sections:[
+  {t:'Manual Entry',f:[
+    {k:'transport',  l:'Transportation Cost (₹)', tp:'num'},
+    {k:'remarks',    l:'Remarks',                 tp:'txt'},
   ]},
-  {title:'Note',fields:[
-    {k:'_note', l:'All other revenue & cost columns are auto-calculated from Sales Detail and other sheets', t:'info'},
+  {t:'Note',f:[
+    {k:'_note', l:'All other revenue & cost columns are auto-derived from Sales Detail, Feed & Balance, and other sheets.', tp:'info'},
   ]},
- ]},
-
-// ── MONTHLY FIXED COSTS ───────────────────────────────────────────
-{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs',
- sections:[
-  {title:'Monthly Entry',fields:[
-    {k:'month',     l:'Month',                    t:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
-    {k:'elec_bill', l:'Electricity Bill (₹)',     t:'num'},
-    {k:'remarks',   l:'Remarks',                  t:'txt'},
+]},
+{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs', hasDate:false, sections:[
+  {t:'Monthly Entry',f:[
+    {k:'month',     l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
+    {k:'elec_bill', l:'Electricity Bill (₹)', tp:'num'},
+    {k:'remarks',   l:'Remarks', tp:'txt'},
   ]},
- ]},
-
-// ── EMI TRACKER ───────────────────────────────────────────────────
-{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:'EMI Tracker',
- sections:[
-  {title:'EMI Payment',fields:[
-    {k:'month',     l:'Month',                    t:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
-    {k:'year',      l:'Year',                     t:'num'},
-    {k:'emi_paid',  l:'EMI Paid (₹)',             t:'num'},
-    {k:'bank',      l:'Bank / Lender',            t:'txt'},
-    {k:'remarks',   l:'Remarks',                  t:'txt'},
+]},
+{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:'EMI Tracker', hasDate:false, sections:[
+  {t:'EMI Payment',f:[
+    {k:'month',    l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
+    {k:'year',     l:'Year',           tp:'num'},
+    {k:'emi_paid', l:'EMI Paid (₹)',   tp:'num'},
+    {k:'bank',     l:'Bank / Lender',  tp:'txt'},
+    {k:'remarks',  l:'Remarks',        tp:'txt'},
   ]},
- ]},
+]},
 
-]// end SHEETS
+] // end SHEETS
 
-// ════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════
 // FORMULA ENGINE
-// ════════════════════════════════════════════════════════════════
-function getMonth(dateStr){ return dateStr ? new Date(dateStr).getMonth()+1 : new Date().getMonth()+1 }
+// ══════════════════════════════════════════════════════════
+function getMonth(ds){ return ds ? new Date(ds).getMonth()+1 : new Date().getMonth()+1 }
+function n(v){ return parseFloat(v)||0 }
 
 const FN = {
-  bpp_cd:  (v,m) => (v.cd_act||0)*R.CD.bpp,
-  bpp_pm:  (v,m) => (v.pm_act||0)*(R.PM.bpp[m]||95),
-  bpp_gs:  (v,m) => (v.gs_act||0)*R.GS.bpp,
-  bpp_csl: (v,m) => (v.csl_act||0)*R.CSL.bpp,
-  wv:      (v,m) => {
-    const h = (v.sl_ht && v.sl_ht>0) ? v.sl_ht : ([1,2,3].includes(m)?R.DIGESTER.hWinter:R.DIGESTER.hOther)
-    return Math.PI*Math.pow(R.DIGESTER.radius,2)*h
+  // BPP
+  bpp_cd:    (v,m) => n(v.cd_act)*45,
+  bpp_pm:    (v,m) => n(v.pm_act)*(PM_BPP[m]||95),
+  bpp_gs:    (v,m) => n(v.gs_act)*220,
+  bpp_csl:   (v,m) => n(v.csl_act)*270,
+  tot_bpp:   (v,m) => n(v.cd_act)*45 + n(v.pm_act)*(PM_BPP[m]||95) + n(v.gs_act)*220 + n(v.csl_act)*270,
+
+  // TS tonnes
+  cd_ts_t:   (v) => n(v.cd_act)  * (n(v.cd_ts)/100),
+  pm_ts_t:   (v) => n(v.pm_act)  * (n(v.pm_ts)/100),
+  gs_ts_t:   (v) => n(v.gs_act)  * DENSITY.GS  * (n(v.gs_ts)/100),
+  csl_ts_t:  (v) => n(v.csl_act) * DENSITY.CSL * (n(v.csl_ts)/100),
+
+  // VS tonnes
+  cd_vs_t:   (v) => n(v.cd_act)  * (n(v.cd_ts)/100) * (n(v.cd_vs)/100),
+  pm_vs_t:   (v) => n(v.pm_act)  * (n(v.pm_ts)/100) * (n(v.pm_vs)/100),
+  gs_vs_t:   (v) => n(v.gs_act)  * DENSITY.GS  * (n(v.gs_ts)/100) * (n(v.gs_vs)/100),
+  csl_vs_t:  (v) => n(v.csl_act) * DENSITY.CSL * (n(v.csl_ts)/100) * (n(v.csl_vs)/100),
+
+  // Total VS kg
+  tot_vs_kg: (v) => {
+    const cd  = n(v.cd_act)  * (n(v.cd_ts)/100)  * (n(v.cd_vs)/100)
+    const pm  = n(v.pm_act)  * (n(v.pm_ts)/100)  * (n(v.pm_vs)/100)
+    const gs  = n(v.gs_act)  * DENSITY.GS  * (n(v.gs_ts)/100) * (n(v.gs_vs)/100)
+    const csl = n(v.csl_act) * DENSITY.CSL * (n(v.csl_ts)/100)* (n(v.csl_vs)/100)
+    return (cd+pm+gs+csl)*1000
   },
-  olr:     (v,m,lk) => lk.wv>0 ? 0 : null, // placeholder until VS kg wired
-  psa_eff: (v,m,lk) => (lk.psa_hrs||0)>0 ? ((v.cbg_prod||0)/((lk.psa_hrs)*R.PSA.basis))*100 : null,
+
+  // Digester performance
+  wv: (v,m) => {
+    const h = n(v.sl_ht)>0 ? n(v.sl_ht) : ([1,2,3].includes(m)?H.winter:H.other)
+    return Math.PI*RADIUS*RADIUS*h
+  },
+  olr: (v,m) => {
+    const wv = Math.PI*RADIUS*RADIUS*(n(v.sl_ht)>0?n(v.sl_ht):([1,2,3].includes(m)?H.winter:H.other))
+    const cd  = n(v.cd_act)  * (n(v.cd_ts)/100)  * (n(v.cd_vs)/100)
+    const pm  = n(v.pm_act)  * (n(v.pm_ts)/100)  * (n(v.pm_vs)/100)
+    const gs  = n(v.gs_act)  * DENSITY.GS  * (n(v.gs_ts)/100) * (n(v.gs_vs)/100)
+    const csl = n(v.csl_act) * DENSITY.CSL * (n(v.csl_ts)/100)* (n(v.csl_vs)/100)
+    const vs_kg = (cd+pm+gs+csl)*1000
+    return wv>0 ? vs_kg/wv : null
+  },
+  psa_eff:   (v) => n(v.psa_hrs)>0 ? (n(v.cbg_prod)/(n(v.psa_hrs)*PSA_BASIS))*100 : null,
+  dig_eff:   (v,m) => {
+    const bpp = n(v.cd_act)*45 + n(v.pm_act)*(PM_BPP[m]||95) + n(v.gs_act)*220 + n(v.csl_act)*270
+    return (bpp>0 && n(v.rbg_psa)>0) ? (n(v.rbg_psa)/bpp)*100 : null
+  },
+
+  // BPP day-wise (30/40/30 for CD & PM; 100% for GS & CSL)
+  bpp_d0: (v,m) => (n(v.cd_act)*45*0.3) + (n(v.pm_act)*(PM_BPP[m]||95)*0.3) + n(v.gs_act)*220 + n(v.csl_act)*270,
+  bpp_d1: (v,m) => (n(v.cd_act)*45*0.4) + (n(v.pm_act)*(PM_BPP[m]||95)*0.4),
+  bpp_d2: (v,m) => (n(v.cd_act)*45*0.3) + (n(v.pm_act)*(PM_BPP[m]||95)*0.3),
+
+  // PSA
+  rbg_total:    (v) => n(v.rbg_d1)+n(v.rbg_d2),
+  cbg_tot:      (v) => n(v.cbg_d1)+n(v.cbg_d2),
+  tot_disp:     (v) => n(v.veer_kg)+n(v.adinath_kg)+n(v.gail_kg)+n(v.sps_kg)+n(v.other1_kg)+n(v.other2_kg),
+  ideal_rbg:    (v) => n(v.psa_hrs)*600,
+  ideal_pur:    (v) => n(v.psa_hrs)*370,
+  ideal_cbg:    (v) => n(v.psa_hrs)*275,
+  psa_eff_psa:  (v) => n(v.psa_hrs)>0 ? ((n(v.cbg_d1)+n(v.cbg_d2))/(n(v.psa_hrs)*PSA_BASIS))*100 : null,
+
+  // IA-PA
+  d1_ta1: (v) => n(v.d1_pa1)+n(v.d1_ia1),
+  d1_ta2: (v) => n(v.d1_pa2)+n(v.d1_ia2),
+  d2_ta1: (v) => n(v.d2_pa1)+n(v.d2_ia1),
+  d2_ta2: (v) => n(v.d2_pa2)+n(v.d2_ia2),
+
+  // Feedstock Supply totals
+  pw_total:    (v) => n(v.pw_lather)+n(v.pw_narwal)+n(v.pw_subhash)+n(v.pw_gk)+n(v.pw_dry)+n(v.pw_nazim),
+  cd_total:    (v) => n(v.cd_gharaunda)+n(v.cd_phoosgarh)+n(v.cd_radhakrishna),
+  csl_total:   (v) => n(v.csl_sadasat)+n(v.csl_pantnagar)+n(v.csl_virangam),
+  pm_total:    (v) => n(v.pm_sonipat)+n(v.pm_malakpur)+n(v.pm_ramala)+n(v.pm_thana)+n(v.pm_tikuala)+
+                      n(v.pm_shamli)+n(v.pm_laknour)+n(v.pm_balyan)+n(v.pm_singh)+n(v.pm_naveen)+
+                      n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom),
+  fs_total_day:(v) => n(v.pw_lather)+n(v.pw_narwal)+n(v.pw_subhash)+n(v.pw_gk)+n(v.pw_dry)+n(v.pw_nazim)+
+                      n(v.cd_gharaunda)+n(v.cd_phoosgarh)+n(v.cd_radhakrishna)+
+                      n(v.pm_sonipat)+n(v.pm_malakpur)+n(v.pm_ramala)+n(v.pm_thana)+n(v.pm_tikuala)+
+                      n(v.pm_shamli)+n(v.pm_laknour)+n(v.pm_balyan)+n(v.pm_singh)+n(v.pm_naveen)+
+                      n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom)+
+                      n(v.carlsberg)+n(v.gs_rcv),
+
+  // Feed & Balance
+  fb_tot_cost: (v) => n(v.pm_cost)+n(v.gs_cost)+n(v.csl_cost)+n(v.cd_cost),
+  fb_tot_fed:  (v) => n(v.pm_fed)+n(v.gs_fed)+n(v.csl_fed)+n(v.cd_fed),
+  fb_pm_bal:   (v) => n(v.pm_rcv)-n(v.pm_fed),
+  fb_gs_bal:   (v) => n(v.gs_rcv)-n(v.gs_fed),
+  fb_csl_bal:  (v) => n(v.csl_rcv)-n(v.csl_fed),
+  fb_cd_bal:   (v) => n(v.cd_rcv)-n(v.cd_fed),
+
+  // Sales
+  manure_amount:(v) => n(v.qty_mt)*n(v.rate),
+  sales_amount: (v) => n(v.qty_kg)*n(v.rate_kg),
 }
 
-function runCalcs(sheet, inputs, dateStr){
-  const m = getMonth(dateStr)
-  const wv = FN.wv(inputs,m)
-  const lk = {wv, psa_hrs: inputs.psa_hrs||0}
+function runCalcs(sheet, inp, ds){
+  const m = getMonth(ds)
   const out = {}
   for(const sec of sheet.sections){
-    for(const f of sec.fields){
-      if(f.t!=='calc') continue
+    for(const f of sec.f){
+      if(f.tp!=='calc') continue
       const fn = FN[f.fn]
       if(!fn) continue
-      const v = fn(inputs,m,lk)
-      out[f.k] = v!==null&&v!==undefined ? Math.round(v*100)/100 : null
+      const v = fn(inp,m)
+      out[f.k] = (v!==null&&v!==undefined) ? (typeof v==='number'?Math.round(v*100)/100:v) : null
     }
   }
   return out
 }
 
-// ════════════════════════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════════════════════════
-let cur = null
-let inputs = {}
+// ══════════════════════════════════════════════════════════
+// STATE & UI
+// ══════════════════════════════════════════════════════════
+let cur=null, inp={}
 
-// ════════════════════════════════════════════════════════════════
-// BUILD NAV
-// ════════════════════════════════════════════════════════════════
 function buildNav(){
-  const nav = document.getElementById('nav')
-  const groups = {}
-  SHEETS.forEach(s=>{ if(!groups[s.group]) groups[s.group]=[]; groups[s.group].push(s) })
-  let html = ''
-  for(const [grp,items] of Object.entries(groups)){
-    html += `<div class="ng">${grp}</div>`
-    items.forEach(s=>{
-      html += `<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>`
-    })
+  const nav=document.getElementById('nav')
+  const grps={}
+  SHEETS.forEach(s=>{ if(!grps[s.group]) grps[s.group]=[]; grps[s.group].push(s) })
+  let html=''
+  for(const [g,items] of Object.entries(grps)){
+    html+=`<div class="ng">${g}</div>`
+    items.forEach(s=>{ html+=`<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>` })
   }
-  nav.innerHTML = html
+  nav.innerHTML=html
 }
 
-// ════════════════════════════════════════════════════════════════
-// LOAD SHEET
-// ════════════════════════════════════════════════════════════════
 function loadSheet(id){
-  cur = SHEETS.find(s=>s.id===id)
-  inputs = {}
+  cur=SHEETS.find(s=>s.id===id); inp={}
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id))
-
-  const main = document.getElementById('main')
-  const needsDate = !['PMCAL','CDCAL','GSCAL','CSLCAL','FIXED','EMI'].includes(id)
-
-  let html = `
-    <div class="sh">
-      <h2>${cur.label}</h2>
-      <div class="sub">Sheet: <b>${cur.sheet}</b></div>
-    </div>`
-
-  if(needsDate){
-    html += `
-    <div class="date-row">
-      <label>Date</label>
-      <input type="date" id="dp" value="${today()}" oninput="recompute()" />
-      <span style="font-size:.78rem;color:var(--muted);">Enter date then fill fields below</span>
-    </div>`
+  let html=`<div class="sh"><h2>${cur.label}</h2><div class="sub">Sheet: <b>${cur.sheet}</b></div></div>`
+  if(cur.hasDate){
+    html+=`<div class="date-row"><label>Date</label>
+      <input type="date" id="dp" value="${today()}" oninput="recompute()"/>
+      <span style="font-size:.77rem;color:var(--muted)">Enter date then fill fields below</span></div>`
   }
-
   cur.sections.forEach(sec=>{
-    html += `<div class="sec"><div class="sec-title">${sec.title}</div><div class="fgrid">`
-    sec.fields.forEach(f=>{
-      if(f.t==='info'){
-        html += `<div class="fg" style="grid-column:1/-1;color:var(--muted);font-size:.8rem;font-style:italic;padding:4px 0;">${f.l}</div>`
-        return
+    html+=`<div class="sec"><div class="sec-title">${sec.t}</div><div class="fgrid">`
+    sec.f.forEach(f=>{
+      if(f.tp==='info'){
+        html+=`<div class="info-row">${f.l}</div>`; return
       }
-      html += `<div class="fg"><label>${f.l}${f.t==='calc'?'<span class="atag">auto</span>':''}</label>`
-      if(f.t==='calc'){
-        html += `<input type="text" id="f_${f.k}" class="cf" readonly placeholder="—" tabindex="-1" />`
-      } else if(f.t==='sel'){
-        html += `<select id="f_${f.k}" onchange="onInp('${f.k}',this.value)"><option value="">— select —</option>`
-        f.opts.forEach(o=> html+=`<option>${o}</option>`)
-        html += `</select>`
-      } else if(f.t==='txt'){
-        html += `<input type="text" id="f_${f.k}" placeholder="" oninput="onInp('${f.k}',this.value)" />`
+      html+=`<div class="fg"><label>${f.l}${f.tp==='calc'?'<span class="atag">auto</span>':''}</label>`
+      if(f.tp==='calc'){
+        html+=`<input type="text" id="f_${f.k}" class="cf" readonly placeholder="—" tabindex="-1"/>`
+      } else if(f.tp==='sel'){
+        html+=`<select id="f_${f.k}" onchange="onInp('${f.k}',this.value)"><option value="">— select —</option>`
+        f.opts.forEach(o=>html+=`<option>${o}</option>`)
+        html+=`</select>`
+      } else if(f.tp==='txt'){
+        html+=`<input type="text" id="f_${f.k}" oninput="onInp('${f.k}',this.value)"/>`
       } else {
-        html += `<input type="number" id="f_${f.k}" step="any" placeholder="0" oninput="onInp('${f.k}',this.value)" />`
+        html+=`<input type="number" id="f_${f.k}" step="any" placeholder="0" oninput="onInp('${f.k}',this.value)"/>`
       }
-      html += `</div>`
+      html+=`</div>`
     })
-    html += `</div></div>`
+    html+=`</div></div>`
   })
-
-  main.innerHTML = html
+  document.getElementById('main').innerHTML=html
   recompute()
 }
 
-// ════════════════════════════════════════════════════════════════
-// INPUT + CALC
-// ════════════════════════════════════════════════════════════════
-function onInp(k,v){ inputs[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
-window.onInp = onInp
+function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
+window.onInp=onInp
 
 function recompute(){
   if(!cur) return
-  const dateStr = document.getElementById('dp')?.value
-  const calcs = runCalcs(cur, inputs, dateStr)
+  const ds=document.getElementById('dp')?.value
+  const calcs=runCalcs(cur,inp,ds)
   for(const [k,v] of Object.entries(calcs)){
-    const el = document.getElementById('f_'+k)
-    if(el) el.value = v!==null?v:''
+    const el=document.getElementById('f_'+k)
+    if(el) el.value=v!==null?v:''
   }
 }
-window.recompute = recompute
+window.recompute=recompute
 
-// ════════════════════════════════════════════════════════════════
-// SAVE / AUTH
-// ════════════════════════════════════════════════════════════════
-window.handleSave = function(){ toast('Sign in first to save data to SharePoint',true) }
-window.handleSignIn = function(){ toast('Azure AD configuration coming soon',true) }
-document.getElementById('saveBtn').onclick = window.handleSave
+window.handleSave=()=>toast('Sign in first to save data to SharePoint',true)
+window.handleSignIn=()=>toast('Azure AD configuration coming soon — contact admin',true)
+document.getElementById('saveBtn').onclick=window.handleSave
 
 function today(){ return new Date().toISOString().slice(0,10) }
-
 function toast(msg,err=false){
   const t=document.getElementById('toast')
-  t.textContent=msg; t.className=err?'err':''
-  t.style.display='block'
-  setTimeout(()=>t.style.display='none',3000)
+  t.textContent=msg; t.className=err?'err':''; t.style.display='block'
+  setTimeout(()=>t.style.display='none',3200)
 }
 
-// ════════════════════════════════════════════════════════════════
-// BOOT
-// ════════════════════════════════════════════════════════════════
 buildNav()
 loadSheet('D1')
 </script>
