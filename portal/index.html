@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CBG Karnal — Data Entry Portal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/msal/3.14.0/msal-browser.min.js"></script>
+  <style>
+    :root {
+      --bg:       #f5f6fa;
+      --surface:  #ffffff;
+      --border:   #dde1ec;
+      --text:     #1a1d2e;
+      --muted:    #6b7280;
+      --accent:   #1c52a3;
+      --accent2:  #2563eb;
+      --calc:     #92400e;       /* amber — read-only calc fields */
+      --calc-bg:  #fffbeb;
+      --success:  #16a34a;
+      --danger:   #dc2626;
+      --radius:   8px;
+      --header-h: 56px;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg:      #0f1117;
+        --surface: #1a1d2e;
+        --border:  #2d3148;
+        --text:    #e8eaf6;
+        --muted:   #8892b0;
+        --accent:  #3b82f6;
+        --calc:    #fbbf24;
+        --calc-bg: #1c1400;
+      }
+    }
+    :root[data-theme="dark"] {
+      --bg:      #0f1117;
+      --surface: #1a1d2e;
+      --border:  #2d3148;
+      --text:    #e8eaf6;
+      --muted:   #8892b0;
+      --accent:  #3b82f6;
+      --calc:    #fbbf24;
+      --calc-bg: #1c1400;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    /* ── Header ── */
+    header {
+      height: var(--header-h);
+      background: var(--accent);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    }
+    header h1 { font-size: 1rem; font-weight: 600; flex: 1; }
+    #userBadge { font-size: .8rem; opacity: .85; }
+    #signInBtn, #saveBtn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1.5px solid rgba(255,255,255,.6);
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 500;
+    }
+    #saveBtn { background: rgba(255,255,255,.18); border-color: #fff; }
+    #saveBtn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* ── Layout ── */
+    .layout { display: flex; height: calc(100vh - var(--header-h)); }
+
+    /* ── Sheet sidebar ── */
+    nav {
+      width: 220px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+    nav .group-label {
+      padding: 10px 16px 4px;
+      font-size: .7rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    nav button {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 8px 16px;
+      border: none;
+      background: none;
+      color: var(--text);
+      cursor: pointer;
+      font-size: .85rem;
+      border-left: 3px solid transparent;
+    }
+    nav button:hover { background: var(--bg); }
+    nav button.active { border-left-color: var(--accent); color: var(--accent); font-weight: 600; background: var(--bg); }
+
+    /* ── Main area ── */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .section-header h2 { font-size: 1.1rem; font-weight: 700; }
+    .section-header .sub { font-size: .85rem; color: var(--muted); }
+
+    /* Date picker row */
+    .date-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .date-row label { font-size: .85rem; font-weight: 600; }
+    .date-row input[type="date"] {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: .9rem;
+    }
+    #loadBtn {
+      padding: 6px 14px;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: #fff;
+      cursor: pointer;
+      font-size: .85rem;
+    }
+    #statusMsg { font-size: .82rem; color: var(--muted); }
+
+    /* Field grid */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label {
+      font-size: .75rem;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .02em;
+    }
+    .field-group input {
+      padding: 7px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text);
+      font-size: .9rem;
+      font-variant-numeric: tabular-nums;
+      transition: border-color .15s;
+    }
+    .field-group input:focus { outline: none; border-color: var(--accent2); }
+    .field-group input.calc-field {
+      background: var(--calc-bg);
+      color: var(--calc);
+      font-weight: 600;
+      border-color: transparent;
+      cursor: default;
+    }
+    .calc-tag {
+      font-size: .68rem;
+      color: var(--calc);
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 20px;
+      border-radius: var(--radius);
+      background: var(--success);
+      color: #fff;
+      font-size: .9rem;
+      font-weight: 500;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      display: none;
+      z-index: 999;
+    }
+    #toast.error { background: var(--danger); }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>CBG Karnal — Data Entry Portal</h1>
+  <span id="userBadge"></span>
+  <button id="signInBtn" onclick="handleSignIn()">Sign In</button>
+  <button id="saveBtn" onclick="handleSave()" disabled>Save</button>
+</header>
+
+<div class="layout">
+  <nav id="sheetNav"></nav>
+  <main id="mainArea">
+    <div style="color:var(--muted); margin-top:80px; text-align:center;">
+      <p style="font-size:1.1rem; font-weight:600;">Sign in to begin</p>
+      <p style="font-size:.85rem; margin-top:8px;">Use your Microsoft work account to access this portal.</p>
+    </div>
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<!-- Load modules as ES modules -->
+<script type="module">
+import { initAuth, signIn, getCurrentUser, readRowByDate, writeRow, findRowByDate } from '../js/graph-api.js'
+import { DIGESTERS } from '../config/digesters.js'
+import { runCalcs, buildExcelRow } from '../js/calc-engine.js'
+
+// ── Sheet configuration ────────────────────────────────────────────────────────
+const SHEET_GROUPS = [
+  {
+    group: 'Digesters',
+    sheets: DIGESTERS.map(d => ({
+      id: d.id,
+      label: d.label,
+      type: 'digester',
+      config: d,
+    }))
+  },
+  {
+    group: 'Other Sheets',
+    sheets: [
+      { id: 'PSA',       label: 'PSA',                  type: 'simple', sheet: 'PSA' },
+      { id: 'FB',        label: 'Feed & Balance',        type: 'simple', sheet: 'Feed & Balance' },
+      { id: 'FS',        label: 'Feedstock Supply',      type: 'simple', sheet: 'Feedstock Supply' },
+      { id: 'ManureSls', label: 'Manure Sales',          type: 'simple', sheet: 'Manure Sales' },
+      { id: 'Sales',     label: 'Sales Detail',          type: 'simple', sheet: 'Sales Detail' },
+    ]
+  }
+]
+
+let currentSheet = null
+let currentRowNum = null
+let currentInputs  = {}
+let isSignedIn = false
+
+// ── Build sidebar nav ──────────────────────────────────────────────────────────
+function buildNav() {
+  const nav = document.getElementById('sheetNav')
+  nav.innerHTML = ''
+  SHEET_GROUPS.forEach(grp => {
+    const lbl = document.createElement('div')
+    lbl.className = 'group-label'
+    lbl.textContent = grp.group
+    nav.appendChild(lbl)
+    grp.sheets.forEach(s => {
+      const btn = document.createElement('button')
+      btn.textContent = s.label
+      btn.dataset.id = s.id
+      btn.onclick = () => loadSheet(s)
+      nav.appendChild(btn)
+    })
+  })
+}
+
+// ── Load a sheet view ──────────────────────────────────────────────────────────
+function loadSheet(sheetDef) {
+  // Highlight active nav
+  document.querySelectorAll('#sheetNav button').forEach(b => b.classList.remove('active'))
+  document.querySelector(`#sheetNav button[data-id="${sheetDef.id}"]`)?.classList.add('active')
+
+  currentSheet = sheetDef
+  currentRowNum = null
+  currentInputs = {}
+  document.getElementById('saveBtn').disabled = true
+
+  const main = document.getElementById('mainArea')
+  if (!isSignedIn) {
+    showSignInPrompt(); return
+  }
+
+  main.innerHTML = `
+    <div class="section-header">
+      <h2>${sheetDef.label}</h2>
+      <span class="sub">Excel sheet: ${sheetDef.config?.sheet || sheetDef.sheet}</span>
+    </div>
+    <div class="date-row">
+      <label>Date</label>
+      <input type="date" id="datePicker" value="${todayStr()}" />
+      <button id="loadBtn" onclick="window._loadDate()">Load / New</button>
+      <span id="statusMsg"></span>
+    </div>
+    <div id="fieldArea" class="field-grid"></div>
+  `
+
+  if (sheetDef.type === 'digester') {
+    buildDigesterFields(sheetDef.config)
+  }
+}
+
+// ── Build digester form fields ─────────────────────────────────────────────────
+function buildDigesterFields(config) {
+  const area = document.getElementById('fieldArea')
+  area.innerHTML = ''
+  for (const [field, def] of Object.entries(config.cols)) {
+    if (field === 'date') continue   // date handled separately
+    const grp = document.createElement('div')
+    grp.className = 'field-group'
+    if (def.type === 'calc') {
+      grp.innerHTML = `
+        <label>${def.label} <span class="calc-tag">auto</span></label>
+        <input type="text" id="f_${field}" class="calc-field" readonly placeholder="—" />
+      `
+    } else {
+      grp.innerHTML = `
+        <label>${def.label}</label>
+        <input type="number" id="f_${field}" step="any" placeholder="0"
+          oninput="window._onInput('${field}', this.value)" />
+      `
+    }
+    area.appendChild(grp)
+  }
+}
+
+// ── Load date row from SharePoint ──────────────────────────────────────────────
+window._loadDate = async function() {
+  if (!currentSheet) return
+  const dateStr = document.getElementById('datePicker').value
+  const status  = document.getElementById('statusMsg')
+  status.textContent = 'Loading…'
+
+  const sheetName = currentSheet.config?.sheet || currentSheet.sheet
+  try {
+    const result = await readRowByDate(sheetName, dateStr, currentSheet.config?.data_start_row || 3)
+    if (result) {
+      currentRowNum = result.rowNum
+      currentInputs = mapRowToInputs(currentSheet.config, result.values)
+      populateFields(currentSheet.config)
+      recomputeCalcs()
+      status.textContent = `Row ${currentRowNum} loaded`
+    } else {
+      currentRowNum = null
+      currentInputs = {}
+      clearFields(currentSheet.config)
+      status.textContent = 'New entry — row not found yet'
+    }
+    document.getElementById('saveBtn').disabled = false
+  } catch(e) {
+    status.textContent = 'Error: ' + e.message
+    console.error(e)
+  }
+}
+
+// ── Map Excel row array → { field: value } ────────────────────────────────────
+function mapRowToInputs(config, rowValues) {
+  if (!config) return {}
+  const inputs = {}
+  for (const [field, def] of Object.entries(config.cols)) {
+    const val = rowValues[def.col - 1]
+    if (val !== null && val !== undefined && val !== '') inputs[field] = val
+  }
+  return inputs
+}
+
+// ── Fill form fields from currentInputs ───────────────────────────────────────
+function populateFields(config) {
+  if (!config) return
+  for (const [field, def] of Object.entries(config.cols)) {
+    if (field === 'date') continue
+    const el = document.getElementById(`f_${field}`)
+    if (!el) continue
+    const val = currentInputs[field]
+    el.value = (val !== undefined && val !== null) ? val : ''
+  }
+}
+
+// ── Clear all fields ──────────────────────────────────────────────────────────
+function clearFields(config) {
+  if (!config) return
+  for (const field of Object.keys(config.cols)) {
+    if (field === 'date') continue
+    const el = document.getElementById(`f_${field}`)
+    if (el) el.value = ''
+  }
+}
+
+// ── Input handler — recompute calcs on every keystroke ────────────────────────
+window._onInput = function(field, value) {
+  currentInputs[field] = value === '' ? null : parseFloat(value)
+  if (currentSheet?.type === 'digester') recomputeCalcs()
+  document.getElementById('saveBtn').disabled = false
+}
+
+// ── Recompute all calc columns and update read-only fields ────────────────────
+function recomputeCalcs() {
+  const config = currentSheet?.config
+  if (!config) return
+  const dateStr = document.getElementById('datePicker')?.value
+  const calcs   = runCalcs(config, { ...currentInputs, date: dateStr })
+  for (const [field, val] of Object.entries(calcs)) {
+    const el = document.getElementById(`f_${field}`)
+    if (el) el.value = val !== null ? val : ''
+  }
+}
+
+// ── Save to SharePoint ────────────────────────────────────────────────────────
+window.handleSave = async function() {
+  if (!currentSheet) return
+  const btn = document.getElementById('saveBtn')
+  btn.disabled = true
+  btn.textContent = 'Saving…'
+
+  try {
+    const config    = currentSheet.config
+    const sheetName = config?.sheet || currentSheet.sheet
+    const dateStr   = document.getElementById('datePicker')?.value
+
+    let rowNum = currentRowNum
+    if (!rowNum) {
+      // find existing row or append
+      rowNum = await findRowByDate(sheetName, dateStr, config?.data_start_row || 3)
+      if (!rowNum) {
+        showToast('Date row not found in sheet. Add the date row first in Excel.', true)
+        btn.disabled = false; btn.textContent = 'Save'; return
+      }
+    }
+
+    const dateObj = new Date(dateStr)
+    const month   = dateObj.getMonth() + 1
+    const calcs   = config ? runCalcs(config, { ...currentInputs, date: dateStr }) : {}
+    const excelRow = config ? buildExcelRow(config, { ...currentInputs, date: dateStr }, calcs) : {}
+
+    await writeRow(sheetName, rowNum, excelRow)
+    showToast('Saved successfully')
+  } catch(e) {
+    showToast('Save failed: ' + e.message, true)
+    console.error(e)
+  }
+
+  btn.disabled = false
+  btn.textContent = 'Save'
+}
+
+// ── Auth ──────────────────────────────────────────────────────────────────────
+window.handleSignIn = async function() {
+  await signIn()
+}
+
+async function checkAuth() {
+  await initAuth()
+  const user = getCurrentUser()
+  if (user !== 'Unknown') {
+    isSignedIn = true
+    document.getElementById('userBadge').textContent = user
+    document.getElementById('signInBtn').style.display = 'none'
+    buildNav()
+  }
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function todayStr() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+function showSignInPrompt() {
+  document.getElementById('mainArea').innerHTML = `
+    <div style="color:var(--muted); margin-top:80px; text-align:center;">
+      <p style="font-size:1.1rem; font-weight:600;">Sign in to begin</p>
+      <p style="font-size:.85rem; margin-top:8px;">Use your Microsoft work account.</p>
+    </div>
+  `
+}
+
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = isError ? 'error' : ''
+  t.style.display = 'block'
+  setTimeout(() => { t.style.display = 'none' }, 3000)
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+checkAuth()
+</script>
+</body>
+</html>
