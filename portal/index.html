@@ -6,551 +6,645 @@
   <title>CBG Karnal — Data Entry Portal</title>
   <style>
     :root {
-      --bg:       #f5f6fa;
-      --surface:  #ffffff;
-      --border:   #dde1ec;
-      --text:     #1a1d2e;
-      --muted:    #6b7280;
-      --accent:   #1c52a3;
-      --accent2:  #2563eb;
-      --calc:     #92400e;
-      --calc-bg:  #fffbeb;
-      --success:  #16a34a;
-      --danger:   #dc2626;
-      --warn-bg:  #fef3c7;
-      --warn-text:#92400e;
-      --radius:   8px;
-      --header-h: 56px;
+      --bg:#f0f2f8; --surface:#fff; --border:#dde1ec; --text:#1a1d2e;
+      --muted:#6b7280; --accent:#1c52a3; --accent2:#2563eb;
+      --calc:#92400e; --calc-bg:#fffbeb;
+      --success:#16a34a; --danger:#dc2626;
+      --warn-bg:#fef3c7; --warn-text:#92400e;
+      --radius:8px; --header-h:54px;
     }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg:      #0f1117; --surface: #1a1d2e; --border: #2d3148;
-        --text:    #e8eaf6; --muted:   #8892b0; --accent: #3b82f6;
-        --calc:    #fbbf24; --calc-bg: #1c1400;
-        --warn-bg: #1c1400; --warn-text: #fbbf24;
-      }
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+      --bg:#0f1117;--surface:#1a1d2e;--border:#2d3148;--text:#e8eaf6;
+      --muted:#8892b0;--accent:#3b82f6;--calc:#fbbf24;--calc-bg:#1c1400;
+      --warn-bg:#1c1400;--warn-text:#fbbf24;
+    }}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-    /* ── Header ── */
-    header {
-      height: var(--header-h);
-      background: var(--accent);
-      color: #fff;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      gap: 12px;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      box-shadow: 0 2px 8px rgba(0,0,0,.25);
+    header{
+      height:var(--header-h);background:var(--accent);color:#fff;
+      display:flex;align-items:center;padding:0 18px;gap:10px;
+      position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);
     }
-    .header-logo {
-      width: 32px; height: 32px;
-      background: rgba(255,255,255,.2);
-      border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
-      font-weight: 800; font-size: .85rem; flex-shrink: 0;
-    }
-    header h1 { font-size: .95rem; font-weight: 600; flex: 1; }
-    .header-right { display: flex; align-items: center; gap: 10px; }
-    #userBadge {
-      font-size: .78rem; background: rgba(255,255,255,.15);
-      padding: 4px 10px; border-radius: 20px;
-    }
-    .btn-outline {
-      padding: 6px 14px; border-radius: 6px;
-      border: 1.5px solid rgba(255,255,255,.7);
-      background: transparent; color: #fff;
-      cursor: pointer; font-size: .82rem; font-weight: 500;
-    }
-    .btn-primary {
-      padding: 6px 16px; border-radius: 6px;
-      border: none; background: #fff; color: var(--accent);
-      cursor: pointer; font-size: .82rem; font-weight: 700;
-    }
-    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+    .logo{width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:6px;
+      display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;}
+    header h1{font-size:.92rem;font-weight:600;flex:1;}
+    .hbtn{padding:5px 13px;border-radius:6px;border:1.5px solid rgba(255,255,255,.6);
+      background:transparent;color:#fff;cursor:pointer;font-size:.8rem;font-weight:500;}
+    .hbtn.solid{background:#fff;color:var(--accent);border-color:#fff;font-weight:700;}
 
-    /* ── Demo banner ── */
-    #demoBanner {
-      background: var(--warn-bg);
-      color: var(--warn-text);
-      text-align: center;
-      padding: 8px 16px;
-      font-size: .82rem;
-      font-weight: 500;
-      border-bottom: 1px solid rgba(0,0,0,.08);
-    }
-    #demoBanner.hidden { display: none; }
+    #banner{background:var(--warn-bg);color:var(--warn-text);text-align:center;
+      padding:7px;font-size:.8rem;font-weight:500;border-bottom:1px solid rgba(0,0,0,.07);}
 
-    /* ── Layout ── */
-    .layout { display: flex; height: calc(100vh - var(--header-h) - 37px); }
+    .layout{display:flex;height:calc(100vh - var(--header-h) - 35px);}
 
-    /* ── Sheet sidebar ── */
-    nav {
-      width: 210px;
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      overflow-y: auto;
-      flex-shrink: 0;
-    }
-    .nav-group-label {
-      padding: 12px 14px 4px;
-      font-size: .68rem;
-      font-weight: 700;
-      letter-spacing: .09em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-    nav button {
-      display: block; width: 100%; text-align: left;
-      padding: 8px 14px; border: none; background: none;
-      color: var(--text); cursor: pointer; font-size: .84rem;
-      border-left: 3px solid transparent;
-      transition: background .1s;
-    }
-    nav button:hover { background: var(--bg); }
-    nav button.active {
-      border-left-color: var(--accent);
-      color: var(--accent); font-weight: 600; background: var(--bg);
-    }
+    nav{width:205px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;}
+    .ng{padding:10px 13px 3px;font-size:.67rem;font-weight:700;letter-spacing:.09em;
+      text-transform:uppercase;color:var(--muted);}
+    nav button{display:block;width:100%;text-align:left;padding:7px 13px;border:none;
+      background:none;color:var(--text);cursor:pointer;font-size:.83rem;
+      border-left:3px solid transparent;transition:background .1s;}
+    nav button:hover{background:var(--bg);}
+    nav button.active{border-left-color:var(--accent);color:var(--accent);font-weight:600;background:var(--bg);}
 
-    /* ── Main area ── */
-    main { flex: 1; overflow-y: auto; padding: 20px 24px; }
+    .content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    main{flex:1;overflow-y:auto;padding:18px 22px;}
 
-    .section-header { margin-bottom: 16px; }
-    .section-header h2 { font-size: 1.05rem; font-weight: 700; }
-    .section-header .sub { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+    .sh{margin-bottom:14px;}
+    .sh h2{font-size:1rem;font-weight:700;}
+    .sh .sub{font-size:.78rem;color:var(--muted);margin-top:2px;}
 
-    /* Date row */
-    .date-row {
-      display: flex; align-items: center; gap: 10px;
-      margin-bottom: 20px; flex-wrap: wrap;
-      padding: 12px 16px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-    }
-    .date-row label { font-size: .82rem; font-weight: 600; }
-    .date-row input[type="date"] {
-      padding: 6px 10px; border: 1px solid var(--border);
-      border-radius: 6px; background: var(--bg);
-      color: var(--text); font-size: .88rem;
-    }
-    #loadBtn {
-      padding: 6px 14px; border: none; border-radius: 6px;
-      background: var(--accent); color: #fff;
-      cursor: pointer; font-size: .82rem; font-weight: 500;
-    }
-    #statusMsg { font-size: .8rem; color: var(--muted); }
+    .date-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;
+      padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+    .date-row label{font-size:.8rem;font-weight:600;}
+    .date-row input[type="date"]{padding:5px 9px;border:1px solid var(--border);border-radius:6px;
+      background:var(--bg);color:var(--text);font-size:.86rem;}
 
-    /* Field sections */
-    .fields-section { margin-bottom: 24px; }
-    .fields-section-title {
-      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--muted);
-      padding: 0 0 8px; border-bottom: 1px solid var(--border);
-      margin-bottom: 14px;
-    }
-    .field-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 14px;
-    }
-    .field-group { display: flex; flex-direction: column; gap: 4px; }
-    .field-group label {
-      font-size: .73rem; font-weight: 600;
-      color: var(--muted); letter-spacing: .02em;
-      display: flex; align-items: center; gap: 5px;
-    }
-    .calc-tag {
-      font-size: .65rem; color: var(--calc);
-      font-weight: 700; letter-spacing: .05em;
-      text-transform: uppercase;
-      background: var(--calc-bg); padding: 1px 5px;
-      border-radius: 3px;
-    }
-    .field-group input {
-      padding: 7px 10px; border: 1px solid var(--border);
-      border-radius: 6px; background: var(--surface);
-      color: var(--text); font-size: .9rem;
-      font-variant-numeric: tabular-nums;
-      transition: border-color .15s;
-    }
-    .field-group input:focus { outline: none; border-color: var(--accent2); box-shadow: 0 0 0 3px rgba(37,99,235,.1); }
-    .field-group input.calc-field {
-      background: var(--calc-bg); color: var(--calc);
-      font-weight: 600; border-color: transparent; cursor: default;
-    }
+    .sec{margin-bottom:22px;}
+    .sec-title{font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+      color:var(--muted);padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:12px;}
+    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(195px,1fr));gap:12px;}
+    .fg{display:flex;flex-direction:column;gap:3px;}
+    .fg label{font-size:.72rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
+    .atag{font-size:.63rem;color:var(--calc);font-weight:700;letter-spacing:.04em;
+      text-transform:uppercase;background:var(--calc-bg);padding:1px 4px;border-radius:3px;}
+    .fg input,.fg select,.fg textarea{
+      padding:6px 9px;border:1px solid var(--border);border-radius:6px;
+      background:var(--surface);color:var(--text);font-size:.88rem;
+      font-variant-numeric:tabular-nums;transition:border-color .15s;width:100%;}
+    .fg input:focus,.fg select:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+    .fg input.cf{background:var(--calc-bg);color:var(--calc);font-weight:600;border-color:transparent;cursor:default;}
+    .fg textarea{resize:vertical;min-height:60px;}
 
-    /* Save bar */
-    .save-bar {
-      position: sticky; bottom: 0;
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      padding: 12px 24px;
-      display: flex; align-items: center; gap: 12px;
-    }
-    #saveBtn2 {
-      padding: 8px 24px; border: none; border-radius: 6px;
-      background: var(--accent); color: #fff;
-      cursor: pointer; font-size: .9rem; font-weight: 600;
-    }
-    #saveBtn2:disabled { opacity: .4; cursor: not-allowed; }
-    #saveNote { font-size: .8rem; color: var(--muted); }
+    .save-bar{padding:10px 22px;background:var(--surface);border-top:1px solid var(--border);
+      display:flex;align-items:center;gap:12px;}
+    #saveBtn{padding:7px 22px;border:none;border-radius:6px;background:var(--accent);
+      color:#fff;cursor:pointer;font-size:.88rem;font-weight:600;}
+    #saveBtn:disabled{opacity:.4;cursor:not-allowed;}
+    #saveNote{font-size:.78rem;color:var(--muted);}
 
-    /* Toast */
-    #toast {
-      position: fixed; bottom: 24px; right: 24px;
-      padding: 12px 20px; border-radius: var(--radius);
-      background: var(--success); color: #fff;
-      font-size: .88rem; font-weight: 500;
-      box-shadow: 0 4px 16px rgba(0,0,0,.2);
-      display: none; z-index: 999;
-    }
-    #toast.error { background: var(--danger); }
+    #toast{position:fixed;bottom:22px;right:22px;padding:11px 18px;border-radius:var(--radius);
+      background:var(--success);color:#fff;font-size:.86rem;font-weight:500;
+      box-shadow:0 4px 16px rgba(0,0,0,.2);display:none;z-index:999;}
+    #toast.err{background:var(--danger);}
   </style>
 </head>
 <body>
-
 <header>
-  <div class="header-logo">CBG</div>
-  <h1>CBG Karnal — Data Entry Portal</h1>
-  <div class="header-right">
-    <span id="userBadge" style="display:none"></span>
-    <button class="btn-outline" id="signInBtn" onclick="handleSignIn()">Sign In to Save</button>
-  </div>
+  <div class="logo">CBG</div>
+  <h1>LR Energy — CBG Karnal &nbsp;|&nbsp; Data Entry Portal</h1>
+  <button class="hbtn" id="signInBtn" onclick="handleSignIn()">Sign In to Save</button>
 </header>
-
-<div id="demoBanner">
-  ⚠️ Demo mode — form is fully functional. Sign in with your Microsoft account to save data to SharePoint.
-</div>
+<div id="banner">⚠️ Demo mode — enter data freely. Sign in with Microsoft account to save to SharePoint.</div>
 
 <div class="layout">
-  <nav id="sheetNav"></nav>
-  <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
-    <main id="mainArea"></main>
+  <nav id="nav"></nav>
+  <div class="content">
+    <main id="main"></main>
     <div class="save-bar">
-      <button id="saveBtn2" onclick="handleSave()" disabled>Save to SharePoint</button>
+      <button id="saveBtn" disabled>Save to SharePoint</button>
       <span id="saveNote">Sign in first to enable saving</span>
     </div>
   </div>
 </div>
-
 <div id="toast"></div>
 
-<script type="module">
-// ── Inline config (no auth needed for demo) ───────────────────────────────────
-const RATES = {
-  CD:  { bpp: 45 },
-  GS:  { bpp: 220 },
-  CSL: { bpp: 270 },
-  PM:  { bpp: { winter: 95, may: 85, summer: 70, monsoon: 50 } },
-  DIGESTER: { radius: 15, default_height: { winter: 7.8, other: 7.5 } },
-  PSA: { design_basis: 275 },
+<script>
+// ════════════════════════════════════════════════════════════════
+// RATES
+// ════════════════════════════════════════════════════════════════
+const R = {
+  CD:{bpp:45}, GS:{bpp:220}, CSL:{bpp:270},
+  PM:{bpp:{11:95,12:95,1:95,2:95,3:95,4:95,5:85,6:70,7:70,8:70,9:50,10:50}},
+  DIGESTER:{radius:15,hWinter:7.8,hOther:7.5},
+  PSA:{basis:275},
 }
 
-const DIGESTERS = [
-  {
-    id: 'D1', label: 'Digester 1', sheet: 'D1', data_start_row: 3,
-    cols: {
-      cd_expected:    { col: 2,  type: 'manual', label: 'CD Expected (MT)',        input: 'number', section: 'Expected Feeding' },
-      pm_expected:    { col: 3,  type: 'manual', label: 'PM Expected (MT)',         input: 'number', section: 'Expected Feeding' },
-      poultry_exp:    { col: 4,  type: 'manual', label: 'Poultry Expected (KL)',    input: 'number', section: 'Expected Feeding' },
-      csl_expected:   { col: 5,  type: 'manual', label: 'CSL Expected (KL)',        input: 'number', section: 'Expected Feeding' },
-      cd_actual:      { col: 15, type: 'manual', label: 'CD Actual (MT)',           input: 'number', section: 'Actual Feeding' },
-      pm_actual:      { col: 16, type: 'manual', label: 'PM Actual (MT)',           input: 'number', section: 'Actual Feeding' },
-      poultry_actual: { col: 17, type: 'manual', label: 'Poultry Actual (cu.m)',    input: 'number', section: 'Actual Feeding' },
-      csl_actual:     { col: 18, type: 'manual', label: 'CSL Actual (KL)',          input: 'number', section: 'Actual Feeding' },
-      fw_actual:      { col: 27, type: 'manual', label: 'Fresh Water (m³)',         input: 'number', section: 'Slurry & Water' },
-      rs_actual:      { col: 28, type: 'manual', label: 'Recycle Slurry (m³)',      input: 'number', section: 'Slurry & Water' },
-      flow_meter:     { col: 29, type: 'manual', label: 'Flow Meter (m³)',          input: 'number', section: 'Slurry & Water' },
-      slurry_height:  { col: 48, type: 'manual', label: 'Slurry Height (m)',        input: 'number', section: 'Slurry & Water' },
-      rbg_psa:        { col: 33, type: 'manual', label: 'RBG at PSA (m³)',          input: 'number', section: 'Gas Production' },
-      rbg_vent:       { col: 34, type: 'manual', label: 'RBG Vent (m³)',            input: 'number', section: 'Gas Production' },
-      cbg_produced:   { col: 36, type: 'manual', label: 'CBG Produced (kg)',        input: 'number', section: 'Gas Production' },
-      cbg_vent:       { col: 37, type: 'manual', label: 'CBG Vent (kg)',            input: 'number', section: 'Gas Production' },
-      cd_bpp:         { col: 43, type: 'calc',   label: 'CD BPP (m³)',              fn: 'bpp_cd',         section: 'Auto Calculations' },
-      pm_bpp:         { col: 44, type: 'calc',   label: 'PM BPP (m³)',              fn: 'bpp_pm',         section: 'Auto Calculations' },
-      gs_bpp:         { col: 45, type: 'calc',   label: 'GS BPP (m³)',              fn: 'bpp_gs',         section: 'Auto Calculations' },
-      csl_bpp:        { col: 46, type: 'calc',   label: 'CSL BPP (m³)',             fn: 'bpp_csl',        section: 'Auto Calculations' },
-      working_vol:    { col: 47, type: 'calc',   label: 'Working Volume (m³)',       fn: 'working_volume', section: 'Auto Calculations' },
-      olr:            { col: 49, type: 'calc',   label: 'OLR (kg VS/m³/day)',        fn: 'olr',            section: 'Auto Calculations' },
-      psa_eff:        { col: 50, type: 'calc',   label: 'PSA Efficiency (%)',        fn: 'psa_efficiency', section: 'Auto Calculations' },
-    }
+// ════════════════════════════════════════════════════════════════
+// SHEET DEFINITIONS
+// ════════════════════════════════════════════════════════════════
+const SHEETS = [
+
+// ── DIGESTERS ────────────────────────────────────────────────────
+{id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1',
+ sections:[
+  {title:'Expected Feeding',fields:[
+    {k:'cd_exp',   l:'CD Expected (MT)',        t:'num'},
+    {k:'pm_exp',   l:'PM Expected (MT)',         t:'num'},
+    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',t:'num'},
+    {k:'csl_exp',  l:'CSL Expected (KL)',         t:'num'},
+    {k:'fw_exp',   l:'Fresh Water Expected (m³)', t:'num'},
+    {k:'rs_exp',   l:'Recycle Slurry Exp (m³)',   t:'num'},
+  ]},
+  {title:'Actual Feeding',fields:[
+    {k:'cd_act',   l:'CD Actual (MT)',            t:'num'},
+    {k:'pm_act',   l:'PM Actual (MT)',             t:'num'},
+    {k:'poultry',  l:'Poultry Actual (cu.m)',      t:'num'},
+    {k:'csl_act',  l:'CSL Actual (KL)',             t:'num'},
+    {k:'gs_act',   l:'Grain Syrup Actual (KL)',     t:'num'},
+    {k:'pm_ts',    l:'PM TS%',                      t:'num'},
+    {k:'pm_vs',    l:'PM VS%',                      t:'num'},
+  ]},
+  {title:'Slurry & Water',fields:[
+    {k:'fw_act',   l:'Fresh Water Actual (m³)',    t:'num'},
+    {k:'rs_act',   l:'Recycle Slurry Actual (m³)', t:'num'},
+    {k:'flow_mtr', l:'Flow Meter Reading (m³)',    t:'num'},
+    {k:'drain',    l:'Actual Drain',               t:'num'},
+    {k:'sl_ht',    l:'Slurry Height (m)',           t:'num'},
+  ]},
+  {title:'Gas Production',fields:[
+    {k:'rbg_psa',  l:'RBG at PSA Inlet (m³)',      t:'num'},
+    {k:'rbg_vent', l:'RBG Vent Loss (m³)',          t:'num'},
+    {k:'cbg_prod', l:'CBG Produced (kg)',            t:'num'},
+    {k:'cbg_vent', l:'CBG Vent (kg)',                t:'num'},
+  ]},
+  {title:'Auto Calculations',fields:[
+    {k:'cd_bpp',   l:'CD BPP (m³)',                 t:'calc', fn:'bpp_cd'},
+    {k:'pm_bpp',   l:'PM BPP (m³)',                  t:'calc', fn:'bpp_pm'},
+    {k:'gs_bpp',   l:'GS BPP (m³)',                  t:'calc', fn:'bpp_gs'},
+    {k:'csl_bpp',  l:'CSL BPP (m³)',                 t:'calc', fn:'bpp_csl'},
+    {k:'wv',       l:'Working Volume (m³)',            t:'calc', fn:'wv'},
+    {k:'olr',      l:'OLR (kg VS/m³/day)',             t:'calc', fn:'olr'},
+    {k:'psa_eff',  l:'PSA Efficiency (%)',             t:'calc', fn:'psa_eff'},
+  ]},
+ ]},
+
+{id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2',
+ sections:[
+  {title:'Expected Feeding',fields:[
+    {k:'cd_exp',   l:'CD Expected (MT)',        t:'num'},
+    {k:'pm_exp',   l:'PM Expected (MT)',         t:'num'},
+    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',t:'num'},
+    {k:'csl_exp',  l:'CSL Expected (KL)',         t:'num'},
+    {k:'fw_exp',   l:'Fresh Water Expected (m³)', t:'num'},
+    {k:'rs_exp',   l:'Recycle Slurry Exp (m³)',   t:'num'},
+  ]},
+  {title:'Actual Feeding',fields:[
+    {k:'cd_act',   l:'CD Actual (MT)',            t:'num'},
+    {k:'pm_act',   l:'PM Actual (MT)',             t:'num'},
+    {k:'poultry',  l:'Poultry Actual (cu.m)',      t:'num'},
+    {k:'csl_act',  l:'CSL Actual (KL)',             t:'num'},
+    {k:'gs_act',   l:'Grain Syrup Actual (KL)',     t:'num'},
+    {k:'pm_ts',    l:'PM TS%',                      t:'num'},
+    {k:'pm_vs',    l:'PM VS%',                      t:'num'},
+  ]},
+  {title:'Slurry & Water',fields:[
+    {k:'fw_act',   l:'Fresh Water Actual (m³)',    t:'num'},
+    {k:'rs_act',   l:'Recycle Slurry Actual (m³)', t:'num'},
+    {k:'flow_mtr', l:'Flow Meter Reading (m³)',    t:'num'},
+    {k:'drain',    l:'Actual Drain',               t:'num'},
+    {k:'sl_ht',    l:'Slurry Height (m)',           t:'num'},
+  ]},
+  {title:'Gas Production',fields:[
+    {k:'rbg_psa',  l:'RBG at PSA Inlet (m³)',      t:'num'},
+    {k:'rbg_vent', l:'RBG Vent Loss (m³)',          t:'num'},
+    {k:'cbg_prod', l:'CBG Produced (kg)',            t:'num'},
+    {k:'cbg_vent', l:'CBG Vent (kg)',                t:'num'},
+  ]},
+  {title:'Auto Calculations',fields:[
+    {k:'cd_bpp',   l:'CD BPP (m³)',                 t:'calc', fn:'bpp_cd'},
+    {k:'pm_bpp',   l:'PM BPP (m³)',                  t:'calc', fn:'bpp_pm'},
+    {k:'gs_bpp',   l:'GS BPP (m³)',                  t:'calc', fn:'bpp_gs'},
+    {k:'csl_bpp',  l:'CSL BPP (m³)',                 t:'calc', fn:'bpp_csl'},
+    {k:'wv',       l:'Working Volume (m³)',            t:'calc', fn:'wv'},
+    {k:'olr',      l:'OLR (kg VS/m³/day)',             t:'calc', fn:'olr'},
+    {k:'psa_eff',  l:'PSA Efficiency (%)',             t:'calc', fn:'psa_eff'},
+  ]},
+ ]},
+
+// ── PSA PRODUCTION ───────────────────────────────────────────────
+{id:'PSA',label:'PSA Production',group:'Operations',sheet:'PSA Production',
+ sections:[
+  {title:'Running Hours',fields:[
+    {k:'psa_hrs',  l:'PSA Running Hours',          t:'num'},
+    {k:'comp_hrs', l:'Compressor Hours',            t:'num'},
+    {k:'pcut_hrs', l:'Power Cut Duration (hrs)',    t:'num'},
+    {k:'vent_hrs', l:'Vent Time (hrs)',              t:'num'},
+  ]},
+  {title:'Raw Biogas',fields:[
+    {k:'rbg_d1',   l:'RBG Suction D1 (m³)',        t:'num'},
+    {k:'rbg_d2',   l:'RBG Suction D2 (m³)',        t:'num'},
+    {k:'rbg_total',l:'Total RBG (m³)',              t:'num'},
+    {k:'ch4_pct',  l:'CH4% at Inlet',              t:'num'},
+  ]},
+  {title:'CBG Production',fields:[
+    {k:'cbg_d1',   l:'CBG from D1 (kg)',           t:'num'},
+    {k:'cbg_d2',   l:'CBG from D2 (kg)',           t:'num'},
+    {k:'cbg_tot',  l:'Total CBG Purified (kg)',     t:'num'},
+    {k:'cbg_den',  l:'CBG Density (kg/m³)',         t:'num'},
+    {k:'cbg_pur',  l:'CBG Purity (%)',              t:'num'},
+    {k:'tail_gas', l:'Tail Gas (m³)',               t:'num'},
+  ]},
+  {title:'Customer Dispatch (kg)',fields:[
+    {k:'veer_kg',    l:'Veer Gas (kg)',             t:'num'},
+    {k:'adinath_kg', l:'Adinath (kg)',              t:'num'},
+    {k:'gail_kg',    l:'GAIL (kg)',                 t:'num'},
+    {k:'sps_kg',     l:'SPS (kg)',                  t:'num'},
+    {k:'other1_kg',  l:'Other Customer 1 (kg)',     t:'num'},
+    {k:'other2_kg',  l:'Other Customer 2 (kg)',     t:'num'},
+  ]},
+  {title:'Cascade Pressure',fields:[
+    {k:'casc1',    l:'Cascade Pressure 1 (bar)',    t:'num'},
+    {k:'casc2',    l:'Cascade Pressure 2 (bar)',    t:'num'},
+  ]},
+ ]},
+
+// ── pH / TEMPERATURE ─────────────────────────────────────────────
+{id:'PHTEMP',label:'pH / Temperature',group:'Operations',sheet:'pH Temp',
+ sections:[
+  {title:'D1 Readings',fields:[
+    {k:'d1_ph_3m',  l:'D1 pH @ 3M',               t:'num'},
+    {k:'d1_ph_6m',  l:'D1 pH @ 6M',               t:'num'},
+    {k:'d1_ph_sl',  l:'D1 pH @ SL',               t:'num'},
+    {k:'d1_tmp_3m', l:'D1 Temp @ 3M (°C)',         t:'num'},
+    {k:'d1_tmp_6m', l:'D1 Temp @ 6M (°C)',         t:'num'},
+    {k:'d1_tmp_sl', l:'D1 Temp @ SL (°C)',         t:'num'},
+  ]},
+  {title:'D2 Readings',fields:[
+    {k:'d2_ph_3m',  l:'D2 pH @ 3M',               t:'num'},
+    {k:'d2_ph_6m',  l:'D2 pH @ 6M',               t:'num'},
+    {k:'d2_ph_sl',  l:'D2 pH @ SL',               t:'num'},
+    {k:'d2_tmp_3m', l:'D2 Temp @ 3M (°C)',         t:'num'},
+    {k:'d2_tmp_6m', l:'D2 Temp @ 6M (°C)',         t:'num'},
+    {k:'d2_tmp_sl', l:'D2 Temp @ SL (°C)',         t:'num'},
+  ]},
+ ]},
+
+// ── TS-VS ─────────────────────────────────────────────────────────
+{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'TS-VS',
+ sections:[
+  {title:'D1 TS% & VS%',fields:[
+    {k:'d1_ts_3m',  l:'D1 TS% @ 3M',              t:'num'},
+    {k:'d1_vs_3m',  l:'D1 VS% @ 3M',              t:'num'},
+    {k:'d1_ts_6m',  l:'D1 TS% @ 6M',              t:'num'},
+    {k:'d1_vs_6m',  l:'D1 VS% @ 6M',              t:'num'},
+    {k:'d1_ts_sl',  l:'D1 TS% @ SL',              t:'num'},
+    {k:'d1_vs_sl',  l:'D1 VS% @ SL',              t:'num'},
+  ]},
+  {title:'D2 TS% & VS%',fields:[
+    {k:'d2_ts_3m',  l:'D2 TS% @ 3M',              t:'num'},
+    {k:'d2_vs_3m',  l:'D2 VS% @ 3M',              t:'num'},
+    {k:'d2_ts_6m',  l:'D2 TS% @ 6M',              t:'num'},
+    {k:'d2_vs_6m',  l:'D2 VS% @ 6M',              t:'num'},
+    {k:'d2_ts_sl',  l:'D2 TS% @ SL',              t:'num'},
+    {k:'d2_vs_sl',  l:'D2 VS% @ SL',              t:'num'},
+  ]},
+ ]},
+
+// ── IA-PA ─────────────────────────────────────────────────────────
+{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'IA-PA',
+ sections:[
+  {title:'D1 Zones',fields:[
+    {k:'d1_ia1',    l:'D1 Zone 1 IA',              t:'num'},
+    {k:'d1_pa1',    l:'D1 Zone 1 PA',              t:'num'},
+    {k:'d1_ia2',    l:'D1 Zone 2 IA',              t:'num'},
+    {k:'d1_pa2',    l:'D1 Zone 2 PA',              t:'num'},
+  ]},
+  {title:'D2 Zones',fields:[
+    {k:'d2_ia1',    l:'D2 Zone 1 IA',              t:'num'},
+    {k:'d2_pa1',    l:'D2 Zone 1 PA',              t:'num'},
+    {k:'d2_ia2',    l:'D2 Zone 2 IA',              t:'num'},
+    {k:'d2_pa2',    l:'D2 Zone 2 PA',              t:'num'},
+  ]},
+  {title:'Remarks',fields:[
+    {k:'remark',    l:'Remark',                    t:'txt'},
+  ]},
+ ]},
+
+// ── FEEDSTOCK SUPPLY ──────────────────────────────────────────────
+{id:'FS',label:'Feedstock Supply',group:'Feedstock',sheet:'Feedstock Supply',
+ sections:[
+  {title:'Cow Dung Received',fields:[
+    {k:'cd_v1',  l:'CD Vendor 1 (MT)',   t:'num'},
+    {k:'cd_v2',  l:'CD Vendor 2 (MT)',   t:'num'},
+    {k:'cd_v3',  l:'CD Vendor 3 (MT)',   t:'num'},
+    {k:'cd_v4',  l:'CD Vendor 4 (MT)',   t:'num'},
+    {k:'cd_v5',  l:'CD Vendor 5 (MT)',   t:'num'},
+    {k:'cd_v6',  l:'CD Vendor 6 (MT)',   t:'num'},
+    {k:'cd_v7',  l:'CD Vendor 7 (MT)',   t:'num'},
+    {k:'cd_v8',  l:'CD Vendor 8 (MT)',   t:'num'},
+    {k:'cd_v9',  l:'CD Vendor 9 (MT)',   t:'num'},
+    {k:'cd_v10', l:'CD Vendor 10 (MT)',  t:'num'},
+  ]},
+  {title:'Pressmud Received',fields:[
+    {k:'pm_v1',  l:'PM Vendor 1 (MT)',   t:'num'},
+    {k:'pm_v2',  l:'PM Vendor 2 (MT)',   t:'num'},
+    {k:'pm_v3',  l:'PM Vendor 3 (MT)',   t:'num'},
+    {k:'pm_v4',  l:'PM Vendor 4 (MT)',   t:'num'},
+    {k:'pm_v5',  l:'PM Vendor 5 (MT)',   t:'num'},
+    {k:'pm_v6',  l:'PM Vendor 6 (MT)',   t:'num'},
+    {k:'pm_v7',  l:'PM Vendor 7 (MT)',   t:'num'},
+    {k:'pm_v8',  l:'PM Vendor 8 (MT)',   t:'num'},
+    {k:'pm_v9',  l:'PM Vendor 9 (MT)',   t:'num'},
+  ]},
+  {title:'Other Feedstock',fields:[
+    {k:'gs_rcv', l:'Grain Syrup Received (KL)',  t:'num'},
+    {k:'csl_rcv',l:'CSL Received (KL)',           t:'num'},
+    {k:'gs_stk', l:'Grain Syrup Stock (KL)',      t:'num'},
+    {k:'csl_stk',l:'CSL Stock (KL)',              t:'num'},
+    {k:'cd_stk', l:'CD Stock (MT)',               t:'num'},
+    {k:'pm_stk', l:'PM Stock (MT)',               t:'num'},
+  ]},
+ ]},
+
+// ── FEED & BALANCE ────────────────────────────────────────────────
+{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance',
+ sections:[
+  {title:'Qty Received Today',fields:[
+    {k:'cd_rcv',  l:'CD Received (MT)',           t:'num'},
+    {k:'pm_rcv',  l:'PM Received (MT)',            t:'num'},
+    {k:'gs_rcv',  l:'Grain Syrup Received (KL)',  t:'num'},
+    {k:'csl_rcv', l:'CSL Received (KL)',           t:'num'},
+  ]},
+  {title:'Qty Fed (D1+D2 Combined)',fields:[
+    {k:'cd_fed',  l:'CD Fed (MT)',                t:'num'},
+    {k:'pm_fed',  l:'PM Fed (MT)',                 t:'num'},
+    {k:'gs_fed',  l:'Grain Syrup Fed (KL)',       t:'num'},
+    {k:'csl_fed', l:'CSL Fed (KL)',                t:'num'},
+  ]},
+  {title:'Cost (₹) — Manual Entry',fields:[
+    {k:'cd_cost', l:'CD Cost (₹)  [₹540/MT]',    t:'num'},
+    {k:'pm_cost', l:'PM Cost (₹)  [vendor rate]', t:'num'},
+    {k:'gs_cost', l:'Grain Syrup Cost (₹)',       t:'num'},
+    {k:'csl_cost',l:'CSL Cost (₹)',               t:'num'},
+  ]},
+ ]},
+
+// ── CAL SHEETS ───────────────────────────────────────────────────
+{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal',
+ sections:[
+  {title:'Sample Details',fields:[
+    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
+    {k:'location',l:'Sample Location',            t:'txt'},
+    {k:'ts_pct',  l:'TS%',                        t:'num'},
+    {k:'vs_pct',  l:'VS%',                        t:'num'},
+    {k:'remarks', l:'Remarks',                    t:'txt'},
+  ]},
+ ]},
+
+{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'CD Cal',
+ sections:[
+  {title:'Sample Details',fields:[
+    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
+    {k:'location',l:'Sample Location',            t:'txt'},
+    {k:'ts_pct',  l:'TS%',                        t:'num'},
+    {k:'vs_pct',  l:'VS%',                        t:'num'},
+    {k:'remarks', l:'Remarks',                    t:'txt'},
+  ]},
+ ]},
+
+{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'RGS Cal',
+ sections:[
+  {title:'Sample Details',fields:[
+    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
+    {k:'location',l:'Sample Location',            t:'txt'},
+    {k:'ts_pct',  l:'TS%',                        t:'num'},
+    {k:'vs_pct',  l:'VS%',                        t:'num'},
+    {k:'remarks', l:'Remarks',                    t:'txt'},
+  ]},
+ ]},
+
+{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal',
+ sections:[
+  {title:'Sample Details',fields:[
+    {k:'sample',  l:'Sample Name / Batch',        t:'txt'},
+    {k:'location',l:'Sample Location',            t:'txt'},
+    {k:'ts_pct',  l:'TS%',                        t:'num'},
+    {k:'vs_pct',  l:'VS%',                        t:'num'},
+    {k:'remarks', l:'Remarks',                    t:'txt'},
+  ]},
+ ]},
+
+// ── MANURE SALES ──────────────────────────────────────────────────
+{id:'MANURE',label:'Manure Sales',group:'Sales',sheet:'Manure Sales',
+ sections:[
+  {title:'Sale Entry',fields:[
+    {k:'vehicle',  l:'Vehicle No.',               t:'txt'},
+    {k:'v_type',   l:'Vehicle Type',              t:'sel', opts:['Tractor','Mini Truck','Truck','Other']},
+    {k:'farmer',   l:'Farmer Name',               t:'txt'},
+    {k:'type',     l:'Manure Type',               t:'sel', opts:['SFOM','LFOM','Mixed']},
+    {k:'qty_mt',   l:'Quantity (MT)',              t:'num'},
+    {k:'rate',     l:'Rate (₹/MT)',               t:'num'},
+    {k:'amount',   l:'Amount (₹)',                t:'num'},
+    {k:'remarks',  l:'Remarks',                   t:'txt'},
+  ]},
+ ]},
+
+// ── SALES DETAIL ──────────────────────────────────────────────────
+{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail',
+ sections:[
+  {title:'CBG Dispatch',fields:[
+    {k:'inv_no',    l:'Invoice No.',              t:'txt'},
+    {k:'customer',  l:'Customer Name',            t:'txt'},
+    {k:'qty_kg',    l:'Qty Dispatched (kg)',      t:'num'},
+    {k:'rate_kg',   l:'Rate (₹/kg)',              t:'num'},
+    {k:'amount',    l:'Amount (₹)',               t:'num'},
+    {k:'vehicle',   l:'Vehicle No.',              t:'txt'},
+    {k:'remarks',   l:'Remarks',                  t:'txt'},
+  ]},
+ ]},
+
+// ── MAINTENANCE ───────────────────────────────────────────────────
+{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance',
+ sections:[
+  {title:'Work Order',fields:[
+    {k:'unit',      l:'Unit / Area',              t:'sel', opts:['D1','D2','PSA','Compressor','Utility','Civil','Electrical','Other']},
+    {k:'equipment', l:'Equipment',                t:'txt'},
+    {k:'work_type', l:'Work Type',                t:'sel', opts:['Preventive','Corrective','Breakdown','AMC']},
+    {k:'description',l:'Work Description',        t:'txt'},
+    {k:'vendor',    l:'Vendor / Contractor',      t:'txt'},
+    {k:'cost',      l:'Cost (₹)',                 t:'num'},
+    {k:'status',    l:'Status',                   t:'sel', opts:['Completed','Pending','In Progress']},
+    {k:'remarks',   l:'Remarks',                  t:'txt'},
+  ]},
+ ]},
+
+// ── REVENUE & COSTS ───────────────────────────────────────────────
+{id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs',
+ sections:[
+  {title:'Transport Cost (manual only)',fields:[
+    {k:'transport', l:'Transportation Cost (₹)',  t:'num'},
+    {k:'remarks',   l:'Remarks',                  t:'txt'},
+  ]},
+  {title:'Note',fields:[
+    {k:'_note', l:'All other revenue & cost columns are auto-calculated from Sales Detail and other sheets', t:'info'},
+  ]},
+ ]},
+
+// ── MONTHLY FIXED COSTS ───────────────────────────────────────────
+{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs',
+ sections:[
+  {title:'Monthly Entry',fields:[
+    {k:'month',     l:'Month',                    t:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
+    {k:'elec_bill', l:'Electricity Bill (₹)',     t:'num'},
+    {k:'remarks',   l:'Remarks',                  t:'txt'},
+  ]},
+ ]},
+
+// ── EMI TRACKER ───────────────────────────────────────────────────
+{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:'EMI Tracker',
+ sections:[
+  {title:'EMI Payment',fields:[
+    {k:'month',     l:'Month',                    t:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
+    {k:'year',      l:'Year',                     t:'num'},
+    {k:'emi_paid',  l:'EMI Paid (₹)',             t:'num'},
+    {k:'bank',      l:'Bank / Lender',            t:'txt'},
+    {k:'remarks',   l:'Remarks',                  t:'txt'},
+  ]},
+ ]},
+
+]// end SHEETS
+
+// ════════════════════════════════════════════════════════════════
+// FORMULA ENGINE
+// ════════════════════════════════════════════════════════════════
+function getMonth(dateStr){ return dateStr ? new Date(dateStr).getMonth()+1 : new Date().getMonth()+1 }
+
+const FN = {
+  bpp_cd:  (v,m) => (v.cd_act||0)*R.CD.bpp,
+  bpp_pm:  (v,m) => (v.pm_act||0)*(R.PM.bpp[m]||95),
+  bpp_gs:  (v,m) => (v.gs_act||0)*R.GS.bpp,
+  bpp_csl: (v,m) => (v.csl_act||0)*R.CSL.bpp,
+  wv:      (v,m) => {
+    const h = (v.sl_ht && v.sl_ht>0) ? v.sl_ht : ([1,2,3].includes(m)?R.DIGESTER.hWinter:R.DIGESTER.hOther)
+    return Math.PI*Math.pow(R.DIGESTER.radius,2)*h
   },
-  {
-    id: 'D2', label: 'Digester 2', sheet: 'D2', data_start_row: 3,
-    cols: {
-      cd_expected:    { col: 2,  type: 'manual', label: 'CD Expected (MT)',        input: 'number', section: 'Expected Feeding' },
-      pm_expected:    { col: 3,  type: 'manual', label: 'PM Expected (MT)',         input: 'number', section: 'Expected Feeding' },
-      poultry_exp:    { col: 4,  type: 'manual', label: 'Poultry Expected (KL)',    input: 'number', section: 'Expected Feeding' },
-      csl_expected:   { col: 5,  type: 'manual', label: 'CSL Expected (KL)',        input: 'number', section: 'Expected Feeding' },
-      cd_actual:      { col: 15, type: 'manual', label: 'CD Actual (MT)',           input: 'number', section: 'Actual Feeding' },
-      pm_actual:      { col: 16, type: 'manual', label: 'PM Actual (MT)',           input: 'number', section: 'Actual Feeding' },
-      poultry_actual: { col: 17, type: 'manual', label: 'Poultry Actual (cu.m)',    input: 'number', section: 'Actual Feeding' },
-      csl_actual:     { col: 18, type: 'manual', label: 'CSL Actual (KL)',          input: 'number', section: 'Actual Feeding' },
-      fw_actual:      { col: 27, type: 'manual', label: 'Fresh Water (m³)',         input: 'number', section: 'Slurry & Water' },
-      rs_actual:      { col: 28, type: 'manual', label: 'Recycle Slurry (m³)',      input: 'number', section: 'Slurry & Water' },
-      flow_meter:     { col: 29, type: 'manual', label: 'Flow Meter (m³)',          input: 'number', section: 'Slurry & Water' },
-      slurry_height:  { col: 49, type: 'manual', label: 'Slurry Height (m)',        input: 'number', section: 'Slurry & Water' },
-      rbg_psa:        { col: 33, type: 'manual', label: 'RBG at PSA (m³)',          input: 'number', section: 'Gas Production' },
-      rbg_vent:       { col: 34, type: 'manual', label: 'RBG Vent (m³)',            input: 'number', section: 'Gas Production' },
-      cbg_produced:   { col: 36, type: 'manual', label: 'CBG Produced (kg)',        input: 'number', section: 'Gas Production' },
-      cbg_vent:       { col: 37, type: 'manual', label: 'CBG Vent (kg)',            input: 'number', section: 'Gas Production' },
-      cd_bpp:         { col: 44, type: 'calc',   label: 'CD BPP (m³)',              fn: 'bpp_cd',         section: 'Auto Calculations' },
-      pm_bpp:         { col: 45, type: 'calc',   label: 'PM BPP (m³)',              fn: 'bpp_pm',         section: 'Auto Calculations' },
-      gs_bpp:         { col: 46, type: 'calc',   label: 'GS BPP (m³)',              fn: 'bpp_gs',         section: 'Auto Calculations' },
-      csl_bpp:        { col: 47, type: 'calc',   label: 'CSL BPP (m³)',             fn: 'bpp_csl',        section: 'Auto Calculations' },
-      working_vol:    { col: 48, type: 'calc',   label: 'Working Volume (m³)',       fn: 'working_volume', section: 'Auto Calculations' },
-      olr:            { col: 50, type: 'calc',   label: 'OLR (kg VS/m³/day)',        fn: 'olr',            section: 'Auto Calculations' },
-      psa_eff:        { col: 51, type: 'calc',   label: 'PSA Efficiency (%)',        fn: 'psa_efficiency', section: 'Auto Calculations' },
+  olr:     (v,m,lk) => lk.wv>0 ? 0 : null, // placeholder until VS kg wired
+  psa_eff: (v,m,lk) => (lk.psa_hrs||0)>0 ? ((v.cbg_prod||0)/((lk.psa_hrs)*R.PSA.basis))*100 : null,
+}
+
+function runCalcs(sheet, inputs, dateStr){
+  const m = getMonth(dateStr)
+  const wv = FN.wv(inputs,m)
+  const lk = {wv, psa_hrs: inputs.psa_hrs||0}
+  const out = {}
+  for(const sec of sheet.sections){
+    for(const f of sec.fields){
+      if(f.t!=='calc') continue
+      const fn = FN[f.fn]
+      if(!fn) continue
+      const v = fn(inputs,m,lk)
+      out[f.k] = v!==null&&v!==undefined ? Math.round(v*100)/100 : null
     }
   }
-]
-
-const OTHER_SHEETS = [
-  { id: 'PSA',       label: 'PSA',             sheet: 'PSA',
-    cols: {
-      date:         { col:1,  type:'manual', label:'Date',                input:'date',   section:'PSA Entry' },
-      psa_hours:    { col:2,  type:'manual', label:'PSA Run Hours',       input:'number', section:'PSA Entry' },
-      cbg_produced: { col:3,  type:'manual', label:'CBG Produced (kg)',   input:'number', section:'PSA Entry' },
-      ch4_pct:      { col:4,  type:'manual', label:'CH4 % at Inlet',      input:'number', section:'PSA Entry' },
-      cbg_purity:   { col:5,  type:'manual', label:'CBG Purity (%)',      input:'number', section:'PSA Entry' },
-      tail_gas:     { col:6,  type:'manual', label:'Tail Gas (m³)',        input:'number', section:'PSA Entry' },
-      cylinder_fill:{ col:7,  type:'manual', label:'Cylinders Filled',    input:'number', section:'PSA Entry' },
-    }
-  },
-  { id: 'FB',        label: 'Feed & Balance',  sheet: 'Feed & Balance',
-    cols: {
-      date:         { col:1,  type:'manual', label:'Date',                input:'date',   section:'Feed & Balance' },
-      total_cd:     { col:2,  type:'manual', label:'Total CD (MT)',        input:'number', section:'Feed & Balance' },
-      total_pm:     { col:3,  type:'manual', label:'Total PM (MT)',        input:'number', section:'Feed & Balance' },
-      total_csl:    { col:4,  type:'manual', label:'Total CSL (KL)',       input:'number', section:'Feed & Balance' },
-      total_water:  { col:5,  type:'manual', label:'Total Water (m³)',     input:'number', section:'Feed & Balance' },
-      total_cbg:    { col:6,  type:'manual', label:'Total CBG (kg)',       input:'number', section:'Feed & Balance' },
-    }
-  },
-  { id: 'FS',        label: 'Feedstock Supply',sheet: 'Feedstock Supply',
-    cols: {
-      date:         { col:1,  type:'manual', label:'Date',                input:'date',   section:'Feedstock Supply' },
-      cd_received:  { col:2,  type:'manual', label:'CD Received (MT)',     input:'number', section:'Feedstock Supply' },
-      pm_received:  { col:3,  type:'manual', label:'PM Received (MT)',     input:'number', section:'Feedstock Supply' },
-      csl_received: { col:4,  type:'manual', label:'CSL Received (KL)',    input:'number', section:'Feedstock Supply' },
-      cd_stock:     { col:5,  type:'manual', label:'CD Stock (MT)',         input:'number', section:'Feedstock Supply' },
-      pm_stock:     { col:6,  type:'manual', label:'PM Stock (MT)',         input:'number', section:'Feedstock Supply' },
-    }
-  },
-  { id: 'ManureSls', label: 'Manure Sales',    sheet: 'Manure Sales',
-    cols: {
-      date:         { col:1,  type:'manual', label:'Date',                input:'date',   section:'Manure Sales' },
-      buyer_name:   { col:2,  type:'manual', label:'Buyer Name',           input:'text',   section:'Manure Sales' },
-      qty_mt:       { col:3,  type:'manual', label:'Quantity (MT)',         input:'number', section:'Manure Sales' },
-      rate:         { col:4,  type:'manual', label:'Rate (₹/MT)',           input:'number', section:'Manure Sales' },
-      amount:       { col:5,  type:'manual', label:'Amount (₹)',            input:'number', section:'Manure Sales' },
-      vehicle_no:   { col:6,  type:'manual', label:'Vehicle No.',           input:'text',   section:'Manure Sales' },
-    }
-  },
-  { id: 'Sales',     label: 'Sales Detail',    sheet: 'Sales Detail',
-    cols: {
-      date:         { col:1,  type:'manual', label:'Date',                input:'date',   section:'Sales' },
-      invoice_no:   { col:2,  type:'manual', label:'Invoice No.',          input:'text',   section:'Sales' },
-      customer:     { col:3,  type:'manual', label:'Customer Name',        input:'text',   section:'Sales' },
-      qty_kg:       { col:4,  type:'manual', label:'Qty (kg)',              input:'number', section:'Sales' },
-      rate_kg:      { col:5,  type:'manual', label:'Rate (₹/kg)',           input:'number', section:'Sales' },
-      amount:       { col:6,  type:'manual', label:'Amount (₹)',            input:'number', section:'Sales' },
-    }
-  },
-]
-
-// ── Formula engine ────────────────────────────────────────────────────────────
-function pmRate(month) {
-  if ([11,12,1,2,3,4].includes(month)) return RATES.PM.bpp.winter
-  if (month === 5) return RATES.PM.bpp.may
-  if ([6,7,8].includes(month)) return RATES.PM.bpp.summer
-  return RATES.PM.bpp.monsoon
-}
-function defaultH(month) {
-  return [1,2,3].includes(month) ? RATES.DIGESTER.default_height.winter : RATES.DIGESTER.default_height.other
-}
-const FORMULAS = {
-  bpp_cd:         (inp)      => (inp.cd_actual  || 0) * RATES.CD.bpp,
-  bpp_pm:         (inp)      => (inp.pm_actual  || 0) * pmRate(inp.month),
-  bpp_gs:         (inp)      => (inp.gs_actual  || 0) * RATES.GS.bpp,
-  bpp_csl:        (inp)      => (inp.csl_actual || 0) * RATES.CSL.bpp,
-  working_volume: (inp)      => Math.PI * Math.pow(RATES.DIGESTER.radius, 2) * ((inp.slurry_height > 0 ? inp.slurry_height : defaultH(inp.month))),
-  olr:            (inp, lk)  => lk.working_vol > 0 ? (lk.vs_kg || 0) / lk.working_vol : null,
-  psa_efficiency: (inp, lk)  => (lk.psa_hours || 0) > 0 ? ((inp.cbg_produced || 0) / (lk.psa_hours * RATES.PSA.design_basis)) * 100 : null,
+  return out
 }
 
-function runCalcs(config, inputs) {
-  const month = inputs.date ? new Date(inputs.date).getMonth() + 1 : new Date().getMonth() + 1
-  const wv = FORMULAS.working_volume({ ...inputs, month })
-  const lk = { working_vol: wv, vs_kg: 0, psa_hours: 0 }
-  const results = {}
-  for (const [field, def] of Object.entries(config.cols)) {
-    if (def.type !== 'calc') continue
-    const fn = FORMULAS[def.fn]
-    if (!fn) continue
-    const v = fn({ ...inputs, month }, lk)
-    results[field] = v !== null && v !== undefined ? Math.round(v * 100) / 100 : null
-  }
-  return results
-}
+// ════════════════════════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════════════════════════
+let cur = null
+let inputs = {}
 
-// ── State ─────────────────────────────────────────────────────────────────────
-let currentConfig = null
-let currentInputs  = {}
-let isSignedIn     = false
-
-// ── Build nav ─────────────────────────────────────────────────────────────────
-function buildNav() {
-  const nav = document.getElementById('sheetNav')
-  nav.innerHTML = ''
-
-  const groups = [
-    { label: 'Digesters', items: DIGESTERS.map(d => ({ ...d, type: 'digester' })) },
-    { label: 'Other Sheets', items: OTHER_SHEETS.map(s => ({ ...s, type: 'simple' })) },
-  ]
-
-  groups.forEach(grp => {
-    const lbl = document.createElement('div')
-    lbl.className = 'nav-group-label'
-    lbl.textContent = grp.label
-    nav.appendChild(lbl)
-    grp.items.forEach(s => {
-      const btn = document.createElement('button')
-      btn.textContent = s.label
-      btn.dataset.id = s.id
-      btn.onclick = () => loadSheet(s)
-      nav.appendChild(btn)
+// ════════════════════════════════════════════════════════════════
+// BUILD NAV
+// ════════════════════════════════════════════════════════════════
+function buildNav(){
+  const nav = document.getElementById('nav')
+  const groups = {}
+  SHEETS.forEach(s=>{ if(!groups[s.group]) groups[s.group]=[]; groups[s.group].push(s) })
+  let html = ''
+  for(const [grp,items] of Object.entries(groups)){
+    html += `<div class="ng">${grp}</div>`
+    items.forEach(s=>{
+      html += `<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>`
     })
-  })
-
-  // Auto-load D1
-  const first = [...DIGESTERS][0]
-  loadSheet({ ...first, type: 'digester' })
+  }
+  nav.innerHTML = html
 }
 
-// ── Load sheet ────────────────────────────────────────────────────────────────
-function loadSheet(sheetDef) {
-  document.querySelectorAll('#sheetNav button').forEach(b => b.classList.remove('active'))
-  document.querySelector(`#sheetNav button[data-id="${sheetDef.id}"]`)?.classList.add('active')
-  currentConfig = sheetDef
-  currentInputs = {}
+// ════════════════════════════════════════════════════════════════
+// LOAD SHEET
+// ════════════════════════════════════════════════════════════════
+function loadSheet(id){
+  cur = SHEETS.find(s=>s.id===id)
+  inputs = {}
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id))
 
-  const main = document.getElementById('mainArea')
-  main.innerHTML = `
-    <div class="section-header">
-      <h2>${sheetDef.label}</h2>
-      <div class="sub">Sheet: <b>${sheetDef.sheet}</b></div>
-    </div>
+  const main = document.getElementById('main')
+  const needsDate = !['PMCAL','CDCAL','GSCAL','CSLCAL','FIXED','EMI'].includes(id)
+
+  let html = `
+    <div class="sh">
+      <h2>${cur.label}</h2>
+      <div class="sub">Sheet: <b>${cur.sheet}</b></div>
+    </div>`
+
+  if(needsDate){
+    html += `
     <div class="date-row">
       <label>Date</label>
-      <input type="date" id="datePicker" value="${todayStr()}" oninput="window._recompute()" />
-      <button id="loadBtn">Load Existing</button>
-      <span id="statusMsg"></span>
-    </div>
-    <div id="fieldSections"></div>
-  `
-  document.getElementById('loadBtn').onclick = () => showToast('Sign in to load existing data', true)
-
-  buildFields(sheetDef)
-}
-
-// ── Build fields grouped by section ──────────────────────────────────────────
-function buildFields(config) {
-  const container = document.getElementById('fieldSections')
-  container.innerHTML = ''
-
-  const sections = {}
-  for (const [field, def] of Object.entries(config.cols)) {
-    if (field === 'date') continue
-    const sec = def.section || 'General'
-    if (!sections[sec]) sections[sec] = []
-    sections[sec].push([field, def])
+      <input type="date" id="dp" value="${today()}" oninput="recompute()" />
+      <span style="font-size:.78rem;color:var(--muted);">Enter date then fill fields below</span>
+    </div>`
   }
 
-  for (const [secName, fields] of Object.entries(sections)) {
-    const sec = document.createElement('div')
-    sec.className = 'fields-section'
-    sec.innerHTML = `<div class="fields-section-title">${secName}</div>`
-    const grid = document.createElement('div')
-    grid.className = 'field-grid'
-
-    fields.forEach(([field, def]) => {
-      const grp = document.createElement('div')
-      grp.className = 'field-group'
-      if (def.type === 'calc') {
-        grp.innerHTML = `
-          <label>${def.label} <span class="calc-tag">auto</span></label>
-          <input type="text" id="f_${field}" class="calc-field" readonly placeholder="—" tabindex="-1" />
-        `
-      } else {
-        const inputType = def.input || 'number'
-        grp.innerHTML = `
-          <label>${def.label}</label>
-          <input type="${inputType}" id="f_${field}" step="any" placeholder="${inputType === 'number' ? '0' : ''}"
-            oninput="window._onInput('${field}', this.value)" />
-        `
+  cur.sections.forEach(sec=>{
+    html += `<div class="sec"><div class="sec-title">${sec.title}</div><div class="fgrid">`
+    sec.fields.forEach(f=>{
+      if(f.t==='info'){
+        html += `<div class="fg" style="grid-column:1/-1;color:var(--muted);font-size:.8rem;font-style:italic;padding:4px 0;">${f.l}</div>`
+        return
       }
-      grid.appendChild(grp)
+      html += `<div class="fg"><label>${f.l}${f.t==='calc'?'<span class="atag">auto</span>':''}</label>`
+      if(f.t==='calc'){
+        html += `<input type="text" id="f_${f.k}" class="cf" readonly placeholder="—" tabindex="-1" />`
+      } else if(f.t==='sel'){
+        html += `<select id="f_${f.k}" onchange="onInp('${f.k}',this.value)"><option value="">— select —</option>`
+        f.opts.forEach(o=> html+=`<option>${o}</option>`)
+        html += `</select>`
+      } else if(f.t==='txt'){
+        html += `<input type="text" id="f_${f.k}" placeholder="" oninput="onInp('${f.k}',this.value)" />`
+      } else {
+        html += `<input type="number" id="f_${f.k}" step="any" placeholder="0" oninput="onInp('${f.k}',this.value)" />`
+      }
+      html += `</div>`
     })
+    html += `</div></div>`
+  })
 
-    sec.appendChild(grid)
-    container.appendChild(sec)
-  }
-
+  main.innerHTML = html
   recompute()
 }
 
-// ── Input + calc ──────────────────────────────────────────────────────────────
-window._onInput = function(field, value) {
-  currentInputs[field] = value === '' ? null : isNaN(value) ? value : parseFloat(value)
-  recompute()
-}
+// ════════════════════════════════════════════════════════════════
+// INPUT + CALC
+// ════════════════════════════════════════════════════════════════
+function onInp(k,v){ inputs[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
+window.onInp = onInp
 
-window._recompute = function() { recompute() }
-
-function recompute() {
-  if (!currentConfig) return
-  const dateStr = document.getElementById('datePicker')?.value
-  const calcs   = runCalcs(currentConfig, { ...currentInputs, date: dateStr })
-  for (const [field, val] of Object.entries(calcs)) {
-    const el = document.getElementById(`f_${field}`)
-    if (el) el.value = val !== null ? val : ''
+function recompute(){
+  if(!cur) return
+  const dateStr = document.getElementById('dp')?.value
+  const calcs = runCalcs(cur, inputs, dateStr)
+  for(const [k,v] of Object.entries(calcs)){
+    const el = document.getElementById('f_'+k)
+    if(el) el.value = v!==null?v:''
   }
 }
+window.recompute = recompute
 
-// ── Save (requires sign-in) ───────────────────────────────────────────────────
-window.handleSave = function() {
-  if (!isSignedIn) {
-    showToast('Please sign in first to save data', true)
-    return
-  }
-  showToast('Saving… (SharePoint connection coming soon)')
+// ════════════════════════════════════════════════════════════════
+// SAVE / AUTH
+// ════════════════════════════════════════════════════════════════
+window.handleSave = function(){ toast('Sign in first to save data to SharePoint',true) }
+window.handleSignIn = function(){ toast('Azure AD configuration coming soon',true) }
+document.getElementById('saveBtn').onclick = window.handleSave
+
+function today(){ return new Date().toISOString().slice(0,10) }
+
+function toast(msg,err=false){
+  const t=document.getElementById('toast')
+  t.textContent=msg; t.className=err?'err':''
+  t.style.display='block'
+  setTimeout(()=>t.style.display='none',3000)
 }
 
-// ── Auth placeholder ──────────────────────────────────────────────────────────
-window.handleSignIn = function() {
-  showToast('Azure AD not configured yet — coming soon', true)
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-function todayStr() { return new Date().toISOString().slice(0, 10) }
-
-function showToast(msg, isError = false) {
-  const t = document.getElementById('toast')
-  t.textContent = msg
-  t.className = isError ? 'error' : ''
-  t.style.display = 'block'
-  setTimeout(() => { t.style.display = 'none' }, 3000)
-}
-
-// ── Boot ──────────────────────────────────────────────────────────────────────
+// ════════════════════════════════════════════════════════════════
+// BOOT
+// ════════════════════════════════════════════════════════════════
 buildNav()
+loadSheet('D1')
 </script>
 </body>
 </html>
