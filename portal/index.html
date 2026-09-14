@@ -888,7 +888,7 @@ async function initMsal(){
   if(_msal) return
   const { PublicClientApplication } = window.msal
   _msal = new PublicClientApplication({
-    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: window.location.origin },
+    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: window.location.href.split('?')[0] },
     cache: { cacheLocation:'sessionStorage' },
   })
   await _msal.initialize()
