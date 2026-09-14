@@ -94,24 +94,96 @@ export async function writeRow(sheetName, rowNumber, rowData, maxCol = 60) {
   })
 }
 
+// ── Append a new row (for Cal sheets — multiple samples per day, never overwrite) ──
+// Finds the last non-empty row in column A, writes to the row after it.
+export async function appendRow(sheetName, rowData, dataStartRow = 3, maxCol = 60) {
+  const token = await getToken()
+
+  const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
+    + `/drives/root:${SHAREPOINT.filePath}:/workbook/worksheets('${sheetName}')/range(address='A${dataStartRow}:A500')`
+  const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+  const data = await res.json()
+  const rows = data.values || []
+
+  // Find last filled row (iterate from end)
+  let lastFilled = dataStartRow - 1
+  for (let i = rows.length - 1; i >= 0; i--) {
+    if (rows[i][0] !== null && rows[i][0] !== '') {
+      lastFilled = dataStartRow + i
+      break
+    }
+  }
+  const nextRow = lastFilled + 1
+  await writeRow(sheetName, nextRow, rowData, maxCol)
+  return nextRow
+}
+
+// ── Parse a date cell returned by Graph API ───────────────────────────────────
+// Graph API can return: Excel serial number (number), ISO string, or formatted string.
+// Always returns a JS Date in local midnight, or null on failure.
+function parseGraphDate(cell) {
+  if (cell === null || cell === undefined || cell === '') return null
+
+  // Case 1: Excel serial number (e.g. 46000)
+  if (typeof cell === 'number') {
+    // Excel epoch: Jan 0 1900; Unix epoch: Jan 1 1970.
+    // 25569 = days between 1900-01-01 and 1970-01-01 (with Excel's leap-year bug baked in)
+    const ms = (cell - 25569) * 86400 * 1000
+    const d = new Date(ms)
+    // Re-parse as local midnight to strip any UTC offset
+    return new Date(`${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}T00:00:00`)
+  }
+
+  if (typeof cell === 'string') {
+    // Case 2: ISO string "2026-09-14T00:00:00" or "2026-09-14"
+    const iso = cell.match(/^(\d{4}-\d{2}-\d{2})/)
+    if (iso) return new Date(iso[1] + 'T00:00:00')
+
+    // Case 3: DD-MM-YYYY (master workbook standard)
+    const dmy = cell.match(/^(\d{2})-(\d{2})-(\d{4})$/)
+    if (dmy) return new Date(`${dmy[3]}-${dmy[2]}-${dmy[1]}T00:00:00`)
+
+    // Case 4: DD/MM/YYYY
+    const dmy2 = cell.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+    if (dmy2) return new Date(`${dmy2[3]}-${dmy2[2]}-${dmy2[1]}T00:00:00`)
+
+    // Case 5: DD-Mon-YYYY (e.g. "14-Sep-2026") — PSA Production sheet format
+    const monNames = {Jan:'01',Feb:'02',Mar:'03',Apr:'04',May:'05',Jun:'06',
+                      Jul:'07',Aug:'08',Sep:'09',Oct:'10',Nov:'11',Dec:'12'}
+    const dMonY = cell.match(/^(\d{2})-([A-Za-z]{3})-(\d{4})$/)
+    if (dMonY) {
+      const mo = monNames[dMonY[2]] || monNames[dMonY[2].charAt(0).toUpperCase()+dMonY[2].slice(1).toLowerCase()]
+      if (mo) return new Date(`${dMonY[3]}-${mo}-${dMonY[1]}T00:00:00`)
+    }
+  }
+
+  return null
+}
+
+// ── Convert Date → YYYY-MM-DD ISO string (locale-proof) ──────────────────────
+function toISODate(d) {
+  if (!d || isNaN(d)) return null
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
 // ── Find row number for a given date in a sheet ───────────────────────────────
 export async function findRowByDate(sheetName, dateStr, dataStartRow = 3) {
   const token = await getToken()
-  // Read column A (dates) — first 400 rows
   const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
     + `/drives/root:${SHAREPOINT.filePath}:/workbook/worksheets('${sheetName}')/range(address='A${dataStartRow}:A400')`
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
   const data = await res.json()
   const rows = data.values || []
 
-  const target = new Date(dateStr).toDateString()
+  // Parse target using T00:00:00 to prevent UTC-to-IST shift
+  const targetISO = toISODate(new Date(dateStr + 'T00:00:00'))
+
   for (let i = 0; i < rows.length; i++) {
     const cell = rows[i][0]
-    if (cell && new Date(cell).toDateString() === target) {
-      return dataStartRow + i
-    }
+    const d = parseGraphDate(cell)
+    if (d && toISODate(d) === targetISO) return dataStartRow + i
   }
-  return null   // date not found
+  return null
 }
 
 // ── Read a full row by date (for pre-filling the form) ────────────────────────

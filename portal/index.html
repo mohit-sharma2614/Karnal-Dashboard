@@ -535,7 +535,20 @@ const SHEETS = [
 // ══════════════════════════════════════════════════════════
 // FORMULA ENGINE
 // ══════════════════════════════════════════════════════════
-function getMonth(ds){ return ds ? new Date(ds).getMonth()+1 : new Date().getMonth()+1 }
+// Always append T00:00:00 — prevents UTC midnight from shifting to previous day in IST
+function getMonth(ds){ return ds ? new Date(ds + 'T00:00:00').getMonth()+1 : new Date().getMonth()+1 }
+
+// Returns true only for real calendar dates (blocks Feb 30, Apr 31, etc.)
+function isValidDate(ds){
+  if(!ds) return false
+  const d = new Date(ds + 'T00:00:00')
+  if(isNaN(d)) return false
+  const [y,m,day] = ds.split('-').map(Number)
+  return d.getFullYear()===y && d.getMonth()+1===m && d.getDate()===day
+}
+
+// Format YYYY-MM-DD → DD-MM-YYYY for display
+function fmtDisplay(ds){ if(!ds) return ''; const [y,m,d]=ds.split('-'); return `${d}-${m}-${y}` }
 function n(v){ return parseFloat(v)||0 }
 
 const FN = {
@@ -672,8 +685,9 @@ function loadSheet(id){
   let html=`<div class="sh"><h2>${cur.label}</h2><div class="sub">Sheet: <b>${cur.sheet}</b></div></div>`
   if(cur.hasDate){
     html+=`<div class="date-row"><label>Date</label>
-      <input type="date" id="dp" value="${today()}" oninput="recompute()"/>
-      <span style="font-size:.77rem;color:var(--muted)">Enter date then fill fields below</span></div>`
+      <input type="date" id="dp" value="${today()}" oninput="onDateChange()"/>
+      <span id="dp-display" style="font-size:.83rem;font-weight:600;color:var(--accent)">${fmtDisplay(today())}</span>
+      <span id="dp-err" style="font-size:.77rem;color:#e53935;display:none">Invalid date</span></div>`
   }
   cur.sections.forEach(sec=>{
     html+=`<div class="sec"><div class="sec-title">${sec.t}</div><div class="fgrid">`
@@ -719,7 +733,27 @@ window.handleSave=()=>toast('Sign in first to save data to SharePoint',true)
 window.handleSignIn=()=>toast('Azure AD configuration coming soon — contact admin',true)
 document.getElementById('saveBtn').onclick=window.handleSave
 
-function today(){ return new Date().toISOString().slice(0,10) }
+function today(){
+  // Use local date components — toISOString() returns UTC which can be 1 day behind in IST at midnight
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+
+function onDateChange(){
+  const el = document.getElementById('dp')
+  const ds = el?.value
+  const errEl = document.getElementById('dp-err')
+  const dispEl = document.getElementById('dp-display')
+  if(!isValidDate(ds)){
+    if(errEl) errEl.style.display='inline'
+    if(dispEl) dispEl.textContent=''
+    return
+  }
+  if(errEl) errEl.style.display='none'
+  if(dispEl) dispEl.textContent=fmtDisplay(ds)
+  recompute()
+}
+window.onDateChange=onDateChange
 function toast(msg,err=false){
   const t=document.getElementById('toast')
   t.textContent=msg; t.className=err?'err':''; t.style.display='block'
