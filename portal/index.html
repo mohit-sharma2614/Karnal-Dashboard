@@ -111,33 +111,37 @@ const SHEETS = [
 // ─── DIGESTER 1 ───────────────────────────────────────────
 {id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1', hasDate:true, sections:[
   {t:'Expected Feeding',f:[
-    {k:'cd_exp',   l:'CD Expected (MT)',              tp:'num'},
-    {k:'pm_exp',   l:'PM Expected (MT)',               tp:'num'},
-    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',      tp:'num'},
-    {k:'csl_exp',  l:'CSL Expected (KL)',              tp:'num'},
-    {k:'fw_exp',   l:'Fresh Water Expected (m³)',      tp:'num'},
-    {k:'rs_exp',   l:'Recycle Slurry Expected (m³)',   tp:'num'},
+    {k:'cd_exp',       l:'CD Expected (MT)',              tp:'num'},
+    {k:'pm_exp',       l:'PM Expected (MT)',               tp:'num'},
+    {k:'poultry_exp',  l:'Poultry Expected (KL/day)',      tp:'num'},
+    {k:'gs_exp',       l:'Grain Syrup Expected (KL)',      tp:'num'},
+    {k:'csl_exp',      l:'CSL Expected (KL)',              tp:'num'},
+    {k:'fw_exp',       l:'Fresh Water Expected (m³)',      tp:'num'},
+    {k:'rs_exp',       l:'Recycle Slurry Expected (m³)',   tp:'num'},
   ]},
   {t:'Actual Feeding',f:[
-    {k:'cd_act',   l:'CD Actual (MT)',                 tp:'num'},
-    {k:'pm_act',   l:'PM Actual (MT)',                 tp:'num'},
-    {k:'gs_act',   l:'Grain Syrup Actual (KL)',        tp:'num'},
-    {k:'csl_act',  l:'CSL Actual (KL)',                tp:'num'},
-    {k:'poultry',  l:'Poultry Actual (cu.m)',          tp:'num'},
-    {k:'fw_act',   l:'Fresh Water Actual (m³)',        tp:'num'},
-    {k:'rs_act',   l:'Recycle Slurry Actual (m³)',     tp:'num'},
-    {k:'flow_mtr', l:'Flow Meter Reading (m³)',        tp:'num'},
-    {k:'drain',    l:'Actual Drain',                   tp:'num'},
+    {k:'cd_act',       l:'CD Actual (MT)',                 tp:'num'},
+    {k:'pm_act',       l:'PM Actual (MT)',                 tp:'num'},
+    {k:'gs_act',       l:'Grain Syrup Actual (KL)',        tp:'num'},
+    {k:'csl_act',      l:'CSL Actual (KL)',                tp:'num'},
+    {k:'poultry',      l:'Poultry Actual (cu.m)',          tp:'num'},
+    {k:'fw_act',       l:'Fresh Water Actual (m³)',        tp:'num'},
+    {k:'rs_act',       l:'Recycle Slurry Actual (m³)',     tp:'num'},
+    {k:'flow_mtr',     l:'Flow Meter Reading (m³)',        tp:'num'},
+    {k:'planned_drain',l:'Planned Drain (m³)',             tp:'num'},
+    {k:'drain',        l:'Actual Drain (m³)',              tp:'num'},
   ]},
   {t:'Lab Values (from Cal Sheets)',f:[
-    {k:'cd_ts',    l:'CD TS%',                         tp:'num'},
-    {k:'cd_vs',    l:'CD VS%',                         tp:'num'},
-    {k:'pm_ts',    l:'PM TS%',                         tp:'num'},
-    {k:'pm_vs',    l:'PM VS%',                         tp:'num'},
-    {k:'gs_ts',    l:'GS TS%',                         tp:'num'},
-    {k:'gs_vs',    l:'GS VS%',                         tp:'num'},
-    {k:'csl_ts',   l:'CSL TS%',                        tp:'num'},
-    {k:'csl_vs',   l:'CSL VS%',                        tp:'num'},
+    {k:'cd_ts',        l:'CD TS%',                         tp:'num'},
+    {k:'cd_vs',        l:'CD VS%',                         tp:'num'},
+    {k:'pm_ts',        l:'PM TS%',                         tp:'num'},
+    {k:'pm_vs',        l:'PM VS%',                         tp:'num'},
+    {k:'gs_ts',        l:'GS TS%',                         tp:'num'},
+    {k:'gs_vs',        l:'GS VS%',                         tp:'num'},
+    {k:'csl_ts',       l:'CSL TS%',                        tp:'num'},
+    {k:'csl_vs',       l:'CSL VS%',                        tp:'num'},
+    {k:'poultry_ts',   l:'Poultry TS% (lab)',              tp:'num'},
+    {k:'poultry_vs',   l:'Poultry VS% (lab)',              tp:'num'},
   ]},
   {t:'Slurry',f:[
     {k:'sl_ht',    l:'Slurry Height — dipstick (m)',   tp:'num'},
@@ -183,33 +187,37 @@ const SHEETS = [
 // ─── DIGESTER 2 ───────────────────────────────────────────
 {id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2', hasDate:true, sections:[
   {t:'Expected Feeding',f:[
-    {k:'cd_exp',   l:'CD Expected (MT)',              tp:'num'},
-    {k:'pm_exp',   l:'PM Expected (MT)',               tp:'num'},
-    {k:'gs_exp',   l:'Grain Syrup Expected (KL)',      tp:'num'},
-    {k:'csl_exp',  l:'CSL Expected (KL)',              tp:'num'},
-    {k:'fw_exp',   l:'Fresh Water Expected (m³)',      tp:'num'},
-    {k:'rs_exp',   l:'Recycle Slurry Expected (m³)',   tp:'num'},
+    {k:'cd_exp',       l:'CD Expected (MT)',              tp:'num'},
+    {k:'pm_exp',       l:'PM Expected (MT)',               tp:'num'},
+    {k:'poultry_exp',  l:'Poultry Expected (KL/day)',      tp:'num'},
+    {k:'gs_exp',       l:'Grain Syrup Expected (KL)',      tp:'num'},
+    {k:'csl_exp',      l:'CSL Expected (KL)',              tp:'num'},
+    {k:'fw_exp',       l:'Fresh Water Expected (m³)',      tp:'num'},
+    {k:'rs_exp',       l:'Recycle Slurry Expected (m³)',   tp:'num'},
   ]},
   {t:'Actual Feeding',f:[
-    {k:'cd_act',   l:'CD Actual (MT)',                 tp:'num'},
-    {k:'pm_act',   l:'PM Actual (MT)',                 tp:'num'},
-    {k:'gs_act',   l:'Grain Syrup Actual (KL)',        tp:'num'},
-    {k:'csl_act',  l:'CSL Actual (KL)',                tp:'num'},
-    {k:'poultry',  l:'Poultry Actual (cu.m)',          tp:'num'},
-    {k:'fw_act',   l:'Fresh Water Actual (m³)',        tp:'num'},
-    {k:'rs_act',   l:'Recycle Slurry Actual (m³)',     tp:'num'},
-    {k:'flow_mtr', l:'Flow Meter Reading (m³)',        tp:'num'},
-    {k:'drain',    l:'Actual Drain',                   tp:'num'},
+    {k:'cd_act',       l:'CD Actual (MT)',                 tp:'num'},
+    {k:'pm_act',       l:'PM Actual (MT)',                 tp:'num'},
+    {k:'gs_act',       l:'Grain Syrup Actual (KL)',        tp:'num'},
+    {k:'csl_act',      l:'CSL Actual (KL)',                tp:'num'},
+    {k:'poultry',      l:'Poultry Actual (cu.m)',          tp:'num'},
+    {k:'fw_act',       l:'Fresh Water Actual (m³)',        tp:'num'},
+    {k:'rs_act',       l:'Recycle Slurry Actual (m³)',     tp:'num'},
+    {k:'flow_mtr',     l:'Flow Meter Reading (m³)',        tp:'num'},
+    {k:'planned_drain',l:'Planned Drain (m³)',             tp:'num'},
+    {k:'drain',        l:'Actual Drain (m³)',              tp:'num'},
   ]},
   {t:'Lab Values (from Cal Sheets)',f:[
-    {k:'cd_ts',    l:'CD TS%',                         tp:'num'},
-    {k:'cd_vs',    l:'CD VS%',                         tp:'num'},
-    {k:'pm_ts',    l:'PM TS%',                         tp:'num'},
-    {k:'pm_vs',    l:'PM VS%',                         tp:'num'},
-    {k:'gs_ts',    l:'GS TS%',                         tp:'num'},
-    {k:'gs_vs',    l:'GS VS%',                         tp:'num'},
-    {k:'csl_ts',   l:'CSL TS%',                        tp:'num'},
-    {k:'csl_vs',   l:'CSL VS%',                        tp:'num'},
+    {k:'cd_ts',        l:'CD TS%',                         tp:'num'},
+    {k:'cd_vs',        l:'CD VS%',                         tp:'num'},
+    {k:'pm_ts',        l:'PM TS%',                         tp:'num'},
+    {k:'pm_vs',        l:'PM VS%',                         tp:'num'},
+    {k:'gs_ts',        l:'GS TS%',                         tp:'num'},
+    {k:'gs_vs',        l:'GS VS%',                         tp:'num'},
+    {k:'csl_ts',       l:'CSL TS%',                        tp:'num'},
+    {k:'csl_vs',       l:'CSL VS%',                        tp:'num'},
+    {k:'poultry_ts',   l:'Poultry TS% (lab)',              tp:'num'},
+    {k:'poultry_vs',   l:'Poultry VS% (lab)',              tp:'num'},
   ]},
   {t:'Slurry',f:[
     {k:'sl_ht',    l:'Slurry Height — dipstick (m)',   tp:'num'},
@@ -293,6 +301,9 @@ const SHEETS = [
     {k:'ideal_cbg', l:'Ideal CBG (kg)',          tp:'calc', fn:'ideal_cbg'},
     {k:'psa_eff',   l:'PSA Efficiency (%)',      tp:'calc', fn:'psa_eff_psa'},
   ]},
+  {t:'Remarks',f:[
+    {k:'psa_remark',l:'Remark / Notes',          tp:'txt'},
+  ]},
 ]},
 
 // ─── pH ───────────────────────────────────────────────────
@@ -343,18 +354,26 @@ const SHEETS = [
 // Sheet "Digester IA-PA"; data starts row 4
 {id:'IAPA',label:'IA-PA',group:'Operations',sheet:'Digester IA-PA', hasDate:true, dataStart:4, sections:[
   {t:'D1 Zones',f:[
-    {k:'d1_ia1',l:'D1 Zone 1 IA',tp:'num'},{k:'d1_pa1',l:'D1 Zone 1 PA',tp:'num'},
-    {k:'d1_ta1',l:'D1 Zone 1 TA',tp:'calc',fn:'d1_ta1'},
-    {k:'d1_ia2',l:'D1 Zone 2 IA',tp:'num'},{k:'d1_pa2',l:'D1 Zone 2 PA',tp:'num'},
-    {k:'d1_ta2',l:'D1 Zone 2 TA',tp:'calc',fn:'d1_ta2'},
+    {k:'d1_ia1',   l:'D1 Zone 1 IA',           tp:'num'},
+    {k:'d1_pa1',   l:'D1 Zone 1 PA',           tp:'num'},
+    {k:'d1_ta1',   l:'D1 Zone 1 TA',           tp:'calc',fn:'d1_ta1'},
+    {k:'d1_iapa1', l:'D1 Zone 1 IA/PA Ratio',  tp:'calc',fn:'d1_iapa1'},
+    {k:'d1_ia2',   l:'D1 Zone 2 IA',           tp:'num'},
+    {k:'d1_pa2',   l:'D1 Zone 2 PA',           tp:'num'},
+    {k:'d1_ta2',   l:'D1 Zone 2 TA',           tp:'calc',fn:'d1_ta2'},
+    {k:'d1_iapa2', l:'D1 Zone 2 IA/PA Ratio',  tp:'calc',fn:'d1_iapa2'},
   ]},
   {t:'D2 Zones',f:[
-    {k:'d2_ia1',l:'D2 Zone 1 IA',tp:'num'},{k:'d2_pa1',l:'D2 Zone 1 PA',tp:'num'},
-    {k:'d2_ta1',l:'D2 Zone 1 TA',tp:'calc',fn:'d2_ta1'},
-    {k:'d2_ia2',l:'D2 Zone 2 IA',tp:'num'},{k:'d2_pa2',l:'D2 Zone 2 PA',tp:'num'},
-    {k:'d2_ta2',l:'D2 Zone 2 TA',tp:'calc',fn:'d2_ta2'},
+    {k:'d2_ia1',   l:'D2 Zone 1 IA',           tp:'num'},
+    {k:'d2_pa1',   l:'D2 Zone 1 PA',           tp:'num'},
+    {k:'d2_ta1',   l:'D2 Zone 1 TA',           tp:'calc',fn:'d2_ta1'},
+    {k:'d2_iapa1', l:'D2 Zone 1 IA/PA Ratio',  tp:'calc',fn:'d2_iapa1'},
+    {k:'d2_ia2',   l:'D2 Zone 2 IA',           tp:'num'},
+    {k:'d2_pa2',   l:'D2 Zone 2 PA',           tp:'num'},
+    {k:'d2_ta2',   l:'D2 Zone 2 TA',           tp:'calc',fn:'d2_ta2'},
+    {k:'d2_iapa2', l:'D2 Zone 2 IA/PA Ratio',  tp:'calc',fn:'d2_iapa2'},
   ]},
-  {t:'Remarks',f:[{k:'remark',l:'Remark',tp:'txt'}]},
+  {t:'Remarks',f:[{k:'iapa_remark',l:'Remark',tp:'txt'}]},
 ]},
 
 // ─── FEEDSTOCK SUPPLY ─────────────────────────────────────
@@ -490,7 +509,7 @@ const SHEETS = [
 
 // ─── SALES DETAIL ─────────────────────────────────────────
 // One summary row per day — qty & rate per customer written side by side
-{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, sections:[
+{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, dataStart:5, sections:[
   {t:'CBG Dispatch — Qty (kg) & Rate (₹/kg)',f:[
     {k:'veer_qty',    l:'Veer Gas — Qty (kg)',     tp:'num'},
     {k:'veer_rate',   l:'Veer Gas — Rate (₹/kg)',  tp:'num'},
@@ -505,7 +524,7 @@ const SHEETS = [
 ]},
 
 // ─── MAINTENANCE ──────────────────────────────────────────
-{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, dataStart:4, sections:[
+{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, dataStart:5, sections:[
   {t:'Work Order',f:[
     {k:'unit',       l:'Unit / Area',       tp:'sel', opts:['D1','D2','PSA','Compressor','Utility','Civil','Electrical','Other']},
     {k:'equipment',  l:'Equipment',         tp:'txt'},
@@ -645,11 +664,15 @@ const FN = {
   ideal_cbg:    (v) => n(v.psa_hrs)*275,
   psa_eff_psa:  (v) => n(v.psa_hrs)>0 ? ((n(v.cbg_d1)+n(v.cbg_d2))/(n(v.psa_hrs)*PSA_BASIS))*100 : null,
 
-  // IA-PA
-  d1_ta1: (v) => n(v.d1_pa1)+n(v.d1_ia1),
-  d1_ta2: (v) => n(v.d1_pa2)+n(v.d1_ia2),
-  d2_ta1: (v) => n(v.d2_pa1)+n(v.d2_ia1),
-  d2_ta2: (v) => n(v.d2_pa2)+n(v.d2_ia2),
+  // IA-PA — TA = IA+PA; ratio = IA÷PA (written to sheet cols 5,9,13,17)
+  d1_ta1:    (v) => n(v.d1_pa1)+n(v.d1_ia1),
+  d1_ta2:    (v) => n(v.d1_pa2)+n(v.d1_ia2),
+  d2_ta1:    (v) => n(v.d2_pa1)+n(v.d2_ia1),
+  d2_ta2:    (v) => n(v.d2_pa2)+n(v.d2_ia2),
+  d1_iapa1:  (v) => n(v.d1_pa1)>0 ? n(v.d1_ia1)/n(v.d1_pa1) : null,
+  d1_iapa2:  (v) => n(v.d1_pa2)>0 ? n(v.d1_ia2)/n(v.d1_pa2) : null,
+  d2_iapa1:  (v) => n(v.d2_pa1)>0 ? n(v.d2_ia1)/n(v.d2_pa1) : null,
+  d2_iapa2:  (v) => n(v.d2_pa2)>0 ? n(v.d2_ia2)/n(v.d2_pa2) : null,
 
   // Feedstock Supply totals
   pw_total:    (v) => n(v.pw_lather)+n(v.pw_narwal)+n(v.pw_subhash)+n(v.pw_gk)+n(v.pw_dry)+n(v.pw_nazim),
@@ -772,18 +795,20 @@ const COLUMN_MAP = {
   D1: {
     // date written as Excel serial to col 1 by handleSave always
     // gs_exp col 14; no separate gs_act column in workbook (only one GS column)
-    cd_exp:2, pm_exp:3, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
+    cd_exp:2, pm_exp:3, poultry_exp:4, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
     cd_act:15, pm_act:16, poultry:17, csl_act:18,
-    fw_act:27, rs_act:28, flow_mtr:29, drain:31,
+    poultry_ts:21, poultry_vs:22,
+    fw_act:27, rs_act:28, flow_mtr:29, planned_drain:30, drain:31,
     rbg_psa:33, rbg_vent:34, cbg_prod:36, cbg_vent:37,
     sl_ht:48,
     // Calculated — written so historical data is self-contained
     cd_bpp:43, pm_bpp:44, gs_bpp:45, csl_bpp:46, wv:47, olr:49, psa_eff:50,
   },
   D2: {
-    cd_exp:2, pm_exp:3, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
+    cd_exp:2, pm_exp:3, poultry_exp:4, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
     cd_act:15, pm_act:16, poultry:17, csl_act:18,
-    fw_act:27, rs_act:28, flow_mtr:29, drain:31,
+    poultry_ts:21, poultry_vs:22,
+    fw_act:27, rs_act:28, flow_mtr:29, planned_drain:30, drain:31,
     rbg_psa:33, rbg_vent:34, cbg_prod:36, cbg_vent:37,
     sl_ht:49,
     cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, wv:48, olr:50, psa_eff:51,
@@ -800,6 +825,7 @@ const COLUMN_MAP = {
     ch4_pct:23, pcut_hrs:24, vent_hrs:25,
     casc1:26, casc2:27, cbg_storage:28,
     ideal_rbg:9, ideal_pur:10, psa_eff_psa:15,  // calc cols
+    psa_remark:29,
   },
   // PHTEMP split into PH (Digester pH) and TEMP (Digester Temp) — same column layout
   PH: {
@@ -818,12 +844,13 @@ const COLUMN_MAP = {
     d2_ts_3m:8, d2_vs_3m:9, d2_ts_6m:10,d2_vs_6m:11,d2_ts_sl:12,d2_vs_sl:13,
   },
   IAPA: {
-    // D1 3M: PA=2,IA=3,TA=4 | D1 6M: PA=6,IA=7,TA=8
-    // D2 3M: PA=10,IA=11,TA=12 | D2 6M: PA=14,IA=15,TA=16
-    d1_pa1:2,  d1_ia1:3,  d1_ta1:4,
-    d1_pa2:6,  d1_ia2:7,  d1_ta2:8,
-    d2_pa1:10, d2_ia1:11, d2_ta1:12,
-    d2_pa2:14, d2_ia2:15, d2_ta2:16,
+    // D1 Z1: PA=2,IA=3,TA=4,ratio=5 | D1 Z2: PA=6,IA=7,TA=8,ratio=9
+    // D2 Z1: PA=10,IA=11,TA=12,ratio=13 | D2 Z2: PA=14,IA=15,TA=16,ratio=17 | remark=18
+    d1_pa1:2,    d1_ia1:3,    d1_ta1:4,    d1_iapa1:5,
+    d1_pa2:6,    d1_ia2:7,    d1_ta2:8,    d1_iapa2:9,
+    d2_pa1:10,   d2_ia1:11,   d2_ta1:12,   d2_iapa1:13,
+    d2_pa2:14,   d2_ia2:15,   d2_ta2:16,   d2_iapa2:17,
+    iapa_remark:18,
   },
   FS: {
     // Feedstock Supply — date col 1; vendors in order
@@ -859,8 +886,8 @@ const COLUMN_MAP = {
     gail_qty:6, gail_rate:7, sps_qty:8, sps_rate:9,
   },
   MAINT: {
-    // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8
-    unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8,
+    // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8, Remarks=9
+    unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8, remarks:9,
   },
   REVCOST: {
     // transport_cost key matches SHEETS field key (renamed from 'transport')
@@ -985,8 +1012,10 @@ window.handleSave = async ()=>{
   if(!t){ toast('Sign in first',true); return }
   if(!cur){ toast('Select a sheet first',true); return }
 
-  // Cal sheets have no date picker (hasDate:false) — use today's date
-  const isCalSheet = ['PMCAL','GSCAL','CSLCAL','CDCAL'].includes(cur.id)
+  // Cal/append sheets: PMCAL/GSCAL/CSLCAL/CDCAL have no date picker (hasDate:false), use today().
+  // MANURE and MAINT have a date picker but also use append mode (Sl.No in col 1, Date in col 2).
+  const isCalSheet   = ['PMCAL','GSCAL','CSLCAL','CDCAL'].includes(cur.id)
+  const isAppendSheet = isCalSheet || ['MANURE','MAINT'].includes(cur.id)
   const ds = document.getElementById('dp')?.value || (isCalSheet ? today() : null)
   if(!ds||!isValidDate(ds)){ toast('Enter a valid date first',true); return }
 
@@ -996,7 +1025,7 @@ window.handleSave = async ()=>{
   try{
     const serial=toExcelSerial(ds)
     const colMap = COLUMN_MAP[cur.id] || {}
-    const dateCol = isCalSheet ? 2 : 1
+    const dateCol = isAppendSheet ? 2 : 1
     const dataStart = cur.dataStart || 3
 
     const rowData={}
@@ -1024,8 +1053,9 @@ window.handleSave = async ()=>{
 
     let rowNum
 
-    if(isCalSheet){
-      // Cal sheets: always append a new row — multiple samples per day are allowed
+    if(isAppendSheet){
+      // Append sheets: always add a new row — multiple entries per day are allowed.
+      // Date is in col B (2); col A (1) holds auto Sl.No / Sr.No.
       const d=await gGet(`/worksheets('${encodeURIComponent(sn)}')/range(address='B${dataStart}:B500')`)
       const rows=(d&&d.values)||[]
       let last=dataStart-1
