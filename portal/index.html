@@ -295,20 +295,29 @@ const SHEETS = [
   ]},
 ]},
 
-// ─── pH / TEMPERATURE ─────────────────────────────────────
-{id:'PHTEMP',label:'pH / Temperature',group:'Operations',sheet:'pH Temp', hasDate:true, sections:[
-  {t:'D1 Readings',f:[
+// ─── pH ───────────────────────────────────────────────────
+// Separate sheet "Digester pH"; data starts row 4
+{id:'PH',label:'Digester pH',group:'Operations',sheet:'Digester pH', hasDate:true, dataStart:4, sections:[
+  {t:'D1 pH',f:[
     {k:'d1_ph_3m',  l:'D1 pH @ 3M',    tp:'num'},
     {k:'d1_ph_6m',  l:'D1 pH @ 6M',    tp:'num'},
     {k:'d1_ph_sl',  l:'D1 pH @ SL',    tp:'num'},
+  ]},
+  {t:'D2 pH',f:[
+    {k:'d2_ph_3m',  l:'D2 pH @ 3M',    tp:'num'},
+    {k:'d2_ph_6m',  l:'D2 pH @ 6M',    tp:'num'},
+    {k:'d2_ph_sl',  l:'D2 pH @ SL',    tp:'num'},
+  ]},
+]},
+// ─── TEMPERATURE ──────────────────────────────────────────
+// Separate sheet "Digester Temp"; data starts row 4
+{id:'TEMP',label:'Digester Temp',group:'Operations',sheet:'Digester Temp', hasDate:true, dataStart:4, sections:[
+  {t:'D1 Temperature',f:[
     {k:'d1_tmp_3m', l:'D1 Temp @ 3M (°C)', tp:'num'},
     {k:'d1_tmp_6m', l:'D1 Temp @ 6M (°C)', tp:'num'},
     {k:'d1_tmp_sl', l:'D1 Temp @ SL (°C)', tp:'num'},
   ]},
-  {t:'D2 Readings',f:[
-    {k:'d2_ph_3m',  l:'D2 pH @ 3M',    tp:'num'},
-    {k:'d2_ph_6m',  l:'D2 pH @ 6M',    tp:'num'},
-    {k:'d2_ph_sl',  l:'D2 pH @ SL',    tp:'num'},
+  {t:'D2 Temperature',f:[
     {k:'d2_tmp_3m', l:'D2 Temp @ 3M (°C)', tp:'num'},
     {k:'d2_tmp_6m', l:'D2 Temp @ 6M (°C)', tp:'num'},
     {k:'d2_tmp_sl', l:'D2 Temp @ SL (°C)', tp:'num'},
@@ -316,7 +325,8 @@ const SHEETS = [
 ]},
 
 // ─── TS-VS ────────────────────────────────────────────────
-{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'TS-VS', hasDate:true, sections:[
+// Sheet "Digester TS-VS"; data starts row 4
+{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'Digester TS-VS', hasDate:true, dataStart:4, sections:[
   {t:'D1 TS% & VS%',f:[
     {k:'d1_ts_3m',  l:'D1 TS% @ 3M', tp:'num'},{k:'d1_vs_3m',  l:'D1 VS% @ 3M', tp:'num'},
     {k:'d1_ts_6m',  l:'D1 TS% @ 6M', tp:'num'},{k:'d1_vs_6m',  l:'D1 VS% @ 6M', tp:'num'},
@@ -330,7 +340,8 @@ const SHEETS = [
 ]},
 
 // ─── IA-PA ────────────────────────────────────────────────
-{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'IA-PA', hasDate:true, sections:[
+// Sheet "Digester IA-PA"; data starts row 4
+{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'Digester IA-PA', hasDate:true, dataStart:4, sections:[
   {t:'D1 Zones',f:[
     {k:'d1_ia1',l:'D1 Zone 1 IA',tp:'num'},{k:'d1_pa1',l:'D1 Zone 1 PA',tp:'num'},
     {k:'d1_ta1',l:'D1 Zone 1 TA',tp:'calc',fn:'d1_ta1'},
@@ -426,7 +437,7 @@ const SHEETS = [
 ]},
 
 // ─── CAL SHEETS ───────────────────────────────────────────
-{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal', hasDate:false, sections:[
+{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch', tp:'txt'},
     {k:'loc',    l:'Sample Location',     tp:'txt'},
@@ -435,7 +446,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
 ]},
-{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'CD Cal', hasDate:false, sections:[
+{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'Cow Dung Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch', tp:'txt'},
     {k:'loc',    l:'Sample Location',     tp:'txt'},
@@ -444,7 +455,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
 ]},
-{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'RGS Cal', hasDate:false, sections:[
+{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'Rice Grain Syrup Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch', tp:'txt'},
     {k:'loc',    l:'Sample Location',     tp:'txt'},
@@ -453,7 +464,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',             tp:'txt'},
   ]},
 ]},
-{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal', hasDate:false, sections:[
+{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch', tp:'txt'},
     {k:'loc',    l:'Sample Location',     tp:'txt'},
@@ -478,20 +489,23 @@ const SHEETS = [
 ]},
 
 // ─── SALES DETAIL ─────────────────────────────────────────
+// One summary row per day — qty & rate per customer written side by side
 {id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, sections:[
-  {t:'CBG Dispatch',f:[
-    {k:'inv_no',   l:'Invoice No.',         tp:'txt'},
-    {k:'customer', l:'Customer Name',       tp:'sel', opts:['Veer Gas','Adinath','GAIL','SPS','Other']},
-    {k:'qty_kg',   l:'Qty Dispatched (kg)', tp:'num'},
-    {k:'rate_kg',  l:'Rate (₹/kg)',         tp:'num'},
-    {k:'amount',   l:'Amount (₹)',          tp:'calc', fn:'sales_amount'},
-    {k:'vehicle',  l:'Vehicle No.',         tp:'txt'},
-    {k:'remarks',  l:'Remarks',             tp:'txt'},
+  {t:'CBG Dispatch — Qty (kg) & Rate (₹/kg)',f:[
+    {k:'veer_qty',    l:'Veer Gas — Qty (kg)',     tp:'num'},
+    {k:'veer_rate',   l:'Veer Gas — Rate (₹/kg)',  tp:'num'},
+    {k:'adinath_qty', l:'Adinath — Qty (kg)',      tp:'num'},
+    {k:'adinath_rate',l:'Adinath — Rate (₹/kg)',   tp:'num'},
+    {k:'gail_qty',    l:'GAIL — Qty (kg)',          tp:'num'},
+    {k:'gail_rate',   l:'GAIL — Rate (₹/kg)',       tp:'num'},
+    {k:'sps_qty',     l:'SPS — Qty (kg)',           tp:'num'},
+    {k:'sps_rate',    l:'SPS — Rate (₹/kg)',        tp:'num'},
+    {k:'tot_disp',    l:'Total Dispatched (kg)',    tp:'calc', fn:'sales_tot_disp'},
   ]},
 ]},
 
 // ─── MAINTENANCE ──────────────────────────────────────────
-{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, sections:[
+{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, dataStart:4, sections:[
   {t:'Work Order',f:[
     {k:'unit',       l:'Unit / Area',       tp:'sel', opts:['D1','D2','PSA','Compressor','Utility','Civil','Electrical','Other']},
     {k:'equipment',  l:'Equipment',         tp:'txt'},
@@ -507,21 +521,21 @@ const SHEETS = [
 // ─── FINANCE ──────────────────────────────────────────────
 {id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs', hasDate:true, sections:[
   {t:'Manual Entry',f:[
-    {k:'transport',  l:'Transportation Cost (₹)', tp:'num'},
+    {k:'transport_cost',l:'Transportation Cost (₹)', tp:'num'},
     {k:'remarks',    l:'Remarks',                 tp:'txt'},
   ]},
   {t:'Note',f:[
     {k:'_note', l:'All other revenue & cost columns are auto-derived from Sales Detail, Feed & Balance, and other sheets.', tp:'info'},
   ]},
 ]},
-{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs', hasDate:false, sections:[
+{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:null, hasDate:false, sections:[
   {t:'Monthly Entry',f:[
     {k:'month',     l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
     {k:'elec_bill', l:'Electricity Bill (₹)', tp:'num'},
     {k:'remarks',   l:'Remarks', tp:'txt'},
   ]},
 ]},
-{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:'EMI Tracker', hasDate:false, sections:[
+{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:null, hasDate:false, sections:[
   {t:'EMI Payment',f:[
     {k:'month',    l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
     {k:'year',     l:'Year',           tp:'num'},
@@ -659,9 +673,10 @@ const FN = {
   fb_csl_bal:  (v) => n(v.csl_rcv)-n(v.csl_fed),
   fb_cd_bal:   (v) => n(v.cd_rcv)-n(v.cd_fed),
 
-  // Sales
+  // Manure: amount = qty_mt × rate (calc, written to col 6)
   manure_amount:(v) => n(v.qty_mt)*n(v.rate),
-  sales_amount: (v) => n(v.qty_kg)*n(v.rate_kg),
+  // Sales Detail: total dispatched across customers
+  sales_tot_disp:(v) => n(v.veer_qty)+n(v.adinath_qty)+n(v.gail_qty)+n(v.sps_qty),
 }
 
 function runCalcs(sheet, inp, ds){
@@ -756,8 +771,9 @@ window.recompute=recompute
 const COLUMN_MAP = {
   D1: {
     // date written as Excel serial to col 1 by handleSave always
+    // gs_exp col 14; no separate gs_act column in workbook (only one GS column)
     cd_exp:2, pm_exp:3, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
-    cd_act:15, pm_act:16, gs_act:14, poultry:17, csl_act:18,
+    cd_act:15, pm_act:16, poultry:17, csl_act:18,
     fw_act:27, rs_act:28, flow_mtr:29, drain:31,
     rbg_psa:33, rbg_vent:34, cbg_prod:36, cbg_vent:37,
     sl_ht:48,
@@ -766,7 +782,7 @@ const COLUMN_MAP = {
   },
   D2: {
     cd_exp:2, pm_exp:3, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
-    cd_act:15, pm_act:16, gs_act:14, poultry:17, csl_act:18,
+    cd_act:15, pm_act:16, poultry:17, csl_act:18,
     fw_act:27, rs_act:28, flow_mtr:29, drain:31,
     rbg_psa:33, rbg_vent:34, cbg_prod:36, cbg_vent:37,
     sl_ht:49,
@@ -785,18 +801,21 @@ const COLUMN_MAP = {
     casc1:26, casc2:27, cbg_storage:28,
     ideal_rbg:9, ideal_pur:10, psa_eff_psa:15,  // calc cols
   },
-  PHTEMP: {
-    // D1: 3M=2, 6M=3, Sludge=4 | D2: 3M=5, 6M=6, Sludge=7
-    d1_3m_ph:2, d1_6m_ph:3, d1_sl_ph:4,
-    d1_3m_t:2,  d1_6m_t:3,  d1_sl_t:4,   // Temp sheet same layout
-    d2_3m_ph:5, d2_6m_ph:6, d2_sl_ph:7,
-    d2_3m_t:5,  d2_6m_t:6,  d2_sl_t:7,
+  // PHTEMP split into PH (Digester pH) and TEMP (Digester Temp) — same column layout
+  PH: {
+    // D1: 3M=2, 6M=3, SL=4 | D2: 3M=5, 6M=6, SL=7
+    d1_ph_3m:2, d1_ph_6m:3, d1_ph_sl:4,
+    d2_ph_3m:5, d2_ph_6m:6, d2_ph_sl:7,
+  },
+  TEMP: {
+    d1_tmp_3m:2, d1_tmp_6m:3, d1_tmp_sl:4,
+    d2_tmp_3m:5, d2_tmp_6m:6, d2_tmp_sl:7,
   },
   TSVS: {
-    // D1: TS3M=2,VS3M=3,TS6M=4,VS6M=5,TSSL=6,VSSL=7
+    // D1: TS3M=2,VS3M=3,TS6M=4,VS6M=5,TSSL=6,VSSL=7 — keys match SHEETS field names
     // D2: TS3M=8,VS3M=9,TS6M=10,VS6M=11,TSSL=12,VSSL=13
-    d1_ts3m:2, d1_vs3m:3, d1_ts6m:4, d1_vs6m:5, d1_tssl:6, d1_vssl:7,
-    d2_ts3m:8, d2_vs3m:9, d2_ts6m:10,d2_vs6m:11,d2_tssl:12,d2_vssl:13,
+    d1_ts_3m:2, d1_vs_3m:3, d1_ts_6m:4, d1_vs_6m:5, d1_ts_sl:6, d1_vs_sl:7,
+    d2_ts_3m:8, d2_vs_3m:9, d2_ts_6m:10,d2_vs_6m:11,d2_ts_sl:12,d2_vs_sl:13,
   },
   IAPA: {
     // D1 3M: PA=2,IA=3,TA=4 | D1 6M: PA=6,IA=7,TA=8
@@ -824,16 +843,18 @@ const COLUMN_MAP = {
     fb_pm_bal:15, fb_gs_bal:16, fb_csl_bal:17, fb_cd_bal:18,
   },
   // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6
-  PMCAL:  { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
-  GSCAL:  { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
-  CSLCAL: { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
-  CDCAL:  { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
+  // keys match SHEETS field names: sample, loc, ts_pct, vs_pct
+  PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6 },
+  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6 },
+  CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6 },
+  CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6 },
   MANURE: {
-    // Sl.No=1(auto), Date=2, Vehicle=3, FarmerName=4, Type=5, Amount=6
-    vehicle:3, farmer_name:4, manure_type:5, qty_mt:6,
+    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount=6
+    // vehicle plate has no column; amount is calc (qty_mt × rate) written to col 6
+    v_type:3, farmer:4, type:5, amount:6,
   },
   SALES: {
-    // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9; Total=10
+    // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9
     veer_qty:2, veer_rate:3, adinath_qty:4, adinath_rate:5,
     gail_qty:6, gail_rate:7, sps_qty:8, sps_rate:9,
   },
@@ -842,6 +863,7 @@ const COLUMN_MAP = {
     unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8,
   },
   REVCOST: {
+    // transport_cost key matches SHEETS field key (renamed from 'transport')
     cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7,
   },
   // FIXED and EMI use month columns, not daily date rows — handled separately
@@ -963,7 +985,9 @@ window.handleSave = async ()=>{
   if(!t){ toast('Sign in first',true); return }
   if(!cur){ toast('Select a sheet first',true); return }
 
-  const ds = document.getElementById('dp')?.value
+  // Cal sheets have no date picker (hasDate:false) — use today's date
+  const isCalSheet = ['PMCAL','GSCAL','CSLCAL','CDCAL'].includes(cur.id)
+  const ds = document.getElementById('dp')?.value || (isCalSheet ? today() : null)
   if(!ds||!isValidDate(ds)){ toast('Enter a valid date first',true); return }
 
   document.getElementById('saveBtn').disabled=true
@@ -972,10 +996,8 @@ window.handleSave = async ()=>{
   try{
     const serial=toExcelSerial(ds)
     const colMap = COLUMN_MAP[cur.id] || {}
-
-    // Cal sheets (multiple samples per day): date goes to col 2, Sr.No to col 1 auto-incremented
-    const isCalSheet = ['PMCAL','GSCAL','CSLCAL','CDCAL'].includes(cur.id)
     const dateCol = isCalSheet ? 2 : 1
+    const dataStart = cur.dataStart || 3
 
     const rowData={}
     rowData[dateCol] = serial  // always an Excel serial integer — no locale ambiguity
@@ -994,8 +1016,13 @@ window.handleSave = async ()=>{
     }))
 
     const sn=cur.sheet
-    const dateColLetter = isCalSheet ? 'B' : 'A'
-    let rowNum, dataStart=3
+
+    if(!sn){
+      toast('This sheet has no direct save path — use the master workbook directly.',true)
+      return
+    }
+
+    let rowNum
 
     if(isCalSheet){
       // Cal sheets: always append a new row — multiple samples per day are allowed
@@ -1004,8 +1031,7 @@ window.handleSave = async ()=>{
       let last=dataStart-1
       for(let i=rows.length-1;i>=0;i--){ if(rows[i][0]!==null&&rows[i][0]!==''){ last=dataStart+i; break } }
       // Auto-assign Sr.No in col A
-      const nextSr = last - dataStart + 2
-      rowData[1] = nextSr
+      rowData[1] = last - dataStart + 2
       rowNum = last+1
     } else {
       rowNum = await findRow(sn, serial, dataStart)
