@@ -263,10 +263,12 @@ const SHEETS = [
 // ─── PSA PRODUCTION ───────────────────────────────────────
 {id:'PSA',label:'PSA Production',group:'Operations',sheet:'PSA Production', hasDate:true, sections:[
   {t:'Running Hours',f:[
-    {k:'psa_hrs',   l:'PSA Running Hours',             tp:'num'},
-    {k:'comp_hrs',  l:'Compressor Hours',              tp:'num'},
-    {k:'pcut_hrs',  l:'Power Cut Duration (hrs)',      tp:'num'},
-    {k:'vent_hrs',  l:'Vent Time (hrs)',                tp:'num'},
+    {k:'psa_hrs',      l:'PSA Running Hours',                    tp:'num'},
+    {k:'psa_run_min',  l:'PSA Run Time (Min)',                   tp:'num'},
+    {k:'comp_hrs',     l:'Compressor Hours',                     tp:'num'},
+    {k:'psa_comp_diff',l:'PSA–Comp Difference (Min)',            tp:'calc', fn:'psa_comp_diff'},
+    {k:'pcut_hrs',     l:'Power Cut Duration (hrs)',             tp:'num'},
+    {k:'vent_hrs',     l:'Vent Time (hrs)',                      tp:'num'},
   ]},
   {t:'Raw Biogas',f:[
     {k:'rbg_d1',    l:'RBG Suction D1 (m³)',          tp:'num'},
@@ -656,6 +658,7 @@ const FN = {
   bpp_d2: (v,m) => (n(v.cd_act)*45*0.3) + (n(v.pm_act)*(PM_BPP[m]||95)*0.3),
 
   // PSA
+  psa_comp_diff:(v) => Math.round((n(v.psa_hrs)-n(v.comp_hrs))*60),  // diff in minutes
   rbg_total:    (v) => n(v.rbg_d1)+n(v.rbg_d2),
   cbg_tot:      (v) => n(v.cbg_d1)+n(v.cbg_d2),
   tot_disp:     (v) => n(v.veer_kg)+n(v.adinath_kg)+n(v.gail_kg)+n(v.sps_kg)+n(v.other1_kg)+n(v.other2_kg),
@@ -814,7 +817,7 @@ const COLUMN_MAP = {
     cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, wv:48, olr:50, psa_eff:51,
   },
   PSA: {
-    psa_hrs:2, comp_hrs:4, rbg_d1:6, rbg_d2:7,
+    psa_hrs:2, psa_run_min:3, comp_hrs:4, psa_comp_diff:5, rbg_d1:6, rbg_d2:7,
     rbg_total:8,   // calc
     cbg_d1:11, cbg_d2:12,
     cbg_tot:13,    // calc
