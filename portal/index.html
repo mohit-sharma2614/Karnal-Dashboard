@@ -549,6 +549,22 @@ function isValidDate(ds){
 
 // Format YYYY-MM-DD → DD-MM-YYYY for display
 function fmtDisplay(ds){ if(!ds) return ''; const [y,m,d]=ds.split('-'); return `${d}-${m}-${y}` }
+
+// Convert YYYY-MM-DD → Excel serial number (locale-proof integer for writing to Excel)
+// Excel epoch = Dec 30 1899 (Lotus leap-year bug offset)
+// Example: 2026-09-14 → 46088
+// Always use this when building the rowData date column — never send a date string.
+function toExcelSerial(ds){
+  const d     = new Date(ds + 'T00:00:00')
+  const epoch = new Date('1899-12-30T00:00:00')
+  return Math.round((d - epoch) / 86400000)
+}
+
+// Sanity-check: convert Excel serial back to YYYY-MM-DD (used in save verification)
+function fromExcelSerial(n){
+  const d = new Date(new Date('1899-12-30T00:00:00').getTime() + n * 86400000)
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
 function n(v){ return parseFloat(v)||0 }
 
 const FN = {
@@ -750,7 +766,14 @@ function onDateChange(){
     return
   }
   if(errEl) errEl.style.display='none'
-  if(dispEl) dispEl.textContent=fmtDisplay(ds)
+  const serial = toExcelSerial(ds)
+  const roundtrip = fromExcelSerial(serial)
+  // Round-trip check: serial → date must equal original to catch any conversion error
+  if(roundtrip !== ds){
+    if(errEl){ errEl.textContent=`Date conversion error (${roundtrip})`; errEl.style.display='inline' }
+    return
+  }
+  if(dispEl) dispEl.textContent=`${fmtDisplay(ds)}  ·  serial ${serial}`
   recompute()
 }
 window.onDateChange=onDateChange

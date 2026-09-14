@@ -205,6 +205,20 @@ function colLetter(n) {
   return s
 }
 
+// ── Convert YYYY-MM-DD → Excel serial number ─────────────────────────────────
+// Use this for every date value written to Excel via Graph API.
+// Excel serial is a plain integer — no locale parsing, no day/month swap possible.
+// The cell's DD-MM-YYYY number format controls display; the value itself is unambiguous.
+//
+// Excel epoch = Dec 30 1899 (accounts for Lotus 1-2-3 leap-year bug).
+// Example: 2026-09-14 → 46088
+export function toExcelSerial(dateStr) {
+  // dateStr must be "YYYY-MM-DD" — always use T00:00:00 to avoid UTC offset
+  const d     = new Date(dateStr + 'T00:00:00')
+  const epoch = new Date('1899-12-30T00:00:00')
+  return Math.round((d - epoch) / 86400000)
+}
+
 // ── Get signed-in user display name ──────────────────────────────────────────
 export function getCurrentUser() {
   const accounts = _msalInstance?.getAllAccounts() || []
