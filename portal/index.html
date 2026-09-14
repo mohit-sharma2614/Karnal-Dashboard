@@ -850,11 +850,13 @@ const COLUMN_MAP = {
 // AUTH & SHAREPOINT CONFIG
 // ══════════════════════════════════════════════════════════
 const CONFIG = {
-  clientId: 'cca66a21-2c5b-455c-bff6-009f2877849c',
-  tenantId: 'f7dda424-934f-4492-91d0-9eff9f6b4ff3',
-  scopes:   ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
-  driveId:  'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
-  fileId:   '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
+  clientId:     'cca66a21-2c5b-455c-bff6-009f2877849c',
+  tenantId:     'f7dda424-934f-4492-91d0-9eff9f6b4ff3',
+  scopes:       ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
+  driveId:      'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
+  fileId:       '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
+  // Only these accounts can save data. Add more emails here when needed.
+  allowedUsers: ['simply.mohitwa@gmail.com'],
 }
 
 let _msal = null, _token = null, _user = null
@@ -868,17 +870,35 @@ async function initMsal(){
   })
   await _msal.initialize()
   const result = await _msal.handleRedirectPromise()
-  if(result){ _token=result.accessToken; _user=result.account?.name||result.account?.username }
+  if(result){
+    if(!isAllowedAccount(result.account)){
+      await _msal.logoutRedirect({ account:result.account })
+      return
+    }
+    _token=result.accessToken
+    _user=result.account?.name||result.account?.username
+  }
   updateAuthUI()
+}
+
+function isAllowedAccount(account){
+  if(!account) return false
+  const email = (account.username||account.loginHint||'').toLowerCase()
+  return CONFIG.allowedUsers.some(u=>u.toLowerCase()===email)
 }
 
 async function getToken(){
   if(_token) return _token
   const accounts = _msal.getAllAccounts()
   if(!accounts.length) return null
+  const account = accounts[0]
+  if(!isAllowedAccount(account)){
+    await _msal.logoutRedirect({ account })
+    return null
+  }
   try{
-    const r = await _msal.acquireTokenSilent({ scopes:CONFIG.scopes, account:accounts[0] })
-    _token=r.accessToken; _user=accounts[0].name||accounts[0].username
+    const r = await _msal.acquireTokenSilent({ scopes:CONFIG.scopes, account })
+    _token=r.accessToken; _user=account.name||account.username
     return _token
   }catch{ await _msal.acquireTokenRedirect({ scopes:CONFIG.scopes }); return null }
 }
