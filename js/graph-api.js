@@ -44,24 +44,28 @@ async function getToken() {
   }
 }
 
+// ── Base URL for all workbook operations ──────────────────────────────────────
+// driveId + fileId is locale-proof and doesn't require URL-encoding file paths.
+function workbookUrl() {
+  return `https://graph.microsoft.com/v1.0/drives/${SHAREPOINT.driveId}/items/${SHAREPOINT.fileId}/workbook`
+}
+
 // ── Get Excel workbook session ID ─────────────────────────────────────────────
 async function getSessionId(token) {
-  const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
-    + `/drives/root:${SHAREPOINT.filePath}:/workbook/createSession`
-  const res = await fetch(url, {
+  const res = await fetch(`${workbookUrl()}/createSession`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({ persistChanges: true }),
   })
   const data = await res.json()
+  if (!data.id) throw new Error(`createSession failed: ${JSON.stringify(data)}`)
   return data.id
 }
 
 // ── Read a sheet range ────────────────────────────────────────────────────────
 export async function readRange(sheetName, range) {
   const token = await getToken()
-  const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
-    + `/drives/root:${SHAREPOINT.filePath}:/workbook/worksheets('${sheetName}')/range(address='${range}')`
+  const url = `${workbookUrl()}/worksheets('${encodeURIComponent(sheetName)}')/range(address='${range}')`
   const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
   return res.json()
 }
@@ -80,8 +84,7 @@ export async function writeRow(sheetName, rowNumber, rowData, maxCol = 60) {
   }
 
   const range = `A${rowNumber}:${colLetter(maxCol)}${rowNumber}`
-  const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
-    + `/drives/root:${SHAREPOINT.filePath}:/workbook/worksheets('${sheetName}')/range(address='${range}')`
+  const url = `${workbookUrl()}/worksheets('${encodeURIComponent(sheetName)}')/range(address='${range}')`
 
   await fetch(url, {
     method: 'PATCH',
@@ -99,8 +102,7 @@ export async function writeRow(sheetName, rowNumber, rowData, maxCol = 60) {
 export async function appendRow(sheetName, rowData, dataStartRow = 3, maxCol = 60) {
   const token = await getToken()
 
-  const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
-    + `/drives/root:${SHAREPOINT.filePath}:/workbook/worksheets('${sheetName}')/range(address='A${dataStartRow}:A500')`
+  const url = `${workbookUrl()}/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStartRow}:A500')`
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
   const data = await res.json()
   const rows = data.values || []
@@ -169,8 +171,7 @@ function toISODate(d) {
 // ── Find row number for a given date in a sheet ───────────────────────────────
 export async function findRowByDate(sheetName, dateStr, dataStartRow = 3) {
   const token = await getToken()
-  const url = `https://graph.microsoft.com/v1.0/sites/${encodeURIComponent(SHAREPOINT.siteUrl)}`
-    + `/drives/root:${SHAREPOINT.filePath}:/workbook/worksheets('${sheetName}')/range(address='A${dataStartRow}:A400')`
+  const url = `${workbookUrl()}/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStartRow}:A400')`
   const res  = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
   const data = await res.json()
   const rows = data.values || []

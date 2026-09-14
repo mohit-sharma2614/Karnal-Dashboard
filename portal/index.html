@@ -745,9 +745,282 @@ function recompute(){
 }
 window.recompute=recompute
 
-window.handleSave=()=>toast('Sign in first to save data to SharePoint',true)
-window.handleSignIn=()=>toast('Azure AD configuration coming soon — contact admin',true)
+// ══════════════════════════════════════════════════════════
+// COLUMN MAP — portal field key → Excel column number
+// Verified against master workbook header rows Sep 2026.
+// Only fields with a known column are listed; unmapped fields
+// (lab-only values used for in-browser calc) are not written.
+// Cal sheets use col B (2) for date; all others use col A (1).
+// ══════════════════════════════════════════════════════════
+const COLUMN_MAP = {
+  D1: {
+    // date written as Excel serial to col 1 by handleSave always
+    cd_exp:2, pm_exp:3, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
+    cd_act:15, pm_act:16, gs_act:14, poultry:17, csl_act:18,
+    fw_act:27, rs_act:28, flow_mtr:29, drain:31,
+    rbg_psa:33, rbg_vent:34, cbg_prod:36, cbg_vent:37,
+    sl_ht:48,
+    // Calculated — written so historical data is self-contained
+    cd_bpp:43, pm_bpp:44, gs_bpp:45, csl_bpp:46, wv:47, olr:49, psa_eff:50,
+  },
+  D2: {
+    cd_exp:2, pm_exp:3, gs_exp:14, csl_exp:5, fw_exp:8, rs_exp:9,
+    cd_act:15, pm_act:16, gs_act:14, poultry:17, csl_act:18,
+    fw_act:27, rs_act:28, flow_mtr:29, drain:31,
+    rbg_psa:33, rbg_vent:34, cbg_prod:36, cbg_vent:37,
+    sl_ht:49,
+    cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, wv:48, olr:50, psa_eff:51,
+  },
+  PSA: {
+    psa_hrs:2, comp_hrs:4, rbg_d1:6, rbg_d2:7,
+    rbg_total:8,   // calc
+    cbg_d1:11, cbg_d2:12,
+    cbg_tot:13,    // calc
+    cbg_den:14,
+    tot_disp:16,   // calc
+    veer_kg:17, adinath_kg:18, gail_kg:19, sps_kg:22,
+    other1_kg:20, other2_kg:21,
+    ch4_pct:23, pcut_hrs:24, vent_hrs:25,
+    casc1:26, casc2:27, cbg_storage:28,
+    ideal_rbg:9, ideal_pur:10, psa_eff_psa:15,  // calc cols
+  },
+  PHTEMP: {
+    // D1: 3M=2, 6M=3, Sludge=4 | D2: 3M=5, 6M=6, Sludge=7
+    d1_3m_ph:2, d1_6m_ph:3, d1_sl_ph:4,
+    d1_3m_t:2,  d1_6m_t:3,  d1_sl_t:4,   // Temp sheet same layout
+    d2_3m_ph:5, d2_6m_ph:6, d2_sl_ph:7,
+    d2_3m_t:5,  d2_6m_t:6,  d2_sl_t:7,
+  },
+  TSVS: {
+    // D1: TS3M=2,VS3M=3,TS6M=4,VS6M=5,TSSL=6,VSSL=7
+    // D2: TS3M=8,VS3M=9,TS6M=10,VS6M=11,TSSL=12,VSSL=13
+    d1_ts3m:2, d1_vs3m:3, d1_ts6m:4, d1_vs6m:5, d1_tssl:6, d1_vssl:7,
+    d2_ts3m:8, d2_vs3m:9, d2_ts6m:10,d2_vs6m:11,d2_tssl:12,d2_vssl:13,
+  },
+  IAPA: {
+    // D1 3M: PA=2,IA=3,TA=4 | D1 6M: PA=6,IA=7,TA=8
+    // D2 3M: PA=10,IA=11,TA=12 | D2 6M: PA=14,IA=15,TA=16
+    d1_pa1:2,  d1_ia1:3,  d1_ta1:4,
+    d1_pa2:6,  d1_ia2:7,  d1_ta2:8,
+    d2_pa1:10, d2_ia1:11, d2_ta1:12,
+    d2_pa2:14, d2_ia2:15, d2_ta2:16,
+  },
+  FS: {
+    // Feedstock Supply — date col 1; vendors in order
+    pw_lather:2, pw_narwal:3, pw_subhash:4, pw_gk:5, pw_dry:6, pw_nazim:7,
+    cd_gharaunda:8, cd_phoosgarh:9, cd_radhakrishna:10,
+    csl_sadasat:11, gs_rcv:12, csl_pantnagar:13, csl_virangam:14,
+    pm_sonipat:15, pm_malakpur:16, pm_ramala:17, pm_thana:18,
+    pm_tikuala:19, pm_shamli:20, pm_laknour:21, pm_balyan:22,
+    pm_singh:23, pm_naveen:24, pm_gs:25, pm_sbec:26,
+    pm_sahakumbri:27, pm_rathi:28, pm_devom:29, carlsberg:30,
+  },
+  FB: {
+    pm_rcv:2, gs_rcv:3, csl_rcv:4, cd_rcv:5,
+    pm_cost:6, gs_cost:7, csl_cost:8, cd_cost:9,
+    pm_fed:10, gs_fed:11, csl_fed:12, cd_fed:13,
+    fb_tot_fed:14,   // calc
+    fb_pm_bal:15, fb_gs_bal:16, fb_csl_bal:17, fb_cd_bal:18,
+  },
+  // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6
+  PMCAL:  { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
+  GSCAL:  { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
+  CSLCAL: { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
+  CDCAL:  { sample_name:3, location:4, ts_pct:5, vs_pct:6 },
+  MANURE: {
+    // Sl.No=1(auto), Date=2, Vehicle=3, FarmerName=4, Type=5, Amount=6
+    vehicle:3, farmer_name:4, manure_type:5, qty_mt:6,
+  },
+  SALES: {
+    // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9; Total=10
+    veer_qty:2, veer_rate:3, adinath_qty:4, adinath_rate:5,
+    gail_qty:6, gail_rate:7, sps_qty:8, sps_rate:9,
+  },
+  MAINT: {
+    // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8
+    unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8,
+  },
+  REVCOST: {
+    cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7,
+  },
+  // FIXED and EMI use month columns, not daily date rows — handled separately
+}
+
+// ══════════════════════════════════════════════════════════
+// AUTH & SHAREPOINT CONFIG
+// ══════════════════════════════════════════════════════════
+const CONFIG = {
+  clientId: 'cca66a21-2c5b-455c-bff6-009f2877849c',
+  tenantId: 'f7dda424-934f-4492-91d0-9eff9f6b4ff3',
+  scopes:   ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
+  driveId:  'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
+  fileId:   '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
+}
+
+let _msal = null, _token = null, _user = null
+
+async function initMsal(){
+  if(_msal) return
+  const { PublicClientApplication } = window.msal
+  _msal = new PublicClientApplication({
+    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: window.location.origin },
+    cache: { cacheLocation:'sessionStorage' },
+  })
+  await _msal.initialize()
+  const result = await _msal.handleRedirectPromise()
+  if(result){ _token=result.accessToken; _user=result.account?.name||result.account?.username }
+  updateAuthUI()
+}
+
+async function getToken(){
+  if(_token) return _token
+  const accounts = _msal.getAllAccounts()
+  if(!accounts.length) return null
+  try{
+    const r = await _msal.acquireTokenSilent({ scopes:CONFIG.scopes, account:accounts[0] })
+    _token=r.accessToken; _user=accounts[0].name||accounts[0].username
+    return _token
+  }catch{ await _msal.acquireTokenRedirect({ scopes:CONFIG.scopes }); return null }
+}
+
+function updateAuthUI(){
+  const accounts = _msal?.getAllAccounts()||[]
+  const signedIn = accounts.length>0
+  _user = accounts[0]?.name||accounts[0]?.username||_user
+  document.getElementById('saveBtn').disabled = !signedIn
+  document.getElementById('saveNote').textContent = signedIn ? `Signed in as ${_user}` : 'Sign in to enable saving'
+  document.getElementById('banner').style.display = signedIn ? 'none' : ''
+  document.querySelector('.hbtn').textContent = signedIn ? 'Sign Out' : 'Sign In'
+}
+
+window.handleSignIn = async ()=>{
+  await initMsal()
+  const accounts = _msal.getAllAccounts()
+  if(accounts.length){ _msal.logoutRedirect(); return }
+  await _msal.loginRedirect({ scopes:CONFIG.scopes })
+}
+
+// ── Graph API helpers ─────────────────────────────────────────────────────────
+function wbUrl(){ return `https://graph.microsoft.com/v1.0/drives/${CONFIG.driveId}/items/${CONFIG.fileId}/workbook` }
+
+async function gGet(path){
+  const t=await getToken(); if(!t) return null
+  const r=await fetch(wbUrl()+path,{headers:{Authorization:`Bearer ${t}`}})
+  return r.json()
+}
+async function gPatch(path,body,sessionId){
+  const t=await getToken(); if(!t) return null
+  const hdrs={Authorization:`Bearer ${t}`,'Content-Type':'application/json'}
+  if(sessionId) hdrs['workbook-session-id']=sessionId
+  const r=await fetch(wbUrl()+path,{method:'PATCH',headers:hdrs,body:JSON.stringify(body)})
+  return r.json()
+}
+async function getSession(){
+  const t=await getToken(); if(!t) return null
+  const r=await fetch(wbUrl()+'/createSession',{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({persistChanges:true})})
+  const d=await r.json(); return d.id
+}
+async function findRow(sheetName, serial, dataStart=3){
+  const d=await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStart}:A400')`)
+  const rows=(d&&d.values)||[]
+  for(let i=0;i<rows.length;i++){
+    const v=rows[i][0]; if(v===null||v===undefined) continue
+    // Match by serial number (our write format) or by parsed date
+    if(typeof v==='number'&&v===serial) return dataStart+i
+    if(typeof v==='string'){
+      const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso){ const s=toExcelSerial(iso[1]); if(s===serial) return dataStart+i }
+      const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy){ const s=toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`); if(s===serial) return dataStart+i }
+    }
+  }
+  return null
+}
+
+// ── Save current sheet to SharePoint ─────────────────────────────────────────
+window.handleSave = async ()=>{
+  await initMsal()
+  const t=await getToken()
+  if(!t){ toast('Sign in first',true); return }
+  if(!cur){ toast('Select a sheet first',true); return }
+
+  const ds = document.getElementById('dp')?.value
+  if(!ds||!isValidDate(ds)){ toast('Enter a valid date first',true); return }
+
+  document.getElementById('saveBtn').disabled=true
+  document.getElementById('saveNote').textContent='Saving…'
+
+  try{
+    const serial=toExcelSerial(ds)
+    const colMap = COLUMN_MAP[cur.id] || {}
+
+    // Cal sheets (multiple samples per day): date goes to col 2, Sr.No to col 1 auto-incremented
+    const isCalSheet = ['PMCAL','GSCAL','CSLCAL','CDCAL'].includes(cur.id)
+    const dateCol = isCalSheet ? 2 : 1
+
+    const rowData={}
+    rowData[dateCol] = serial  // always an Excel serial integer — no locale ambiguity
+
+    // Collect all fields with a known column mapping
+    cur.sections.forEach(sec=>sec.f.forEach(f=>{
+      const col = colMap[f.k]
+      if(!col) return  // no column mapping — browser-calc only, not written
+      if(f.tp==='calc'){
+        const el=document.getElementById('f_'+f.k)
+        if(el&&el.value!=='') rowData[col]=parseFloat(el.value)
+      } else {
+        const v=inp[f.k]
+        if(v!==null&&v!==undefined&&v!=='') rowData[col]=v
+      }
+    }))
+
+    const sn=cur.sheet
+    const dateColLetter = isCalSheet ? 'B' : 'A'
+    let rowNum, dataStart=3
+
+    if(isCalSheet){
+      // Cal sheets: always append a new row — multiple samples per day are allowed
+      const d=await gGet(`/worksheets('${encodeURIComponent(sn)}')/range(address='B${dataStart}:B500')`)
+      const rows=(d&&d.values)||[]
+      let last=dataStart-1
+      for(let i=rows.length-1;i>=0;i--){ if(rows[i][0]!==null&&rows[i][0]!==''){ last=dataStart+i; break } }
+      // Auto-assign Sr.No in col A
+      const nextSr = last - dataStart + 2
+      rowData[1] = nextSr
+      rowNum = last+1
+    } else {
+      rowNum = await findRow(sn, serial, dataStart)
+      if(!rowNum){
+        // New date — append after last filled row
+        const d=await gGet(`/worksheets('${encodeURIComponent(sn)}')/range(address='A${dataStart}:A400')`)
+        const rows=(d&&d.values)||[]
+        let last=dataStart-1
+        for(let i=rows.length-1;i>=0;i--){ if(rows[i][0]!==null&&rows[i][0]!==''){ last=dataStart+i; break } }
+        rowNum=last+1
+      }
+    }
+
+    const maxCol=Math.max(...Object.keys(rowData).map(Number),60)
+    const values=Array(maxCol).fill(null)
+    for(const[c,v]of Object.entries(rowData)) values[parseInt(c)-1]=v??null
+
+    const sessionId=await getSession()
+    const range=`A${rowNum}:${colLetter(maxCol)}${rowNum}`
+    const res=await gPatch(`/worksheets('${encodeURIComponent(sn)}')/range(address='${range}')`,{values:[values]},sessionId)
+
+    if(res&&res.error){ toast(`Save failed: ${res.error.message}`,true) }
+    else { toast(`Saved to ${sn} row ${rowNum} (${fmtDisplay(ds)})`) }
+  }catch(e){ toast(`Error: ${e.message}`,true) }
+  finally{
+    document.getElementById('saveBtn').disabled=false
+    document.getElementById('saveNote').textContent=`Signed in as ${_user}`
+  }
+}
+
+function colLetter(n){ let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)} return s }
+
 document.getElementById('saveBtn').onclick=window.handleSave
+
+// Init MSAL on page load (handles redirect token silently)
+initMsal().catch(e=>console.warn('MSAL init:',e))
 
 function today(){
   // Use local date components — toISOString() returns UTC which can be 1 day behind in IST at midnight

@@ -1,14 +1,15 @@
 // ─── MICROSOFT GRAPH API AUTH CONFIG ─────────────────────────────────────────
-// Fill in your values after Azure AD app registration.
-// Client ID and Tenant ID are safe to commit (not secrets).
+// Client ID and Tenant ID are safe to commit (not secrets — no client secret used).
+// Delegated auth only: user signs in, tokens are scoped to their own permissions.
 
 export const AUTH = {
-  clientId:   'YOUR_CLIENT_ID_HERE',    // Azure AD → App registrations → Application (client) ID
-  tenantId:   'YOUR_TENANT_ID_HERE',    // Azure AD → App registrations → Directory (tenant) ID
-  scopes:     ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
+  clientId: 'cca66a21-2c5b-455c-bff6-009f2877849c',
+  tenantId: 'f7dda424-934f-4492-91d0-9eff9f6b4ff3',
+  scopes:   ['Files.ReadWrite.All', 'Sites.ReadWrite.All', 'User.Read'],
 }
 
 export const SHAREPOINT = {
-  siteUrl:    'https://YOUR_ORG.sharepoint.com/sites/YOUR_SITE',
-  filePath:   '/sites/YOUR_SITE/Shared Documents/MASTER_WORKBOOK/CBG_Karnal_D1_D2_2026.xlsx',
+  // driveId + fileId — more reliable than file path (no URL encoding issues)
+  driveId: 'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
+  fileId:  '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
 }
