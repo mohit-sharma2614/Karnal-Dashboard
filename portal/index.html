@@ -460,38 +460,50 @@ const SHEETS = [
 // ─── CAL SHEETS ───────────────────────────────────────────
 {id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
-    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
-    {k:'loc',    l:'Sample Location',     tp:'txt'},
-    {k:'ts_pct', l:'TS%',                 tp:'num'},
-    {k:'vs_pct', l:'VS%',                 tp:'num'},
-    {k:'remarks',l:'Remarks',             tp:'txt'},
+    {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
+    {k:'loc',    l:'Sample Location',       tp:'txt'},
+    {k:'ts_pct', l:'TS%',                   tp:'num'},
+    {k:'vs_pct', l:'VS%',                   tp:'num'},
+    {k:'qty',    l:'Qty Fed Today (MT)',     tp:'fetch'},
+    {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
+    {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 {id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'Cow Dung Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
-    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
-    {k:'loc',    l:'Sample Location',     tp:'txt'},
-    {k:'ts_pct', l:'TS%',                 tp:'num'},
-    {k:'vs_pct', l:'VS%',                 tp:'num'},
-    {k:'remarks',l:'Remarks',             tp:'txt'},
+    {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
+    {k:'loc',    l:'Sample Location',       tp:'txt'},
+    {k:'ts_pct', l:'TS%',                   tp:'num'},
+    {k:'vs_pct', l:'VS%',                   tp:'num'},
+    {k:'qty',    l:'Qty Fed Today (MT)',     tp:'fetch'},
+    {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
+    {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 {id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'Rice Grain Syrup Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
-    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
-    {k:'loc',    l:'Sample Location',     tp:'txt'},
-    {k:'ts_pct', l:'TS%',                 tp:'num'},
-    {k:'vs_pct', l:'VS%',                 tp:'num'},
-    {k:'remarks',l:'Remarks',             tp:'txt'},
+    {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
+    {k:'loc',    l:'Sample Location',       tp:'txt'},
+    {k:'ts_pct', l:'TS%',                   tp:'num'},
+    {k:'vs_pct', l:'VS%',                   tp:'num'},
+    {k:'qty',    l:'Qty Fed Today (KL)',     tp:'fetch'},
+    {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
+    {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 {id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:false, sections:[
   {t:'Sample Details',f:[
-    {k:'sample', l:'Sample Name / Batch', tp:'txt'},
-    {k:'loc',    l:'Sample Location',     tp:'txt'},
-    {k:'ts_pct', l:'TS%',                 tp:'num'},
-    {k:'vs_pct', l:'VS%',                 tp:'num'},
-    {k:'remarks',l:'Remarks',             tp:'txt'},
+    {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
+    {k:'loc',    l:'Sample Location',       tp:'txt'},
+    {k:'ts_pct', l:'TS%',                   tp:'num'},
+    {k:'vs_pct', l:'VS%',                   tp:'num'},
+    {k:'qty',    l:'Qty Fed Today (KL)',     tp:'fetch'},
+    {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
+    {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 
@@ -658,6 +670,11 @@ const FN = {
   bpp_d2: (v,m) => (n(v.cd_act)*45*0.3) + (n(v.pm_act)*(PM_BPP[m]||95)*0.3),
 
   // PSA
+  // Cal sheets: TS Tonnes = Qty Fed × (TS%/100); VS Tonnes = TS Tonnes × VS_factor
+  // VS% stored as fraction (<2) for PMCAL, as percentage for CDCAL/GSCAL/CSLCAL
+  cal_ts_t: (v) => n(v.qty)>0 && n(v.ts_pct)>0 ? Math.round(n(v.qty)*(n(v.ts_pct)/100)*10000)/10000 : null,
+  cal_vs_t: (v) => { const vs=n(v.vs_pct); const f=vs<2?vs:vs/100; return n(v.ts_t)>0 ? Math.round(n(v.ts_t)*f*10000)/10000 : null },
+
   psa_comp_diff:(v) => Math.round((n(v.psa_hrs)-n(v.comp_hrs))*60),  // diff in minutes
   rbg_total:    (v) => n(v.rbg_d1)+n(v.rbg_d2),
   cbg_tot:      (v) => n(v.cbg_d1)+n(v.cbg_d2),
@@ -754,7 +771,7 @@ function loadSheet(id){
         html+=`<div class="info-row">${f.l}</div>`; return
       }
       html+=`<div class="fg"><label>${f.l}${f.tp==='calc'?'<span class="atag">auto</span>':''}</label>`
-      if(f.tp==='calc'){
+      if(f.tp==='calc'||f.tp==='fetch'){
         html+=`<input type="text" id="f_${f.k}" class="cf" readonly placeholder="—" tabindex="-1"/>`
       } else if(f.tp==='sel'){
         html+=`<select id="f_${f.k}" onchange="onInp('${f.k}',this.value)"><option value="">— select —</option>`
@@ -771,6 +788,7 @@ function loadSheet(id){
   })
   document.getElementById('main').innerHTML=html
   recompute()
+  if(CAL_QTY_COLS[id]) fetchCalQty(id)
 }
 
 function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
@@ -872,12 +890,12 @@ const COLUMN_MAP = {
     fb_tot_fed:14,   // calc
     fb_pm_bal:15, fb_gs_bal:16, fb_csl_bal:17, fb_cd_bal:18,
   },
-  // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6
-  // keys match SHEETS field names: sample, loc, ts_pct, vs_pct
-  PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6 },
-  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6 },
-  CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6 },
-  CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6 },
+  // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6, TS Tonnes=7(formula), VS Tonnes=8(formula), Remarks=9
+  // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
+  PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   MANURE: {
     // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount=6
     // vehicle plate has no column; amount is calc (qty_mt × rate) written to col 6
@@ -993,6 +1011,40 @@ async function getSession(){
   const r=await fetch(wbUrl()+'/createSession',{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({persistChanges:true})})
   const d=await r.json(); return d.id
 }
+// Cal sheet → D1 col, D2 col to read actual qty fed today
+const CAL_QTY_COLS = {
+  PMCAL:  { col: 16, label:'pm_act'  },  // Press mud actual (MT/day)
+  CDCAL:  { col: 15, label:'cd_act'  },  // Cow dung actual (MT/day)
+  CSLCAL: { col: 18, label:'csl_act' },  // CSL actual (KL/day)
+  GSCAL:  { col: 14, label:'gs_exp'  },  // Grain Syrup expected (KL/day) — no actual col in workbook
+}
+
+async function fetchCalQty(sheetId){
+  const cfg = CAL_QTY_COLS[sheetId]; if(!cfg) return
+  const serial = toExcelSerial(today())
+  // Find today's row in D1 and D2 (col A = date serial, dataStart=3)
+  const [rowD1, rowD2] = await Promise.all([
+    findRow('D1', serial, 3),
+    findRow('D2', serial, 3),
+  ])
+  let total = 0
+  const reads = []
+  if(rowD1) reads.push(gGet(`/worksheets('D1')/range(address='${colLetter(cfg.col)}${rowD1}')`))
+  if(rowD2) reads.push(gGet(`/worksheets('D2')/range(address='${colLetter(cfg.col)}${rowD2}')`))
+  const results = await Promise.all(reads)
+  results.forEach(r=>{ if(r&&r.values&&r.values[0]&&r.values[0][0]) total+=parseFloat(r.values[0][0])||0 })
+  if(total>0){
+    inp.qty = Math.round(total*1000)/1000
+    const el = document.getElementById('f_qty')
+    if(el) el.value = inp.qty
+    recompute()
+  }
+}
+
+function colLetter(n){
+  let s=''; while(n>0){ s=String.fromCharCode(64+(n%26||26))+s; n=Math.floor((n-1)/26) } return s
+}
+
 async function findRow(sheetName, serial, dataStart=3){
   const d=await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStart}:A400')`)
   const rows=(d&&d.values)||[]
