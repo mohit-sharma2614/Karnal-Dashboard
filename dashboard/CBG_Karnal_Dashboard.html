@@ -565,31 +565,89 @@ function renderProduction() {
 function renderFeedstock() {
   const {d1,d2} = _D
   const rows = [
-    { name:'Cow Dung',   unit:'MT',  exp: n(d1[1])+n(d2[1]),  act: n(d1[14])+n(d2[14]) },
-    { name:'Pressmud',   unit:'MT',  exp: n(d1[2])+n(d2[2]),  act: n(d1[15])+n(d2[15]) },
-    { name:'CSL',        unit:'KL',  exp: n(d1[4])+n(d2[4]),  act: n(d1[17])+n(d2[17]) },
-    { name:'Grain Syrup',unit:'KL',  exp: n(d1[6])+n(d2[6]),  act: n(d1[22])+n(d2[22]) },
-    { name:'Spent Grain',unit:'tons',exp: n(d1[5])+n(d2[5]),  act: n(d1[23])+n(d2[23]) },
+    { name:'Cow Dung',    unit:'MT',
+      exp1:n(d1[1]),  exp2:n(d2[1]),
+      act1:n(d1[14]), act2:n(d2[14]) },
+    { name:'Pressmud',    unit:'MT',
+      exp1:n(d1[2]),  exp2:n(d2[2]),
+      act1:n(d1[15]), act2:n(d2[15]) },
+    { name:'CSL',         unit:'KL',
+      exp1:n(d1[4]),  exp2:n(d2[4]),
+      act1:n(d1[17]), act2:n(d2[17]) },
+    { name:'Grain Syrup', unit:'KL',
+      exp1:n(d1[6]),  exp2:n(d2[6]),
+      act1:n(d1[22]), act2:n(d2[22]) },
+    { name:'Spent Grain', unit:'tons',
+      exp1:n(d1[5]),  exp2:n(d2[5]),
+      act1:n(d1[23]), act2:n(d2[23]) },
   ]
 
-  let tbl = `<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    <th>Feedstock</th><th>Unit</th><th>Expected (D1+D2)</th><th>Actual (D1+D2)</th><th>vs Target</th>
-  </tr></thead><tbody>`
+  function actCls(act, exp) {
+    if (!exp) return ''
+    const pct = act/exp*100
+    return pct>=90?'tg':pct>=70?'ta':'tr'
+  }
+  function pctStr(act, exp) {
+    return exp>0 ? Math.round(act/exp*100)+'%' : '—'
+  }
+
+  let tbl = `<div class="tbl-wrap"><table class="tbl"><thead>
+    <tr>
+      <th rowspan="2" style="text-align:left">Feedstock</th>
+      <th rowspan="2">Unit</th>
+      <th colspan="2" style="border-bottom:1px solid var(--bdr);background:#EEF6FF;color:#1D6FA8">Digester 1</th>
+      <th colspan="2" style="border-bottom:1px solid var(--bdr);background:#F0FBF4;color:#1A7A4A">Digester 2</th>
+      <th colspan="2" style="border-bottom:1px solid var(--bdr)">Combined</th>
+    </tr>
+    <tr>
+      <th style="background:#EEF6FF;color:#1D6FA8">Expected</th>
+      <th style="background:#EEF6FF;color:#1D6FA8">Actual</th>
+      <th style="background:#F0FBF4;color:#1A7A4A">Expected</th>
+      <th style="background:#F0FBF4;color:#1A7A4A">Actual</th>
+      <th>Total Actual</th>
+      <th>vs Target</th>
+    </tr>
+  </thead><tbody>`
+
   rows.forEach(r => {
-    const pct = r.exp > 0 ? Math.round(r.act/r.exp*100) : null
-    const cls = pct===null?'':(pct>=90?'tg':pct>=70?'ta':'tr')
-    tbl += `<tr><td>${r.name}</td><td>${r.unit}</td><td>${fmt(r.exp,1)}</td><td class="${cls}">${fmt(r.act,1)}</td><td class="${cls}">${pct!==null?pct+'%':'—'}</td></tr>`
+    const totAct = r.act1+r.act2, totExp = r.exp1+r.exp2
+    const cls1 = actCls(r.act1,r.exp1), cls2 = actCls(r.act2,r.exp2)
+    const clsTot = actCls(totAct,totExp)
+    tbl += `<tr>
+      <td>${r.name}</td>
+      <td>${r.unit}</td>
+      <td style="color:#1D6FA8">${fmt(r.exp1,1)}</td>
+      <td class="${cls1}">${fmt(r.act1,1)}</td>
+      <td style="color:#1A7A4A">${fmt(r.exp2,1)}</td>
+      <td class="${cls2}">${fmt(r.act2,1)}</td>
+      <td class="${clsTot}" style="font-weight:700">${fmt(totAct,1)}</td>
+      <td class="${clsTot}">${pctStr(totAct,totExp)}</td>
+    </tr>`
   })
   tbl += `</tbody></table></div>`
 
   document.getElementById('tab-feedstock').innerHTML = tbl + `
-    <div class="sub-sec">BPP Contribution — Digester 1 (m³)</div>
-    <div class="kpi-grid">
-      ${kpi('CD',  fmt(n(d1[42])), 'm³','c')}
-      ${kpi('PM',  fmt(n(d1[43])), 'm³','c')}
-      ${kpi('GS',  fmt(n(d1[44])), 'm³','c')}
-      ${kpi('CSL', fmt(n(d1[45])), 'm³','c')}
-      ${kpi('SG',  fmt(n(d1[46])), 'm³','c')}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px">
+      <div>
+        <div class="sub-sec">BPP Contribution — Digester 1 (m³)</div>
+        <div class="kpi-grid">
+          ${kpi('CD',  fmt(n(d1[42])), 'm³','b')}
+          ${kpi('PM',  fmt(n(d1[43])), 'm³','b')}
+          ${kpi('GS',  fmt(n(d1[44])), 'm³','b')}
+          ${kpi('CSL', fmt(n(d1[45])), 'm³','b')}
+          ${kpi('SG',  fmt(n(d1[46])), 'm³','b')}
+        </div>
+      </div>
+      <div>
+        <div class="sub-sec">BPP Contribution — Digester 2 (m³)</div>
+        <div class="kpi-grid">
+          ${kpi('CD',  fmt(n(d2[43])), 'm³','g')}
+          ${kpi('PM',  fmt(n(d2[44])), 'm³','g')}
+          ${kpi('GS',  fmt(n(d2[45])), 'm³','g')}
+          ${kpi('CSL', fmt(n(d2[46])), 'm³','g')}
+          ${kpi('SG',  fmt(n(d2[47])), 'm³','g')}
+        </div>
+      </div>
     </div>`
 }
 
