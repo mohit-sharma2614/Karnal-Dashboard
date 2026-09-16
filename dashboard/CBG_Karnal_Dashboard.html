@@ -580,12 +580,12 @@ function renderProduction() {
 // ── FEEDSTOCK TAB ─────────────────────────────────────────
 function renderFeedstock() {
   const {d1,d2} = _D
-  const d = _selDig === 'D1' ? d1 : _selDig === 'D2' ? d2 : null
-  const label = _selDig || 'Combined'
-  const accentClr = _selDig === 'D1' ? '#1D6FA8' : _selDig === 'D2' ? '#1A7A4A' : '#555'
+  // Default to D1 when nothing selected; D2 only when explicitly chosen
+  const d = _selDig === 'D2' ? d2 : d1
+  const accentClr = _selDig === 'D2' ? '#1A7A4A' : '#1D6FA8'
 
-  function e(idx)  { return d ? n(d[idx]) : n(d1[idx]) + n(d2[idx]) }
-  function a(i1,i2){ return d ? n(d[i1])  : n(d1[i1])  + n(d2[i2])  }
+  function e(idx)  { return n(d[idx]) }
+  function a(i1,i2){ return n(d[i1]) }
 
   const rows = [
     { name:'Cow Dung',    unit:'MT',   exp:e(1),  act:a(14,14) },
@@ -604,9 +604,8 @@ function renderFeedstock() {
     return exp>0 ? Math.round(act/exp*100)+'%' : '—'
   }
 
-  const hintHtml = _selDig
-    ? `<div style="font-size:12px;color:${accentClr};margin-bottom:8px;font-weight:600">Showing: ${_selDig === 'D1' ? 'Digester 1' : 'Digester 2'} — click the card again to deselect</div>`
-    : `<div style="font-size:12px;color:#888;margin-bottom:8px">Click a Digester 1 or Digester 2 submission card above to filter this view</div>`
+  const digLabel = _selDig === 'D2' ? 'Digester 2' : 'Digester 1'
+  const hintHtml = `<div style="font-size:12px;color:${accentClr};margin-bottom:8px;font-weight:600">Showing: ${digLabel} — click a submission card to switch digester</div>`
 
   let tbl = `<div class="tbl-wrap"><table class="tbl"><thead>
     <tr>
@@ -630,37 +629,20 @@ function renderFeedstock() {
   })
   tbl += `</tbody></table></div>`
 
-  // BPP section: show selected digester or both
-  const bppHtml = _selDig === 'D1' ? `
-    <div class="sub-sec" style="color:#1D6FA8">BPP Contribution — Digester 1 (m³)</div>
+  // BPP section: show active digester (D1 by default, D2 when selected)
+  const isD2 = _selDig === 'D2'
+  const bppColor = isD2 ? '#1A7A4A' : '#1D6FA8'
+  const bppVariant = isD2 ? 'g' : 'b'
+  const bppD = isD2 ? d2 : d1
+  const bppIdxCD = isD2 ? 43 : 42
+  const bppHtml = `
+    <div class="sub-sec" style="color:${bppColor}">BPP Contribution — ${digLabel} (m³)</div>
     <div class="kpi-grid">
-      ${kpi('CD',fmt(n(d1[42])),'m³','b')} ${kpi('PM',fmt(n(d1[43])),'m³','b')}
-      ${kpi('GS',fmt(n(d1[44])),'m³','b')} ${kpi('CSL',fmt(n(d1[45])),'m³','b')}
-      ${kpi('SG',fmt(n(d1[46])),'m³','b')}
-    </div>` : _selDig === 'D2' ? `
-    <div class="sub-sec" style="color:#1A7A4A">BPP Contribution — Digester 2 (m³)</div>
-    <div class="kpi-grid">
-      ${kpi('CD',fmt(n(d2[43])),'m³','g')} ${kpi('PM',fmt(n(d2[44])),'m³','g')}
-      ${kpi('GS',fmt(n(d2[45])),'m³','g')} ${kpi('CSL',fmt(n(d2[46])),'m³','g')}
-      ${kpi('SG',fmt(n(d2[47])),'m³','g')}
-    </div>` : `
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-      <div>
-        <div class="sub-sec">BPP Contribution — Digester 1 (m³)</div>
-        <div class="kpi-grid">
-          ${kpi('CD',fmt(n(d1[42])),'m³','b')} ${kpi('PM',fmt(n(d1[43])),'m³','b')}
-          ${kpi('GS',fmt(n(d1[44])),'m³','b')} ${kpi('CSL',fmt(n(d1[45])),'m³','b')}
-          ${kpi('SG',fmt(n(d1[46])),'m³','b')}
-        </div>
-      </div>
-      <div>
-        <div class="sub-sec">BPP Contribution — Digester 2 (m³)</div>
-        <div class="kpi-grid">
-          ${kpi('CD',fmt(n(d2[43])),'m³','g')} ${kpi('PM',fmt(n(d2[44])),'m³','g')}
-          ${kpi('GS',fmt(n(d2[45])),'m³','g')} ${kpi('CSL',fmt(n(d2[46])),'m³','g')}
-          ${kpi('SG',fmt(n(d2[47])),'m³','g')}
-        </div>
-      </div>
+      ${kpi('CD',fmt(n(bppD[bppIdxCD])),'m³',bppVariant)}
+      ${kpi('PM',fmt(n(bppD[bppIdxCD+1])),'m³',bppVariant)}
+      ${kpi('GS',fmt(n(bppD[bppIdxCD+2])),'m³',bppVariant)}
+      ${kpi('CSL',fmt(n(bppD[bppIdxCD+3])),'m³',bppVariant)}
+      ${kpi('SG',fmt(n(bppD[bppIdxCD+4])),'m³',bppVariant)}
     </div>`
 
   document.getElementById('tab-feedstock').innerHTML = hintHtml + tbl + `<div style="margin-top:16px">${bppHtml}</div>`
