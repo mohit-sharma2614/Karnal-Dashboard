@@ -1164,7 +1164,11 @@ window.handleSave = async ()=>{
       const results=await Promise.all(writes)
       const err=results.find(r=>r&&r.error)
       if(err) toast(`Save failed: ${err.error.message}`,true)
-      else toast(`Saved electricity for ${mName}: ₹${bill.toLocaleString('en-IN')} → Monthly Fixed Costs + Daily Revenue & Costs updated`)
+      else {
+        toast(`Saved electricity for ${mName}: ₹${bill.toLocaleString('en-IN')} → Monthly Fixed Costs + Daily Revenue & Costs updated`)
+        const mSerial=toExcelSerial(`2026-${String(mIdx+1).padStart(2,'0')}-01`)
+        appendSubmissionLog(mSerial, cur.label, sessionId).catch(()=>{})
+      }
       return
     }
     // ── End special FIXED ────────────────────────────────────────────────────
@@ -1202,12 +1206,31 @@ window.handleSave = async ()=>{
     const res=await gPatch(`/worksheets('${encodeURIComponent(sn)}')/range(address='${range}')`,{values:[values]},sessionId)
 
     if(res&&res.error){ toast(`Save failed: ${res.error.message}`,true) }
-    else { toast(`Saved to ${sn} row ${rowNum} (${fmtDisplay(ds)})`) }
+    else {
+      toast(`Saved to ${sn} row ${rowNum} (${fmtDisplay(ds)})`)
+      appendSubmissionLog(serial, cur.label, sessionId).catch(()=>{})
+    }
   }catch(e){ toast(`Error: ${e.message}`,true) }
   finally{
     document.getElementById('saveBtn').disabled=false
     document.getElementById('saveNote').textContent=`Signed in as ${_user}`
   }
+}
+
+async function appendSubmissionLog(dateSerial, sheetLabel, sessionId){
+  const SL = encodeURIComponent('Submission Log')
+  const d  = await gGet(`/worksheets('${SL}')/range(address='A3:A202')`)
+  const rows = (d&&d.values)||[]
+  let last = 2
+  for(let i=rows.length-1;i>=0;i--){ if(rows[i][0]!==null&&rows[i][0]!==''){ last=3+i; break } }
+  const rowNum = last+1
+  const accounts = _msal?.getAllAccounts()||[]
+  const email = accounts[0]?.username||''
+  const name  = _user||email
+  const now   = new Date()
+  const ts    = `${now.getDate().toString().padStart(2,'0')}-${now.toLocaleString('en',{month:'short'})}-${now.getFullYear()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`
+  await gPatch(`/worksheets('${SL}')/range(address='A${rowNum}:E${rowNum}')`,
+    {values:[[dateSerial, sheetLabel, name, email, ts]]}, sessionId)
 }
 
 function colLetter(n){ let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)} return s }
