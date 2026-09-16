@@ -577,11 +577,11 @@ const SHEETS = [
     {k:'_note', l:'All other revenue & cost columns are auto-derived from Sales Detail, Feed & Balance, and other sheets.', tp:'info'},
   ]},
 ]},
-{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:null, hasDate:false, sections:[
-  {t:'Monthly Entry',f:[
-    {k:'month',     l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
-    {k:'elec_bill', l:'Electricity Bill (₹)', tp:'num'},
-    {k:'remarks',   l:'Remarks', tp:'txt'},
+{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs', hasDate:false, sections:[
+  {t:'Monthly Electricity Entry',f:[
+    {k:'month',      l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
+    {k:'elec_kvah',  l:'Electricity Usage (kVAh)', tp:'num'},
+    {k:'elec_bill',  l:'Electricity Bill (₹)',     tp:'num'},
   ]},
 ]},
 {id:'EMI',label:'EMI Tracker',group:'Finance',sheet:null, hasDate:false, sections:[
@@ -1136,6 +1136,38 @@ window.handleSave = async ()=>{
       toast('This sheet has no direct save path — use the master workbook directly.',true)
       return
     }
+
+    // ── Special: Monthly Fixed Costs (month-column structure) ────────────────
+    if(cur.id==='FIXED'){
+      const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December']
+      const DAYS=[31,28,31,30,31,30,31,31,30,31,30,31]  // 2026 non-leap
+      const CUM=[0,31,59,90,120,151,181,212,243,273,304,334]
+      const mName=inp['month']; const mIdx=MONTHS.indexOf(mName)
+      if(mIdx<0){ toast('Select a month first',true); return }
+      const kvah=parseFloat(inp['elec_kvah'])||null
+      const bill=parseFloat(inp['elec_bill'])||null
+      if(!bill){ toast('Enter Electricity Bill (₹) at minimum',true); return }
+      const monthCol=mIdx+4   // D=Jan=col4, E=Feb=col5 ... O=Dec=col15
+      const colL=colLetter(monthCol)
+      const sessionId=await getSession()
+      const FC=encodeURIComponent('Monthly Fixed Costs')
+      const RC=encodeURIComponent('Daily Revenue & Costs')
+      const writes=[]
+      if(kvah) writes.push(gPatch(`/worksheets('${FC}')/range(address='${colL}4')`,{values:[[kvah]]},sessionId))
+      writes.push(gPatch(`/worksheets('${FC}')/range(address='${colL}5')`,{values:[[bill]]},sessionId))
+      // Update Daily Revenue & Costs col H (electricity per day) for all days in month
+      const days=DAYS[mIdx]
+      const firstRow=4+CUM[mIdx]
+      const daily=Math.round((bill/days)*100)/100
+      const vals=Array.from({length:days},()=>[daily])
+      writes.push(gPatch(`/worksheets('${RC}')/range(address='H${firstRow}:H${firstRow+days-1}')`,{values:vals},sessionId))
+      const results=await Promise.all(writes)
+      const err=results.find(r=>r&&r.error)
+      if(err) toast(`Save failed: ${err.error.message}`,true)
+      else toast(`Saved electricity for ${mName}: ₹${bill.toLocaleString('en-IN')} → Monthly Fixed Costs + Daily Revenue & Costs updated`)
+      return
+    }
+    // ── End special FIXED ────────────────────────────────────────────────────
 
     let rowNum
 
