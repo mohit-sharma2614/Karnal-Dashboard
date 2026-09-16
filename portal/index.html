@@ -867,17 +867,15 @@ const COLUMN_MAP = {
     cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, sg_bpp:48, wv:49, olr:51, psa_eff:52,
   },
   PSA: {
-    psa_hrs:2, psa_run_min:3, comp_hrs:4, psa_comp_diff:5, rbg_d1:6, rbg_d2:7,
-    rbg_total:8,   // calc
-    cbg_d1:11, cbg_d2:12,
-    cbg_tot:13,    // calc
+    // C9=Avg RBG Flow, C10=Total Purified Gas, C15=Avg Flow — all auto in Excel; do NOT overwrite with portal calcs
+    psa_hrs:2, psa_run_min:3, comp_hrs:4, psa_comp_diff:5,
+    rbg_d1:6, rbg_d2:7, rbg_total:8,
+    cbg_d1:11, cbg_d2:12, cbg_tot:13,
     cbg_den:14,
-    tot_disp:16,   // calc
-    veer_kg:17, adinath_kg:18, gail_kg:19, sps_kg:22,
-    other1_kg:20, other2_kg:21,
+    tot_disp:16,
+    veer_kg:17, adinath_kg:18, gail_kg:19, other1_kg:20, other2_kg:21, sps_kg:22,
     ch4_pct:23, pcut_hrs:24, vent_hrs:25,
     casc1:26, casc2:27, cbg_storage:28,
-    ideal_rbg:9, ideal_pur:10, psa_eff_psa:15,  // calc cols
     psa_remark:29,
   },
   // PHTEMP split into PH (Digester pH) and TEMP (Digester Temp) — same column layout
@@ -928,12 +926,12 @@ const COLUMN_MAP = {
   // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
   PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8 },           // no remarks/qty cols in Excel
   CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8 },           // no remarks/qty cols in Excel
   MANURE: {
-    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Qty=6, Rate=7, Amount=8, Remarks=9
-    v_type:3, farmer:4, type:5, qty_mt:6, rate:7, amount:8, remarks:9,
+    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6 — no qty/rate/remarks cols in Excel
+    v_type:3, farmer:4, type:5, amount:6,
   },
   SALES: {
     // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9
