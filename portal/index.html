@@ -419,10 +419,11 @@ const SHEETS = [
     {k:'pm_gs',        l:'G.S.',                tp:'num'},
     {k:'pm_sbec',      l:'SBEC',               tp:'num'},
     {k:'pm_sahakumbri',l:'Sahakumbri',          tp:'num'},
-    {k:'pm_rathi',     l:'Rathi (Kathuali Sugar Mill)',  tp:'num'},
-    {k:'pm_unn',       l:'Unn Sugar Mill',      tp:'num'},
-    {k:'pm_devom',     l:'Devom',               tp:'num'},
-    {k:'pm_total',     l:'Total PM (kg)',        tp:'calc', fn:'pm_total'},
+    {k:'pm_rathi',          l:'Rathi (Kathuali Sugar Mill)',  tp:'num'},
+    {k:'pm_unn',            l:'Unn Sugar Mill',              tp:'num'},
+    {k:'pm_devom',          l:'Devom',                       tp:'num'},
+    {k:'pm_vaibhav_ramala', l:'Vaibhav Ramala (PM)',         tp:'num'},
+    {k:'pm_total',          l:'Total PM (kg)',                tp:'calc', fn:'pm_total'},
   ]},
   {t:'Other Feedstock',f:[
     {k:'carlsberg',    l:'Carlsberg (kg)',       tp:'num'},
@@ -730,13 +731,14 @@ const FN = {
   csl_total:   (v) => n(v.csl_sadasat)+n(v.csl_pantnagar)+n(v.csl_virangam),
   pm_total:    (v) => n(v.pm_sonipat)+n(v.pm_malakpur)+n(v.pm_ramala)+n(v.pm_thana)+n(v.pm_tikuala)+
                       n(v.pm_shamli)+n(v.pm_laknour)+n(v.pm_balyan)+n(v.pm_singh)+n(v.pm_naveen)+
-                      n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom),
+                      n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom)+
+                      n(v.pm_vaibhav_ramala),
   fs_total_day:(v) => n(v.pw_lather)+n(v.pw_narwal)+n(v.pw_subhash)+n(v.pw_gk)+n(v.pw_dry)+n(v.pw_nazim)+
                       n(v.cd_gharaunda)+n(v.cd_phoosgarh)+n(v.cd_radhakrishna)+
                       n(v.pm_sonipat)+n(v.pm_malakpur)+n(v.pm_ramala)+n(v.pm_thana)+n(v.pm_tikuala)+
                       n(v.pm_shamli)+n(v.pm_laknour)+n(v.pm_balyan)+n(v.pm_singh)+n(v.pm_naveen)+
                       n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom)+
-                      n(v.carlsberg)+n(v.gs_rcv),
+                      n(v.pm_vaibhav_ramala)+n(v.carlsberg)+n(v.gs_rcv),
 
   // Feed & Balance
   fb_tot_cost: (v) => n(v.pm_cost)+n(v.gs_cost)+n(v.csl_cost)+n(v.cd_cost),
@@ -911,7 +913,9 @@ const COLUMN_MAP = {
     pm_sonipat:15, pm_malakpur:16, pm_ramala:17, pm_thana:18,
     pm_tikuala:19, pm_shamli:20, pm_laknour:21, pm_balyan:22,
     pm_singh:23, pm_naveen:24, pm_gs:25, pm_sbec:26,
-    pm_sahakumbri:27, pm_rathi:28, pm_devom:29, carlsberg:30,
+    pm_sahakumbri:27, pm_rathi:28, pm_devom:29, pm_vaibhav_ramala:30,
+    pm_unn:31,
+    carlsberg:32,
   },
   FB: {
     pm_rcv:2, gs_rcv:3, csl_rcv:4, cd_rcv:5,
