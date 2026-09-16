@@ -444,15 +444,15 @@ async function loadData() {
 
   try {
     const [rowD1, rowD2, rowPSA, rowRC] = await Promise.all([
-      findRow('Digester 1',           serial, 3),
-      findRow('Digester 2',           serial, 3),
+      findRow('D1',                   serial, 3),
+      findRow('D2',                   serial, 3),
       findRow('PSA Production',       serial, 3),
       findRow('Daily Revenue & Costs',serial, 4),
     ])
 
     const [d1, d2, psa, rc, subRaw, fixRaw] = await Promise.all([
-      rowD1  ? readRow('Digester 1',            rowD1,  52) : Promise.resolve([]),
-      rowD2  ? readRow('Digester 2',            rowD2,  52) : Promise.resolve([]),
+      rowD1  ? readRow('D1',                    rowD1,  52) : Promise.resolve([]),
+      rowD2  ? readRow('D2',                    rowD2,  52) : Promise.resolve([]),
       rowPSA ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
       rowRC  ? readRow('Daily Revenue & Costs', rowRC,   8) : Promise.resolve([]),
       gGet(`/worksheets('${encodeURIComponent('Submission Log')}')/range(address='A3:E202')`),
