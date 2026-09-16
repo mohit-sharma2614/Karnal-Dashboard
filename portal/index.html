@@ -927,13 +927,13 @@ const COLUMN_MAP = {
   // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6, TS Tonnes=7(formula), VS Tonnes=8(formula), Remarks=9
   // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
   PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
+  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   MANURE: {
-    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount=6
-    // vehicle plate has no column; amount is calc (qty_mt × rate) written to col 6
-    v_type:3, farmer:4, type:5, amount:6,
+    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Qty=6, Rate=7, Amount=8, Remarks=9
+    v_type:3, farmer:4, type:5, qty_mt:6, rate:7, amount:8, remarks:9,
   },
   SALES: {
     // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9
@@ -1074,10 +1074,6 @@ async function fetchCalQty(sheetId){
     if(el) el.value = inp.qty
     recompute()
   }
-}
-
-function colLetter(n){
-  let s=''; while(n>0){ s=String.fromCharCode(64+(n%26||26))+s; n=Math.floor((n-1)/26) } return s
 }
 
 async function findRow(sheetName, serial, dataStart=3){
