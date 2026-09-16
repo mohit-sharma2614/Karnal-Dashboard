@@ -4,165 +4,234 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>CBG Karnal Operations</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/msal.js/2.38.3/msal-browser.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@2.38.3/lib/msal-browser.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0B0F14;--bg2:#111820;--bg3:#1A2334;--bg4:#22304A;
-  --acc:#2A9D8F;--acc2:#1d7068;
-  --amber:#E9C46A;--green:#52B788;--red:#E76F51;--blue:#457B9D;--cyan:#48CAE4;
-  --text:#E8EDF2;--text2:#8FA3B1;--text3:#4A6070;
-  --bdr:#1E2D3D;--bdr2:#2A3F55;
-  font-family:'Segoe UI',system-ui,sans-serif;font-size:13px;color:var(--text);
+  --bg:#F4F7FB;
+  --surf:#FFFFFF;
+  --surf2:#EEF2F8;
+  --acc:#0D7A6F;
+  --acc-hover:#0A6260;
+  --acc-light:#E6F4F2;
+  --text:#1B2B3A;
+  --text2:#5A7185;
+  --text3:#93A8B8;
+  --bdr:#D4DDE6;
+  --bdr2:#C2CDD8;
+  --green:#1A7A4A;
+  --green-bg:#E8F5EE;
+  --amber:#B45309;
+  --amber-bg:#FEF3E2;
+  --red:#C0392B;
+  --red-bg:#FDECEA;
+  --blue:#1D6FA8;
+  --shadow:0 1px 3px rgba(27,43,58,.08),0 1px 2px rgba(27,43,58,.04);
+  --shadow-md:0 4px 12px rgba(27,43,58,.1);
+  font-family:'DM Sans',system-ui,sans-serif;font-size:13px;color:var(--text);
 }
 body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 
-/* ── LOGIN ─────────────────────────────────────────────── */
-#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:20px;padding:40px 20px}
-.login-badge{background:var(--acc);color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:4px;letter-spacing:.5px}
-.login-title{font-size:24px;font-weight:700;color:var(--text)}
-.login-plant{font-size:12px;color:var(--text3)}
-.login-box{background:var(--bg2);border:1px solid var(--bdr2);border-radius:12px;padding:28px 32px;width:340px;display:flex;flex-direction:column;gap:14px}
-.login-box h2{font-size:15px;font-weight:700;color:var(--text)}
-.login-box p{font-size:12px;color:var(--text2);line-height:1.6}
-.btn-ms{background:var(--acc);border:none;border-radius:7px;color:#fff;font-size:13px;font-weight:600;padding:11px;cursor:pointer;width:100%}
-.btn-ms:hover{background:var(--acc2)}
+/* ── LOGIN ──────────────────────────────────────────────── */
+#loginScreen{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:24px;padding:40px 20px}
+.login-logo{display:flex;align-items:center;gap:12px}
+.login-badge{background:var(--acc);color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:5px;letter-spacing:.8px}
+.login-name{font-size:22px;font-weight:700;color:var(--text)}
+.login-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.login-card{background:var(--surf);border:1px solid var(--bdr);border-radius:14px;padding:32px 36px;width:360px;display:flex;flex-direction:column;gap:18px;box-shadow:var(--shadow-md)}
+.login-card h2{font-size:16px;font-weight:700;color:var(--text)}
+.login-card p{font-size:12.5px;color:var(--text2);line-height:1.65}
+.login-divider{height:1px;background:var(--bdr)}
+.btn-ms{
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  background:var(--acc);border:none;border-radius:8px;color:#fff;
+  font-family:inherit;font-size:13.5px;font-weight:600;padding:12px 16px;
+  cursor:pointer;width:100%;transition:background .15s,transform .1s
+}
+.btn-ms:hover:not(:disabled){background:var(--acc-hover)}
+.btn-ms:active{transform:scale(.98)}
+.btn-ms:disabled{opacity:.6;cursor:not-allowed}
+.ms-icon{width:18px;height:18px;flex-shrink:0}
+.login-note{font-size:11px;color:var(--text3);text-align:center}
 
-/* ── LOADING ────────────────────────────────────────────── */
-#loadingScreen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:12px}
-.spinner{width:32px;height:32px;border:3px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
+/* ── LOADING ─────────────────────────────────────────────── */
+#loadingScreen{display:none;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:14px}
+.spinner{width:28px;height:28px;border:2.5px solid var(--bdr2);border-top-color:var(--acc);border-radius:50%;animation:spin .75s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{font-size:12px;color:var(--text3)}
 
-/* ── HEADER ─────────────────────────────────────────────── */
+/* ── HEADER ──────────────────────────────────────────────── */
 #dashScreen{display:none;flex-direction:column;flex:1}
-.hdr{background:var(--bg2);border-bottom:1px solid var(--bdr);padding:0 20px;height:48px;display:flex;align-items:center;gap:12px;flex-shrink:0}
-.hdr-brand{font-size:13px;font-weight:700;color:var(--acc)}
+.hdr{background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 24px;height:52px;display:flex;align-items:center;gap:14px;flex-shrink:0;box-shadow:0 1px 3px rgba(27,43,58,.06)}
+.hdr-badge{background:var(--acc);color:#fff;font-size:10px;font-weight:700;padding:4px 8px;border-radius:4px;letter-spacing:.8px}
+.hdr-brand{font-size:14px;font-weight:700;color:var(--text)}
 .hdr-plant{font-size:11px;color:var(--text3)}
-.hdr-sep{width:1px;height:20px;background:var(--bdr2)}
+.hdr-sep{width:1px;height:22px;background:var(--bdr)}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.hdr-date-label{font-size:11px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.7px}
-#datePicker{background:var(--bg3);border:1px solid var(--bdr2);border-radius:6px;padding:5px 10px;color:var(--text);font-size:12px;cursor:pointer}
-.hdr-user{font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--bdr2);padding:5px 10px;border-radius:6px;display:flex;align-items:center;gap:6px}
-.user-dot{width:6px;height:6px;border-radius:50%;background:var(--green);flex-shrink:0}
-.btn-signout{font-size:11px;background:none;border:1px solid var(--bdr);border-radius:6px;padding:5px 10px;cursor:pointer;color:var(--text2)}
+.date-wrap{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:7px;padding:6px 11px}
+.date-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+#datePicker{background:none;border:none;color:var(--text);font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;outline:none}
+.hdr-refresh{background:none;border:1px solid var(--bdr);border-radius:7px;padding:6px 10px;color:var(--text2);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
+.hdr-refresh:hover{background:var(--surf2);color:var(--text)}
+.refresh-time{font-size:10px;color:var(--text3)}
+.user-chip{display:flex;align-items:center;gap:7px;background:var(--acc-light);border:1px solid rgba(13,122,111,.2);border-radius:7px;padding:6px 11px}
+.user-dot{width:7px;height:7px;border-radius:50%;background:var(--green);flex-shrink:0}
+.user-name{font-size:12px;font-weight:500;color:var(--acc)}
+.btn-signout{font-family:inherit;font-size:11.5px;background:none;border:1px solid var(--bdr);border-radius:7px;padding:6px 11px;cursor:pointer;color:var(--text2);transition:border-color .15s,color .15s}
 .btn-signout:hover{border-color:var(--red);color:var(--red)}
-.hdr-refresh{font-size:11px;color:var(--text3);cursor:pointer;background:none;border:none;display:flex;align-items:center;gap:4px}
-.hdr-refresh:hover{color:var(--text2)}
 
 /* ── CONTENT ─────────────────────────────────────────────── */
-.content{padding:16px 20px;display:flex;flex-direction:column;gap:14px;flex:1;overflow-y:auto}
+.content{padding:20px 24px;display:flex;flex-direction:column;gap:18px;flex:1;overflow-y:auto}
 
 /* ── ALERT STRIP ─────────────────────────────────────────── */
-#alertStrip{background:rgba(231,111,81,.1);border:1px solid rgba(231,111,81,.3);border-radius:6px;padding:9px 14px;font-size:12px;color:var(--red);display:none;align-items:center;gap:8px}
-.alert-dot{width:6px;height:6px;border-radius:50%;background:var(--red);flex-shrink:0}
+#alertStrip{background:var(--amber-bg);border:1px solid rgba(180,83,9,.2);border-radius:8px;padding:10px 14px;font-size:12.5px;color:var(--amber);display:none;align-items:center;gap:8px}
+#alertStrip b{font-weight:600}
 
-/* ── SECTION LABEL ───────────────────────────────────────── */
-.sec-label{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px}
+/* ── SECTION HEADER ──────────────────────────────────────── */
+.sec-hdr{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+.sec-title{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.9px}
+.sec-date{font-size:11px;color:var(--text3)}
 
 /* ── SUBMISSION GRID ─────────────────────────────────────── */
-.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
-.sub-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;border-left:3px solid var(--bdr2)}
-.sub-card.ok{border-left-color:var(--green)}
-.sub-card.warn{border-left-color:var(--amber)}
-.sub-sheet{font-size:11px;font-weight:600;color:var(--text)}
-.sub-by{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
+.sub-card{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;border-left:3px solid var(--bdr);box-shadow:var(--shadow)}
+.sub-card.done{border-left-color:var(--green);background:#FAFFFE}
+.sub-card.pend{border-left-color:var(--bdr2)}
+.sub-sheet{font-size:11.5px;font-weight:600;color:var(--text);line-height:1.3}
+.sub-by{font-size:10.5px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sub-time{font-size:10px;color:var(--text3)}
-.sub-status{font-size:10px;font-weight:600;color:var(--text3)}
+.sub-status{font-size:10px;font-weight:600;margin-top:3px}
 .sub-status.ok{color:var(--green)}
-.sub-status.warn{color:var(--amber)}
+.sub-status.pend{color:var(--text3)}
 
 /* ── DIVIDER ─────────────────────────────────────────────── */
 .divider{height:1px;background:var(--bdr)}
 
 /* ── TABS ────────────────────────────────────────────────── */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--bdr);margin-bottom:14px}
-.tab-btn{padding:7px 16px;font-size:12px;font-weight:600;color:var(--text3);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
-.tab-btn.on{color:var(--acc);border-bottom-color:var(--acc)}
-.tab-btn:hover:not(.on){color:var(--text2)}
+.tabs{display:flex;gap:2px;border-bottom:2px solid var(--bdr);margin-bottom:16px}
+.tab-btn{padding:8px 18px;font-family:inherit;font-size:12.5px;font-weight:500;color:var(--text2);background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;border-radius:6px 6px 0 0;transition:color .15s,background .15s}
+.tab-btn.on{color:var(--acc);font-weight:700;border-bottom-color:var(--acc);background:var(--acc-light)}
+.tab-btn:hover:not(.on){color:var(--text);background:var(--surf2)}
 
-/* ── KPI GRID ────────────────────────────────────────────── */
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.kpi{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px}
-.kpi-label{font-size:9px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
-.kpi-val{font-size:22px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+/* ── KPI TILES ───────────────────────────────────────────── */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin-bottom:16px}
+.kpi{background:var(--surf);border:1px solid var(--bdr);border-radius:9px;padding:13px 15px;box-shadow:var(--shadow)}
+.kpi-label{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.9px;margin-bottom:7px}
+.kpi-val{font-size:23px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
 .kpi-val.g{color:var(--green)}.kpi-val.a{color:var(--amber)}.kpi-val.r{color:var(--red)}
 .kpi-val.c{color:var(--acc)}.kpi-val.b{color:var(--blue)}.kpi-val.w{color:var(--text)}
 .kpi-unit{font-size:10px;color:var(--text3);margin-top:4px}
 .kpi-sub{font-size:10px;color:var(--text2);margin-top:3px}
+.kpi-pill{display:inline-flex;align-items:center;padding:1px 7px;border-radius:99px;font-size:9.5px;font-weight:600;margin-top:5px}
+.kpi-pill.g{background:var(--green-bg);color:var(--green)}
+.kpi-pill.a{background:var(--amber-bg);color:var(--amber)}
+.kpi-pill.r{background:var(--red-bg);color:var(--red)}
+
+/* ── SUB-SECTION LABEL ───────────────────────────────────── */
+.sub-sec{font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.9px;margin:16px 0 9px}
 
 /* ── TABLE ───────────────────────────────────────────────── */
-.tbl-wrap{overflow-x:auto}
-.tbl{width:100%;border-collapse:collapse;font-size:12px}
-.tbl th{background:var(--bg3);color:var(--acc);padding:8px 10px;text-align:center;border:1px solid var(--bdr);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
-.tbl td{padding:7px 10px;text-align:center;border:1px solid var(--bdr);color:var(--text2)}
+.tbl-wrap{overflow-x:auto;border:1px solid var(--bdr);border-radius:9px;box-shadow:var(--shadow)}
+.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.tbl th{background:var(--surf2);color:var(--text2);padding:9px 12px;text-align:center;border-bottom:1px solid var(--bdr);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px}
+.tbl th:first-child{text-align:left}
+.tbl td{padding:8px 12px;text-align:center;border-bottom:1px solid var(--bdr);color:var(--text2)}
 .tbl td:first-child{text-align:left;color:var(--text);font-weight:600}
-.tbl tr:nth-child(odd) td{background:var(--bg2)}
-.tbl tr:nth-child(even) td{background:#0e1620}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:#F9FBFD}
 .tg{color:var(--green)!important;font-weight:600}.ta{color:var(--amber)!important;font-weight:600}.tr{color:var(--red)!important;font-weight:600}
 
+/* ── HEALTH ALERT ────────────────────────────────────────── */
+.health-warn{background:var(--amber-bg);border:1px solid rgba(180,83,9,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:12px}
+
 /* ── NO DATA ─────────────────────────────────────────────── */
-.no-data{color:var(--text3);font-size:12px;padding:20px;text-align:center}
+.no-data{color:var(--text3);font-size:12px;padding:24px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:9px}
 
 /* ── TOAST ───────────────────────────────────────────────── */
-#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid var(--bdr2);border-radius:8px;padding:10px 18px;font-size:12px;color:var(--text);display:none;z-index:999;white-space:nowrap}
-#toast.err{border-color:var(--red);color:var(--red)}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;border-radius:8px;padding:10px 18px;font-size:12px;display:none;z-index:999;white-space:nowrap;box-shadow:var(--shadow-md)}
+#toast.err{background:var(--red)}
 
 @media(max-width:600px){
-  .hdr{flex-wrap:wrap;height:auto;padding:8px 12px;gap:8px}
-  .content{padding:12px}
+  .hdr{flex-wrap:wrap;height:auto;padding:10px 14px;gap:8px}
+  .hdr-right{flex-wrap:wrap}
+  .content{padding:14px}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
 <body>
 
-<!-- LOGIN -->
+<!-- LOGIN ─────────────────────────────────────────────────── -->
 <div id="loginScreen">
-  <div style="display:flex;align-items:center;gap:10px">
+  <div class="login-logo">
     <div class="login-badge">CBG</div>
     <div>
-      <div class="login-title">LR Energy — Karnal</div>
-      <div class="login-plant">5.4 TPD Compressed Biogas Plant · Operations Dashboard</div>
+      <div class="login-name">LR Energy — Karnal</div>
+      <div class="login-sub">5.4 TPD Compressed Biogas Plant · Operations Dashboard</div>
     </div>
   </div>
-  <div class="login-box">
-    <h2>Sign in to view data</h2>
-    <p>Access is restricted to authorised plant personnel. Sign in with your Microsoft account to continue.</p>
-    <button class="btn-ms" onclick="handleSignIn()">Sign in with Microsoft →</button>
+
+  <div class="login-card">
+    <h2>Sign in to continue</h2>
+    <p>Access is restricted to authorised plant personnel. Use your Microsoft work account to proceed.</p>
+    <div class="login-divider"></div>
+    <button class="btn-ms" id="signInBtn" onclick="handleSignIn()">
+      <!-- Microsoft "M" icon -->
+      <svg class="ms-icon" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+        <rect x="1" y="1" width="9" height="9" fill="#f25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7fba00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00a4ef"/>
+        <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+      </svg>
+      Sign in with Microsoft
+    </button>
+    <div class="login-note">Signing in with a non-authorised account will be rejected automatically.</div>
   </div>
 </div>
 
-<!-- LOADING -->
+<!-- LOADING ───────────────────────────────────────────────── -->
 <div id="loadingScreen">
   <div class="spinner"></div>
-  <div style="font-size:12px;color:var(--text3)">Loading data from SharePoint…</div>
+  <div class="loading-text">Loading data from SharePoint…</div>
 </div>
 
-<!-- DASHBOARD -->
+<!-- DASHBOARD ─────────────────────────────────────────────── -->
 <div id="dashScreen">
   <div class="hdr">
-    <div class="login-badge" style="font-size:10px">CBG</div>
+    <div class="hdr-badge">CBG</div>
     <div>
-      <span class="hdr-brand">LR Energy — Karnal</span>
-      <span class="hdr-plant" style="margin-left:6px">5.4 TPD Plant</span>
+      <div class="hdr-brand">LR Energy — Karnal</div>
+      <div class="hdr-plant">5.4 TPD Plant · Operations</div>
     </div>
     <div class="hdr-sep"></div>
     <div class="hdr-right">
-      <span class="hdr-date-label">Date</span>
-      <input type="date" id="datePicker" onchange="onDateChange(this.value)"/>
-      <button class="hdr-refresh" onclick="loadData()" title="Refresh">↻ <span id="lastRefresh" style="font-size:10px;color:var(--text3)"></span></button>
+      <div class="date-wrap">
+        <span class="date-label">Viewing</span>
+        <input type="date" id="datePicker" onchange="onDateChange(this.value)"/>
+      </div>
+      <button class="hdr-refresh" onclick="loadData()" title="Refresh data">
+        ↻ <span class="refresh-time" id="lastRefresh"></span>
+      </button>
       <div class="hdr-sep"></div>
-      <div class="hdr-user"><div class="user-dot"></div><span id="userLabel">—</span></div>
+      <div class="user-chip">
+        <div class="user-dot"></div>
+        <span class="user-name" id="userLabel">—</span>
+      </div>
       <button class="btn-signout" onclick="handleSignOut()">Sign out</button>
     </div>
   </div>
 
   <div class="content">
-    <div id="alertStrip"><div class="alert-dot"></div><span id="alertMsg"></span></div>
+    <div id="alertStrip"><b id="alertCount"></b><span id="alertMsg"></span></div>
 
     <!-- SUBMISSION STATUS -->
     <div>
-      <div class="sec-label" id="subLabel">Data submission</div>
+      <div class="sec-hdr">
+        <span class="sec-title">Data Submission</span>
+        <span class="sec-date" id="subDate"></span>
+      </div>
       <div class="sub-grid" id="subGrid"><div class="no-data">Loading…</div></div>
     </div>
 
@@ -177,9 +246,9 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
         <button class="tab-btn" onclick="switchTab('health',this)">Digester Health</button>
       </div>
       <div id="tab-production"></div>
-      <div id="tab-feedstock" style="display:none"></div>
-      <div id="tab-finance" style="display:none"></div>
-      <div id="tab-health" style="display:none"></div>
+      <div id="tab-feedstock"  style="display:none"></div>
+      <div id="tab-finance"    style="display:none"></div>
+      <div id="tab-health"     style="display:none"></div>
     </div>
   </div>
 </div>
@@ -188,164 +257,214 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 
 <script>
 // ── CONFIG ────────────────────────────────────────────────
-const CONFIG={
-  clientId:'cca66a21-2c5b-455c-bff6-009f2877849c',
-  tenantId:'f7dda424-934f-4492-91d0-9eff9f6b4ff3',
-  scopes:['Files.ReadWrite.All','Sites.ReadWrite.All','User.Read'],
-  driveId:'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
-  fileId:'017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
-  allowedUsers:['it@elanenergy.in','ekas@elanenergy.in','shikha@elanenergy.in','ea@elanenergy.in'],
+const CFG = {
+  clientId: 'cca66a21-2c5b-455c-bff6-009f2877849c',
+  tenantId: 'f7dda424-934f-4492-91d0-9eff9f6b4ff3',
+  scopes:   ['Files.ReadWrite.All','Sites.ReadWrite.All','User.Read'],
+  driveId:  'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
+  fileId:   '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
+  allowed:  ['it@elanenergy.in','ekas@elanenergy.in','shikha@elanenergy.in','ea@elanenergy.in'],
 }
 
-// ── SHEETS covered by Submission Log ─────────────────────
-const TRACKED_SHEETS=[
+const TRACKED = [
   'Digester 1','Digester 2','PSA Production','Digester pH','Digester Temp',
   'TS-VS Analysis','IA-PA','Feedstock Supply','Feed & Balance',
   'Pressmud Cal','CD Cal','Grain Syrup Cal','CSL Cal','Spent Grain Cal',
   'Manure Sales','Sales Detail','Maintenance','Daily Revenue & Costs','Monthly Fixed Costs',
 ]
 
-// ── MSAL ──────────────────────────────────────────────────
-let _msal=null,_token=null,_user=null,_curDate=null,_D={}
+// ── MSAL ─────────────────────────────────────────────────
+let _app = null, _user = null, _curDate = null, _D = {}
 
-async function initMsal(){
-  if(_msal) return
-  const {PublicClientApplication}=window.msal
-  _msal=new PublicClientApplication({
-    auth:{clientId:CONFIG.clientId,authority:`https://login.microsoftonline.com/${CONFIG.tenantId}`,redirectUri:window.location.href.split('?')[0]},
-    cache:{cacheLocation:'sessionStorage'},
+async function getMsalApp() {
+  if (_app) return _app
+  // msal is the global from the UMD bundle
+  const lib = window.msal
+  if (!lib) throw new Error('MSAL library not loaded')
+  _app = new lib.PublicClientApplication({
+    auth: {
+      clientId:    CFG.clientId,
+      authority:   `https://login.microsoftonline.com/${CFG.tenantId}`,
+      redirectUri: window.location.href.split('?')[0].split('#')[0],
+    },
+    cache: { cacheLocation: 'sessionStorage' },
   })
-  await _msal.initialize()
-  const result=await _msal.handleRedirectPromise()
-  if(result){
-    if(!isAllowed(result.account)){await _msal.logoutRedirect({account:result.account});return}
-    _token=result.accessToken;_user=result.account?.name||result.account?.username
+  await _app.initialize()
+  return _app
+}
+
+function allowed(account) {
+  return account && CFG.allowed.some(e => e.toLowerCase() === (account.username || '').toLowerCase())
+}
+
+async function getToken() {
+  const app = await getMsalApp()
+  const accounts = app.getAllAccounts()
+  if (!accounts.length) return null
+  const acct = accounts[0]
+  if (!allowed(acct)) { await app.logoutRedirect({ account: acct }); return null }
+  try {
+    const r = await app.acquireTokenSilent({ scopes: CFG.scopes, account: acct })
+    _user = acct.name || acct.username
+    return r.accessToken
+  } catch {
+    await app.acquireTokenRedirect({ scopes: CFG.scopes, account: acct })
+    return null
   }
-  const accounts=_msal.getAllAccounts()
-  if(accounts.length>0&&isAllowed(accounts[0])){
-    _user=accounts[0].name||accounts[0].username
-    showDash()
+}
+
+async function handleSignIn() {
+  const btn = document.getElementById('signInBtn')
+  btn.disabled = true
+  btn.textContent = 'Redirecting…'
+  try {
+    const app = await getMsalApp()
+    const result = await app.handleRedirectPromise()
+    if (result) {
+      if (!allowed(result.account)) {
+        await app.logoutRedirect({ account: result.account })
+        return
+      }
+      _user = result.account.name || result.account.username
+      showDash()
+      return
+    }
+    const accounts = app.getAllAccounts()
+    if (accounts.length && allowed(accounts[0])) {
+      _user = accounts[0].name || accounts[0].username
+      showDash()
+      return
+    }
+    await app.loginRedirect({ scopes: CFG.scopes })
+  } catch (e) {
+    console.error(e)
+    toast('Sign-in failed: ' + e.message, true)
+    btn.disabled = false
+    btn.innerHTML = '<svg class="ms-icon" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>Sign in with Microsoft'
   }
 }
 
-function isAllowed(account){
-  if(!account) return false
-  const e=(account.username||'').toLowerCase()
-  return CONFIG.allowedUsers.some(u=>u.toLowerCase()===e)
-}
-
-async function getToken(){
-  if(_token) return _token
-  const accounts=_msal.getAllAccounts()
-  if(!accounts.length) return null
-  const account=accounts[0]
-  if(!isAllowed(account)){await _msal.logoutRedirect({account});return null}
-  try{
-    const r=await _msal.acquireTokenSilent({scopes:CONFIG.scopes,account})
-    _token=r.accessToken;_user=account.name||account.username
-    return _token
-  }catch{await _msal.acquireTokenRedirect({scopes:CONFIG.scopes});return null}
-}
-
-async function handleSignIn(){
-  await initMsal()
-  const accounts=_msal.getAllAccounts()
-  if(accounts.length>0&&isAllowed(accounts[0])){_user=accounts[0].name||accounts[0].username;showDash();return}
-  await _msal.loginRedirect({scopes:CONFIG.scopes})
-}
-
-async function handleSignOut(){
-  const accounts=_msal.getAllAccounts()
-  if(accounts.length>0) await _msal.logoutRedirect({account:accounts[0]})
+async function handleSignOut() {
+  const app = await getMsalApp()
+  const accounts = app.getAllAccounts()
+  if (accounts.length) await app.logoutRedirect({ account: accounts[0] })
 }
 
 // ── GRAPH API ─────────────────────────────────────────────
-function wbUrl(){return`https://graph.microsoft.com/v1.0/drives/${CONFIG.driveId}/items/${CONFIG.fileId}/workbook`}
-async function gGet(path){
-  const t=await getToken();if(!t) return null
-  const r=await fetch(wbUrl()+path,{headers:{Authorization:`Bearer ${t}`}})
+function wbBase() { return `https://graph.microsoft.com/v1.0/drives/${CFG.driveId}/items/${CFG.fileId}/workbook` }
+
+async function gGet(path) {
+  const t = await getToken(); if (!t) return null
+  const r = await fetch(wbBase() + path, { headers: { Authorization: `Bearer ${t}` } })
+  if (!r.ok) { console.warn('Graph', path, r.status); return null }
   return r.json()
 }
 
-// ── DATE UTILS ────────────────────────────────────────────
-function today(){const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
-function toSerial(ds){const e=new Date('1899-12-30T00:00:00');const d=new Date(ds+'T00:00:00');return Math.round((d-e)/86400000)}
-function fmtDate(ds){const d=new Date(ds+'T00:00:00');return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}
-function colLetter(n){let s='';while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)}return s}
+// ── UTILS ─────────────────────────────────────────────────
+function today() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+function toSerial(ds) {
+  const epoch = new Date('1899-12-30T00:00:00')
+  return Math.round((new Date(ds+'T00:00:00') - epoch) / 86400000)
+}
+function fmtDate(ds) {
+  return new Date(ds+'T00:00:00').toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
+}
+function colL(n) { let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)} return s }
+function n(v)  { return parseFloat(v) || 0 }
+function fmt(v, dec=0) {
+  if (v===null||v===undefined||v===''||isNaN(parseFloat(v))) return '—'
+  return parseFloat(v).toLocaleString('en-IN', { maximumFractionDigits:dec, minimumFractionDigits:dec })
+}
+function fmtR(v) {
+  if (!v || isNaN(parseFloat(v))) return '—'
+  const x = parseFloat(v)
+  if (x >= 1e7) return '₹'+(x/1e7).toFixed(2)+' Cr'
+  if (x >= 1e5) return '₹'+(x/1e5).toFixed(2)+' L'
+  return '₹'+x.toLocaleString('en-IN')
+}
+function olrCls(v) { const x=parseFloat(v); return !x?'w':x>=5?'r':x>=4?'a':'g' }
+function effCls(v) { const x=parseFloat(v); return !x?'w':x>=90?'g':x>=70?'a':'r' }
+function pillCls(v, hi, lo) {
+  const x=parseFloat(v); if(!x) return ''
+  return x>=hi?'g':x>=lo?'a':'r'
+}
 
-// ── FIND ROW BY DATE SERIAL ───────────────────────────────
-async function findRow(sheet,serial,dataStart){
-  const d=await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${dataStart}:A400')`)
-  const rows=(d&&d.values)||[]
-  for(let i=0;i<rows.length;i++){
-    const v=rows[i][0];if(v===null||v===undefined) continue
-    if(typeof v==='number'&&Math.round(v)===serial) return dataStart+i
-    if(typeof v==='string'){
-      const iso=v.match(/^(\d{4}-\d{2}-\d{2})/);if(iso){if(toSerial(iso[1])===serial) return dataStart+i}
+async function findRow(sheet, serial, startRow) {
+  const d = await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${startRow}:A400')`)
+  const rows = (d && d.values) || []
+  for (let i = 0; i < rows.length; i++) {
+    const v = rows[i][0]
+    if (v === null || v === undefined) continue
+    if (typeof v === 'number' && Math.round(v) === serial) return startRow + i
+    if (typeof v === 'string') {
+      const iso = v.match(/^(\d{4}-\d{2}-\d{2})/)
+      if (iso && toSerial(iso[1]) === serial) return startRow + i
     }
-    if(v instanceof Date||Object.prototype.toString.call(v)==='[object Date]'){if(toSerial(v.toISOString().slice(0,10))===serial) return dataStart+i}
   }
   return null
 }
 
-// ── READ A FULL ROW ───────────────────────────────────────
-async function readRow(sheet,row,maxCol){
-  const d=await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${row}:${colLetter(maxCol)}${row}')`)
-  return (d&&d.values&&d.values[0])||[]
+async function readRow(sheet, row, maxCol) {
+  const d = await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${row}:${colL(maxCol)}${row}')`)
+  return (d && d.values && d.values[0]) || []
 }
 
-// ── TOAST ─────────────────────────────────────────────────
-function toast(msg,err=false){
-  const t=document.getElementById('toast')
-  t.textContent=msg;t.className=err?'err':'';t.style.display='block'
-  setTimeout(()=>t.style.display='none',3000)
+function toast(msg, err=false) {
+  const t = document.getElementById('toast')
+  t.textContent = msg; t.className = err ? 'err' : ''; t.style.display = 'block'
+  setTimeout(() => t.style.display = 'none', 3500)
 }
 
-// ── SHOW DASH ─────────────────────────────────────────────
-function showDash(){
-  document.getElementById('loginScreen').style.display='none'
-  document.getElementById('loadingScreen').style.display='none'
-  document.getElementById('dashScreen').style.display='flex'
-  document.getElementById('userLabel').textContent=_user||'Signed in'
-  const dp=document.getElementById('datePicker')
-  dp.value=today();dp.max=today()
-  _curDate=today()
+// ── SHOW DASHBOARD ────────────────────────────────────────
+function showDash() {
+  document.getElementById('loginScreen').style.display   = 'none'
+  document.getElementById('loadingScreen').style.display = 'none'
+  document.getElementById('dashScreen').style.display    = 'flex'
+  document.getElementById('userLabel').textContent = _user || 'Signed in'
+  const dp = document.getElementById('datePicker')
+  dp.value = today(); dp.max = today()
+  _curDate = today()
   loadData()
 }
 
-function onDateChange(v){_curDate=v;loadData()}
+function onDateChange(v) { _curDate = v; loadData() }
 
-// ── MAIN DATA LOAD ────────────────────────────────────────
-async function loadData(){
-  if(!_curDate) return
-  document.getElementById('subGrid').innerHTML='<div class="no-data">Loading…</div>'
+// ── LOAD ALL DATA ─────────────────────────────────────────
+async function loadData() {
+  if (!_curDate) return
+  document.getElementById('subGrid').innerHTML = '<div class="no-data">Loading…</div>'
   clearKpis()
 
-  const serial=toSerial(_curDate)
-  const month=new Date(_curDate+'T00:00:00').getMonth() // 0-indexed
-  const monthCol=month+4 // col D=Jan(4)...col O=Dec(15)
+  const serial = toSerial(_curDate)
+  const month  = new Date(_curDate+'T00:00:00').getMonth() // 0-indexed
+  const mCol   = month + 4  // col D=Jan(4)…O=Dec(15)
 
-  try{
-    // Parallel fetch: find rows in D1, D2, PSA, DailyCost
-    const [rowD1,rowD2,rowPSA,rowRC]=await Promise.all([
-      findRow('D1',serial,3),
-      findRow('D2',serial,3),
-      findRow('PSA Production',serial,3),
-      findRow('Daily Revenue & Costs',serial,4),
+  try {
+    const [rowD1, rowD2, rowPSA, rowRC] = await Promise.all([
+      findRow('Digester 1',           serial, 3),
+      findRow('Digester 2',           serial, 3),
+      findRow('PSA Production',       serial, 3),
+      findRow('Daily Revenue & Costs',serial, 4),
     ])
 
-    // Read rows in parallel (52 cols for D1/D2, 29 for PSA, 8 for RC)
-    const reads=[
-      rowD1?readRow('D1',rowD1,52):Promise.resolve([]),
-      rowD2?readRow('D2',rowD2,52):Promise.resolve([]),
-      rowPSA?readRow('PSA Production',rowPSA,29):Promise.resolve([]),
-      rowRC?readRow('Daily Revenue & Costs',rowRC,8):Promise.resolve([]),
+    const [d1, d2, psa, rc, subRaw, fixRaw] = await Promise.all([
+      rowD1  ? readRow('Digester 1',            rowD1,  52) : Promise.resolve([]),
+      rowD2  ? readRow('Digester 2',            rowD2,  52) : Promise.resolve([]),
+      rowPSA ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
+      rowRC  ? readRow('Daily Revenue & Costs', rowRC,   8) : Promise.resolve([]),
       gGet(`/worksheets('${encodeURIComponent('Submission Log')}')/range(address='A3:E202')`),
-      gGet(`/worksheets('${encodeURIComponent('Monthly Fixed Costs')}')/range(address='A4:${colLetter(monthCol)}8')`),
-    ]
-    const [d1,d2,psa,rc,subLog,fixedData]=await Promise.all(reads)
+      gGet(`/worksheets('${encodeURIComponent('Monthly Fixed Costs')}')/range(address='A4:${colL(mCol)}8')`),
+    ])
 
-    _D={d1,d2,psa,rc,subLog:subLog&&subLog.values||[],fixedData:fixedData&&fixedData.values||[],serial,month,monthCol,rowD1,rowD2,rowPSA,rowRC}
+    _D = {
+      d1, d2, psa, rc,
+      subLog:    (subRaw  && subRaw.values)  || [],
+      fixedData: (fixRaw  && fixRaw.values)  || [],
+      serial, month, mCol, rowD1, rowD2, rowPSA, rowRC,
+    }
 
     renderSubmissions()
     renderProduction()
@@ -353,240 +472,234 @@ async function loadData(){
     renderFinance()
     renderHealth()
 
-    document.getElementById('lastRefresh').textContent=new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})
-  }catch(e){
-    toast('Error loading data: '+e.message,true)
+    document.getElementById('lastRefresh').textContent =
+      new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' })
+  } catch (e) {
+    toast('Data load error: ' + e.message, true)
     console.error(e)
   }
 }
 
-// ── HELPERS ───────────────────────────────────────────────
-function n(v){return(parseFloat(v)||0)}
-function fmt(v,dec=0){if(v===null||v===undefined||v===''||isNaN(parseFloat(v))) return '—';return parseFloat(v).toLocaleString('en-IN',{maximumFractionDigits:dec,minimumFractionDigits:dec})}
-function fmtR(v){if(!v||isNaN(parseFloat(v))) return '—';const x=parseFloat(v);if(x>=10000000) return '₹'+(x/10000000).toFixed(2)+' Cr';if(x>=100000) return '₹'+(x/100000).toFixed(2)+' L';return '₹'+x.toLocaleString('en-IN')}
-function olrCls(v){const x=parseFloat(v);if(!x) return 'w';return x>=5?'r':x>=4?'a':'g'}
-function effCls(v){const x=parseFloat(v);if(!x) return 'w';return x>=90?'g':x>=70?'a':'r'}
-
-function kpiCard(label,val,unit,cls,sub=''){
-  return`<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-val ${cls}">${val}</div>${unit?`<div class="kpi-unit">${unit}</div>`:''}${sub?`<div class="kpi-sub">${sub}</div>`:''}</div>`
-}
-
-function clearKpis(){
-  ['production','feedstock','finance','health'].forEach(t=>{
-    const el=document.getElementById('tab-'+t);if(el) el.innerHTML='<div class="no-data">Loading…</div>'
+function clearKpis() {
+  ;['production','feedstock','finance','health'].forEach(t => {
+    const el = document.getElementById('tab-'+t)
+    if (el) el.innerHTML = '<div class="no-data">Loading…</div>'
   })
 }
 
 // ── SUBMISSION STATUS ─────────────────────────────────────
-function renderSubmissions(){
-  const serial=_D.serial
-  const rows=_D.subLog
-  // Build map: sheetLabel → {by, time}
-  const map={}
-  rows.forEach(r=>{
-    if(!r[0]||Math.round(r[0])!==serial) return
-    const label=r[1]||''
-    map[label]={by:r[2]||r[3]||'—',time:r[4]||''}
+function renderSubmissions() {
+  const serial = _D.serial
+  const map = {}
+  _D.subLog.forEach(r => {
+    if (!r[0] || Math.round(r[0]) !== serial) return
+    map[r[1]] = { by: r[2] || r[3] || '—', time: r[4] || '' }
   })
 
-  const pending=TRACKED_SHEETS.filter(s=>!map[s])
-  const submitted=TRACKED_SHEETS.filter(s=>!!map[s])
+  const pending   = TRACKED.filter(s => !map[s])
+  const submitted = TRACKED.filter(s =>  map[s])
 
   // Alert strip
-  const alert=document.getElementById('alertStrip')
-  if(pending.length>0){
-    alert.style.display='flex'
-    document.getElementById('alertMsg').innerHTML=`<b>${pending.length} sheet${pending.length>1?'s':''} pending</b> — ${pending.slice(0,4).join(', ')}${pending.length>4?' and more':''}`
+  const alert = document.getElementById('alertStrip')
+  if (pending.length) {
+    alert.style.display = 'flex'
+    document.getElementById('alertCount').textContent = `${pending.length} ${pending.length===1?'sheet':'sheets'} pending — `
+    document.getElementById('alertMsg').textContent   = pending.slice(0,4).join(', ') + (pending.length>4 ? ` +${pending.length-4} more` : '')
   } else {
-    alert.style.display='none'
+    alert.style.display = 'none'
   }
 
-  // Section label
-  document.getElementById('subLabel').textContent=`Data submission — ${fmtDate(_curDate)}`
+  document.getElementById('subDate').textContent = fmtDate(_curDate)
 
-  // Grid
-  let html=''
-  TRACKED_SHEETS.forEach(s=>{
-    const entry=map[s]
-    if(entry){
-      html+=`<div class="sub-card ok">
+  let html = ''
+  TRACKED.forEach(s => {
+    const e = map[s]
+    if (e) {
+      html += `<div class="sub-card done">
         <div class="sub-sheet">${s}</div>
-        <div class="sub-by">${entry.by}</div>
-        <div class="sub-time">${entry.time}</div>
+        <div class="sub-by">${e.by}</div>
+        <div class="sub-time">${e.time}</div>
         <div class="sub-status ok">✓ Submitted</div>
       </div>`
     } else {
-      html+=`<div class="sub-card">
+      html += `<div class="sub-card pend">
         <div class="sub-sheet">${s}</div>
         <div class="sub-by">—</div>
         <div class="sub-time">—</div>
-        <div class="sub-status">Pending</div>
+        <div class="sub-status pend">Pending</div>
       </div>`
     }
   })
-  document.getElementById('subGrid').innerHTML=html
+  document.getElementById('subGrid').innerHTML = html
 }
 
 // ── PRODUCTION TAB ────────────────────────────────────────
-function renderProduction(){
-  const d1=_D.d1, d2=_D.d2, psa=_D.psa
-  const cbgD1=n(d1[35]), cbgD2=n(d2[35]), cbgTotal=cbgD1+cbgD2
-  const bppD1=n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46])
-  const bppD2=n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47])
-  const olrD1=d1[49], olrD2=d2[50]
-  const psaHrs=psa[1], psaCbg=psa[12]
-  const psaEffD1=d1[50], psaEffD2=d2[51]
+function renderProduction() {
+  const {d1,d2,psa} = _D
+  const cbgD1 = n(d1[35]), cbgD2 = n(d2[35]), cbgTot = cbgD1 + cbgD2
+  const bppD1 = n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46])
+  const bppD2 = n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47])
+  const olr1  = d1[49], olr2 = d2[50]
+  const psaHrs = psa[1], psaCbg = psa[12]
+  const psaE1 = d1[50], psaE2 = d2[51]
+  const tgt = Math.round(130000/30)
+  const cbgCls = cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
 
-  // CBG target: 130,000 kg/month → ~4,333/day
-  const dayTgt=Math.round(130000/30)
-  const cbgCls=cbgTotal>=dayTgt*0.9?'g':cbgTotal>=dayTgt*0.7?'a':cbgTotal>0?'r':'w'
-
-  let html=`<div class="kpi-grid">`
-  html+=kpiCard('Total CBG Produced',fmt(cbgTotal),'kg today',cbgCls,`Target ${dayTgt.toLocaleString('en-IN')} kg/day`)
-  html+=kpiCard('CBG — D1',fmt(cbgD1),'kg','b')
-  html+=kpiCard('CBG — D2',fmt(cbgD2),'kg','b')
-  html+=kpiCard('Total BPP D1',fmt(bppD1),'m³ expected','c')
-  html+=kpiCard('Total BPP D2',fmt(bppD2),'m³ expected','c')
-  html+=kpiCard('OLR — D1',fmt(olrD1,2),'kg VS/m³/day',olrCls(olrD1),'Safe: 2.0–4.0')
-  html+=kpiCard('OLR — D2',fmt(olrD2,2),'kg VS/m³/day',olrCls(olrD2),'Safe: 2.0–4.0')
-  html+=kpiCard('PSA Run Hrs',fmt(psaHrs,1),'hrs today','b')
-  html+=kpiCard('PSA CBG Out',fmt(psaCbg),'kg','c')
-  html+=kpiCard('PSA Eff — D1',fmt(psaEffD1,1),'%',effCls(psaEffD1))
-  html+=kpiCard('PSA Eff — D2',fmt(psaEffD2,1),'%',effCls(psaEffD2))
-  html+=`</div>`
-  document.getElementById('tab-production').innerHTML=html
+  document.getElementById('tab-production').innerHTML = `
+    <div class="kpi-grid">
+      ${kpi('Total CBG Today', fmt(cbgTot), 'kg', cbgCls, `Target ${tgt.toLocaleString('en-IN')} kg/day`)}
+      ${kpi('CBG — Digester 1', fmt(cbgD1), 'kg', 'b')}
+      ${kpi('CBG — Digester 2', fmt(cbgD2), 'kg', 'b')}
+      ${kpi('BPP Total D1', fmt(bppD1), 'm³ expected', 'c')}
+      ${kpi('BPP Total D2', fmt(bppD2), 'm³ expected', 'c')}
+      ${kpi('OLR — D1', fmt(olr1,2), 'kg VS/m³/day', olrCls(olr1), 'Safe: 2.0–4.0')}
+      ${kpi('OLR — D2', fmt(olr2,2), 'kg VS/m³/day', olrCls(olr2), 'Safe: 2.0–4.0')}
+      ${kpi('PSA Run Hours', fmt(psaHrs,1), 'hrs today', 'b')}
+      ${kpi('PSA CBG Output', fmt(psaCbg), 'kg', 'c')}
+      ${kpi('PSA Efficiency D1', fmt(psaE1,1), '%', effCls(psaE1))}
+      ${kpi('PSA Efficiency D2', fmt(psaE2,1), '%', effCls(psaE2))}
+    </div>`
 }
 
 // ── FEEDSTOCK TAB ─────────────────────────────────────────
-function renderFeedstock(){
-  const d1=_D.d1, d2=_D.d2
-  // Expected: C2=CD,C3=PM,C5=CSL,C6=SG,C7=GS (0-indexed: 1,2,4,5,6)
-  // Actual:   C15=CD,C16=PM,C18=CSL,C23=GS,C24=SG (0-indexed: 14,15,17,22,23)
-  const rows=[
-    {name:'Cow Dung',unit:'MT',exp:n(d1[1])+n(d2[1]),act:n(d1[14])+n(d2[14])},
-    {name:'Pressmud',unit:'MT',exp:n(d1[2])+n(d2[2]),act:n(d1[15])+n(d2[15])},
-    {name:'CSL',unit:'KL',exp:n(d1[4])+n(d2[4]),act:n(d1[17])+n(d2[17])},
-    {name:'Grain Syrup',unit:'KL',exp:n(d1[6])+n(d2[6]),act:n(d1[22])+n(d2[22])},
-    {name:'Spent Grain',unit:'tons',exp:n(d1[5])+n(d2[5]),act:n(d1[23])+n(d2[23])},
+function renderFeedstock() {
+  const {d1,d2} = _D
+  const rows = [
+    { name:'Cow Dung',   unit:'MT',  exp: n(d1[1])+n(d2[1]),  act: n(d1[14])+n(d2[14]) },
+    { name:'Pressmud',   unit:'MT',  exp: n(d1[2])+n(d2[2]),  act: n(d1[15])+n(d2[15]) },
+    { name:'CSL',        unit:'KL',  exp: n(d1[4])+n(d2[4]),  act: n(d1[17])+n(d2[17]) },
+    { name:'Grain Syrup',unit:'KL',  exp: n(d1[6])+n(d2[6]),  act: n(d1[22])+n(d2[22]) },
+    { name:'Spent Grain',unit:'tons',exp: n(d1[5])+n(d2[5]),  act: n(d1[23])+n(d2[23]) },
   ]
 
-  let html=`<div class="tbl-wrap"><table class="tbl"><thead><tr>
-    <th>Feedstock</th><th>Unit</th><th>Expected (D1+D2)</th><th>Actual (D1+D2)</th><th>vs Expected</th>
+  let tbl = `<div class="tbl-wrap"><table class="tbl"><thead><tr>
+    <th>Feedstock</th><th>Unit</th><th>Expected (D1+D2)</th><th>Actual (D1+D2)</th><th>vs Target</th>
   </tr></thead><tbody>`
-
-  rows.forEach(r=>{
-    const pct=r.exp>0?Math.round(r.act/r.exp*100):null
-    const cls=pct===null?'':(pct>=90?'tg':pct>=70?'ta':'tr')
-    html+=`<tr>
-      <td>${r.name}</td>
-      <td>${r.unit}</td>
-      <td>${fmt(r.exp,1)}</td>
-      <td class="${cls}">${fmt(r.act,1)}</td>
-      <td class="${cls}">${pct!==null?pct+'%':'—'}</td>
-    </tr>`
+  rows.forEach(r => {
+    const pct = r.exp > 0 ? Math.round(r.act/r.exp*100) : null
+    const cls = pct===null?'':(pct>=90?'tg':pct>=70?'ta':'tr')
+    tbl += `<tr><td>${r.name}</td><td>${r.unit}</td><td>${fmt(r.exp,1)}</td><td class="${cls}">${fmt(r.act,1)}</td><td class="${cls}">${pct!==null?pct+'%':'—'}</td></tr>`
   })
-  html+=`</tbody></table></div>`
+  tbl += `</tbody></table></div>`
 
-  // BPP breakdown
-  html+=`<div style="margin-top:12px"><div class="sec-label">BPP Contribution (m³)</div><div class="kpi-grid">`
-  html+=kpiCard('CD BPP D1',fmt(n(_D.d1[42])),'m³','c')
-  html+=kpiCard('PM BPP D1',fmt(n(_D.d1[43])),'m³','c')
-  html+=kpiCard('GS BPP D1',fmt(n(_D.d1[44])),'m³','c')
-  html+=kpiCard('CSL BPP D1',fmt(n(_D.d1[45])),'m³','c')
-  html+=kpiCard('SG BPP D1',fmt(n(_D.d1[46])),'m³','c')
-  html+=`</div></div>`
-
-  document.getElementById('tab-feedstock').innerHTML=html
+  document.getElementById('tab-feedstock').innerHTML = tbl + `
+    <div class="sub-sec">BPP Contribution — Digester 1 (m³)</div>
+    <div class="kpi-grid">
+      ${kpi('CD',  fmt(n(d1[42])), 'm³','c')}
+      ${kpi('PM',  fmt(n(d1[43])), 'm³','c')}
+      ${kpi('GS',  fmt(n(d1[44])), 'm³','c')}
+      ${kpi('CSL', fmt(n(d1[45])), 'm³','c')}
+      ${kpi('SG',  fmt(n(d1[46])), 'm³','c')}
+    </div>`
 }
 
 // ── FINANCE TAB ───────────────────────────────────────────
-function renderFinance(){
-  const rc=_D.rc
-  // Daily Revenue & Costs: C2=CBGSale,C3=SFOM,C4=LFOM,C5=FeedCost,C6=Transport,C7=Maint,C8=Elec
-  const cbgSale=n(rc[1]),sfom=n(rc[2]),lfom=n(rc[3])
-  const totalRev=cbgSale+sfom+lfom
-  const feedCost=n(rc[4]),transport=n(rc[5]),maint=n(rc[6]),elec=n(rc[7])
-  const totalCost=feedCost+transport+maint+elec
+function renderFinance() {
+  const {rc, fixedData, month, mCol} = _D
+  const cbgSale = n(rc[1]), sfom = n(rc[2]), lfom = n(rc[3])
+  const totRev  = cbgSale + sfom + lfom
+  const feed    = n(rc[4]), transp = n(rc[5]), maint = n(rc[6]), elec = n(rc[7])
+  const totCost = feed + transp + maint + elec
+  const margin  = totRev > 0 ? (totRev - totCost)/totRev*100 : 0
+  const mCls    = margin>=45?'g':margin>=30?'a':'r'
 
-  // Monthly Fixed Costs — fixedData rows: kVAh(row4), Bill(row5), Manpower(row6), EMI(row7), Total(row8)
-  // We fetched from A4:colX 8 → 5 rows. Col values: [#, CostHead, Unit, ...monthcols]
-  // monthCol offset within fetched range = _D.monthCol - 1 (since we start at col A=0-idx)
-  // Actually we fetched A4:colLetter(monthCol)8 so last column of fetched data is monthCol
-  const fd=_D.fixedData // array of rows
-  const mci=_D.monthCol-1 // 0-indexed position in the row
-  const fixedElecBill = fd[1]?n(fd[1][mci]):0
-  const fixedManpower = fd[2]?n(fd[2][mci]):0
-  const fixedEMI      = fd[3]?n(fd[3][mci]):0
-  const fixedTotal    = fd[4]?n(fd[4][mci]):0
+  // Monthly Fixed Costs: fixedData rows 0=kVAh, 1=bill, 2=manpower, 3=EMI, 4=total
+  const mi = mCol - 1  // 0-indexed column offset in the fetched range
+  const bill   = fixedData[1] ? n(fixedData[1][mi]) : 0
+  const manpow = fixedData[2] ? n(fixedData[2][mi]) : 0
+  const emi    = fixedData[3] ? n(fixedData[3][mi]) : 0
+  const fixed  = fixedData[4] ? n(fixedData[4][mi]) : 0
 
-  const margin=totalRev>0?((totalRev-totalCost)/totalRev*100):0
-  const marginCls=margin>=45?'g':margin>=30?'a':'r'
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
-  let html=`<div class="sec-label">Daily (${fmtDate(_curDate)})</div><div class="kpi-grid">`
-  html+=kpiCard('CBG Sale',fmtR(cbgSale),'','g')
-  html+=kpiCard('SFOM Sale',fmtR(sfom),'','g')
-  html+=kpiCard('LFOM Sale',fmtR(lfom),'','g')
-  html+=kpiCard('Total Revenue',fmtR(totalRev),'','g')
-  html+=kpiCard('Feedstock Cost',fmtR(feedCost),'','r')
-  html+=kpiCard('Transport Cost',fmtR(transport),'','a')
-  html+=kpiCard('Maintenance',fmtR(maint),'','a')
-  html+=kpiCard('Electricity/Day',fmtR(elec),'','a')
-  html+=kpiCard('Total Cost',fmtR(totalCost),'','r')
-  html+=kpiCard('Net Margin',margin>0?margin.toFixed(1)+'%':'—','',''+marginCls,'Target 45%')
-  html+=`</div>`
-
-  const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  const mName=MONTHS[_D.month]||''
-  html+=`<div style="margin-top:14px"><div class="sec-label">Monthly Fixed Costs — ${mName} 2026</div><div class="kpi-grid">`
-  html+=kpiCard('Electricity Bill',fmtR(fixedElecBill),'this month','a')
-  html+=kpiCard('Manpower Cost',fmtR(fixedManpower),'this month','a')
-  html+=kpiCard('Loan EMI',fmtR(fixedEMI),'this month','r')
-  html+=kpiCard('Total Fixed Cost',fmtR(fixedTotal),'this month','r')
-  html+=`</div></div>`
-
-  document.getElementById('tab-finance').innerHTML=html
+  document.getElementById('tab-finance').innerHTML = `
+    <div class="sub-sec">Daily Revenue & Costs — ${fmtDate(_curDate)}</div>
+    <div class="kpi-grid">
+      ${kpi('CBG Sale',      fmtR(cbgSale), '', 'g')}
+      ${kpi('SFOM Sale',     fmtR(sfom),    '', 'g')}
+      ${kpi('LFOM Sale',     fmtR(lfom),    '', 'g')}
+      ${kpi('Total Revenue', fmtR(totRev),  '', 'g')}
+      ${kpi('Feedstock Cost',fmtR(feed),    '', 'r')}
+      ${kpi('Transport',     fmtR(transp),  '', 'a')}
+      ${kpi('Maintenance',   fmtR(maint),   '', 'a')}
+      ${kpi('Electricity/Day',fmtR(elec),   '', 'a')}
+      ${kpi('Total Cost',    fmtR(totCost), '', 'r')}
+      ${kpi('Net Margin',    margin>0?margin.toFixed(1)+'%':'—', '', mCls, 'Target 45%')}
+    </div>
+    <div class="sub-sec">Monthly Fixed Costs — ${MONTHS[month]} 2026</div>
+    <div class="kpi-grid">
+      ${kpi('Electricity Bill', fmtR(bill),   'this month', 'a')}
+      ${kpi('Manpower Cost',    fmtR(manpow), 'this month', 'a')}
+      ${kpi('Loan EMI',         fmtR(emi),    'this month', 'r')}
+      ${kpi('Total Fixed',      fmtR(fixed),  'this month', 'r')}
+    </div>`
 }
 
 // ── DIGESTER HEALTH TAB ───────────────────────────────────
-function renderHealth(){
-  const d1=_D.d1, d2=_D.d2
-  // Slurry Height: D1=C49(idx48), D2=C50(idx49)
-  // Working Volume: D1=C48(idx47), D2=C49(idx48)
-  // OLR: D1=C50(idx49), D2=C51(idx50)
-  const sh1=d1[48], sh2=d2[49]
-  const wv1=d1[47], wv2=d2[48]
-  const olr1=d1[49], olr2=d2[50]
+function renderHealth() {
+  const {d1,d2} = _D
+  const sh1 = d1[48], sh2 = d2[49]
+  const wv1 = d1[47], wv2 = d2[48]
+  const o1  = d1[49], o2  = d2[50]
+  const warn = (parseFloat(o1)>4||parseFloat(o2)>4)
+    ? `<div class="health-warn">⚠ OLR elevated — ${parseFloat(o1)>4?`D1: ${parseFloat(o1).toFixed(2)} `:''} ${parseFloat(o2)>4?`D2: ${parseFloat(o2).toFixed(2)}`:''} kg VS/m³/day. Consider reducing feedstock load.</div>` : ''
 
-  let html=`<div class="kpi-grid">`
-  html+=kpiCard('Slurry Height D1',fmt(sh1,2),'m',sh1?'b':'w','Dipstick reading')
-  html+=kpiCard('Slurry Height D2',fmt(sh2,2),'m',sh2?'b':'w','Dipstick reading')
-  html+=kpiCard('Working Volume D1',fmt(wv1,0),'m³','c')
-  html+=kpiCard('Working Volume D2',fmt(wv2,0),'m³','c')
-  html+=kpiCard('OLR — D1',fmt(olr1,2),'kg VS/m³/day',olrCls(olr1),'Safe: 2.0–4.0')
-  html+=kpiCard('OLR — D2',fmt(olr2,2),'kg VS/m³/day',olrCls(olr2),'Safe: 2.0–4.0')
-  html+=`</div>`
+  document.getElementById('tab-health').innerHTML = warn + `
+    <div class="kpi-grid">
+      ${kpi('Slurry Height D1', fmt(sh1,2), 'm', sh1?'b':'w', 'Dipstick reading')}
+      ${kpi('Slurry Height D2', fmt(sh2,2), 'm', sh2?'b':'w', 'Dipstick reading')}
+      ${kpi('Working Volume D1', fmt(wv1,0), 'm³', 'c')}
+      ${kpi('Working Volume D2', fmt(wv2,0), 'm³', 'c')}
+      ${kpi('OLR — D1', fmt(o1,2), 'kg VS/m³/day', olrCls(o1), 'Safe: 2.0–4.0')}
+      ${kpi('OLR — D2', fmt(o2,2), 'kg VS/m³/day', olrCls(o2), 'Safe: 2.0–4.0')}
+    </div>`
+}
 
-  // OLR alert
-  const o1=parseFloat(olr1), o2=parseFloat(olr2)
-  if((o1&&o1>4)||(o2&&o2>4)){
-    html=`<div style="background:rgba(231,111,81,.1);border:1px solid rgba(231,111,81,.3);border-radius:6px;padding:9px 14px;font-size:12px;color:var(--red);margin-bottom:12px">
-      ⚠ OLR alert: ${o1>4?'D1='+o1.toFixed(2)+' ':''}${o2>4?'D2='+o2.toFixed(2):''}  — Consider reducing feedstock load</div>`+html
-  }
-
-  document.getElementById('tab-health').innerHTML=html
+// ── KPI HELPER ────────────────────────────────────────────
+function kpi(label, val, unit, cls, sub='') {
+  return `<div class="kpi">
+    <div class="kpi-label">${label}</div>
+    <div class="kpi-val ${cls}">${val}</div>
+    ${unit ? `<div class="kpi-unit">${unit}</div>` : ''}
+    ${sub  ? `<div class="kpi-sub">${sub}</div>`   : ''}
+  </div>`
 }
 
 // ── TAB SWITCH ────────────────────────────────────────────
-function switchTab(name,btn){
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'))
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('on'))
   btn.classList.add('on')
-  ;['production','feedstock','finance','health'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display=t===name?'':'none'
+  ;['production','feedstock','finance','health'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = (t===name) ? '' : 'none'
   })
 }
 
-// ── INIT ──────────────────────────────────────────────────
-initMsal().catch(e=>console.warn('MSAL init:',e))
+// ── BOOT ──────────────────────────────────────────────────
+;(async () => {
+  try {
+    const app = await getMsalApp()
+    // Handle redirect result first (page just came back from Microsoft login)
+    const result = await app.handleRedirectPromise()
+    if (result) {
+      if (!allowed(result.account)) {
+        await app.logoutRedirect({ account: result.account })
+        return
+      }
+      _user = result.account.name || result.account.username
+      showDash()
+      return
+    }
+    // Already signed in from a previous session?
+    const accounts = app.getAllAccounts()
+    if (accounts.length && allowed(accounts[0])) {
+      _user = accounts[0].name || accounts[0].username
+      showDash()
+    }
+    // Otherwise stay on login screen
+  } catch (e) {
+    console.error('Boot error:', e)
+  }
+})()
 </script>
 </body>
 </html>
