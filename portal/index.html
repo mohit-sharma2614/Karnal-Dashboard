@@ -281,31 +281,29 @@ const SHEETS = [
     {k:'ch4_pct',   l:'CH4% at Inlet',                tp:'num'},
   ]},
   {t:'CBG Production',f:[
-    {k:'cbg_d1',    l:'CBG from D1 (kg)',              tp:'num'},
-    {k:'cbg_d2',    l:'CBG from D2 (kg)',              tp:'num'},
-    {k:'cbg_tot',   l:'Total CBG Purified (kg)',  tp:'calc', fn:'cbg_tot'},
-    {k:'cbg_den',   l:'CBG Density (kg/m³)',           tp:'num'},
-    {k:'cbg_pur',   l:'CBG Purity (%)',                tp:'num'},
-    {k:'tail_gas',  l:'Tail Gas (m³)',                 tp:'num'},
+    {k:'cbg_d1',       l:'CBG from D1 (kg)',              tp:'num'},
+    {k:'cbg_d2',       l:'CBG from D2 (kg)',              tp:'num'},
+    {k:'cbg_tot',      l:'Total CBG Purified (kg)',       tp:'calc', fn:'cbg_tot'},
+    {k:'cbg_den',      l:'CBG Density (kg/m³)',           tp:'num'},
+    {k:'purified_gas', l:'Total Purified Gas (m³)',       tp:'num'},
   ]},
   {t:'Customer Dispatch (kg)',f:[
-    {k:'veer_kg',    l:'Veer Gas (kg)',                tp:'num'},
-    {k:'adinath_kg', l:'Adinath (kg)',                 tp:'num'},
-    {k:'gail_kg',    l:'GAIL (kg)',                    tp:'num'},
-    {k:'sps_kg',     l:'SPS (kg)',                     tp:'num'},
-    {k:'other1_kg',  l:'Other Customer 1 (kg)',        tp:'num'},
-    {k:'other2_kg',  l:'Other Customer 2 (kg)',        tp:'num'},
-    {k:'tot_disp',   l:'Total Dispatched (kg)', tp:'calc', fn:'tot_disp'},
+    {k:'veer_kg',    l:'Dispatch — Veer (kg)',             tp:'num'},
+    {k:'adinath_kg', l:'Dispatch — Adinath (kg)',          tp:'num'},
+    {k:'gail_kg',    l:'Dispatch — KFS Sonipat (kg)',      tp:'num'},
+    {k:'other1_kg',  l:'Dispatch — KSK Sonipat (kg)',      tp:'num'},
+    {k:'other2_kg',  l:'Dispatch — OM Filling Sonipat (kg)',tp:'num'},
+    {k:'sps_kg',     l:'Dispatch — SPS Yamuna Nagar (kg)', tp:'num'},
+    {k:'tot_disp',   l:'Total Dispatched (kg)',            tp:'calc', fn:'tot_disp'},
   ]},
   {t:'Cascade Pressure',f:[
     {k:'casc1',     l:'Cascade Pressure 1 (bar)',      tp:'num'},
     {k:'casc2',     l:'Cascade Pressure 2 (bar)',      tp:'num'},
   ]},
-  {t:'Auto Calculations — PSA Performance',f:[
-    {k:'ideal_rbg', l:'Ideal Raw Biogas (m³)',  tp:'calc', fn:'ideal_rbg'},
-    {k:'ideal_pur', l:'Ideal Purified Gas (m³)',tp:'calc', fn:'ideal_pur'},
-    {k:'ideal_cbg', l:'Ideal CBG (kg)',          tp:'calc', fn:'ideal_cbg'},
-    {k:'psa_eff',   l:'PSA Efficiency (%)',      tp:'calc', fn:'psa_eff_psa'},
+  {t:'PSA Performance (display only — not saved)',f:[
+    {k:'ideal_rbg', l:'Ideal Raw Biogas (m³)',   tp:'calc', fn:'ideal_rbg'},
+    {k:'ideal_pur', l:'Ideal Purified Gas (m³)', tp:'calc', fn:'ideal_pur'},
+    {k:'ideal_cbg', l:'Ideal CBG (kg)',           tp:'calc', fn:'ideal_cbg'},
   ]},
   {t:'Remarks',f:[
     {k:'psa_remark',l:'Remark / Notes',          tp:'txt'},
@@ -493,10 +491,8 @@ const SHEETS = [
     {k:'loc',    l:'Sample Location',       tp:'txt'},
     {k:'ts_pct', l:'TS%',                   tp:'num'},
     {k:'vs_pct', l:'VS%',                   tp:'num'},
-    {k:'qty',    l:'Qty Fed Today (KL)',     tp:'fetch'},
     {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
     {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
-    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 {id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:false, sections:[
@@ -517,24 +513,20 @@ const SHEETS = [
     {k:'loc',    l:'Sample Location',       tp:'txt'},
     {k:'ts_pct', l:'TS%',                   tp:'num'},
     {k:'vs_pct', l:'VS%',                   tp:'num'},
-    {k:'qty',    l:'Qty Fed Today (tons)',   tp:'fetch'},
     {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
     {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
-    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 
 // ─── MANURE SALES ─────────────────────────────────────────
 {id:'MANURE',label:'Manure Sales',group:'Sales',sheet:'Manure Sales', hasDate:true, sections:[
   {t:'Sale Entry',f:[
-    {k:'vehicle', l:'Vehicle No.',         tp:'txt'},
     {k:'v_type',  l:'Vehicle Type',        tp:'sel', opts:['Tractor','Mini Truck','Truck','Other']},
     {k:'farmer',  l:'Farmer Name',         tp:'txt'},
     {k:'type',    l:'Manure Type',         tp:'sel', opts:['SFOM','LFOM','Mixed']},
     {k:'qty_mt',  l:'Quantity (MT)',        tp:'num'},
     {k:'rate',    l:'Rate (₹/MT)',         tp:'num'},
     {k:'amount',  l:'Amount (₹)',          tp:'calc', fn:'manure_amount'},
-    {k:'remarks', l:'Remarks',             tp:'txt'},
   ]},
 ]},
 
@@ -563,7 +555,6 @@ const SHEETS = [
     {k:'description',l:'Work Description',  tp:'txt'},
     {k:'vendor',     l:'Vendor / Contractor',tp:'txt'},
     {k:'cost',       l:'Cost (₹)',          tp:'num'},
-    {k:'status',     l:'Status',            tp:'sel', opts:['Completed','Pending','In Progress']},
     {k:'remarks',    l:'Remarks',           tp:'txt'},
   ]},
 ]},
@@ -868,9 +859,10 @@ const COLUMN_MAP = {
     cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, sg_bpp:48, wv:49, olr:51, psa_eff:52,
   },
   PSA: {
-    // C9=Avg RBG Flow, C10=Total Purified Gas, C15=Avg Flow — all auto in Excel; do NOT overwrite with portal calcs
+    // C9=Avg RBG Flow (auto formula), C15=Avg Flow (auto formula) — do NOT write
     psa_hrs:2, psa_run_min:3, comp_hrs:4, psa_comp_diff:5,
     rbg_d1:6, rbg_d2:7, rbg_total:8,
+    purified_gas:10,
     cbg_d1:11, cbg_d2:12, cbg_tot:13,
     cbg_den:14,
     tot_disp:16,
