@@ -120,6 +120,10 @@ const SHEETS = [
     {k:'gs_exp',       l:'Grain Syrup — Expected (KL/day)',      tp:'num'},
     {k:'fw_exp',       l:'Fresh Water — Expected (m³)',          tp:'num'},
     {k:'rs_exp',       l:'Recycle Slurry — Expected (m³)',       tp:'num'},
+    {k:'biogas_est',   l:'Biogas Estimated (m³)',                tp:'num'},
+    {k:'slurry_exp',   l:'Total Slurry Expected (m³)',           tp:'num'},
+    {k:'sfom_exp',     l:'SFOM — Expected (tons)',               tp:'num'},
+    {k:'lfom_exp',     l:'LFOM — Expected (KL)',                 tp:'num'},
   ]},
   // ── ACTUAL (Excel C15–C37) ───────────────────────────────
   {t:'Actual — Feeding',f:[
@@ -198,6 +202,10 @@ const SHEETS = [
     {k:'gs_exp',       l:'Grain Syrup — Expected (KL/day)',      tp:'num'},
     {k:'fw_exp',       l:'Fresh Water — Expected (m³)',          tp:'num'},
     {k:'rs_exp',       l:'Recycle Slurry — Expected (m³)',       tp:'num'},
+    {k:'biogas_est',   l:'Biogas Estimated (m³)',                tp:'num'},
+    {k:'slurry_exp',   l:'Total Slurry Expected (m³)',           tp:'num'},
+    {k:'sfom_exp',     l:'SFOM — Expected (tons)',               tp:'num'},
+    {k:'lfom_exp',     l:'LFOM — Expected (KL)',                 tp:'num'},
   ]},
   // ── ACTUAL (Excel C15–C37) ───────────────────────────────
   {t:'Actual — Feeding',f:[
@@ -839,6 +847,7 @@ window.recompute=recompute
 const COLUMN_MAP = {
   D1: {
     cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, fw_exp:9, rs_exp:10,
+    biogas_est:11, slurry_exp:12, sfom_exp:13, lfom_exp:14,
     cd_act:15, pm_act:16, poultry:17, csl_act:18,
     poultry_ts:21, poultry_vs:22,
     gs_act:23, sg_act:24,
@@ -850,6 +859,7 @@ const COLUMN_MAP = {
   },
   D2: {
     cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, fw_exp:9, rs_exp:10,
+    biogas_est:11, slurry_exp:12, sfom_exp:13, lfom_exp:14,
     cd_act:15, pm_act:16, poultry:17, csl_act:18,
     poultry_ts:21, poultry_vs:22,
     gs_act:23, sg_act:24,
