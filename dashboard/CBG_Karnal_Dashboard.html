@@ -148,6 +148,9 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 /* ── HEALTH ALERT ────────────────────────────────────────── */
 .health-warn{background:var(--amber-bg);border:1px solid rgba(180,83,9,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:12px}
 
+/* ── PENDING SECTION BANNER ──────────────────────────────── */
+.sec-pending-banner{background:rgba(234,179,8,0.10);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:7px 11px;font-size:11.5px;color:var(--amber);margin-bottom:8px;font-weight:500}
+
 /* ── DATA TABLE ──────────────────────────────────────────── */
 .dt-head{background:var(--surf2);color:var(--accent);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:7px 12px!important;text-align:left!important}
 .dt-label{text-align:left;color:var(--text);font-weight:500;width:60%}
@@ -287,8 +290,28 @@ const TRACKED = [
   'Manure Sales','Sales Detail','Maintenance','Daily Revenue & Costs','Monthly Fixed Costs',
 ]
 
+const SHEET_NAV = {
+  'PSA Production':        {tab:'production', sec:'sec-psa'},
+  'Digester pH':           {tab:'health',     sec:'sec-ph'},
+  'Digester Temp':         {tab:'health',     sec:'sec-tmp'},
+  'TS-VS Analysis':        {tab:'health',     sec:'sec-tsvs'},
+  'IA-PA':                 {tab:'health',     sec:'sec-iapa'},
+  'Feedstock Supply':      {tab:'feedstock',  sec:'sec-fs'},
+  'Feed & Balance':        {tab:'feedstock',  sec:'sec-fb'},
+  'Pressmud Cal':          {tab:'health',     sec:'sec-cal-pm'},
+  'CD Cal':                {tab:'health',     sec:'sec-cal-cd'},
+  'Grain Syrup Cal':       {tab:'health',     sec:'sec-cal-gs'},
+  'CSL Cal':               {tab:'health',     sec:'sec-cal-csl'},
+  'Spent Grain Cal':       {tab:'health',     sec:'sec-cal-sg'},
+  'Manure Sales':          {tab:'finance',    sec:'sec-manure'},
+  'Sales Detail':          {tab:'finance',    sec:'sec-sales'},
+  'Maintenance':           {tab:'finance',    sec:'sec-maint'},
+  'Daily Revenue & Costs': {tab:'finance',    sec:'sec-revenue'},
+  'Monthly Fixed Costs':   {tab:'finance',    sec:'sec-fixed'},
+}
+
 // ── MSAL ─────────────────────────────────────────────────
-let _app = null, _user = null, _curDate = null, _D = {}, _selDig = null
+let _app = null, _user = null, _curDate = null, _D = {}, _selDig = null, _loadSeq = 0
 
 async function getMsalApp() {
   if (_app) return _app
@@ -494,29 +517,32 @@ function populateDays(year, month, selDay, todayParts) {
   daySel.innerHTML = ''
   const daysInMonth = new Date(year, month, 0).getDate()
   const maxD = (year === todayParts[0] && month === todayParts[1]) ? todayParts[2] : daysInMonth
+  const clampedDay = Math.min(selDay, maxD)
   for (let dd = 1; dd <= maxD; dd++) {
     const opt = document.createElement('option')
     opt.value = dd; opt.textContent = String(dd).padStart(2,'0')
-    if (dd === selDay) opt.selected = true
+    if (dd === clampedDay) opt.selected = true
     daySel.appendChild(opt)
   }
 }
 
 function onYearChange() {
   const todayParts = today().split('-').map(Number)
-  const y  = Number(document.getElementById('selYear').value)
-  const m  = Number(document.getElementById('selMonth').value)
+  const y    = Number(document.getElementById('selYear').value)
+  const m    = Number(document.getElementById('selMonth').value)
+  const curD = Number(document.getElementById('selDay').value)
   populateMonths(y, m, todayParts)
   const newM = Number(document.getElementById('selMonth').value)
-  populateDays(y, newM, 1, todayParts)
+  populateDays(y, newM, curD, todayParts)
   applyDateCascade()
 }
 
 function onMonthChange() {
   const todayParts = today().split('-').map(Number)
-  const y = Number(document.getElementById('selYear').value)
-  const m = Number(document.getElementById('selMonth').value)
-  populateDays(y, m, 1, todayParts)
+  const y    = Number(document.getElementById('selYear').value)
+  const m    = Number(document.getElementById('selMonth').value)
+  const curD = Number(document.getElementById('selDay').value)
+  populateDays(y, m, curD, todayParts)
   applyDateCascade()
 }
 
@@ -533,6 +559,7 @@ function applyDateCascade() {
 // ── LOAD ALL DATA ─────────────────────────────────────────
 async function loadData() {
   if (!_curDate) return
+  const seq = ++_loadSeq
   document.getElementById('subGrid').innerHTML = '<div class="no-data">Loading…</div>'
   clearKpis()
 
@@ -578,6 +605,8 @@ async function loadData() {
       gGet(`/worksheets('${encodeURIComponent('CSL Cal.')}')/range(address='A4:H100')`),
       gGet(`/worksheets('${encodeURIComponent('Dry Spent Grain Cal')}')/range(address='A4:H100')`),
     ])
+
+    if (seq !== _loadSeq) return  // stale — a newer request already started
 
     _D = {
       d1, d2, psa, rc, fb, fs, ph, tmp, tsvs, iapa,
@@ -627,7 +656,7 @@ function renderSubmissions() {
   })
 
   const pending   = TRACKED.filter(s => !map[s])
-  const submitted = TRACKED.filter(s =>  map[s])
+  _D.pendingSet   = new Set(pending)
 
   // Alert strip
   const alert = document.getElementById('alertStrip')
@@ -641,24 +670,25 @@ function renderSubmissions() {
 
   document.getElementById('subDate').textContent = fmtDate(_curDate)
 
-  const clickable = ['Digester 1','Digester 2']
   let html = ''
   TRACKED.forEach(s => {
     const e = map[s]
-    const isClick = clickable.includes(s)
+    const isDig    = s === 'Digester 1' || s === 'Digester 2'
     const isSelected = _selDig === s
-    const clickAttr = isClick ? ` onclick="selectDigester('${s}')" style="cursor:pointer"` : ''
+    const clickAttr = isDig
+      ? ` onclick="selectDigester('${s}')" style="cursor:pointer"`
+      : ` onclick="showSection('${s}')" style="cursor:pointer"`
     const selStyle  = isSelected ? ' selected' : ''
     if (e) {
       html += `<div class="sub-card done${selStyle}"${clickAttr}>
-        <div class="sub-sheet">${s}${isClick ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
+        <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
         <div class="sub-by">${e.by}</div>
         <div class="sub-time">${e.time}</div>
         <div class="sub-status ok">✓ Submitted</div>
       </div>`
     } else {
       html += `<div class="sub-card pend${selStyle}"${clickAttr}>
-        <div class="sub-sheet">${s}${isClick ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
+        <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
         <div class="sub-by">—</div>
         <div class="sub-time">—</div>
         <div class="sub-status pend">Pending</div>
@@ -676,6 +706,31 @@ function selectDigester(dig) {
   renderFeedstock()
   renderFinance()
   renderHealth()
+}
+
+// ── SHEET CARD NAVIGATION ─────────────────────────────────
+function showSection(sheet) {
+  const nav = SHEET_NAV[sheet]
+  if (!nav) return
+  document.querySelectorAll('.tab-btn').forEach(b => {
+    const oc = b.getAttribute('onclick') || ''
+    b.classList.toggle('on', oc.includes("'"+nav.tab+"'"))
+  })
+  ;['production','feedstock','finance','health'].forEach(t => {
+    document.getElementById('tab-'+t).style.display = (t===nav.tab) ? '' : 'none'
+  })
+  setTimeout(() => {
+    const el = document.getElementById(nav.sec)
+    if (el) el.scrollIntoView({behavior:'smooth', block:'start'})
+  }, 50)
+}
+
+// ── PENDING HELPERS ───────────────────────────────────────
+function isPending(sheet) { return !!((_D.pendingSet && _D.pendingSet.has(sheet))) }
+function pendingBanner(sheet) {
+  return isPending(sheet)
+    ? `<div class="sec-pending-banner">⚠ ${sheet} not submitted — data not available for this date</div>`
+    : ''
 }
 
 // ── DATA ROW HELPER ───────────────────────────────────────
@@ -698,19 +753,29 @@ function fi(v)        { const x=parseFloat(v); return isNaN(x)?'—':Math.round(
 // ── PRODUCTION TAB ────────────────────────────────────────
 function renderProduction() {
   const {d1,d2,psa} = _D
-  const cbgD1 = n(d1[35]), cbgD2 = n(d2[35]), cbgTot = cbgD1 + cbgD2
-  const bppD1 = n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46])
-  const bppD2 = n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47])
+  const d1Pend = isPending('Digester 1'), d2Pend = isPending('Digester 2'), psaPend = isPending('PSA Production')
+
+  // CBG totals — show '—' when source sheet is pending (not just zero)
+  const cbgD1Raw = !d1Pend && d1[35]!==undefined && d1[35]!=='' ? n(d1[35]) : null
+  const cbgD2Raw = !d2Pend && d2[35]!==undefined && d2[35]!=='' ? n(d2[35]) : null
+  const cbgTot   = (cbgD1Raw !== null || cbgD2Raw !== null) ? (cbgD1Raw||0)+(cbgD2Raw||0) : null
+  const cbgD1Disp = cbgD1Raw !== null ? fmt(cbgD1Raw) : '—'
+  const cbgD2Disp = cbgD2Raw !== null ? fmt(cbgD2Raw) : '—'
+  const cbgTotDisp = cbgTot !== null ? fmt(cbgTot) : '—'
+
   const olr1  = d1[49], olr2 = d2[50]
   const psaHrs = n(psa[1]) > 0 && n(psa[1]) < 2 ? n(psa[1]) * 24 : n(psa[1])
-  const psaE1 = d1[50], psaE2 = d2[51]
   const tgt = Math.round(130000/30)
-  const cbgCls = cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
+  const cbgCls = cbgTot===null?'w':cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
+
+  // Total BPP — show '—' when sheet pending (sum of zeros is misleading)
+  const bppD1Tot = d1Pend ? '—' : fv(n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46]))
+  const bppD2Tot = d2Pend ? '—' : fv(n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47]))
 
   const summary = `<div class="kpi-grid">
-    ${kpi('Total CBG Today', fmt(cbgTot), 'kg', cbgCls, `Target ${tgt.toLocaleString('en-IN')} kg/day`)}
-    ${kpi('CBG — D1', fmt(cbgD1), 'kg', 'b')}
-    ${kpi('CBG — D2', fmt(cbgD2), 'kg', 'b')}
+    ${kpi('Total CBG Today', cbgTotDisp, 'kg', cbgCls, `Target ${tgt.toLocaleString('en-IN')} kg/day`)}
+    ${kpi('CBG — D1', cbgD1Disp, 'kg', 'b')}
+    ${kpi('CBG — D2', cbgD2Disp, 'kg', 'b')}
     ${kpi('OLR — D1', fmt(olr1,2), 'kg VS/m³/day', olrCls(olr1), 'Safe: 2.0–4.0')}
     ${kpi('OLR — D2', fmt(olr2,2), 'kg VS/m³/day', olrCls(olr2), 'Safe: 2.0–4.0')}
     ${kpi('PSA Run Hours', fmt(psaHrs,1), 'hrs', 'b')}
@@ -735,7 +800,7 @@ function renderProduction() {
     {label:'GS BPP',                       unit:'m³',  val:fv(d1[44])},
     {label:'CSL BPP',                      unit:'m³',  val:fv(d1[45])},
     {label:'SG BPP',                       unit:'m³',  val:fv(d1[46])},
-    {label:'Total BPP',                    unit:'m³',  val:fv(n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46]))},
+    {label:'Total BPP',                    unit:'m³',  val:bppD1Tot},
     {label:'Working Volume',               unit:'m³',  val:fv(d1[47])},
     {label:'Slurry Height',                unit:'m',   val:fv(d1[48])},
     {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d1[49])},
@@ -762,7 +827,7 @@ function renderProduction() {
     {label:'GS BPP',                       unit:'m³',  val:fv(d2[45])},
     {label:'CSL BPP',                      unit:'m³',  val:fv(d2[46])},
     {label:'SG BPP',                       unit:'m³',  val:fv(d2[47])},
-    {label:'Total BPP',                    unit:'m³',  val:fv(n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47]))},
+    {label:'Total BPP',                    unit:'m³',  val:bppD2Tot},
     {label:'Working Volume',               unit:'m³',  val:fv(d2[48])},
     {label:'Slurry Height',                unit:'m',   val:fv(d2[49])},
     {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d2[50])},
@@ -803,8 +868,11 @@ function renderProduction() {
 
   document.getElementById('tab-production').innerHTML =
     summary +
-    `<div class="dt-grid">${d1tbl}${d2tbl}</div>` +
-    psatbl
+    `<div class="dt-grid">
+      <div id="sec-d1-gas">${pendingBanner('Digester 1')}${d1tbl}</div>
+      <div id="sec-d2-gas">${pendingBanner('Digester 2')}${d2tbl}</div>
+    </div>` +
+    `<div id="sec-psa" style="margin-top:12px">${pendingBanner('PSA Production')}${psatbl}</div>`
 }
 
 // ── FEEDSTOCK TAB ─────────────────────────────────────────
@@ -907,20 +975,26 @@ function renderFeedstock() {
   ])
 
   document.getElementById('tab-feedstock').innerHTML =
-    hint + expActTbl +
+    hint +
+    `<div id="sec-feedstock-main">${pendingBanner('Digester 1')}${expActTbl}</div>` +
     `<div style="margin-top:12px">${detailTbl}</div>` +
-    `<div class="dt-grid" style="margin-top:12px">${fbTbl}${fsTbl}</div>`
+    `<div class="dt-grid" style="margin-top:12px">
+      <div id="sec-fb">${pendingBanner('Feed & Balance')}${fbTbl}</div>
+      <div id="sec-fs">${pendingBanner('Feedstock Supply')}${fsTbl}</div>
+    </div>`
 }
 
 // ── FINANCE TAB ───────────────────────────────────────────
 function renderFinance() {
   const {rc, fixedData, month, mCol} = _D
+  const rcPend = isPending('Daily Revenue & Costs')
   const cbgSale = n(rc[1]), sfom = n(rc[2]), lfom = n(rc[3])
   const totRev  = cbgSale + sfom + lfom
   const feed    = n(rc[4]), transp = n(rc[5]), maint = n(rc[6]), elec = n(rc[7])
   const totCost = feed + transp + maint + elec
-  const margin  = totRev > 0 ? (totRev - totCost)/totRev*100 : 0
-  const mCls    = margin>=45?'g':margin>=30?'a':'r'
+  // Net Margin: show '—' when RC sheet is pending (0% is misleading)
+  const margin  = rcPend ? null : (totRev > 0 ? (totRev - totCost)/totRev*100 : 0)
+  const mCls    = margin===null?'w':margin>=45?'g':margin>=30?'a':'r'
 
   const mi = mCol - 1
   const bill   = fixedData[1] ? n(fixedData[1][mi]) : 0
@@ -930,9 +1004,9 @@ function renderFinance() {
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
   const summary = `<div class="kpi-grid">
-    ${kpi('Total Revenue', fmtR(totRev), '', 'g')}
-    ${kpi('Total Cost',    fmtR(totCost), '', 'r')}
-    ${kpi('Net Margin',    margin>0?margin.toFixed(1)+'%':'—', '', mCls, 'Target 45%')}
+    ${kpi('Total Revenue', rcPend?'—':fmtR(totRev), '', rcPend?'w':'g')}
+    ${kpi('Total Cost',    rcPend?'—':fmtR(totCost), '', rcPend?'w':'r')}
+    ${kpi('Net Margin',    margin===null?'—':margin>0?margin.toFixed(1)+'%':'0%', '', mCls, 'Target 45%')}
   </div>`
 
   const dailyTbl = dataTable([
@@ -961,16 +1035,11 @@ function renderFinance() {
   const salesRow = _D.salesData.find(r => r && r[0] && Math.round(n(r[0])) === _D.serial) || []
   const salesTbl = dataTable([
     {head:'Customer-wise CBG Sales — Today'},
-    {label:'Veer Filling Station',  unit:'kg', val:fi(salesRow[1])},
-    {label:'Veer Filling Station',  unit:'₹',  val:fmtR(salesRow[2])},
-    {label:'Adinath Auto',          unit:'kg', val:fi(salesRow[3])},
-    {label:'Adinath Auto',          unit:'₹',  val:fmtR(salesRow[4])},
-    {label:'Gail via LREVPL',       unit:'kg', val:fi(salesRow[5])},
-    {label:'Gail via LREVPL',       unit:'₹',  val:fmtR(salesRow[6])},
-    {label:'SPS Bio Chem',          unit:'kg', val:fi(salesRow[7])},
-    {label:'SPS Bio Chem',          unit:'₹',  val:fmtR(salesRow[8])},
-    {label:'Total Sale',            unit:'kg', val:fi(salesRow[9])},
-    {label:'Total Sale',            unit:'₹',  val:fmtR(salesRow[10])},
+    {label:'Veer Filling Station',  unit:'kg / ₹', val:`${fi(salesRow[1])} / ${fmtR(salesRow[2])}`},
+    {label:'Adinath Auto',          unit:'kg / ₹', val:`${fi(salesRow[3])} / ${fmtR(salesRow[4])}`},
+    {label:'Gail via LREVPL',       unit:'kg / ₹', val:`${fi(salesRow[5])} / ${fmtR(salesRow[6])}`},
+    {label:'SPS Bio Chem',          unit:'kg / ₹', val:`${fi(salesRow[7])} / ${fmtR(salesRow[8])}`},
+    {label:'Total Sale',            unit:'kg / ₹', val:`${fi(salesRow[9])} / ${fmtR(salesRow[10])}`},
   ])
 
   // Manure Sales — all entries for selected date
@@ -1004,17 +1073,32 @@ function renderFinance() {
 
   document.getElementById('tab-finance').innerHTML =
     summary +
-    `<div class="dt-grid">${dailyTbl}${fixedTbl}</div>` +
-    `<div class="dt-grid" style="margin-top:12px">${salesTbl}${manureTbl}</div>` +
-    `<div style="margin-top:12px">${maintHtml}</div>`
+    `<div class="dt-grid">
+      <div id="sec-revenue">${pendingBanner('Daily Revenue & Costs')}${dailyTbl}</div>
+      <div id="sec-fixed">${pendingBanner('Monthly Fixed Costs')}${fixedTbl}</div>
+    </div>` +
+    `<div class="dt-grid" style="margin-top:12px">
+      <div id="sec-sales">${pendingBanner('Sales Detail')}${salesTbl}</div>
+      <div id="sec-manure">${pendingBanner('Manure Sales')}${manureTbl}</div>
+    </div>` +
+    `<div id="sec-maint" style="margin-top:12px">${pendingBanner('Maintenance')}${maintHtml}</div>`
 }
 
 // ── DIGESTER HEALTH TAB ───────────────────────────────────
 function renderHealth() {
   const {d1,d2} = _D
-  const o1 = d1[49], o2 = d2[50]
-  const warn = (parseFloat(o1)>4||parseFloat(o2)>4)
-    ? `<div class="health-warn">⚠ OLR elevated — ${parseFloat(o1)>4?`D1: ${parseFloat(o1).toFixed(2)} `:''} ${parseFloat(o2)>4?`D2: ${parseFloat(o2).toFixed(2)}`:''} kg VS/m³/day. Consider reducing feedstock load.</div>` : ''
+  const o1 = parseFloat(d1[49]), o2 = parseFloat(d2[50])
+  const warnParts = []
+  if (o1 >= 5)           warnParts.push(`D1 overloaded: ${o1.toFixed(2)}`)
+  else if (o1 >= 4)      warnParts.push(`D1 elevated: ${o1.toFixed(2)}`)
+  if (o2 >= 5)           warnParts.push(`D2 overloaded: ${o2.toFixed(2)}`)
+  else if (o2 >= 4)      warnParts.push(`D2 elevated: ${o2.toFixed(2)}`)
+  if (o1 > 0 && o1 < 2) warnParts.push(`D1 underloaded: ${o1.toFixed(2)}`)
+  if (o2 > 0 && o2 < 2) warnParts.push(`D2 underloaded: ${o2.toFixed(2)}`)
+  const hasOver = warnParts.some(p => p.includes('load'))
+  const warn = warnParts.length
+    ? `<div class="health-warn">⚠ OLR Alert — ${warnParts.join(' | ')} kg VS/m³/day. Safe range: 2.0–4.0. ${warnParts.some(p=>p.includes('over'))?'Consider reducing feedstock load.':'Consider increasing feedstock.'}</div>`
+    : ''
 
   const d1tbl = dataTable([
     {head:'Digester 1 — Health'},
@@ -1111,20 +1195,27 @@ function renderHealth() {
     return rows
   }
 
-  const calTbl = dataTable([
-    ...calRows(calData.pm,  'Pressmud'),
-    ...calRows(calData.cd,  'Cow Dung'),
-    ...calRows(calData.gs,  'Grain Syrup'),
-    ...calRows(calData.csl, 'CSL'),
-    ...calRows(calData.sg,  'Dry Spent Grain'),
-  ])
-
   document.getElementById('tab-health').innerHTML =
     warn +
-    `<div class="dt-grid">${d1tbl}${d2tbl}</div>` +
-    `<div class="dt-grid" style="margin-top:12px">${phTbl}${tmpTbl}</div>` +
-    `<div class="dt-grid" style="margin-top:12px">${tsvsT}${iapaT}</div>` +
-    `<div style="margin-top:12px">${calTbl}</div>`
+    `<div class="dt-grid">
+      <div id="sec-d1-health">${pendingBanner('Digester 1')}${d1tbl}</div>
+      <div id="sec-d2-health">${pendingBanner('Digester 2')}${d2tbl}</div>
+    </div>` +
+    `<div class="dt-grid" style="margin-top:12px">
+      <div id="sec-ph">${pendingBanner('Digester pH')}${phTbl}</div>
+      <div id="sec-tmp">${pendingBanner('Digester Temp')}${tmpTbl}</div>
+    </div>` +
+    `<div class="dt-grid" style="margin-top:12px">
+      <div id="sec-tsvs">${pendingBanner('TS-VS Analysis')}${tsvsT}</div>
+      <div id="sec-iapa">${pendingBanner('IA-PA')}${iapaT}</div>
+    </div>` +
+    `<div style="margin-top:12px">
+      <div id="sec-cal-pm">${pendingBanner('Pressmud Cal')}${dataTable(calRows(calData.pm,'Pressmud'))}</div>
+      <div id="sec-cal-cd" style="margin-top:8px">${pendingBanner('CD Cal')}${dataTable(calRows(calData.cd,'Cow Dung'))}</div>
+      <div id="sec-cal-gs" style="margin-top:8px">${pendingBanner('Grain Syrup Cal')}${dataTable(calRows(calData.gs,'Grain Syrup'))}</div>
+      <div id="sec-cal-csl" style="margin-top:8px">${pendingBanner('CSL Cal')}${dataTable(calRows(calData.csl,'CSL'))}</div>
+      <div id="sec-cal-sg" style="margin-top:8px">${pendingBanner('Spent Grain Cal')}${dataTable(calRows(calData.sg,'Dry Spent Grain'))}</div>
+    </div>`
 }
 
 // ── KPI HELPER ────────────────────────────────────────────
