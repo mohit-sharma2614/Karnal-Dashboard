@@ -421,6 +421,19 @@ async function readRow(sheet, row, maxCol) {
   return (d && d.values && d.values[0]) || []
 }
 
+// Find latest row whose date (col A) is <= serial (for periodic/monthly sheets)
+async function findLatestRow(sheet, serial, startRow) {
+  const d = await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${startRow}:A200')`)
+  const rows = (d && d.values) || []
+  let bestRow = null
+  for (let i = 0; i < rows.length; i++) {
+    const v = rows[i][0]
+    if (v === null || v === undefined || v === '') break
+    if (typeof v === 'number' && v <= serial) bestRow = startRow + i
+  }
+  return bestRow
+}
+
 function toast(msg, err=false) {
   const t = document.getElementById('toast')
   t.textContent = msg; t.className = err ? 'err' : ''; t.style.display = 'block'
@@ -452,26 +465,58 @@ async function loadData() {
   const mCol   = month + 4  // col D=Jan(4)…O=Dec(15)
 
   try {
-    const [rowD1, rowD2, rowPSA, rowRC] = await Promise.all([
+    const [rowD1, rowD2, rowPSA, rowRC, rowFB, rowFS, rowPH, rowTMP, rowTSVS, rowIAPA] = await Promise.all([
       findRow('D1',                   serial, 3),
       findRow('D2',                   serial, 3),
       findRow('PSA Production',       serial, 3),
       findRow('Daily Revenue & Costs',serial, 4),
+      findRow('Feed & Balance',       serial, 4),
+      findRow('Feedstock Supply',     serial, 4),
+      findLatestRow('Digester pH',    serial, 4),
+      findLatestRow('Digester Temp',  serial, 4),
+      findLatestRow('Digester TS-VS', serial, 4),
+      findLatestRow('Digester IA-PA', serial, 4),
     ])
 
-    const [d1, d2, psa, rc, subRaw, fixRaw] = await Promise.all([
-      rowD1  ? readRow('D1',                    rowD1,  52) : Promise.resolve([]),
-      rowD2  ? readRow('D2',                    rowD2,  52) : Promise.resolve([]),
-      rowPSA ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
-      rowRC  ? readRow('Daily Revenue & Costs', rowRC,   8) : Promise.resolve([]),
+    const [d1, d2, psa, rc, fb, fs, ph, tmp, tsvs, iapa,
+           subRaw, fixRaw, maintRaw, manureRaw, salesRaw,
+           pmCalRaw, cdCalRaw, gsCalRaw, cslCalRaw, sgCalRaw] = await Promise.all([
+      rowD1   ? readRow('D1',                    rowD1,  52) : Promise.resolve([]),
+      rowD2   ? readRow('D2',                    rowD2,  52) : Promise.resolve([]),
+      rowPSA  ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
+      rowRC   ? readRow('Daily Revenue & Costs', rowRC,   8) : Promise.resolve([]),
+      rowFB   ? readRow('Feed & Balance',        rowFB,  18) : Promise.resolve([]),
+      rowFS   ? readRow('Feedstock Supply',      rowFS,  32) : Promise.resolve([]),
+      rowPH   ? readRow('Digester pH',           rowPH,   7) : Promise.resolve([]),
+      rowTMP  ? readRow('Digester Temp',         rowTMP,  7) : Promise.resolve([]),
+      rowTSVS ? readRow('Digester TS-VS',        rowTSVS,13) : Promise.resolve([]),
+      rowIAPA ? readRow('Digester IA-PA',        rowIAPA,18) : Promise.resolve([]),
       gGet(`/worksheets('${encodeURIComponent('Submission Log')}')/range(address='A3:E202')`),
       gGet(`/worksheets('${encodeURIComponent('Monthly Fixed Costs')}')/range(address='A4:${colL(mCol)}8')`),
+      gGet(`/worksheets('${encodeURIComponent('Maintenance')}')/range(address='A4:I300')`),
+      gGet(`/worksheets('${encodeURIComponent('Manure Sales')}')/range(address='A3:G500')`),
+      gGet(`/worksheets('${encodeURIComponent('Sales Detail')}')/range(address='A5:K300')`),
+      gGet(`/worksheets('${encodeURIComponent('Pressmud Cal.')}')/range(address='A4:H100')`),
+      gGet(`/worksheets('${encodeURIComponent('Cow Dung Cal.')}')/range(address='A4:H100')`),
+      gGet(`/worksheets('${encodeURIComponent('Rice Grain Syrup Cal.')}')/range(address='A4:H100')`),
+      gGet(`/worksheets('${encodeURIComponent('CSL Cal.')}')/range(address='A4:H100')`),
+      gGet(`/worksheets('${encodeURIComponent('Dry Spent Grain Cal')}')/range(address='A4:H100')`),
     ])
 
     _D = {
-      d1, d2, psa, rc,
-      subLog:    (subRaw  && subRaw.values)  || [],
-      fixedData: (fixRaw  && fixRaw.values)  || [],
+      d1, d2, psa, rc, fb, fs, ph, tmp, tsvs, iapa,
+      subLog:    (subRaw    && subRaw.values)    || [],
+      fixedData: (fixRaw    && fixRaw.values)    || [],
+      maintData: (maintRaw  && maintRaw.values)  || [],
+      manureData:(manureRaw && manureRaw.values) || [],
+      salesData: (salesRaw  && salesRaw.values)  || [],
+      calData: {
+        pm:  (pmCalRaw  && pmCalRaw.values)  || [],
+        cd:  (cdCalRaw  && cdCalRaw.values)  || [],
+        gs:  (gsCalRaw  && gsCalRaw.values)  || [],
+        csl: (cslCalRaw && cslCalRaw.values) || [],
+        sg:  (sgCalRaw  && sgCalRaw.values)  || [],
+      },
       serial, month, mCol, rowD1, rowD2, rowPSA, rowRC,
     }
 
@@ -737,7 +782,58 @@ function renderFeedstock() {
     {label:'Spent Grain BPP',        unit:'m³',     val:fv(d[bppOff+4])},
   ])
 
-  document.getElementById('tab-feedstock').innerHTML = hint + expActTbl + `<div style="margin-top:12px">${detailTbl}</div>`
+  const {fb, fs} = _D
+
+  const fbTbl = dataTable([
+    {head:'Feed & Balance — Today'},
+    {label:'Pressmud In',        unit:'MT',  val:fv(fb[1],2)},
+    {label:'Grain Syrup In',     unit:'KL',  val:fv(fb[2],2)},
+    {label:'CSL In',             unit:'KL',  val:fv(fb[3],2)},
+    {label:'Cow Dung In',        unit:'MT',  val:fv(fb[4],2)},
+    {label:'Pressmud Cost',      unit:'₹',   val:fmtR(fb[5])},
+    {label:'Grain Syrup Cost',   unit:'₹',   val:fmtR(fb[6])},
+    {label:'CSL Cost',           unit:'₹',   val:fmtR(fb[7])},
+    {label:'Cow Dung Cost',      unit:'₹',   val:fmtR(fb[8])},
+    {label:'Pressmud Feed',      unit:'MT',  val:fv(fb[9],2)},
+    {label:'Grain Syrup Feed',   unit:'KL',  val:fv(fb[10],2)},
+    {label:'CSL Feed',           unit:'KL',  val:fv(fb[11],2)},
+    {label:'Cow Dung Feed',      unit:'MT',  val:fv(fb[12],2)},
+    {label:'Total Feed',         unit:'MT',  val:fv(fb[13],2)},
+    {label:'Pressmud Balance',   unit:'MT',  val:fv(fb[14],2)},
+    {label:'Grain Syrup Balance',unit:'KL',  val:fv(fb[15],2)},
+    {label:'CSL Balance',        unit:'KL',  val:fv(fb[16],2)},
+    {label:'Cow Dung Balance',   unit:'MT',  val:fv(fb[17],2)},
+  ])
+
+  // Feedstock Supply — sum by category
+  const fsPoultry = [1,2,3,4,5,6].reduce((s,i)=>s+n(fs[i]),0)
+  const fsCowDung = [7,8,9].reduce((s,i)=>s+n(fs[i]),0)
+  const fsCSL     = [10,11,12,13].reduce((s,i)=>s+n(fs[i]),0)
+  const fsPM      = [14,...Array.from({length:17},(_, k)=>15+k)].reduce((s,i)=>s+n(fs[i]),0)
+  const fsSG      = n(fs[31])
+
+  const fsTbl = dataTable([
+    {head:'Feedstock Supply — Today (kg received)'},
+    {label:'Poultry Wastewater', unit:'kg', val:fi(fsPoultry)},
+    {label:'Cow Dung',           unit:'kg', val:fi(fsCowDung)},
+    {label:'CSL',                unit:'kg', val:fi(fsCSL)},
+    {label:'Pressmud',           unit:'kg', val:fi(fsPM)},
+    {label:'Spent Grain',        unit:'kg', val:fi(fsSG)},
+    {head:'Poultry Vendors (kg)'},
+    ...[['Lather',1],['Narwal',2],['Subhash',3],['GK Hatchery',4],['Dry Poultry',5],['Nazim',6]]
+      .filter(([,i])=>n(fs[i])>0).map(([l,i])=>({label:l, unit:'kg', val:fi(fs[i])})),
+    {head:'Cow Dung Vendors (kg)'},
+    ...[['Gharaunda',7],['Phoosgarh',8],['Radha Krishna',9]]
+      .filter(([,i])=>n(fs[i])>0).map(([l,i])=>({label:l, unit:'kg', val:fi(fs[i])})),
+    {head:'Pressmud Vendors (kg)'},
+    ...[['Sonipat',14],['Malakpur Sugar Mill',15],['Ramala/Bhagpat',16],['Thana Bhavan',17],['Tikuala',18],['Shamli Sugar Mill',19],['Laknour Biogas',20],['Balyan Tikuala',21],['Singh Associate',22],['Naveen',23],['G.S.',24],['SBEC',25],['Sahakumbri',26],['Rathi Sugar Mill',27],['Devom',28],['Vaibhav Ramala',29],['Unn Sugar Mill',30]]
+      .filter(([,i])=>n(fs[i])>0).map(([l,i])=>({label:l, unit:'kg', val:fi(fs[i])})),
+  ])
+
+  document.getElementById('tab-feedstock').innerHTML =
+    hint + expActTbl +
+    `<div style="margin-top:12px">${detailTbl}</div>` +
+    `<div class="dt-grid" style="margin-top:12px">${fbTbl}${fsTbl}</div>`
 }
 
 // ── FINANCE TAB ───────────────────────────────────────────
@@ -785,7 +881,56 @@ function renderFinance() {
     {label:'Total Fixed',      unit:'₹', val:fmtR(fixed)},
   ])
 
-  document.getElementById('tab-finance').innerHTML = summary + `<div class="dt-grid">${dailyTbl}${fixedTbl}</div>`
+  // Sales Detail — customer-wise breakdown for selected date
+  const salesRow = _D.salesData.find(r => r && r[0] && Math.round(n(r[0])) === _D.serial) || []
+  const salesTbl = dataTable([
+    {head:'Customer-wise CBG Sales — Today'},
+    {label:'Veer Filling Station',  unit:'kg', val:fi(salesRow[1])},
+    {label:'Veer Filling Station',  unit:'₹',  val:fmtR(salesRow[2])},
+    {label:'Adinath Auto',          unit:'kg', val:fi(salesRow[3])},
+    {label:'Adinath Auto',          unit:'₹',  val:fmtR(salesRow[4])},
+    {label:'Gail via LREVPL',       unit:'kg', val:fi(salesRow[5])},
+    {label:'Gail via LREVPL',       unit:'₹',  val:fmtR(salesRow[6])},
+    {label:'SPS Bio Chem',          unit:'kg', val:fi(salesRow[7])},
+    {label:'SPS Bio Chem',          unit:'₹',  val:fmtR(salesRow[8])},
+    {label:'Total Sale',            unit:'kg', val:fi(salesRow[9])},
+    {label:'Total Sale',            unit:'₹',  val:fmtR(salesRow[10])},
+  ])
+
+  // Manure Sales — all entries for selected date
+  const manureEntries = _D.manureData.filter(r => r && r[1] && Math.round(n(r[1])) === _D.serial)
+  let manureTbl = dataTable([{head:'Manure Sales — Today'}])
+  if (manureEntries.length === 0) {
+    manureTbl = `<div class="tbl-wrap"><table class="tbl"><tbody><tr><td colspan="3" class="dt-head">Manure Sales — Today</td></tr><tr><td colspan="3" style="text-align:center;padding:8px;color:var(--text3)">No manure sales recorded for this date</td></tr></tbody></table></div>`
+  } else {
+    const rows = [{head:'Manure Sales — Today'}]
+    manureEntries.forEach(r => {
+      rows.push({label:`${r[4]||'—'} — ${r[3]||'—'}`, unit:r[2]||'', val:fmtR(r[5])})
+    })
+    rows.push({label:'Total', unit:'₹', val:fmtR(manureEntries.reduce((s,r)=>s+n(r[5]),0))})
+    manureTbl = dataTable(rows)
+  }
+
+  // Maintenance — all entries for selected date
+  const maintEntries = _D.maintData.filter(r => r && r[1] && Math.round(n(r[1])) === _D.serial)
+  let maintHtml = ''
+  if (maintEntries.length === 0) {
+    maintHtml = `<div class="tbl-wrap"><table class="tbl"><tbody><tr><td colspan="3" class="dt-head">Maintenance — Today</td></tr><tr><td colspan="3" style="text-align:center;padding:8px;color:var(--text3)">No maintenance entries for this date</td></tr></tbody></table></div>`
+  } else {
+    let rows = `<tr><th style="text-align:left">Unit / Equipment</th><th>Work Type</th><th style="text-align:right">Cost (₹)</th></tr>`
+    maintEntries.forEach(r => {
+      rows += `<tr><td>${r[2]||'—'} / ${r[3]||'—'}</td><td>${r[4]||'—'}</td><td style="text-align:right">${fmtR(r[7])}</td></tr>`
+    })
+    const totalCost = maintEntries.reduce((s,r)=>s+n(r[7]),0)
+    rows += `<tr><td colspan="2" style="font-weight:600">Total</td><td style="text-align:right;font-weight:600">${fmtR(totalCost)}</td></tr>`
+    maintHtml = `<div class="tbl-wrap"><table class="tbl"><tbody><tr><td colspan="3" class="dt-head">Maintenance — Today</td></tr>${rows}</tbody></table></div>`
+  }
+
+  document.getElementById('tab-finance').innerHTML =
+    summary +
+    `<div class="dt-grid">${dailyTbl}${fixedTbl}</div>` +
+    `<div class="dt-grid" style="margin-top:12px">${salesTbl}${manureTbl}</div>` +
+    `<div style="margin-top:12px">${maintHtml}</div>`
 }
 
 // ── DIGESTER HEALTH TAB ───────────────────────────────────
@@ -811,7 +956,99 @@ function renderHealth() {
     {label:'PSA Efficiency',  unit:'%',             val:fv(d2[51])},
   ])
 
-  document.getElementById('tab-health').innerHTML = warn + `<div class="dt-grid">${d1tbl}${d2tbl}</div>`
+  const {ph, tmp, tsvs, iapa, calData} = _D
+
+  const phTbl = dataTable([
+    {head:'Digester pH (latest reading)'},
+    {label:'D1 — 3M',       unit:'pH', val:fv(ph[1],2)},
+    {label:'D1 — 6M',       unit:'pH', val:fv(ph[2],2)},
+    {label:'D1 — Sludge Line', unit:'pH', val:fv(ph[3],2)},
+    {label:'D2 — 3M',       unit:'pH', val:fv(ph[4],2)},
+    {label:'D2 — 6M',       unit:'pH', val:fv(ph[5],2)},
+    {label:'D2 — Sludge Line', unit:'pH', val:fv(ph[6],2)},
+  ])
+
+  const tmpTbl = dataTable([
+    {head:'Digester Temperature °C (latest reading)'},
+    {label:'D1 — 3M',       unit:'°C', val:fv(tmp[1],1)},
+    {label:'D1 — 6M',       unit:'°C', val:fv(tmp[2],1)},
+    {label:'D1 — Sludge Line', unit:'°C', val:fv(tmp[3],1)},
+    {label:'D2 — 3M',       unit:'°C', val:fv(tmp[4],1)},
+    {label:'D2 — 6M',       unit:'°C', val:fv(tmp[5],1)},
+    {label:'D2 — Sludge Line', unit:'°C', val:fv(tmp[6],1)},
+  ])
+
+  const tsvsRows = [
+    {head:'Digester TS% & VS% (latest reading)'},
+    {head:'D1'},
+    {label:'3M — TS%', unit:'%', val:fv(tsvs[1],2)},
+    {label:'3M — VS%', unit:'%', val:fv(tsvs[2],2)},
+    {label:'6M — TS%', unit:'%', val:fv(tsvs[3],2)},
+    {label:'6M — VS%', unit:'%', val:fv(tsvs[4],2)},
+    {label:'SL — TS%', unit:'%', val:fv(tsvs[5],2)},
+    {label:'SL — VS%', unit:'%', val:fv(tsvs[6],2)},
+    {head:'D2'},
+    {label:'3M — TS%', unit:'%', val:fv(tsvs[7],2)},
+    {label:'3M — VS%', unit:'%', val:fv(tsvs[8],2)},
+    {label:'6M — TS%', unit:'%', val:fv(tsvs[9],2)},
+    {label:'6M — VS%', unit:'%', val:fv(tsvs[10],2)},
+    {label:'SL — TS%', unit:'%', val:fv(tsvs[11],2)},
+    {label:'SL — VS%', unit:'%', val:fv(tsvs[12],2)},
+  ]
+  const tsvsT = dataTable(tsvsRows)
+
+  const iapaT = dataTable([
+    {head:'Digester IA/PA Alkalinity (latest reading)'},
+    {head:'3M D1'},
+    {label:'PA (mg/L)', unit:'', val:fv(iapa[1],0)},
+    {label:'IA (mg/L)', unit:'', val:fv(iapa[2],0)},
+    {label:'TA',        unit:'', val:fv(iapa[3],0)},
+    {label:'IA/PA',     unit:'', val:fv(iapa[4],4)},
+    {head:'6M D1'},
+    {label:'PA (mg/L)', unit:'', val:fv(iapa[5],0)},
+    {label:'IA (mg/L)', unit:'', val:fv(iapa[6],0)},
+    {label:'TA',        unit:'', val:fv(iapa[7],0)},
+    {label:'IA/PA',     unit:'', val:fv(iapa[8],4)},
+    {head:'3M D2'},
+    {label:'PA (mg/L)', unit:'', val:fv(iapa[9],0)},
+    {label:'IA (mg/L)', unit:'', val:fv(iapa[10],0)},
+    {label:'TA',        unit:'', val:fv(iapa[11],0)},
+    {label:'IA/PA',     unit:'', val:fv(iapa[12],4)},
+    {head:'6M D2'},
+    {label:'PA (mg/L)', unit:'', val:fv(iapa[13],0)},
+    {label:'IA (mg/L)', unit:'', val:fv(iapa[14],0)},
+    {label:'TA',        unit:'', val:fv(iapa[15],0)},
+    {label:'IA/PA',     unit:'', val:fv(iapa[16],4)},
+    {label:'Remark',    unit:'', val:iapa[17]||'—'},
+  ])
+
+  // Cal sheets — last 3 readings for each feedstock
+  function calRows(data, name) {
+    const nonEmpty = data.filter(r => r && r[1])
+    const last3 = nonEmpty.slice(-3).reverse()
+    const rows = [{head:`${name} — Last 3 Samples`}]
+    last3.forEach(r => {
+      const dt = r[1] ? new Date(Math.round((n(r[1])-25569)*86400000)).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—'
+      rows.push({label:dt, unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(r[5],2)}%`})
+    })
+    if (last3.length === 0) rows.push({label:'No data', unit:'', val:'—'})
+    return rows
+  }
+
+  const calTbl = dataTable([
+    ...calRows(calData.pm,  'Pressmud'),
+    ...calRows(calData.cd,  'Cow Dung'),
+    ...calRows(calData.gs,  'Grain Syrup'),
+    ...calRows(calData.csl, 'CSL'),
+    ...calRows(calData.sg,  'Dry Spent Grain'),
+  ])
+
+  document.getElementById('tab-health').innerHTML =
+    warn +
+    `<div class="dt-grid">${d1tbl}${d2tbl}</div>` +
+    `<div class="dt-grid" style="margin-top:12px">${phTbl}${tmpTbl}</div>` +
+    `<div class="dt-grid" style="margin-top:12px">${tsvsT}${iapaT}</div>` +
+    `<div style="margin-top:12px">${calTbl}</div>`
 }
 
 // ── KPI HELPER ────────────────────────────────────────────
