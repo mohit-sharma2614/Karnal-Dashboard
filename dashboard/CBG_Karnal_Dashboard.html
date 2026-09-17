@@ -147,6 +147,14 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 /* ── HEALTH ALERT ────────────────────────────────────────── */
 .health-warn{background:var(--amber-bg);border:1px solid rgba(180,83,9,.2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:12px}
 
+/* ── DATA TABLE ──────────────────────────────────────────── */
+.dt-head{background:var(--surf2);color:var(--accent);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:7px 12px!important;text-align:left!important}
+.dt-label{text-align:left;color:var(--text);font-weight:500;width:60%}
+.dt-unit{color:var(--text2);font-size:11px;width:15%;text-align:center}
+.dt-val{text-align:right;font-weight:600;color:var(--text);font-variant-numeric:tabular-nums;width:25%}
+.dt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+@media(max-width:640px){.dt-grid{grid-template-columns:1fr}}
+
 /* ── NO DATA ─────────────────────────────────────────────── */
 .no-data{color:var(--text3);font-size:12px;padding:24px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:9px}
 
@@ -549,6 +557,23 @@ function selectDigester(dig) {
   renderHealth()
 }
 
+// ── DATA ROW HELPER ───────────────────────────────────────
+function dataTable(rows) {
+  let h = `<div class="tbl-wrap"><table class="tbl"><tbody>`
+  rows.forEach(r => {
+    if (r.head) {
+      h += `<tr><td colspan="3" class="dt-head">${r.head}</td></tr>`
+    } else {
+      const v = r.val===null||r.val===undefined||r.val===''||r.val===0&&r.zero===false ? '—' : r.val
+      h += `<tr><td class="dt-label">${r.label}</td><td class="dt-unit">${r.unit||''}</td><td class="dt-val">${v}</td></tr>`
+    }
+  })
+  h += `</tbody></table></div>`
+  return h
+}
+function fv(v, dec=2) { const x=parseFloat(v); return isNaN(x)||x===0?'—':x.toFixed(dec) }
+function fi(v)        { const x=parseFloat(v); return isNaN(x)||x===0?'—':Math.round(x).toLocaleString('en-IN') }
+
 // ── PRODUCTION TAB ────────────────────────────────────────
 function renderProduction() {
   const {d1,d2,psa} = _D
@@ -556,98 +581,162 @@ function renderProduction() {
   const bppD1 = n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46])
   const bppD2 = n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47])
   const olr1  = d1[49], olr2 = d2[50]
-  // psa[1]=C2 is Excel time-formatted (fraction of day). Multiply by 24 to get hours.
   const psaHrs = n(psa[1]) > 0 && n(psa[1]) < 2 ? n(psa[1]) * 24 : n(psa[1])
-  const psaCbg = psa[12]
   const psaE1 = d1[50], psaE2 = d2[51]
   const tgt = Math.round(130000/30)
   const cbgCls = cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
 
-  document.getElementById('tab-production').innerHTML = `
-    <div class="kpi-grid">
-      ${kpi('Total CBG Today', fmt(cbgTot), 'kg', cbgCls, `Target ${tgt.toLocaleString('en-IN')} kg/day`)}
-      ${kpi('CBG — Digester 1', fmt(cbgD1), 'kg', 'b')}
-      ${kpi('CBG — Digester 2', fmt(cbgD2), 'kg', 'b')}
-      ${kpi('BPP Total D1', fmt(bppD1), 'm³ expected', 'c')}
-      ${kpi('BPP Total D2', fmt(bppD2), 'm³ expected', 'c')}
-      ${kpi('OLR — D1', fmt(olr1,2), 'kg VS/m³/day', olrCls(olr1), 'Safe: 2.0–4.0')}
-      ${kpi('OLR — D2', fmt(olr2,2), 'kg VS/m³/day', olrCls(olr2), 'Safe: 2.0–4.0')}
-      ${kpi('PSA Run Hours', fmt(psaHrs,1), 'hrs today', 'b')}
-      ${kpi('PSA CBG Output', fmt(psaCbg), 'kg', 'c')}
-      ${kpi('PSA Efficiency D1', fmt(psaE1,1), '%', effCls(psaE1))}
-      ${kpi('PSA Efficiency D2', fmt(psaE2,1), '%', effCls(psaE2))}
-    </div>`
+  const summary = `<div class="kpi-grid">
+    ${kpi('Total CBG Today', fmt(cbgTot), 'kg', cbgCls, `Target ${tgt.toLocaleString('en-IN')} kg/day`)}
+    ${kpi('CBG — D1', fmt(cbgD1), 'kg', 'b')}
+    ${kpi('CBG — D2', fmt(cbgD2), 'kg', 'b')}
+    ${kpi('OLR — D1', fmt(olr1,2), 'kg VS/m³/day', olrCls(olr1), 'Safe: 2.0–4.0')}
+    ${kpi('OLR — D2', fmt(olr2,2), 'kg VS/m³/day', olrCls(olr2), 'Safe: 2.0–4.0')}
+    ${kpi('PSA Run Hours', fmt(psaHrs,1), 'hrs', 'b')}
+  </div>`
+
+  const d1tbl = dataTable([
+    {head:'Digester 1 — Gas Production'},
+    {label:'Biogas Estimated (Expected)',   unit:'m³',  val:fv(d1[10])},
+    {label:'Biogas Estimated (Actual)',     unit:'m³',  val:fi(d1[31])},
+    {label:'Raw Biogas at PSA Inlet',       unit:'m³',  val:fi(d1[32])},
+    {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d1[33])},
+    {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d1[34])},
+    {label:'CBG Produced',                 unit:'kg',  val:fi(d1[35])},
+    {label:'CBG Vent',                     unit:'kg',  val:fi(d1[36])},
+    {label:'CBG Expected',                 unit:'kg',  val:fi(d1[38])},
+    {label:'CBG Expected per Slot',        unit:'kg',  val:fv(d1[39])},
+    {label:'Per Hour Biogas Generation',   unit:'kg',  val:fv(d1[40])},
+    {label:'PSA Efficiency (hr basis)',    unit:'',    val:fv(d1[41])},
+    {head:'Digester 1 — BPP & Calculations'},
+    {label:'CD BPP',                       unit:'m³',  val:fv(d1[42])},
+    {label:'PM BPP',                       unit:'m³',  val:fv(d1[43])},
+    {label:'GS BPP',                       unit:'m³',  val:fv(d1[44])},
+    {label:'CSL BPP',                      unit:'m³',  val:fv(d1[45])},
+    {label:'SG BPP',                       unit:'m³',  val:fv(d1[46])},
+    {label:'Total BPP',                    unit:'m³',  val:fv(n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46]))},
+    {label:'Working Volume',               unit:'m³',  val:fv(d1[47])},
+    {label:'Slurry Height',                unit:'m',   val:fv(d1[48])},
+    {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d1[49])},
+    {label:'PSA Efficiency %',             unit:'%',   val:fv(d1[50])},
+  ])
+
+  const d2tbl = dataTable([
+    {head:'Digester 2 — Gas Production'},
+    {label:'Biogas Estimated (Expected)',   unit:'m³',  val:fv(d2[10])},
+    {label:'Biogas Estimated (Actual)',     unit:'m³',  val:fi(d2[31])},
+    {label:'Raw Biogas at PSA Inlet',       unit:'m³',  val:fi(d2[32])},
+    {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d2[33])},
+    {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d2[34])},
+    {label:'CBG Produced',                 unit:'kg',  val:fi(d2[35])},
+    {label:'CBG Vent',                     unit:'kg',  val:fi(d2[36])},
+    {label:'CBG Expected',                 unit:'kg',  val:fi(d2[38])},
+    {label:'CBG Expected per Slot',        unit:'kg',  val:fv(d2[39])},
+    {label:'Per Hour Biogas Generation',   unit:'kg',  val:fv(d2[40])},
+    {label:'PSA Efficiency (hr basis)',    unit:'',    val:fv(d2[41])},
+    {head:'Digester 2 — BPP & Calculations'},
+    {label:'CD BPP',                       unit:'m³',  val:fv(d2[43])},
+    {label:'PM BPP',                       unit:'m³',  val:fv(d2[44])},
+    {label:'GS BPP',                       unit:'m³',  val:fv(d2[45])},
+    {label:'CSL BPP',                      unit:'m³',  val:fv(d2[46])},
+    {label:'SG BPP',                       unit:'m³',  val:fv(d2[47])},
+    {label:'Total BPP',                    unit:'m³',  val:fv(n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47]))},
+    {label:'Working Volume',               unit:'m³',  val:fv(d2[48])},
+    {label:'Slurry Height',                unit:'m',   val:fv(d2[49])},
+    {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d2[50])},
+    {label:'PSA Efficiency %',             unit:'%',   val:fv(d2[51])},
+  ])
+
+  const psatbl = dataTable([
+    {head:'PSA Production'},
+    {label:'PSA Running Hours',            unit:'hrs', val:fv(psaHrs,1)},
+    {label:'PSA Run Minutes',              unit:'min', val:fi(psa[2])},
+    {label:'Compressor Hours',             unit:'hrs', val:fv(psa[3])},
+    {label:'PSA-Comp Diff',                unit:'min', val:fv(psa[4])},
+    {label:'Raw Biogas D1',                unit:'m³',  val:fi(psa[5])},
+    {label:'Raw Biogas D2',                unit:'m³',  val:fi(psa[6])},
+    {label:'Raw Biogas Total',             unit:'m³',  val:fi(psa[7])},
+    {label:'Purified Gas',                 unit:'m³',  val:fi(psa[9])},
+    {label:'CBG from D1',                  unit:'kg',  val:fi(psa[10])},
+    {label:'CBG from D2',                  unit:'kg',  val:fi(psa[11])},
+    {label:'Total CBG Purified',           unit:'kg',  val:fi(psa[12])},
+    {label:'CBG Density',                  unit:'kg/m³', val:fv(psa[13])},
+    {head:'PSA — Customer Dispatch (kg)'},
+    {label:'Total Dispatched',             unit:'kg',  val:fi(psa[15])},
+    {label:'Veer',                         unit:'kg',  val:fi(psa[16])},
+    {label:'Adinath',                      unit:'kg',  val:fi(psa[17])},
+    {label:'KFS Sonipat',                  unit:'kg',  val:fi(psa[18])},
+    {label:'KSK Sonipat',                  unit:'kg',  val:fi(psa[19])},
+    {label:'OM Filling Sonipat',           unit:'kg',  val:fi(psa[20])},
+    {label:'SPS Yamuna Nagar',             unit:'kg',  val:fi(psa[21])},
+    {head:'PSA — Other'},
+    {label:'CH4 %',                        unit:'%',   val:fv(psa[22])},
+    {label:'P-Cut Hours',                  unit:'hrs', val:fv(psa[23])},
+    {label:'Vent Hours',                   unit:'hrs', val:fv(psa[24])},
+    {label:'Cascade 1',                    unit:'',    val:fv(psa[25])},
+    {label:'Cascade 2',                    unit:'',    val:fv(psa[26])},
+    {label:'CBG Storage',                  unit:'',    val:fv(psa[27])},
+    {label:'Remark',                       unit:'',    val:psa[28]||'—'},
+  ])
+
+  document.getElementById('tab-production').innerHTML =
+    summary +
+    `<div class="dt-grid">${d1tbl}${d2tbl}</div>` +
+    psatbl
 }
 
 // ── FEEDSTOCK TAB ─────────────────────────────────────────
 function renderFeedstock() {
   const {d1,d2} = _D
-  // Default to D1 when nothing selected; D2 only when explicitly chosen
-  const d = _selDig === 'Digester 2' ? d2 : d1
-  const accentClr = _selDig === 'Digester 2' ? '#1A7A4A' : '#1D6FA8'
-
-  function e(idx)  { return n(d[idx]) }
-  function a(i1,i2){ return n(d[i1]) }
-
-  const rows = [
-    { name:'Cow Dung',    unit:'MT',   exp:e(1),  act:a(14,14) },
-    { name:'Pressmud',    unit:'MT',   exp:e(2),  act:a(15,15) },
-    { name:'CSL',         unit:'KL',   exp:e(4),  act:a(17,17) },
-    { name:'Grain Syrup', unit:'KL',   exp:e(6),  act:a(22,22) },
-    { name:'Spent Grain', unit:'tons', exp:e(5),  act:a(23,23) },
-  ]
-
-  function actCls(act, exp) {
-    if (!exp) return ''
-    const pct = act/exp*100
-    return pct>=90?'tg':pct>=70?'ta':'tr'
-  }
-  function pctStr(act, exp) {
-    return exp>0 ? Math.round(act/exp*100)+'%' : '—'
-  }
-
   const digLabel = _selDig === 'Digester 2' ? 'Digester 2' : 'Digester 1'
-  const hintHtml = `<div style="font-size:12px;color:${accentClr};margin-bottom:8px;font-weight:600">Showing: ${digLabel} — click a submission card to switch digester</div>`
+  const accentClr = _selDig === 'Digester 2' ? '#1A7A4A' : '#1D6FA8'
+  const d = _selDig === 'Digester 2' ? d2 : d1
+  const bppOff = _selDig === 'Digester 2' ? 43 : 42
+  const hint = `<div style="font-size:12px;color:${accentClr};margin-bottom:10px;font-weight:600">Showing: ${digLabel} — click a submission card to switch digester</div>`
 
-  let tbl = `<div class="tbl-wrap"><table class="tbl"><thead>
-    <tr>
-      <th style="text-align:left">Feedstock</th>
-      <th>Unit</th>
-      <th>Expected</th>
-      <th>Actual</th>
-      <th>vs Target</th>
-    </tr>
-  </thead><tbody>`
+  function pct(act,exp){ return exp>0?`${Math.round(n(act)/n(exp)*100)}%`:'—' }
+  function cls(act,exp){ if(!exp) return ''; const p=n(act)/n(exp)*100; return p>=90?'tg':p>=70?'ta':'tr' }
 
-  rows.forEach(r => {
-    const cls = actCls(r.act, r.exp)
-    tbl += `<tr>
-      <td>${r.name}</td>
-      <td>${r.unit}</td>
-      <td>${fmt(r.exp,1)}</td>
-      <td class="${cls}">${fmt(r.act,1)}</td>
-      <td class="${cls}">${pctStr(r.act,r.exp)}</td>
-    </tr>`
-  })
-  tbl += `</tbody></table></div>`
+  const expActTbl = `<div class="tbl-wrap"><table class="tbl">
+    <thead><tr><th style="text-align:left">Feedstock</th><th>Unit</th><th>Expected</th><th>Actual</th><th>%</th></tr></thead>
+    <tbody>
+      <tr><td>Cow Dung</td><td>MT</td><td>${fv(d[1],1)}</td><td class="${cls(d[14],d[1])}">${fv(d[14],1)}</td><td class="${cls(d[14],d[1])}">${pct(d[14],d[1])}</td></tr>
+      <tr><td>Pressmud</td><td>MT</td><td>${fv(d[2],1)}</td><td class="${cls(d[15],d[2])}">${fv(d[15],1)}</td><td class="${cls(d[15],d[2])}">${pct(d[15],d[2])}</td></tr>
+      <tr><td>Poultry Waste</td><td>KL</td><td>${fv(d[3],1)}</td><td class="${cls(d[16],d[3])}">${fv(d[16],1)}</td><td class="${cls(d[16],d[3])}">${pct(d[16],d[3])}</td></tr>
+      <tr><td>CSL</td><td>KL</td><td>${fv(d[4],1)}</td><td class="${cls(d[17],d[4])}">${fv(d[17],1)}</td><td class="${cls(d[17],d[4])}">${pct(d[17],d[4])}</td></tr>
+      <tr><td>Spent Grain</td><td>tons</td><td>${fv(d[5],1)}</td><td class="${cls(d[23],d[5])}">${fv(d[23],1)}</td><td class="${cls(d[23],d[5])}">${pct(d[23],d[5])}</td></tr>
+      <tr><td>Grain Syrup</td><td>KL</td><td>${fv(d[6],1)}</td><td class="${cls(d[22],d[6])}">${fv(d[22],1)}</td><td class="${cls(d[22],d[6])}">${pct(d[22],d[6])}</td></tr>
+      <tr><td>Fresh Water</td><td>m³</td><td>${fv(d[8],1)}</td><td>${fv(d[26],1)}</td><td>—</td></tr>
+      <tr><td>Recycle Slurry</td><td>m³</td><td>${fv(d[9],1)}</td><td>${fv(d[27],1)}</td><td>—</td></tr>
+    </tbody>
+  </table></div>`
 
-  // BPP section: show active digester (D1 by default, D2 when selected)
-  const isD2 = _selDig === 'Digester 2'
-  const bppColor = isD2 ? '#1A7A4A' : '#1D6FA8'
-  const bppVariant = isD2 ? 'g' : 'b'
-  const bppD = isD2 ? d2 : d1
-  const bppIdxCD = isD2 ? 43 : 42
-  const bppHtml = `
-    <div class="sub-sec" style="color:${bppColor}">BPP Contribution — ${digLabel} (m³)</div>
-    <div class="kpi-grid">
-      ${kpi('CD',fmt(n(bppD[bppIdxCD])),'m³',bppVariant)}
-      ${kpi('PM',fmt(n(bppD[bppIdxCD+1])),'m³',bppVariant)}
-      ${kpi('GS',fmt(n(bppD[bppIdxCD+2])),'m³',bppVariant)}
-      ${kpi('CSL',fmt(n(bppD[bppIdxCD+3])),'m³',bppVariant)}
-      ${kpi('SG',fmt(n(bppD[bppIdxCD+4])),'m³',bppVariant)}
-    </div>`
+  const detailTbl = dataTable([
+    {head:'Expected — Additional'},
+    {label:'Total Feed Expected',    unit:'MT/day', val:fv(d[7],1)},
+    {label:'Biogas Estimated',       unit:'m³',     val:fi(d[10])},
+    {label:'Total Slurry Expected',  unit:'m³',     val:fi(d[11])},
+    {label:'SFOM Expected',          unit:'tons',   val:fv(d[12],1)},
+    {label:'LFOM Expected',          unit:'KL',     val:fv(d[13],1)},
+    {head:'Actual — Additional'},
+    {label:'Poultry (tons/day, 28% TS)', unit:'tons', val:fv(d[18],2)},
+    {label:'Poultry (tons/day, VS basis)',unit:'tons', val:fv(d[19],2)},
+    {label:'Poultry TS%',            unit:'%',      val:fv(d[20],2)},
+    {label:'Poultry VS%',            unit:'%',      val:fv(d[21],2)},
+    {label:'Total Feed Actual',      unit:'MT/day', val:fv(d[24],1)},
+    {label:'Total Feed Actual',      unit:'KL/day', val:fv(d[25],1)},
+    {label:'Flow Meter Reading',     unit:'m³',     val:fi(d[28])},
+    {label:'Planned Drain',          unit:'m³',     val:fi(d[29])},
+    {label:'Actual Drain',           unit:'m³',     val:fi(d[30])},
+    {head:'BPP Contribution (m³)'},
+    {label:'Cow Dung BPP',           unit:'m³',     val:fv(d[bppOff])},
+    {label:'Pressmud BPP',           unit:'m³',     val:fv(d[bppOff+1])},
+    {label:'Grain Syrup BPP',        unit:'m³',     val:fv(d[bppOff+2])},
+    {label:'CSL BPP',                unit:'m³',     val:fv(d[bppOff+3])},
+    {label:'Spent Grain BPP',        unit:'m³',     val:fv(d[bppOff+4])},
+  ])
 
-  document.getElementById('tab-feedstock').innerHTML = hintHtml + tbl + `<div style="margin-top:16px">${bppHtml}</div>`
+  document.getElementById('tab-feedstock').innerHTML = hint + expActTbl + `<div style="margin-top:12px">${detailTbl}</div>`
 }
 
 // ── FINANCE TAB ───────────────────────────────────────────
@@ -660,56 +749,68 @@ function renderFinance() {
   const margin  = totRev > 0 ? (totRev - totCost)/totRev*100 : 0
   const mCls    = margin>=45?'g':margin>=30?'a':'r'
 
-  // Monthly Fixed Costs: fixedData rows 0=kVAh, 1=bill, 2=manpower, 3=EMI, 4=total
-  const mi = mCol - 1  // 0-indexed column offset in the fetched range
+  const mi = mCol - 1
   const bill   = fixedData[1] ? n(fixedData[1][mi]) : 0
   const manpow = fixedData[2] ? n(fixedData[2][mi]) : 0
   const emi    = fixedData[3] ? n(fixedData[3][mi]) : 0
   const fixed  = fixedData[4] ? n(fixedData[4][mi]) : 0
-
   const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
 
-  document.getElementById('tab-finance').innerHTML = `
-    <div class="sub-sec">Daily Revenue & Costs — ${fmtDate(_curDate)}</div>
-    <div class="kpi-grid">
-      ${kpi('CBG Sale',      fmtR(cbgSale), '', 'g')}
-      ${kpi('SFOM Sale',     fmtR(sfom),    '', 'g')}
-      ${kpi('LFOM Sale',     fmtR(lfom),    '', 'g')}
-      ${kpi('Total Revenue', fmtR(totRev),  '', 'g')}
-      ${kpi('Feedstock Cost',fmtR(feed),    '', 'r')}
-      ${kpi('Transport',     fmtR(transp),  '', 'a')}
-      ${kpi('Maintenance',   fmtR(maint),   '', 'a')}
-      ${kpi('Electricity/Day',fmtR(elec),   '', 'a')}
-      ${kpi('Total Cost',    fmtR(totCost), '', 'r')}
-      ${kpi('Net Margin',    margin>0?margin.toFixed(1)+'%':'—', '', mCls, 'Target 45%')}
-    </div>
-    <div class="sub-sec">Monthly Fixed Costs — ${MONTHS[month]} 2026</div>
-    <div class="kpi-grid">
-      ${kpi('Electricity Bill', fmtR(bill),   'this month', 'a')}
-      ${kpi('Manpower Cost',    fmtR(manpow), 'this month', 'a')}
-      ${kpi('Loan EMI',         fmtR(emi),    'this month', 'r')}
-      ${kpi('Total Fixed',      fmtR(fixed),  'this month', 'r')}
-    </div>`
+  const summary = `<div class="kpi-grid">
+    ${kpi('Total Revenue', fmtR(totRev), '', 'g')}
+    ${kpi('Total Cost',    fmtR(totCost), '', 'r')}
+    ${kpi('Net Margin',    margin>0?margin.toFixed(1)+'%':'—', '', mCls, 'Target 45%')}
+  </div>`
+
+  const dailyTbl = dataTable([
+    {head:'Daily Revenue'},
+    {label:'CBG Sale',        unit:'₹', val:fmtR(cbgSale)},
+    {label:'SFOM Sale',       unit:'₹', val:fmtR(sfom)},
+    {label:'LFOM Sale',       unit:'₹', val:fmtR(lfom)},
+    {label:'Total Revenue',   unit:'₹', val:fmtR(totRev)},
+    {head:'Daily Costs'},
+    {label:'Feedstock Cost',  unit:'₹', val:fmtR(feed)},
+    {label:'Transport',       unit:'₹', val:fmtR(transp)},
+    {label:'Maintenance',     unit:'₹', val:fmtR(maint)},
+    {label:'Electricity/Day', unit:'₹', val:fmtR(elec)},
+    {label:'Total Cost',      unit:'₹', val:fmtR(totCost)},
+  ])
+
+  const fixedTbl = dataTable([
+    {head:`Monthly Fixed Costs — ${MONTHS[month]} 2026`},
+    {label:'Electricity Bill', unit:'₹', val:fmtR(bill)},
+    {label:'Manpower Cost',    unit:'₹', val:fmtR(manpow)},
+    {label:'Loan EMI',         unit:'₹', val:fmtR(emi)},
+    {label:'Total Fixed',      unit:'₹', val:fmtR(fixed)},
+  ])
+
+  document.getElementById('tab-finance').innerHTML = summary + `<div class="dt-grid">${dailyTbl}${fixedTbl}</div>`
 }
 
 // ── DIGESTER HEALTH TAB ───────────────────────────────────
 function renderHealth() {
   const {d1,d2} = _D
-  const sh1 = d1[48], sh2 = d2[49]
-  const wv1 = d1[47], wv2 = d2[48]
-  const o1  = d1[49], o2  = d2[50]
+  const o1 = d1[49], o2 = d2[50]
   const warn = (parseFloat(o1)>4||parseFloat(o2)>4)
     ? `<div class="health-warn">⚠ OLR elevated — ${parseFloat(o1)>4?`D1: ${parseFloat(o1).toFixed(2)} `:''} ${parseFloat(o2)>4?`D2: ${parseFloat(o2).toFixed(2)}`:''} kg VS/m³/day. Consider reducing feedstock load.</div>` : ''
 
-  document.getElementById('tab-health').innerHTML = warn + `
-    <div class="kpi-grid">
-      ${kpi('Slurry Height D1', fmt(sh1,2), 'm', sh1?'b':'w', 'Dipstick reading')}
-      ${kpi('Slurry Height D2', fmt(sh2,2), 'm', sh2?'b':'w', 'Dipstick reading')}
-      ${kpi('Working Volume D1', fmt(wv1,0), 'm³', 'c')}
-      ${kpi('Working Volume D2', fmt(wv2,0), 'm³', 'c')}
-      ${kpi('OLR — D1', fmt(o1,2), 'kg VS/m³/day', olrCls(o1), 'Safe: 2.0–4.0')}
-      ${kpi('OLR — D2', fmt(o2,2), 'kg VS/m³/day', olrCls(o2), 'Safe: 2.0–4.0')}
-    </div>`
+  const d1tbl = dataTable([
+    {head:'Digester 1 — Health'},
+    {label:'Slurry Height',   unit:'m',             val:fv(d1[48])},
+    {label:'Working Volume',  unit:'m³',            val:fv(d1[47])},
+    {label:'OLR',             unit:'kg VS/m³/day',  val:fv(d1[49])},
+    {label:'PSA Efficiency',  unit:'%',             val:fv(d1[50])},
+  ])
+
+  const d2tbl = dataTable([
+    {head:'Digester 2 — Health'},
+    {label:'Slurry Height',   unit:'m',             val:fv(d2[49])},
+    {label:'Working Volume',  unit:'m³',            val:fv(d2[48])},
+    {label:'OLR',             unit:'kg VS/m³/day',  val:fv(d2[50])},
+    {label:'PSA Efficiency',  unit:'%',             val:fv(d2[51])},
+  ])
+
+  document.getElementById('tab-health').innerHTML = warn + `<div class="dt-grid">${d1tbl}${d2tbl}</div>`
 }
 
 // ── KPI HELPER ────────────────────────────────────────────
