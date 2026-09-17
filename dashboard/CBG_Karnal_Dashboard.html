@@ -70,9 +70,10 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 .hdr-plant{font-size:11px;color:var(--text3)}
 .hdr-sep{width:1px;height:22px;background:var(--bdr)}
 .hdr-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.date-wrap{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:7px;padding:6px 11px}
+.date-wrap{display:flex;align-items:center;gap:7px;background:var(--surf2);border:1px solid var(--bdr);border-radius:7px;padding:6px 11px;flex-wrap:wrap}
 .date-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
-#datePicker{background:none;border:none;color:var(--text);font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;outline:none}
+.date-sel{background:none;border:none;color:var(--text);font-family:inherit;font-size:12.5px;font-weight:500;cursor:pointer;outline:none;padding:0 2px}
+.date-sep{color:var(--text3);font-size:11px;font-weight:600}
 .hdr-refresh{background:none;border:1px solid var(--bdr);border-radius:7px;padding:6px 10px;color:var(--text2);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:5px}
 .hdr-refresh:hover{background:var(--surf2);color:var(--text)}
 .refresh-time{font-size:10px;color:var(--text3)}
@@ -218,7 +219,11 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
     <div class="hdr-right">
       <div class="date-wrap">
         <span class="date-label">Viewing</span>
-        <input type="date" id="datePicker" onchange="onDateChange(this.value)"/>
+        <select id="selYear"  class="date-sel" onchange="onYearChange()"></select>
+        <span class="date-sep">/</span>
+        <select id="selMonth" class="date-sel" onchange="onMonthChange()"></select>
+        <span class="date-sep">/</span>
+        <select id="selDay"   class="date-sel" onchange="onDayChange()"></select>
       </div>
       <button class="hdr-refresh" onclick="loadData()" title="Refresh data">
         ↻ <span class="refresh-time" id="lastRefresh"></span>
@@ -446,13 +451,84 @@ function showDash() {
   document.getElementById('loadingScreen').style.display = 'none'
   document.getElementById('dashScreen').style.display    = 'flex'
   document.getElementById('userLabel').textContent = _user || 'Signed in'
-  const dp = document.getElementById('datePicker')
-  dp.value = today(); dp.max = today()
-  _curDate = today()
+  initDateCascade(today())
   loadData()
 }
 
-function onDateChange(v) { _curDate = v; loadData() }
+// ── DATE CASCADE ──────────────────────────────────────────
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+function initDateCascade(dateStr) {
+  _curDate = dateStr
+  const [y, m, d] = dateStr.split('-').map(Number)
+  const todayParts = today().split('-').map(Number)
+
+  // Populate years: 2025 up to current year
+  const yearSel = document.getElementById('selYear')
+  yearSel.innerHTML = ''
+  for (let yr = 2025; yr <= todayParts[0]; yr++) {
+    const opt = document.createElement('option')
+    opt.value = yr; opt.textContent = yr
+    if (yr === y) opt.selected = true
+    yearSel.appendChild(opt)
+  }
+
+  populateMonths(y, m, todayParts)
+  populateDays(y, m, d, todayParts)
+}
+
+function populateMonths(year, selMonth, todayParts) {
+  const monthSel = document.getElementById('selMonth')
+  monthSel.innerHTML = ''
+  const maxM = year === todayParts[0] ? todayParts[1] : 12
+  for (let mo = 1; mo <= maxM; mo++) {
+    const opt = document.createElement('option')
+    opt.value = mo; opt.textContent = MONTHS[mo-1]
+    if (mo === selMonth) opt.selected = true
+    monthSel.appendChild(opt)
+  }
+}
+
+function populateDays(year, month, selDay, todayParts) {
+  const daySel = document.getElementById('selDay')
+  daySel.innerHTML = ''
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const maxD = (year === todayParts[0] && month === todayParts[1]) ? todayParts[2] : daysInMonth
+  for (let dd = 1; dd <= maxD; dd++) {
+    const opt = document.createElement('option')
+    opt.value = dd; opt.textContent = String(dd).padStart(2,'0')
+    if (dd === selDay) opt.selected = true
+    daySel.appendChild(opt)
+  }
+}
+
+function onYearChange() {
+  const todayParts = today().split('-').map(Number)
+  const y  = Number(document.getElementById('selYear').value)
+  const m  = Number(document.getElementById('selMonth').value)
+  populateMonths(y, m, todayParts)
+  const newM = Number(document.getElementById('selMonth').value)
+  populateDays(y, newM, 1, todayParts)
+  applyDateCascade()
+}
+
+function onMonthChange() {
+  const todayParts = today().split('-').map(Number)
+  const y = Number(document.getElementById('selYear').value)
+  const m = Number(document.getElementById('selMonth').value)
+  populateDays(y, m, 1, todayParts)
+  applyDateCascade()
+}
+
+function onDayChange() { applyDateCascade() }
+
+function applyDateCascade() {
+  const y = document.getElementById('selYear').value
+  const m = String(document.getElementById('selMonth').value).padStart(2,'0')
+  const d = String(document.getElementById('selDay').value).padStart(2,'0')
+  _curDate = `${y}-${m}-${d}`
+  loadData()
+}
 
 // ── LOAD ALL DATA ─────────────────────────────────────────
 async function loadData() {
