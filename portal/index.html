@@ -246,6 +246,7 @@ const SHEETS = [
     {k:'rbg_total',      l:'Raw Biogas Total Produce (m³)',      tp:'num'},
     {k:'cbg_prod',       l:'CBG Produced (kg)',                  tp:'num'},
     {k:'cbg_vent',       l:'CBG Vent (kg)',                      tp:'num'},
+    {k:'biogas_est2',    l:'Biogas Estimated (m³) — D2 C39',    tp:'num'},
     {k:'cbg_exp',        l:'CBG Expected (kg)',                  tp:'num'},
     {k:'cbg_exp_slot',   l:'CBG Expected per Slot (kg)',         tp:'num'},
     {k:'biogas_per_hr',  l:'Per Hour Biogas Generation (kg)',    tp:'num'},
@@ -889,7 +890,8 @@ const COLUMN_MAP = {
     gs_act:23, sg_act:24, total_feed_act:25, total_feed_kl:26,
     fw_act:27, rs_act:28, flow_mtr:29, planned_drain:30, drain:31,
     biogas_est_act:32, rbg_psa:33, rbg_vent:34, rbg_total:35, cbg_prod:36, cbg_vent:37,
-    cbg_exp:39, cbg_exp_slot:40, biogas_per_hr:41, psa_eff_hr:42,
+    // D2 has an extra column C39 'Biogas Estimated (m3)' not present in D1 — all C39+ shift by 1
+    biogas_est2:39, cbg_exp:40, cbg_exp_slot:41, biogas_per_hr:42, psa_eff_hr:43,
     sl_ht:50,
     cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, sg_bpp:48, wv:49, olr:51, psa_eff:52,
   },
