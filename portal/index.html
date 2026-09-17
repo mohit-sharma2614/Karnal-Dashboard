@@ -593,7 +593,8 @@ const SHEETS = [
 {id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs', hasDate:true, sections:[
   {t:'Manual Entry',f:[
     {k:'transport_cost',l:'Transportation Cost (₹)', tp:'num'},
-    {k:'remarks',    l:'Remarks',                 tp:'txt'},
+    {k:'elec_cost',  l:'Electricity Cost (₹/day)',  tp:'num'},
+    {k:'remarks',    l:'Remarks',                   tp:'txt'},
   ]},
   {t:'Note',f:[
     {k:'_note', l:'All other revenue & cost columns are auto-derived from Sales Detail, Feed & Balance, and other sheets.', tp:'info'},
@@ -957,8 +958,9 @@ const COLUMN_MAP = {
   CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8 },           // no remarks/qty cols in Excel
   MANURE: {
-    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6 — no qty/rate/remarks cols in Excel
+    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6, Month=7(auto from date)
     v_type:3, farmer:4, type:5, amount:6,
+    // month col (7) is written automatically in save logic — not a form field
   },
   SALES: {
     // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9
@@ -971,7 +973,7 @@ const COLUMN_MAP = {
   },
   REVCOST: {
     // transport_cost key matches SHEETS field key (renamed from 'transport')
-    cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7,
+    cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7, elec_cost:8,
   },
   // FIXED and EMI use month columns, not daily date rows — handled separately
 }
@@ -1154,6 +1156,13 @@ window.handleSave = async ()=>{
         if(v!==null&&v!==undefined&&v!=='') rowData[col]=v
       }
     }))
+
+    // MANURE C7 = Month string (e.g. "Jan-2026") — auto-derived from the date picker.
+    if(cur.id === 'MANURE') {
+      const [y,m] = ds.split('-')
+      const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+      rowData[7] = `${MON[parseInt(m,10)-1]}-${y}`
+    }
 
     // PSA C2 (psa_hrs) and C4 (comp_hrs) are time-formatted cells in Excel.
     // Convert decimal hours → Excel time fraction (÷24) before writing.
