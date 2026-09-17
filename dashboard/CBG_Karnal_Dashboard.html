@@ -393,7 +393,7 @@ function fmt(v, dec=0) {
   return parseFloat(v).toLocaleString('en-IN', { maximumFractionDigits:dec, minimumFractionDigits:dec })
 }
 function fmtR(v) {
-  if (!v || isNaN(parseFloat(v))) return '—'
+  if (v===null||v===undefined||v===''||isNaN(parseFloat(v))) return '—'
   const x = parseFloat(v)
   if (x >= 1e7) return '₹'+(x/1e7).toFixed(2)+' Cr'
   if (x >= 1e5) return '₹'+(x/1e5).toFixed(2)+' L'
@@ -692,8 +692,8 @@ function dataTable(rows) {
   h += `</tbody></table></div>`
   return h
 }
-function fv(v, dec=2) { const x=parseFloat(v); return isNaN(x)||x===0?'—':x.toFixed(dec) }
-function fi(v)        { const x=parseFloat(v); return isNaN(x)||x===0?'—':Math.round(x).toLocaleString('en-IN') }
+function fv(v, dec=2) { const x=parseFloat(v); return isNaN(x)?'—':x.toFixed(dec) }
+function fi(v)        { const x=parseFloat(v); return isNaN(x)?'—':Math.round(x).toLocaleString('en-IN') }
 
 // ── PRODUCTION TAB ────────────────────────────────────────
 function renderProduction() {
