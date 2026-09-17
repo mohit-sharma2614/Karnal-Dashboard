@@ -99,6 +99,7 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 .sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
 .sub-card{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;border-left:3px solid var(--bdr);box-shadow:var(--shadow)}
 .sub-card.done{border-left-color:var(--green);background:#FAFFFE}
+.sub-card.avail{border-left-color:var(--blue);background:#F6FAFF}
 .sub-card.pend{border-left-color:var(--bdr2)}
 .sub-card.selected{outline:2px solid var(--blue);outline-offset:1px;box-shadow:0 0 0 3px rgba(29,111,168,0.18)}
 .sub-sheet{font-size:11.5px;font-weight:600;color:var(--text);line-height:1.3}
@@ -106,6 +107,7 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 .sub-time{font-size:10px;color:var(--text3)}
 .sub-status{font-size:10px;font-weight:600;margin-top:3px}
 .sub-status.ok{color:var(--green)}
+.sub-status.avail{color:var(--blue)}
 .sub-status.pend{color:var(--text3)}
 
 /* ── DIVIDER ─────────────────────────────────────────────── */
@@ -652,22 +654,49 @@ function clearKpis() {
 
 // ── SUBMISSION STATUS ─────────────────────────────────────
 function renderSubmissions() {
-  const serial = _D.serial
-  const map = {}
+  const {d1,d2,psa,rc,fb,fs,ph,tmp,tsvs,iapa,
+         fixedData,maintData,manureData,salesData,calData,serial} = _D
+
+  // --- submission log: who/when (portal audit trail) ---
+  const subMap = {}
   _D.subLog.forEach(r => {
     if (!r[0] || Math.round(r[0]) !== serial) return
-    map[r[1]] = { by: r[2] || r[3] || '—', time: r[4] || '' }
+    subMap[r[1]] = { by: r[2] || r[3] || '—', time: r[4] || '' }
   })
 
-  const pending   = TRACKED.filter(s => !map[s])
-  _D.pendingSet   = new Set(pending)
+  // --- actual data presence: drives pendingSet, amber banners and "—" values ---
+  // A sheet is "no data" only when the loaded arrays are empty / no matching rows.
+  // This correctly handles historical back-dates where data exists without a portal log entry.
+  const hasData = {
+    'Digester 1':            d1.length > 0,
+    'Digester 2':            d2.length > 0,
+    'PSA Production':        psa.length > 0,
+    'Daily Revenue & Costs': rc.length > 0,
+    'Feed & Balance':        fb.length > 0,
+    'Feedstock Supply':      fs.length > 0,
+    'Digester pH':           ph.length > 0,
+    'Digester Temp':         tmp.length > 0,
+    'TS-VS Analysis':        tsvs.length > 0,
+    'IA-PA':                 iapa.length > 0,
+    'Monthly Fixed Costs':   fixedData.some(r => r && r.some(v => v !== null && v !== '')),
+    'Manure Sales':          manureData.some(r => r && r[1] && Math.round(n(r[1])) === serial),
+    'Sales Detail':          salesData.some(r => r && r[0] && Math.round(n(r[0])) === serial),
+    'Maintenance':           maintData.some(r => r && r[1] && Math.round(n(r[1])) === serial),
+    'Pressmud Cal':          calData.pm.some(r => r && r[1]),
+    'CD Cal':                calData.cd.some(r => r && r[1]),
+    'Grain Syrup Cal':       calData.gs.some(r => r && r[1]),
+    'CSL Cal':               calData.csl.some(r => r && r[1]),
+    'Spent Grain Cal':       calData.sg.some(r => r && r[1]),
+  }
+  _D.pendingSet = new Set(TRACKED.filter(s => !hasData[s]))
 
-  // Alert strip
-  const alert = document.getElementById('alertStrip')
-  if (pending.length) {
+  // --- alert strip counts sheets with NO data (truly pending) ---
+  const noData = TRACKED.filter(s => !hasData[s])
+  const alert  = document.getElementById('alertStrip')
+  if (noData.length) {
     alert.style.display = 'flex'
-    document.getElementById('alertCount').textContent = `${pending.length} ${pending.length===1?'sheet':'sheets'} pending — `
-    document.getElementById('alertMsg').textContent   = pending.slice(0,4).join(', ') + (pending.length>4 ? ` +${pending.length-4} more` : '')
+    document.getElementById('alertCount').textContent = `${noData.length} ${noData.length===1?'sheet':'sheets'} pending — `
+    document.getElementById('alertMsg').textContent   = noData.slice(0,4).join(', ') + (noData.length>4 ? ` +${noData.length-4} more` : '')
   } else {
     alert.style.display = 'none'
   }
@@ -676,21 +705,33 @@ function renderSubmissions() {
 
   let html = ''
   TRACKED.forEach(s => {
-    const e = map[s]
+    const logged   = subMap[s]       // portal submission entry
+    const dataOK   = hasData[s]      // data actually found in sheet
     const isDig    = s === 'Digester 1' || s === 'Digester 2'
     const isSelected = _selDig === s
     const clickAttr = isDig
       ? ` onclick="selectDigester('${s}')" style="cursor:pointer"`
       : ` onclick="showSection('${s}')" style="cursor:pointer"`
-    const selStyle  = isSelected ? ' selected' : ''
-    if (e) {
+    const selStyle = isSelected ? ' selected' : ''
+
+    if (logged) {
+      // Portal-submitted: green border, submitter name + time
       html += `<div class="sub-card done${selStyle}"${clickAttr}>
         <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
-        <div class="sub-by">${e.by}</div>
-        <div class="sub-time">${e.time}</div>
+        <div class="sub-by">${logged.by}</div>
+        <div class="sub-time">${logged.time}</div>
         <div class="sub-status ok">✓ Submitted</div>
       </div>`
+    } else if (dataOK) {
+      // Data exists but not logged through portal (historical / direct entry)
+      html += `<div class="sub-card avail${selStyle}"${clickAttr}>
+        <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
+        <div class="sub-by">Direct entry</div>
+        <div class="sub-time">—</div>
+        <div class="sub-status avail">✓ Data available</div>
+      </div>`
     } else {
+      // No data at all for this date
       html += `<div class="sub-card pend${selStyle}"${clickAttr}>
         <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
         <div class="sub-by">—</div>
