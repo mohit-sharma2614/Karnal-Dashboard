@@ -151,6 +151,10 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 /* ── PENDING SECTION BANNER ──────────────────────────────── */
 .sec-pending-banner{background:rgba(234,179,8,0.10);border:1px solid rgba(180,83,9,.25);border-radius:7px;padding:7px 11px;font-size:11.5px;color:var(--amber);margin-bottom:8px;font-weight:500}
 
+/* ── FOCUS BACK BUTTON ───────────────────────────────────── */
+.focus-back{font-family:inherit;font-size:12px;background:none;border:1px solid var(--bdr);border-radius:7px;padding:6px 12px;cursor:pointer;color:var(--text2);margin-bottom:14px;display:inline-flex;align-items:center;gap:5px}
+.focus-back:hover{background:var(--surf2);color:var(--text)}
+
 /* ── DATA TABLE ──────────────────────────────────────────── */
 .dt-head{background:var(--surf2);color:var(--accent);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;padding:7px 12px!important;text-align:left!important}
 .dt-label{text-align:left;color:var(--text);font-weight:500;width:60%}
@@ -311,7 +315,7 @@ const SHEET_NAV = {
 }
 
 // ── MSAL ─────────────────────────────────────────────────
-let _app = null, _user = null, _curDate = null, _D = {}, _selDig = null, _loadSeq = 0
+let _app = null, _user = null, _curDate = null, _D = {}, _selDig = null, _loadSeq = 0, _focusSheet = null
 
 async function getMsalApp() {
   if (_app) return _app
@@ -701,6 +705,7 @@ function renderSubmissions() {
 // ── DIGESTER FILTER ───────────────────────────────────────
 function selectDigester(dig) {
   _selDig = (_selDig === dig) ? null : dig
+  _focusSheet = null
   renderSubmissions()
   renderProduction()
   renderFeedstock()
@@ -708,10 +713,12 @@ function selectDigester(dig) {
   renderHealth()
 }
 
-// ── SHEET CARD NAVIGATION ─────────────────────────────────
+// ── SHEET CARD NAVIGATION (focus mode) ───────────────────
 function showSection(sheet) {
   const nav = SHEET_NAV[sheet]
   if (!nav) return
+  _focusSheet = sheet
+  // switch tab
   document.querySelectorAll('.tab-btn').forEach(b => {
     const oc = b.getAttribute('onclick') || ''
     b.classList.toggle('on', oc.includes("'"+nav.tab+"'"))
@@ -719,10 +726,23 @@ function showSection(sheet) {
   ;['production','feedstock','finance','health'].forEach(t => {
     document.getElementById('tab-'+t).style.display = (t===nav.tab) ? '' : 'none'
   })
-  setTimeout(() => {
-    const el = document.getElementById(nav.sec)
-    if (el) el.scrollIntoView({behavior:'smooth', block:'start'})
-  }, 50)
+  // re-render only the affected tab (focus mode will isolate the section)
+  if (nav.tab === 'production') renderProduction()
+  else if (nav.tab === 'feedstock') renderFeedstock()
+  else if (nav.tab === 'finance') renderFinance()
+  else renderHealth()
+}
+
+function clearFocus() {
+  _focusSheet = null
+  renderProduction()
+  renderFeedstock()
+  renderFinance()
+  renderHealth()
+}
+
+function focusBackBtn() {
+  return `<button class="focus-back" onclick="clearFocus()">← Show all</button>`
 }
 
 // ── PENDING HELPERS ───────────────────────────────────────
@@ -866,6 +886,13 @@ function renderProduction() {
     {label:'Remark',                       unit:'',    val:psa[28]||'—'},
   ])
 
+  if (_focusSheet === 'PSA Production') {
+    document.getElementById('tab-production').innerHTML =
+      focusBackBtn() +
+      `<div id="sec-psa">${pendingBanner('PSA Production')}${psatbl}</div>`
+    return
+  }
+
   document.getElementById('tab-production').innerHTML =
     summary +
     `<div class="dt-grid">
@@ -974,6 +1001,19 @@ function renderFeedstock() {
       .filter(([,i])=>n(fs[i])>0).map(([l,i])=>({label:l, unit:'kg', val:fi(fs[i])})),
   ])
 
+  if (_focusSheet === 'Feed & Balance') {
+    document.getElementById('tab-feedstock').innerHTML =
+      focusBackBtn() +
+      `<div id="sec-fb">${pendingBanner('Feed & Balance')}${fbTbl}</div>`
+    return
+  }
+  if (_focusSheet === 'Feedstock Supply') {
+    document.getElementById('tab-feedstock').innerHTML =
+      focusBackBtn() +
+      `<div id="sec-fs">${pendingBanner('Feedstock Supply')}${fsTbl}</div>`
+    return
+  }
+
   document.getElementById('tab-feedstock').innerHTML =
     hint +
     `<div id="sec-feedstock-main">${pendingBanner('Digester 1')}${expActTbl}</div>` +
@@ -1069,6 +1109,18 @@ function renderFinance() {
     const totalCost = maintEntries.reduce((s,r)=>s+n(r[7]),0)
     rows += `<tr><td colspan="2" style="font-weight:600">Total</td><td style="text-align:right;font-weight:600">${fmtR(totalCost)}</td></tr>`
     maintHtml = `<div class="tbl-wrap"><table class="tbl"><tbody><tr><td colspan="3" class="dt-head">Maintenance — Today</td></tr>${rows}</tbody></table></div>`
+  }
+
+  const finFocusMap = {
+    'Daily Revenue & Costs': `<div id="sec-revenue">${pendingBanner('Daily Revenue & Costs')}${dailyTbl}</div>`,
+    'Monthly Fixed Costs':   `<div id="sec-fixed">${pendingBanner('Monthly Fixed Costs')}${fixedTbl}</div>`,
+    'Sales Detail':          `<div id="sec-sales">${pendingBanner('Sales Detail')}${salesTbl}</div>`,
+    'Manure Sales':          `<div id="sec-manure">${pendingBanner('Manure Sales')}${manureTbl}</div>`,
+    'Maintenance':           `<div id="sec-maint">${pendingBanner('Maintenance')}${maintHtml}</div>`,
+  }
+  if (finFocusMap[_focusSheet]) {
+    document.getElementById('tab-finance').innerHTML = focusBackBtn() + finFocusMap[_focusSheet]
+    return
   }
 
   document.getElementById('tab-finance').innerHTML =
@@ -1193,6 +1245,22 @@ function renderHealth() {
     })
     if (last3.length === 0) rows.push({label:'No data', unit:'', val:'—'})
     return rows
+  }
+
+  const healthFocusMap = {
+    'Digester pH':    `<div id="sec-ph">${pendingBanner('Digester pH')}${phTbl}</div>`,
+    'Digester Temp':  `<div id="sec-tmp">${pendingBanner('Digester Temp')}${tmpTbl}</div>`,
+    'TS-VS Analysis': `<div id="sec-tsvs">${pendingBanner('TS-VS Analysis')}${tsvsT}</div>`,
+    'IA-PA':          `<div id="sec-iapa">${pendingBanner('IA-PA')}${iapaT}</div>`,
+    'Pressmud Cal':   `<div id="sec-cal-pm">${pendingBanner('Pressmud Cal')}${dataTable(calRows(calData.pm,'Pressmud'))}</div>`,
+    'CD Cal':         `<div id="sec-cal-cd">${pendingBanner('CD Cal')}${dataTable(calRows(calData.cd,'Cow Dung'))}</div>`,
+    'Grain Syrup Cal':`<div id="sec-cal-gs">${pendingBanner('Grain Syrup Cal')}${dataTable(calRows(calData.gs,'Grain Syrup'))}</div>`,
+    'CSL Cal':        `<div id="sec-cal-csl">${pendingBanner('CSL Cal')}${dataTable(calRows(calData.csl,'CSL'))}</div>`,
+    'Spent Grain Cal':`<div id="sec-cal-sg">${pendingBanner('Spent Grain Cal')}${dataTable(calRows(calData.sg,'Dry Spent Grain'))}</div>`,
+  }
+  if (healthFocusMap[_focusSheet]) {
+    document.getElementById('tab-health').innerHTML = focusBackBtn() + healthFocusMap[_focusSheet]
+    return
   }
 
   document.getElementById('tab-health').innerHTML =
