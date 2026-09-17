@@ -512,7 +512,7 @@ function renderSubmissions() {
 
   document.getElementById('subDate').textContent = fmtDate(_curDate)
 
-  const clickable = ['D1','D2']
+  const clickable = ['Digester 1','Digester 2']
   let html = ''
   TRACKED.forEach(s => {
     const e = map[s]
@@ -556,7 +556,9 @@ function renderProduction() {
   const bppD1 = n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46])
   const bppD2 = n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47])
   const olr1  = d1[49], olr2 = d2[50]
-  const psaHrs = psa[1], psaCbg = psa[12]
+  // psa[1]=C2 is Excel time-formatted (fraction of day). Multiply by 24 to get hours.
+  const psaHrs = n(psa[1]) > 0 && n(psa[1]) < 2 ? n(psa[1]) * 24 : n(psa[1])
+  const psaCbg = psa[12]
   const psaE1 = d1[50], psaE2 = d2[51]
   const tgt = Math.round(130000/30)
   const cbgCls = cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
@@ -581,8 +583,8 @@ function renderProduction() {
 function renderFeedstock() {
   const {d1,d2} = _D
   // Default to D1 when nothing selected; D2 only when explicitly chosen
-  const d = _selDig === 'D2' ? d2 : d1
-  const accentClr = _selDig === 'D2' ? '#1A7A4A' : '#1D6FA8'
+  const d = _selDig === 'Digester 2' ? d2 : d1
+  const accentClr = _selDig === 'Digester 2' ? '#1A7A4A' : '#1D6FA8'
 
   function e(idx)  { return n(d[idx]) }
   function a(i1,i2){ return n(d[i1]) }
@@ -604,7 +606,7 @@ function renderFeedstock() {
     return exp>0 ? Math.round(act/exp*100)+'%' : '—'
   }
 
-  const digLabel = _selDig === 'D2' ? 'Digester 2' : 'Digester 1'
+  const digLabel = _selDig === 'Digester 2' ? 'Digester 2' : 'Digester 1'
   const hintHtml = `<div style="font-size:12px;color:${accentClr};margin-bottom:8px;font-weight:600">Showing: ${digLabel} — click a submission card to switch digester</div>`
 
   let tbl = `<div class="tbl-wrap"><table class="tbl"><thead>
@@ -630,7 +632,7 @@ function renderFeedstock() {
   tbl += `</tbody></table></div>`
 
   // BPP section: show active digester (D1 by default, D2 when selected)
-  const isD2 = _selDig === 'D2'
+  const isD2 = _selDig === 'Digester 2'
   const bppColor = isD2 ? '#1A7A4A' : '#1D6FA8'
   const bppVariant = isD2 ? 'g' : 'b'
   const bppD = isD2 ? d2 : d1

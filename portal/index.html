@@ -1121,6 +1121,15 @@ window.handleSave = async ()=>{
       }
     }))
 
+    // PSA C2 (psa_hrs) and C4 (comp_hrs) are time-formatted cells in Excel.
+    // Convert decimal hours → Excel time fraction (÷24) before writing.
+    // C5 (psa_comp_diff) is minutes → convert to time fraction (÷60÷24).
+    if(cur.id === 'PSA') {
+      if(rowData[2]) rowData[2] = rowData[2] / 24
+      if(rowData[4]) rowData[4] = rowData[4] / 24
+      if(rowData[5]) rowData[5] = rowData[5] / 60 / 24
+    }
+
     const sn=cur.sheet
 
     if(!sn){
