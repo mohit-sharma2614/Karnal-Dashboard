@@ -957,8 +957,8 @@ function renderFeedstock() {
   const bppOff = _selDig === 'Digester 2' ? 43 : 42
   const hint = `<div style="font-size:12px;color:${accentClr};margin-bottom:10px;font-weight:600">Showing: ${digLabel} — click a submission card to switch digester</div>`
 
-  function pct(act,exp){ return exp>0?`${Math.round(n(act)/n(exp)*100)}%`:'—' }
-  function cls(act,exp){ if(!exp) return ''; const p=n(act)/n(exp)*100; return p>=90?'tg':p>=70?'ta':'tr' }
+  function pct(act,exp){ if(act===''||act===null||act===undefined) return '—'; return exp>0?`${Math.round(n(act)/n(exp)*100)}%`:'—' }
+  function cls(act,exp){ if(act===''||act===null||act===undefined) return ''; if(!exp) return ''; const p=n(act)/n(exp)*100; return p>=90?'tg':p>=70?'ta':'tr' }
 
   const expActTbl = `<div class="tbl-wrap"><table class="tbl">
     <thead><tr><th style="text-align:left">Feedstock</th><th>Unit</th><th>Expected</th><th>Actual</th><th>%</th></tr></thead>
