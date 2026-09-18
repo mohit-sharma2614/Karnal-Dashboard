@@ -415,6 +415,16 @@ function toSerial(ds) {
 function fmtDate(ds) {
   return new Date(ds+'T00:00:00').toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' })
 }
+function fmtTS(serial) {
+  if (!serial) return '—'
+  const frac = serial - Math.floor(serial)
+  const totalMin = Math.round(frac * 1440)
+  const h = Math.floor(totalMin / 60) % 24
+  const m = totalMin % 60
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${h12}:${String(m).padStart(2,'0')} ${ampm}`
+}
 function colL(n) { let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)} return s }
 function n(v)  { return parseFloat(v) || 0 }
 function fmt(v, dec=0) {
@@ -721,7 +731,7 @@ function renderSubmissions() {
       html += `<div class="sub-card done${selStyle}"${clickAttr}>
         <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
         <div class="sub-by">${logged.by}</div>
-        <div class="sub-time">${logged.time}</div>
+        <div class="sub-time">${fmtTS(logged.time)}</div>
         <div class="sub-status ok">✓ Submitted</div>
       </div>`
     } else if (dataOK) {
