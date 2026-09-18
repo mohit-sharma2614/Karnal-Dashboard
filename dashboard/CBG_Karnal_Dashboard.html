@@ -617,11 +617,11 @@ async function loadData() {
       gGet(`/worksheets('${encodeURIComponent('Maintenance')}')/range(address='A4:I300')`),
       gGet(`/worksheets('${encodeURIComponent('Manure Sales')}')/range(address='A3:G500')`),
       gGet(`/worksheets('${encodeURIComponent('Sales Detail')}')/range(address='A5:K300')`),
-      gGet(`/worksheets('${encodeURIComponent('Pressmud Cal.')}')/range(address='A4:H100')`),
-      gGet(`/worksheets('${encodeURIComponent('Cow Dung Cal.')}')/range(address='A4:H100')`),
-      gGet(`/worksheets('${encodeURIComponent('Rice Grain Syrup Cal.')}')/range(address='A4:H100')`),
-      gGet(`/worksheets('${encodeURIComponent('CSL Cal.')}')/range(address='A4:H100')`),
-      gGet(`/worksheets('${encodeURIComponent('Dry Spent Grain Cal')}')/range(address='A4:H100')`),
+      gGet(`/worksheets('${encodeURIComponent('Pressmud Cal.')}')/range(address='A4:J700')`),
+      gGet(`/worksheets('${encodeURIComponent('Cow Dung Cal.')}')/range(address='A4:J300')`),
+      gGet(`/worksheets('${encodeURIComponent('Rice Grain Syrup Cal.')}')/range(address='A4:J200')`),
+      gGet(`/worksheets('${encodeURIComponent('CSL Cal.')}')/range(address='A4:J200')`),
+      gGet(`/worksheets('${encodeURIComponent('Dry Spent Grain Cal')}')/range(address='A4:J200')`),
     ])
 
     if (seq !== _loadSeq) return  // stale — a newer request already started
@@ -694,11 +694,11 @@ function renderSubmissions() {
     'Manure Sales':          manureData.some(r => r && r[1] && Math.round(n(r[1])) === serial),
     'Sales Detail':          salesData.some(r => r && r[0] && Math.round(n(r[0])) === serial),
     'Maintenance':           maintData.some(r => r && r[1] && Math.round(n(r[1])) === serial),
-    'Pressmud Cal':          calData.pm.some(r => r && r[1]),
-    'CD Cal':                calData.cd.some(r => r && r[1]),
-    'Grain Syrup Cal':       calData.gs.some(r => r && r[1]),
-    'CSL Cal':               calData.csl.some(r => r && r[1]),
-    'Spent Grain Cal':       calData.sg.some(r => r && r[1]),
+    'Pressmud Cal':          calData.pm.some(r => r && Math.round(n(r[1])) === serial),
+    'CD Cal':                calData.cd.some(r => r && Math.round(n(r[1])) === serial),
+    'Grain Syrup Cal':       calData.gs.some(r => r && Math.round(n(r[1])) === serial),
+    'CSL Cal':               calData.csl.some(r => r && Math.round(n(r[1])) === serial),
+    'Spent Grain Cal':       calData.sg.some(r => r && Math.round(n(r[1])) === serial),
   }
   _D.pendingSet = new Set(TRACKED.filter(s => !hasData[s]))
 
@@ -1291,15 +1291,41 @@ function renderHealth() {
 
   // Cal sheets — last 3 readings for each feedstock
   function calRows(data, name) {
-    const nonEmpty = data.filter(r => r && r[1])
-    const last3 = nonEmpty.slice(-3).reverse()
-    const rows = [{head:`${name} — Last 3 Samples`}]
-    last3.forEach(r => {
-      const dt = r[1] ? new Date(Math.round((n(r[1])-25569)*86400000)).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—'
-      const vs = (r[5] !== null && r[5] !== '' && n(r[5]) < 2) ? n(r[5])*100 : r[5]
-      rows.push({label:dt, unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(vs,2)}%`})
-    })
-    if (last3.length === 0) rows.push({label:'No data', unit:'', val:'—'})
+    const fmtDate = s => {
+      const v = n(s)
+      if (!v) return '—'
+      // Excel serial → JS date
+      return new Date(Math.round((v-25569)*86400000)).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
+    }
+    const fixVS = v => (v !== null && v !== '' && n(v) < 2) ? n(v)*100 : v
+
+    const withDate = data.filter(r => r && r[1])
+    // Row for the selected date exactly
+    const todayRow = withDate.find(r => Math.round(n(r[1])) === serial)
+    // Last 3 samples up to selected date (for reference)
+    const recent = withDate.filter(r => Math.round(n(r[1])) <= serial).slice(-3).reverse()
+
+    const rows = []
+    if (todayRow) {
+      rows.push({head:`${name} — Sample on ${fmtDate(todayRow[1])}`})
+      rows.push({label:'Sample Name', unit:'', val: todayRow[2] || '—'})
+      rows.push({label:'Location',    unit:'', val: todayRow[3] || '—'})
+      rows.push({label:'TS %',        unit:'%', val: fv(todayRow[4],2)})
+      rows.push({label:'VS %',        unit:'%', val: fv(fixVS(todayRow[5]),2)})
+      rows.push({label:'TS (Tonnes)', unit:'T', val: fv(todayRow[6],3)})
+      rows.push({label:'VS (Tonnes)', unit:'T', val: fv(todayRow[7],3)})
+      if (todayRow[9]) rows.push({label:'Quantity',   unit:'MT/KL', val: fv(todayRow[9],2)})
+      if (todayRow[8]) rows.push({label:'Remarks',    unit:'', val: todayRow[8]})
+    } else {
+      rows.push({head:`${name} — No sample on selected date`})
+    }
+    if (recent.length) {
+      rows.push({head:`${name} — Last 3 Samples (up to selected date)`})
+      recent.forEach(r => {
+        rows.push({label: fmtDate(r[1]), unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(fixVS(r[5]),2)}%  |  ${r[2]||''}`})
+      })
+    }
+    if (!withDate.length) rows.push({label:'No data', unit:'', val:'—'})
     return rows
   }
 
