@@ -1934,7 +1934,7 @@ function healthRows(containerId){
 }
 
 // ═══ PLANT INTELLIGENCE ══════════════════════════════════════
-let TGT = {cbg_month:4333, cbg_total:52000, cost_kg:30};
+let TGT = {cbg_month:130000, cbg_total:1560000, cost_kg:30};
 let MONTHS_LIST = [];
 
 function momArrow(curr,prev){
@@ -2071,11 +2071,11 @@ function renderHeatmap(){
     const days=Object.keys(D.days).filter(d=>D.days[d].mo===mo).sort((a,b)=>parseInt(a)-parseInt(b));
     if(!days.length) return;
     html+=`<div class="hm-month"><div class="hm-month-label">${mo}</div><div class="hm-grid">`;
-    days.forEach(d=>{
-      const pct=hm[d];
-      const cls=pct==null?'empty':pct>=90?'g':pct>=70?'a':'r';
-      const day=d.split('-')[0];
+    days.forEach((d,dayIdx)=>{
+      const hmDay=(hm[mo]||[])[dayIdx];
       const cbg=D.days[d]?.psa?.cbg_tot||0;
+      const cls=hmDay||(cbg>0?'r':'empty');
+      const day=d.split('-')[0];
       html+=`<div class="hm-day ${cls}" title="${d}: ${cbg?Math.round(cbg).toLocaleString()+' kg':'-'} (${pct!=null?pct+'%':'no data'})"
         onclick="setMonth('${mo}',null);setTimeout(()=>setDay('${d}',null),100)">${day}</div>`;
     });
@@ -2423,7 +2423,7 @@ async function buildAnalyticsD() {
   M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4);
   M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12);
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45);
-  M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46);
+  M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46);  M.act_cbg=M.cbg;
   M.d1_sfom=mkA(); M.d2_sfom=mkA(); M.d1_lfom=mkA(); M.d2_lfom=mkA();
   M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
@@ -2492,7 +2492,7 @@ async function buildAnalyticsD() {
   const psa_days={};
   psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(!k)return;const m=moKey(toDate(r[0]));psa_days[k]={date:k,mo:m,psa_hrs:psaH(r),act_raw:nv(r[7]),act_pur:nv(r[9]),act_cbg:nv(r[12]),dispatched:nv(r[15]),veer:nv(r[16]),adinath:nv(r[17]),kfs:nv(r[18]),ksk:nv(r[19]),om:nv(r[20]),sps:nv(r[21]),ch4:nv(r[22]),cascade:nv(r[27]),storage:nv(r[28]),d1_eff:0,d2_eff:0};});
   const cal={pm:{ts:0,vs:0},cd:{ts:0,vs:0},gs:{ts:0,vs:0},csl:{ts:0,vs:0}};
-  const tgts={cbg_month:4333,cbg_total:months.length*4333,cost_kg:30};
+  const tgts={cbg_month:130000,cbg_total:months.length*130000,cost_kg:30};
   const ts=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   return {
     meta:{plant:'LREKPL — 5.4 TPD CBG Plant, Karnal',updated:ts,period:months.length>0?months[0]+' – '+months[months.length-1]+' '+(latDt?latDt.getFullYear():2026):'—'},
@@ -2511,11 +2511,11 @@ async function initDashboard() {
   try {
     D=await buildAnalyticsD();
     MONTHS=D.months; MONTHS_LIST=D.months; TGT=D.targets;
-    // Build month filter buttons dynamically from actual data
+    // Build month filter buttons dynamically — only months with actual CBG data
     const mf=document.querySelector('.mf');
-    const allBtn=mf.querySelector('.mb.on');
     mf.querySelectorAll('.mb:not(.on)').forEach(b=>b.remove());
-    D.months.forEach(m=>{
+    const activeMonths=D.months.filter((_,i)=>(D.M.cbg[i]||0)>0);
+    activeMonths.forEach(m=>{
       const b=document.createElement('button');
       b.className='mb'; b.textContent=m;
       b.onclick=function(){setMonth(m,this);};
