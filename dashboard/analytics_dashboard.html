@@ -1094,6 +1094,10 @@ function showDayPanel(sectionId){
 function renderOV(){
   showDayPanel('ov');
   const mo=curMonth;
+  // Update period badge
+  const periodLbl=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
+  document.getElementById('ov_period').textContent=periodLbl;
+  document.getElementById('ov_cbg_s').textContent=mo==='ALL'?'YTD '+periodLbl:mo+' 2026 total';
   let cbg,rev,cost,margin;
   const cbgArr=D.M.cbg||[];
   if(mo==='ALL'){
@@ -1167,6 +1171,10 @@ function renderOV(){
   const purData = mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   bar('c_ov_d1d2',labels,[bDS('D1 Biogas (m³)',d1Data,C.blue),bDS('D2 Biogas (m³)',d2Data,C.teal)]);
   line('c_ov_exp',labels,[lDS('Expected Gas',expData,C.amber),lDS('Actual Purified',purData,C.green)]);
+  // Update pH KPI tile with latest values from real data
+  const ph1=D.kpis.ph_d1, ph2=D.kpis.ph_d2;
+  const phEl=document.getElementById('ov_ph');
+  if(phEl) phEl.textContent=(ph1!=null?ph1.toFixed(2):'—')+' / '+(ph2!=null?ph2.toFixed(2):'—');
   healthRows('ov_health');
 }
 
@@ -2414,6 +2422,7 @@ async function buildAnalyticsD() {
   M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4);
   M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12);
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45);
+  M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46);
   M.d1_sfom=mkA(); M.d2_sfom=mkA(); M.d1_lfom=mkA(); M.d2_lfom=mkA();
   M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
@@ -2435,7 +2444,10 @@ async function buildAnalyticsD() {
   DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:r=>0,lfom:r=>0,feed_act:25});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
-  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,act_pur:r=>0});
+  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,act_pur:r=>0,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
+  // Merge D2 BPP into DD.exp daily arrays
+  const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46});
+  months.forEach(m=>{if(DD.exp[m]&&d2ExpDA[m]){Object.assign(DD.exp[m],d2ExpDA[m]);}})
   DD.health=buildDA(ph,gD,{ph_d1:1,ph_d2:4});
   // D.days map
   setStatus('Building daily records…');
@@ -2457,7 +2469,9 @@ async function buildAnalyticsD() {
       d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:null,lfom:null},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),pm_feed:nv(fbr[9]),gs_feed:nv(fbr[10]),csl_feed:nv(fbr[11]),cd_feed:nv(fbr[12]),pm_bal:nv(fbr[14]),gs_bal:nv(fbr[15]),csl_bal:nv(fbr[16]),cd_bal:nv(fbr[17])},
       rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
-      exp:{tot_exp:nv(d1r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9])},
+      exp:{tot_exp:nv(d1r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),
+        d1_cd_bpp:nv(d1r[42]),d1_pm_bpp:nv(d1r[43]),d1_gs_bpp:nv(d1r[44]),d1_csl_bpp:nv(d1r[45]),d1_sg_bpp:nv(d1r[46]),
+        d2_cd_bpp:nv(d2r[43]),d2_pm_bpp:nv(d2r[44]),d2_gs_bpp:nv(d2r[45]),d2_csl_bpp:nv(d2r[46]),d2_sg_bpp:nv(d2r[47])},
       health:{ph:{d1:nv(phr[1]),d2:nv(phr[4])},tp:{d1:nv(tmr[1]),d2:nv(tmr[4])},ia:{d1:null,d2:null},ts:{d1:null},vs:{d1:null}}
     };
   });
@@ -2496,6 +2510,25 @@ async function initDashboard() {
   try {
     D=await buildAnalyticsD();
     MONTHS=D.months; MONTHS_LIST=D.months; TGT=D.targets;
+    // Build month filter buttons dynamically from actual data
+    const mf=document.querySelector('.mf');
+    const allBtn=mf.querySelector('.mb.on');
+    mf.querySelectorAll('.mb:not(.on)').forEach(b=>b.remove());
+    D.months.forEach(m=>{
+      const b=document.createElement('button');
+      b.className='mb'; b.textContent=m;
+      b.onclick=function(){setMonth(m,this);};
+      mf.appendChild(b);
+    });
+    // Update period labels
+    const period=D.months.length>0?D.months[0]+' – '+D.months[D.months.length-1]+' 2026':'All Months';
+    document.querySelectorAll('.mo-badge').forEach(b=>b.textContent='All Months');
+    document.getElementById('ov_cbg_s').textContent='YTD '+period;
+    // Clear hardcoded KPI placeholder values
+    ['ov_cbg','ov_rev','ov_margin','ov_ph'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+    ['s8_rev_kpi','s8_cost_kpi','s8_margin_kpi'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+    // Update footer with real period
+    document.querySelector('.footer').innerHTML=`LREKPL — 5.4 TPD CBG Plant Karnal &nbsp;|&nbsp; ${period} &nbsp;|&nbsp; Data: CBG_Karnal_D1_D2_2026.xlsx`;
     document.getElementById('nav_updated').textContent=D.meta.updated;
     overlay.style.display='none';
     try{ renderOV(); }catch(e){ console.error('OV init error',e); }
