@@ -1293,6 +1293,7 @@ function renderHealth() {
 
   // Cal sheets — last 3 readings for each feedstock
   function calRows(data, name) {
+    const calSerial = _D.serial
     const fmtDate = s => {
       const v = n(s)
       if (!v) return '—'
@@ -1303,9 +1304,9 @@ function renderHealth() {
 
     const withDate = data.filter(r => r && r[1])
     // Row for the selected date exactly
-    const todayRow = withDate.find(r => Math.round(n(r[1])) === serial)
+    const todayRow = withDate.find(r => Math.round(n(r[1])) === calSerial)
     // Last 3 samples up to selected date (for reference)
-    const recent = withDate.filter(r => Math.round(n(r[1])) <= serial).slice(-3).reverse()
+    const recent = withDate.filter(r => Math.round(n(r[1])) <= calSerial).slice(-3).reverse()
 
     const rows = []
     if (todayRow) {
