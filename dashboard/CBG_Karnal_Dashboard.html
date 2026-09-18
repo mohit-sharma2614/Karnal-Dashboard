@@ -1296,7 +1296,8 @@ function renderHealth() {
     const rows = [{head:`${name} — Last 3 Samples`}]
     last3.forEach(r => {
       const dt = r[1] ? new Date(Math.round((n(r[1])-25569)*86400000)).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}) : '—'
-      rows.push({label:dt, unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(r[5],2)}%`})
+      const vs = (r[5] !== null && r[5] !== '' && n(r[5]) < 2) ? n(r[5])*100 : r[5]
+      rows.push({label:dt, unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(vs,2)}%`})
     })
     if (last3.length === 0) rows.push({label:'No data', unit:'', val:'—'})
     return rows
