@@ -558,7 +558,9 @@ function applyDateCascade() {
   const y = document.getElementById('selYear').value
   const m = String(document.getElementById('selMonth').value).padStart(2,'0')
   const d = String(document.getElementById('selDay').value).padStart(2,'0')
-  _curDate = `${y}-${m}-${d}`
+  const newDate = `${y}-${m}-${d}`
+  if (newDate === _curDate) return
+  _curDate = newDate
   loadData()
 }
 
@@ -825,7 +827,10 @@ function renderProduction() {
   const cbgTotDisp = cbgTot !== null ? fmt(cbgTot) : '—'
 
   const olr1  = d1[49], olr2 = d2[50]
-  const psaHrs = n(psa[1]) > 0 && n(psa[1]) < 2 ? n(psa[1]) * 24 : n(psa[1])
+  const _psa1 = psa[1]
+  const psaHrs = (_psa1 === '' || _psa1 === null || _psa1 === undefined)
+    ? null
+    : (n(_psa1) > 0 && n(_psa1) < 2 ? n(_psa1) * 24 : n(_psa1))
   const tgt = Math.round(130000/30)
   const cbgCls = cbgTot===null?'w':cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
 
@@ -839,7 +844,7 @@ function renderProduction() {
     ${kpi('CBG — D2', cbgD2Disp, 'kg', 'b')}
     ${kpi('OLR — D1', fmt(olr1,2), 'kg VS/m³/day', olrCls(olr1), 'Safe: 2.0–4.0')}
     ${kpi('OLR — D2', fmt(olr2,2), 'kg VS/m³/day', olrCls(olr2), 'Safe: 2.0–4.0')}
-    ${kpi('PSA Run Hours', fmt(psaHrs,1), 'hrs', 'b')}
+    ${kpi('PSA Run Hours', psaHrs === null ? '—' : fmt(psaHrs,1), 'hrs', 'b')}
   </div>`
 
   const d1tbl = dataTable([
@@ -1188,7 +1193,6 @@ function renderHealth() {
   else if (o2 >= 4)      warnParts.push(`D2 elevated: ${o2.toFixed(2)}`)
   if (o1 > 0 && o1 < 2) warnParts.push(`D1 underloaded: ${o1.toFixed(2)}`)
   if (o2 > 0 && o2 < 2) warnParts.push(`D2 underloaded: ${o2.toFixed(2)}`)
-  const hasOver = warnParts.some(p => p.includes('load'))
   const warn = warnParts.length
     ? `<div class="health-warn">⚠ OLR Alert — ${warnParts.join(' | ')} kg VS/m³/day. Safe range: 2.0–4.0. ${warnParts.some(p=>p.includes('over'))?'Consider reducing feedstock load.':'Consider increasing feedstock.'}</div>`
     : ''
