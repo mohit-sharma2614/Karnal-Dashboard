@@ -1693,7 +1693,7 @@ function renderS5(){
   document.getElementById('s5_cbg').textContent=fmtN(sumA(cbg));
   document.getElementById('s5_disp').textContent=fmtN(sumA(disp));
   document.getElementById('s5_comp').textContent=fmtN(sumA(comp));
-  const totalDays=mo==='ALL'?181:MDAYS[mo]||30;
+  const totalDays=mo==='ALL'?MONTHS.reduce((s,m)=>s+(MDAYS[m]||30),0):MDAYS[mo]||30;
   const util=sumA(comp)>0?(sumA(comp)/(totalDays*24)*100).toFixed(1):0;
   document.getElementById('s5_util').textContent=util+'%';
   const dailyUtil=comp.map(h=>h?(h/24*100).toFixed(1):0);
@@ -1779,7 +1779,8 @@ function renderS8(){
   const totC = mo==='ALL'?fin.ytd_cost:(sumA(fc)+sumA(elec)+sumA(mp)+sumA(emi));
   const mg   = totR>0?((totR-totC)/totR*100).toFixed(1):0;
   const margins = mo==='ALL'?D.M.margin:[D.M.margin[idx]];
-  const cpk_arr = mo==='ALL'?fin.cpk_monthly:[fin.cpk_monthly[idx]];
+  const cpkMonthly=D.cpk_monthly||{};
+  const cpk_arr = mo==='ALL'?MONTHS.map(m=>cpkMonthly[m]||null):[cpkMonthly[mo]||null];
   const totalCBG = mo==='ALL'?D.kpis.ytd_cbg:sumA(dArr('psa','cbg_tot'));
   const cpk = totalCBG>0?(totC/totalCBG*1000).toFixed(1):null;
 
@@ -1892,10 +1893,10 @@ function renderS8(){
       const mg=D.M.margin[i];const mc=mg>=10?'tg':mg>=0?'ta':'tr';
       return`<tr><td>${m} 2026</td>
         <td class="tg">${fmtL(D.M.total_rev[i])}</td>
-        <td class="tr">${fmtL(D.M.feed_cost[i])}</td>
-        <td class="ta">${fmtL(D.M.elec[i])}</td>
-        <td class="ta">${fmtL(D.M.manpower[i])}</td>
-        <td class="ta">${fmtL(D.M.emi[i])}</td>
+        <td class="tr">${fmtL((D.M.feed_cost||[])[i])}</td>
+        <td class="ta">${fmtL((D.M.elec||[])[i])}</td>
+        <td class="ta">${fmtL((D.M.manpower||[])[i])}</td>
+        <td class="ta">${fmtL((D.M.emi||[])[i])}</td>
         <td>${pendingNote}</td>
         <td>${pendingNote}</td>
         <td class="tr">${fmtL(D.M.total_cost[i])}</td>
@@ -2424,6 +2425,12 @@ async function buildAnalyticsD() {
   M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12);
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45);
   M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46);  M.act_cbg=M.cbg;
+  M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
+  M.ksk=aggMonth(psa,gD,19); M.om=aggMonth(psa,gD,20); M.sps=aggMonth(psa,gD,21);
+  M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
+  M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
+  M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
+  M.d2_exp=aggMonth(d2,gD,10); M.d1_drain=mkA(); M.d2_drain=mkA();
   M.d1_sfom=mkA(); M.d2_sfom=mkA(); M.d1_lfom=mkA(); M.d2_lfom=mkA();
   M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
@@ -2441,13 +2448,16 @@ async function buildAnalyticsD() {
   }
   const DD={};
   DD.psa=buildDA(psa,gD,{cbg_tot:12,purified:9,dispatched:15,psa_hrs:psaH,rbg_d1:5,rbg_d2:6,rbg_tot:7,cbg_d1:10,cbg_d2:11,ch4:22,veer:16,adinath:17,kfs:18,ksk:19,om:20,sps:21});
-  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:r=>0,lfom:r=>0,feed_act:24});
-  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:r=>0,lfom:r=>0,feed_act:25});
+  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:r=>0,lfom:r=>0,feed_act:24,psa_eff_pct:50});
+  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:r=>0,lfom:r=>0,feed_act:25,psa_eff_pct:51});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
-  // Merge PSA actual purified into DD.exp by day key
-  months.forEach(m=>{if(!DD.exp[m])return;DD.exp[m].act_pur=(DD.exp[m].dates||[]).map(d=>(D.days[d]?.psa?.purified)||0);});
+  // Merge PSA data into DD.exp by day key
+  months.forEach(m=>{if(!DD.exp[m])return;
+    DD.exp[m].act_pur=(DD.exp[m].dates||[]).map(d=>(D.days[d]?.psa?.purified)||0);
+    DD.exp[m].act_cbg=(DD.exp[m].dates||[]).map(d=>(D.days[d]?.psa?.cbg_tot)||0);
+  });
   // Merge D2 BPP into DD.exp daily arrays
   const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46});
   months.forEach(m=>{if(DD.exp[m]&&d2ExpDA[m]){Object.assign(DD.exp[m],d2ExpDA[m]);}})
@@ -2512,11 +2522,16 @@ async function buildAnalyticsD() {
       ph_d1:nv(lastPh[1]),ph_d2:nv(lastPh[4]),
       temp_d1:tmp_.length?nv(tmp_[tmp_.length-1][1]):null,temp_d2:tmp_.length?nv(tmp_[tmp_.length-1][4]):null,
       iapa_d1:iapa_.length?nv(iapa_[iapa_.length-1][4]):null,iapa_d2:iapa_.length?nv(iapa_[iapa_.length-1][12]):null,
+      pa_d1:iapa_.length?nv(iapa_[iapa_.length-1][1]):null,pa_d2:iapa_.length?nv(iapa_[iapa_.length-1][9]):null,
+      ia_ind_d1:iapa_.length?nv(iapa_[iapa_.length-1][2]):null,ia_ind_d2:iapa_.length?nv(iapa_[iapa_.length-1][10]):null,
+      ta_d1:iapa_.length?nv(iapa_[iapa_.length-1][3]):null,ta_d2:iapa_.length?nv(iapa_[iapa_.length-1][11]):null,
       ts_d1:tsvs_.length?nv(tsvs_[tsvs_.length-1][1]):null,ts_d2:tsvs_.length?nv(tsvs_[tsvs_.length-1][7]):null,
       vs_d1:tsvs_.length?nv(tsvs_[tsvs_.length-1][2]):null,vs_d2:tsvs_.length?nv(tsvs_[tsvs_.length-1][8]):null,
       lat_date:dayKey(latDt)||'—'},
     stock,latest_psa:{date:dayKey(latDt)||'—',psa_hrs:psaH(lastPsa),act_raw:nv(lastPsa[7]),act_pur:nv(lastPsa[9]),act_cbg:nv(lastPsa[12]),dispatched:nv(lastPsa[15]),ch4:nv(lastPsa[22]),cascade:nv(lastPsa[27]),storage:nv(lastPsa[28])},
-    finance:{ytd_rev,ytd_cost,ytd_cbg_rev:M.cbg_rev.reduce((s,v)=>s+(v||0),0),ytd_manure:M.sfom_mn.reduce((s,v)=>s+(v||0),0)+M.lfom_mn.reduce((s,v)=>s+(v||0),0)},
+    finance:{ytd_rev,ytd_cost,ytd_cbg_rev:M.cbg_rev.reduce((s,v)=>s+(v||0),0),ytd_manure:M.sfom_mn.reduce((s,v)=>s+(v||0),0)+M.lfom_mn.reduce((s,v)=>s+(v||0),0),
+      ytd_feed_cost:M.feed_cost.reduce((s,v)=>s+(v||0),0),ytd_elec:M.elec.reduce((s,v)=>s+(v||0),0),
+      ytd_manpower:0,ytd_emi:0,emi_rows:[],cpk_monthly:cost_per_kg},
     manure:{ytd_sfom_rev:M.sfom_mn.reduce((s,v)=>s+(v||0),0),ytd_lfom_rev:M.lfom_mn.reduce((s,v)=>s+(v||0),0)},
     targets:tgts,heatmap,olr_trail,cost_per_kg,cpk_monthly:cost_per_kg,
     dispatch:{ytd_veer:aggMonth(psa,gD,16).reduce((s,v)=>s+(v||0),0),ytd_adinath:aggMonth(psa,gD,17).reduce((s,v)=>s+(v||0),0),ytd_kfs:aggMonth(psa,gD,18).reduce((s,v)=>s+(v||0),0),ytd_ksk:aggMonth(psa,gD,19).reduce((s,v)=>s+(v||0),0),ytd_om:aggMonth(psa,gD,20).reduce((s,v)=>s+(v||0),0),ytd_sps:aggMonth(psa,gD,21).reduce((s,v)=>s+(v||0),0)},
