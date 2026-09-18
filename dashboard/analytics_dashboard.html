@@ -189,15 +189,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="nav-right" id="nav_updated">Loading...</div>
   </div>
   <div class="nav-row2">
-    <div class="mf">
-      <span class="mf-lbl">PERIOD:</span>
-      <button class="mb on" onclick="setMonth('ALL',this)">All</button>
-      <button class="mb" onclick="setMonth('Jan',this)">Jan</button>
-      <button class="mb" onclick="setMonth('Feb',this)">Feb</button>
-      <button class="mb" onclick="setMonth('Mar',this)">Mar</button>
-      <button class="mb" onclick="setMonth('Apr',this)">Apr</button>
-      <button class="mb" onclick="setMonth('May',this)">May</button>
-      <button class="mb" onclick="setMonth('Jun',this)">Jun</button>
+    <div id="year_filter" class="mf" style="margin-right:0">
+      <span class="mf-lbl">YEAR:</span>
+      <button class="mb on" id="yr_ALL" onclick="setYear('ALL',this)">All</button>
+    </div>
+    <div class="filter-sep"></div>
+    <div class="mf" id="month_filter">
+      <span class="mf-lbl">MONTH:</span>
+      <button class="mb on" id="mo_ALL" onclick="setMonth('ALL',this)">All</button>
     </div>
     <div id="day_wrap" style="display:none;align-items:center;gap:6px;margin-left:12px">
       <div class="filter-sep"></div>
@@ -571,8 +570,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <script>
 let D = null;
 let MONTHS = [];
+let ALL_MONTHS = [];
 let MDAYS={Jan:31,Feb:28,Mar:31,Apr:30,May:31,Jun:30,Jul:31,Aug:31,Sep:30,Oct:31,Nov:30,Dec:31};
 let curMonth='ALL';
+let curYear='ALL';
 const charts={};
 
 Chart.defaults.color='#607d8b';Chart.defaults.borderColor='#eceff1';
@@ -711,10 +712,28 @@ function show(id,btn){
   try{ sectionRender[id]&&sectionRender[id](); }catch(e){ console.error('render error',id,e); }
 }
 
+function setYear(yr,btn){
+  curYear=yr;
+  document.querySelectorAll('#year_filter .mb').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on'); else document.getElementById('yr_'+yr)?.classList.add('on');
+  // Show/hide month buttons based on selected year
+  const mf=document.getElementById('month_filter');
+  mf.querySelectorAll('.mb[data-year]').forEach(b=>{
+    b.style.display=(yr==='ALL'||b.dataset.year==yr)?'':'none';
+  });
+  // Reset month to ALL if current selection is hidden
+  const moBtn=mf.querySelector('.mb[data-month="'+curMonth+'"]');
+  if(curMonth!=='ALL'&&(!moBtn||moBtn.style.display==='none')){
+    setMonth('ALL',document.getElementById('mo_ALL'));
+  } else {
+    try{ sectionRender[curSection]&&sectionRender[curSection](); }catch(e){ console.error('render error',curSection,e); }
+  }
+}
+
 function setMonth(mo,btn){
   curMonth=mo; curDay='ALL';
-  document.querySelectorAll('.mb').forEach(b=>b.classList.remove('on'));
-  if(btn) btn.classList.add('on');
+  document.querySelectorAll('#month_filter .mb').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on'); else document.getElementById('mo_ALL')?.classList.add('on');
   const lbl=mo==='ALL'?'All Months':mo+' 2026';
   document.querySelectorAll('.mo-badge').forEach(b=>b.textContent=lbl);
   const wrap=document.getElementById('day_wrap');
@@ -2393,8 +2412,11 @@ async function buildAnalyticsD() {
   const psa=getRows(psaR,0),d1=getRows(d1R,0),d2=getRows(d2R,0);
   const ph=getRows(phR,0),tmp_=getRows(tmpR,0),tsvs_=getRows(tsvsR,0),iapa_=getRows(iapaR,0);
   const rc=getRows(rcR,0),fb=getRows(fbR,0);
-  const monthSet=new Set(); psa.forEach(r=>{const m=moKey(toDate(r[0]));if(m)monthSet.add(m);});
+  const monthSet=new Set(); const yearMonthSet=new Set();
+  psa.forEach(r=>{const dt=toDate(r[0]);if(!dt)return;const m=moKey(dt);if(m){monthSet.add(m);yearMonthSet.add(dt.getFullYear()+'|'+m);}});
   const months=MNAMES.filter(m=>monthSet.has(m));
+  const years=[...new Set([...yearMonthSet].map(k=>+k.split('|')[0]))].sort();
+  const monthYear={}; [...yearMonthSet].forEach(k=>{const[y,m]=k.split('|');if(!monthYear[m])monthYear[m]=+y;});
   const mIdx=m=>months.indexOf(m);
   const mkA=()=>months.map(()=>0);
   function aggMonth(rows,getD,col,type='sum'){
@@ -2517,7 +2539,7 @@ async function buildAnalyticsD() {
   const ts=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   return {
     meta:{plant:'LREKPL — 5.4 TPD CBG Plant, Karnal',updated:ts,period:months.length>0?months[0]+' – '+months[months.length-1]+' '+(latDt?latDt.getFullYear():2026):'—'},
-    months,M,D:DD,days,psa_days,
+    months,years,monthYear,M,D:DD,days,psa_days,
     kpis:{ytd_cbg:M.cbg.reduce((s,v)=>s+(v||0),0),ytd_rev,ytd_cost,ytd_margin:ytd_rev>0?+((ytd_rev-ytd_cost)/ytd_rev*100).toFixed(1):0,
       ph_d1:nv(lastPh[1]),ph_d2:nv(lastPh[4]),
       temp_d1:tmp_.length?nv(tmp_[tmp_.length-1][1]):null,temp_d2:tmp_.length?nv(tmp_[tmp_.length-1][4]):null,
@@ -2542,14 +2564,23 @@ async function initDashboard() {
   const overlay=document.getElementById('authOverlay');
   try {
     D=await buildAnalyticsD();
-    MONTHS=D.months; MONTHS_LIST=D.months; TGT=D.targets;
+    MONTHS=D.months; ALL_MONTHS=D.months; MONTHS_LIST=D.months; TGT=D.targets;
+    // Build year filter buttons dynamically
+    const yf=document.getElementById('year_filter');
+    (D.years||[]).forEach(yr=>{
+      const b=document.createElement('button');
+      b.className='mb'; b.textContent=yr; b.id='yr_'+yr;
+      b.onclick=function(){setYear(yr,this);};
+      yf.appendChild(b);
+    });
     // Build month filter buttons dynamically — only months with actual CBG data
-    const mf=document.querySelector('.mf');
-    mf.querySelectorAll('.mb:not(.on)').forEach(b=>b.remove());
+    const mf=document.getElementById('month_filter');
+    mf.querySelectorAll('.mb[data-month]').forEach(b=>b.remove());
     const activeMonths=D.months.filter((_,i)=>(D.M.cbg[i]||0)>0);
     activeMonths.forEach(m=>{
       const b=document.createElement('button');
       b.className='mb'; b.textContent=m;
+      b.dataset.month=m; b.dataset.year=D.monthYear?.[m]||'';
       b.onclick=function(){setMonth(m,this);};
       mf.appendChild(b);
     });
