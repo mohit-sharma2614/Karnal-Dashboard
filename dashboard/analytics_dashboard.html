@@ -2475,10 +2475,12 @@ async function buildAnalyticsD() {
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
-  // Merge PSA data into DD.exp by day key
+  // Merge PSA data into DD.exp by day key (use DD.psa — D global is not yet set here)
   months.forEach(m=>{if(!DD.exp[m])return;
-    DD.exp[m].act_pur=(DD.exp[m].dates||[]).map(d=>(D.days[d]?.psa?.purified)||0);
-    DD.exp[m].act_cbg=(DD.exp[m].dates||[]).map(d=>(D.days[d]?.psa?.cbg_tot)||0);
+    const psaDates=DD.psa[m]?.dates||[];
+    const psaMap={}; psaDates.forEach((d,i)=>{psaMap[d]={pur:(DD.psa[m].act_pur||[])[i],cbg:(DD.psa[m].cbg_tot||[])[i]};});
+    DD.exp[m].act_pur=(DD.exp[m].dates||[]).map(d=>psaMap[d]?.pur||0);
+    DD.exp[m].act_cbg=(DD.exp[m].dates||[]).map(d=>psaMap[d]?.cbg||0);
   });
   // Merge D2 BPP into DD.exp daily arrays
   const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46});
