@@ -2445,11 +2445,22 @@ async function buildAnalyticsD() {
   DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:r=>0,lfom:r=>0,feed_act:25});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
-  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,act_pur:r=>0,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
+  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
+  // Merge PSA actual purified into DD.exp by day key
+  months.forEach(m=>{if(!DD.exp[m])return;DD.exp[m].act_pur=(DD.exp[m].dates||[]).map(d=>(D.days[d]?.psa?.purified)||0);});
   // Merge D2 BPP into DD.exp daily arrays
   const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46});
   months.forEach(m=>{if(DD.exp[m]&&d2ExpDA[m]){Object.assign(DD.exp[m],d2ExpDA[m]);}})
   DD.health=buildDA(ph,gD,{ph_d1:1,ph_d2:4});
+  // Merge temp, ts/vs, ia/pa into DD.health by date alignment
+  const tmpDA=buildDA(tmp_,gD,{tp_d1:1,tp_d2:4});
+  const tsvsDA=buildDA(tsvs_,gD,{ts_d1:1,vs_d1:2,ts_d2:7,vs_d2:8});
+  const iapaDA=buildDA(iapa_,gD,{ia_d1:4,ia_d2:12,pa_d1:1,pa_d2:9});
+  months.forEach(m=>{
+    if(DD.health[m]&&tmpDA[m]) Object.assign(DD.health[m],tmpDA[m]);
+    if(DD.health[m]&&tsvsDA[m]) Object.assign(DD.health[m],tsvsDA[m]);
+    if(DD.health[m]&&iapaDA[m]) Object.assign(DD.health[m],iapaDA[m]);
+  });
   // D.days map
   setStatus('Building daily records…');
   const mp={}; ['psa','d1','d2','ph','tm','fb','rc'].forEach(k=>mp[k]={});
@@ -2497,7 +2508,13 @@ async function buildAnalyticsD() {
   return {
     meta:{plant:'LREKPL — 5.4 TPD CBG Plant, Karnal',updated:ts,period:months.length>0?months[0]+' – '+months[months.length-1]+' '+(latDt?latDt.getFullYear():2026):'—'},
     months,M,D:DD,days,psa_days,
-    kpis:{ytd_cbg:M.cbg.reduce((s,v)=>s+(v||0),0),ytd_rev,ytd_cost,ytd_margin:ytd_rev>0?+((ytd_rev-ytd_cost)/ytd_rev*100).toFixed(1):0,ph_d1:nv(lastPh[1]),ph_d2:nv(lastPh[4]),temp_d1:nv(ph[ph.length-1]?.[1]),temp_d2:nv(ph[ph.length-1]?.[4]),lat_date:dayKey(latDt)||'—'},
+    kpis:{ytd_cbg:M.cbg.reduce((s,v)=>s+(v||0),0),ytd_rev,ytd_cost,ytd_margin:ytd_rev>0?+((ytd_rev-ytd_cost)/ytd_rev*100).toFixed(1):0,
+      ph_d1:nv(lastPh[1]),ph_d2:nv(lastPh[4]),
+      temp_d1:tmp_.length?nv(tmp_[tmp_.length-1][1]):null,temp_d2:tmp_.length?nv(tmp_[tmp_.length-1][4]):null,
+      iapa_d1:iapa_.length?nv(iapa_[iapa_.length-1][4]):null,iapa_d2:iapa_.length?nv(iapa_[iapa_.length-1][12]):null,
+      ts_d1:tsvs_.length?nv(tsvs_[tsvs_.length-1][1]):null,ts_d2:tsvs_.length?nv(tsvs_[tsvs_.length-1][7]):null,
+      vs_d1:tsvs_.length?nv(tsvs_[tsvs_.length-1][2]):null,vs_d2:tsvs_.length?nv(tsvs_[tsvs_.length-1][8]):null,
+      lat_date:dayKey(latDt)||'—'},
     stock,latest_psa:{date:dayKey(latDt)||'—',psa_hrs:psaH(lastPsa),act_raw:nv(lastPsa[7]),act_pur:nv(lastPsa[9]),act_cbg:nv(lastPsa[12]),dispatched:nv(lastPsa[15]),ch4:nv(lastPsa[22]),cascade:nv(lastPsa[27]),storage:nv(lastPsa[28])},
     finance:{ytd_rev,ytd_cost,ytd_cbg_rev:M.cbg_rev.reduce((s,v)=>s+(v||0),0),ytd_manure:M.sfom_mn.reduce((s,v)=>s+(v||0),0)+M.lfom_mn.reduce((s,v)=>s+(v||0),0)},
     manure:{ytd_sfom_rev:M.sfom_mn.reduce((s,v)=>s+(v||0),0),ytd_lfom_rev:M.lfom_mn.reduce((s,v)=>s+(v||0),0)},
