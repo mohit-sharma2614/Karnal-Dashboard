@@ -276,23 +276,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S1 FEEDSTOCK ══ -->
 <div id="s1" class="pg">
   <div class="stitle">Feedstock Procurement & Management <span class="resp">— Mr. Vivek Kumar</span><span id="s1_period" class="mo-badge">All Months</span></div>
-  <div class="kg k4">
+  <div class="kg" style="grid-template-columns:repeat(5,1fr)">
     <div class="kc"><div class="kl">Stock — Pressmud</div><div class="kv" id="s1_pm">—</div><div class="ks">MT (as of last entry)</div></div>
     <div class="kc c"><div class="kl">Stock — Grain Syrup</div><div class="kv c" id="s1_gs">—</div><div class="ks">KL</div></div>
     <div class="kc a"><div class="kl">Stock — CSL</div><div class="kv a" id="s1_csl">—</div><div class="ks">KL</div></div>
     <div class="kc g"><div class="kl">Stock — Cow Dung</div><div class="kv g" id="s1_cd">—</div><div class="ks">MT</div></div>
+    <div class="kc" style="border-color:#f97316"><div class="kl">Stock — Spent Grain</div><div class="kv" id="s1_sg" style="color:#f97316">—</div><div class="ks">MT</div></div>
   </div>
   <!-- Inventory days remaining -->
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
     <div class="inv-card"><div class="kl">Pressmud — Days Left</div><div class="inv-days" id="inv_pm">—</div><div class="ks">at current feed rate</div></div>
     <div class="inv-card"><div class="kl">Grain Syrup — Days Left</div><div class="inv-days" id="inv_gs">—</div><div class="ks">at current feed rate</div></div>
     <div class="inv-card"><div class="kl">CSL — Days Left</div><div class="inv-days" id="inv_csl">—</div><div class="ks">at current feed rate</div></div>
     <div class="inv-card"><div class="kl">Cow Dung — Days Left</div><div class="inv-days" id="inv_cd">—</div><div class="ks">at current feed rate</div></div>
+    <div class="inv-card"><div class="kl">Spent Grain — Days Left</div><div class="inv-days" id="inv_sg">—</div><div class="ks">at current feed rate</div></div>
   </div>
   <div id="s1_stock_bars" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;margin-bottom:12px"></div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s1_pm">Pressmud Procurement (MT)</div><div class="cw"><canvas id="c_s1_pm"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s1_gs">Grain Syrup & CSL Procurement (KL)</div><div class="cw"><canvas id="c_s1_gs"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s1_gs">Grain Syrup, CSL & Cow Dung Procurement</div><div class="cw"><canvas id="c_s1_gs"></canvas></div></div>
   </div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s1_feed">Feedstock Fed per Day/Month</div><div class="cw"><canvas id="c_s1_feed"></canvas></div></div>
@@ -1207,16 +1209,17 @@ function renderS1(){
   document.getElementById('s1_gs').textContent=s.gs.toFixed(1)+' KL';
   document.getElementById('s1_csl').textContent=s.csl.toFixed(1)+' KL';
   document.getElementById('s1_cd').textContent=s.cd.toFixed(1)+' MT';
+  const s1_sg=document.getElementById('s1_sg'); if(s1_sg) s1_sg.textContent=s.sg.toFixed(2)+' MT';
   // Inventory days
   const inv=D.inv_days||{};
-  [['pm','inv_pm'],['gs','inv_gs'],['csl','inv_csl'],['cd','inv_cd']].forEach(([k,id])=>{
+  [['pm','inv_pm'],['gs','inv_gs'],['csl','inv_csl'],['cd','inv_cd'],['sg','inv_sg']].forEach(([k,id])=>{
     const el=document.getElementById(id); if(!el) return;
     const d=inv[k]||0;
     el.className='inv-days '+(d>=15?'ok':d>=7?'warn':'low');
     el.textContent=d>0?Math.round(d)+' days':'—';
   });
   const stocks=[['Pressmud',s.pm,200,'MT',C.amber],['Grain Syrup',s.gs,100,'KL',C.cyan],
-    ['CSL',s.csl,50,'KL',C.blue],['Cow Dung',s.cd,150,'MT',C.green]];
+    ['CSL',s.csl,50,'KL',C.blue],['Cow Dung',s.cd,150,'MT',C.green],['Spent Grain',s.sg,50,'MT',C.orange]];
   document.getElementById('s1_stock_bars').innerHTML=stocks.map(([nm,v,max,u,c])=>{
     const pct=Math.min(v/max*100,100).toFixed(0);
     const fc=v>max*.5?C.green:v>max*.15?C.amber:C.red;
@@ -1230,13 +1233,16 @@ function renderS1(){
   const pmIn=mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in');
   const gsIn=mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in');
   const cslIn=mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in');
+  const cdIn=mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in');
+  const sgIn=mo==='ALL'?mArr('sg_in'):dArr('feed','sg_in');
   const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
   const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
   const cslFeed=mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
   const cdFeed=mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed');
+  const sgFeed=mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed');
   bar('c_s1_pm',labels,[bDS('Procured (MT)',pmIn,C.blue,.9),bDS('Fed (MT)',pmFeed,C.teal,.9)]);
-  bar('c_s1_gs',labels,[bDS('Grain Syrup (KL)',gsIn,C.indigo,.9),bDS('CSL (KL)',cslIn,C.cyan,.9)]);
-  bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan)],true);
+  bar('c_s1_gs',labels,[bDS('Grain Syrup (KL)',gsIn,C.indigo,.9),bDS('CSL (KL)',cslIn,C.cyan,.9),bDS('Cow Dung (MT)',cdIn,C.green,.9)]);
+  bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan),bDS('Spent Grain',sgFeed,C.orange)],true);
   const cal=D.cal;
   const qL=['Pressmud','Grain Syrup','CSL','Cow Dung'];
   const ts=[cal.pm.ts||0,cal.gs.ts||0,cal.csl.ts||0,cal.cd.ts||0];
@@ -1252,17 +1258,20 @@ function renderS1(){
   const cdBpp=mo==='ALL'?mArr('cd_bpp'):dArr('exp','d1_cd_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_cd_bpp')[i]||0));
   const cslBpp=mo==='ALL'?mArr('csl_bpp'):dArr('exp','d1_csl_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_csl_bpp')[i]||0));
   const gsBpp=mo==='ALL'?mArr('gs_bpp'):dArr('exp','d1_gs_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_gs_bpp')[i]||0));
-  bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan)],true);
+  const sgBpp=mo==='ALL'?mArr('sg_bpp'):[];
+  bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange)],true);
   // Received / Used / Balance table
   const rulTbl=document.getElementById('s1_rul_tbl');
   const pmR=sumA(mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in'));
   const gsR=sumA(mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in'));
   const cslR=sumA(mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in'));
   const cdR=sumA(mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in'));
+  const sgR=sumA(mo==='ALL'?mArr('sg_in'):dArr('feed','sg_in'));
   const pmU=sumA(mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed'));
   const gsU=sumA(mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed'));
   const cslU=sumA(mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed'));
   const cdU=sumA(mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed'));
+  const sgU=sumA(mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed'));
   const fmtV=(v,u)=>v>0?fmtN(v)+' '+u:'—';
   rulTbl.innerHTML=`<thead><tr><th>Feedstock</th><th>Received</th><th>Used (Fed)</th><th>Balance (Latest)</th><th>Unit</th></tr></thead>
   <tbody>
@@ -1270,6 +1279,7 @@ function renderS1(){
     <tr><td><b>Grain Syrup</b></td><td>${fmtV(gsR,'KL')}</td><td>${fmtV(gsU,'KL')}</td><td>${s.gs.toFixed(1)} KL</td><td>KL</td></tr>
     <tr><td><b>CSL</b></td><td>${fmtV(cslR,'KL')}</td><td>${fmtV(cslU,'KL')}</td><td>${s.csl.toFixed(1)} KL</td><td>KL</td></tr>
     <tr><td><b>Cow Dung</b></td><td>${fmtV(cdR,'MT')}</td><td>${fmtV(cdU,'MT')}</td><td>${s.cd.toFixed(1)} MT</td><td>MT</td></tr>
+    <tr><td><b>Spent Grain</b></td><td>${fmtV(sgR,'MT')}</td><td>${fmtV(sgU,'MT')}</td><td>${s.sg.toFixed(3)} MT</td><td>MT</td></tr>
   </tbody>`;
   const tbl=document.getElementById('s1_cal_tbl');
   tbl.innerHTML=`<thead><tr><th>Feedstock</th><th>Date</th><th>TS %</th><th>VS %</th><th>TS (T)</th><th>VS (T)</th></tr></thead>
@@ -3062,10 +3072,11 @@ async function buildAnalyticsD() {
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
   M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
-  M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4);
-  M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12);
-  M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45);
-  M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46);  M.act_cbg=M.cbg;
+  M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4); M.sg_in=aggMonth(fb,gD,18);
+  M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12); M.sg_feed=aggMonth(fb,gD,20);
+  M.sg_cost=aggMonth(fb,gD,19); M.sg_bal=aggMonth(fb,gD,21);
+  M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45); M.sg_bpp=aggMonth(d1,gD,46);
+  M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46); M.d2_sg_bpp=aggMonth(d2,gD,47); M.act_cbg=M.cbg;
   M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
   M.ksk=aggMonth(psa,gD,19); M.om=aggMonth(psa,gD,20); M.sps=aggMonth(psa,gD,21);
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
@@ -3094,7 +3105,7 @@ async function buildAnalyticsD() {
   DD.psa=buildDA(psa,gD,{cbg_tot:12,purified:9,dispatched:15,psa_hrs:psaH,rbg_d1:5,rbg_d2:6,rbg_tot:7,cbg_d1:10,cbg_d2:11,ch4:22,veer:16,adinath:17,kfs:18,ksk:19,om:20,sps:21});
   DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50});
   DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51});
-  DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17});
+  DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:18,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,sg_feed:20,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17,sg_bal:21});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
   // Merge PSA data into DD.exp by day key (local DD.psa — global D is null at this point)
@@ -3137,7 +3148,7 @@ async function buildAnalyticsD() {
       psa:{psa_hrs:psaH(p),comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:nv(p[7]),purified:nv(p[9]),cbg_d1:nv(p[10]),cbg_d2:nv(p[11]),cbg_tot:nv(p[12]),dispatched:nv(p[15]),veer:nv(p[16]),adinath:nv(p[17]),kfs:nv(p[18]),ksk:nv(p[19]),om:nv(p[20]),sps:nv(p[21]),ch4:nv(p[22]),cascade:nv(p[27]),storage:nv(p[28]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51])},
       d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30])},
       d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30])},
-      feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),pm_feed:nv(fbr[9]),gs_feed:nv(fbr[10]),csl_feed:nv(fbr[11]),cd_feed:nv(fbr[12]),pm_bal:nv(fbr[14]),gs_bal:nv(fbr[15]),csl_bal:nv(fbr[16]),cd_bal:nv(fbr[17])},
+      feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[18]),pm_feed:nv(fbr[9]),gs_feed:nv(fbr[10]),csl_feed:nv(fbr[11]),cd_feed:nv(fbr[12]),sg_feed:nv(fbr[20]),pm_bal:nv(fbr[14]),gs_bal:nv(fbr[15]),csl_bal:nv(fbr[16]),cd_bal:nv(fbr[17]),sg_bal:nv(fbr[21])},
       rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
       exp:{tot_exp:nv(d1r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),
         d1_cd_bpp:nv(d1r[42]),d1_pm_bpp:nv(d1r[43]),d1_gs_bpp:nv(d1r[44]),d1_csl_bpp:nv(d1r[45]),d1_sg_bpp:nv(d1r[46]),
@@ -3149,9 +3160,9 @@ async function buildAnalyticsD() {
   const lastPsa=psa[psa.length-1]||[],lastPh=ph[ph.length-1]||[],lastFb=fb[fb.length-1]||[];
   const latDt=toDate(lastPsa[0]);
   const ytd_rev=M.total_rev.reduce((s,v)=>s+(v||0),0),ytd_cost=M.total_cost.reduce((s,v)=>s+(v||0),0);
-  const stock={pm:nv(lastFb[14])||0,gs:nv(lastFb[15])||0,csl:nv(lastFb[16])||0,cd:nv(lastFb[17])||0,date:dayKey(toDate(lastFb[0]))||'—'};
+  const stock={pm:nv(lastFb[14])||0,gs:nv(lastFb[15])||0,csl:nv(lastFb[16])||0,cd:nv(lastFb[17])||0,sg:nv(lastFb[21])||0,date:dayKey(toDate(lastFb[0]))||'—'};
   const avgF=ci=>{const v=fb.map(r=>nv(r[ci])).filter(x=>x!==null&&x>0);return v.length?v.reduce((s,x)=>s+x,0)/v.length:1;};
-  const inv_days={pm:stock.pm/avgF(9),gs:stock.gs/avgF(10),csl:stock.csl/avgF(11),cd:stock.cd/avgF(12)};
+  const inv_days={pm:stock.pm/avgF(9),gs:stock.gs/avgF(10),csl:stock.csl/avgF(11),cd:stock.cd/avgF(12),sg:stock.sg>0?stock.sg/avgF(20):0};
   const td=Math.round(130000/30);
   const heatmap={};
   months.forEach(m=>{const dp=DD.psa[m]||{};heatmap[m]=(dp.dates||[]).map((_,i)=>{const c=(dp.cbg_tot||[])[i]||0;return c>=td?'g':c>=td*.7?'a':c>0?'r':'empty';});});
