@@ -186,7 +186,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb" onclick="show('s7',this)">8 · Sales</button>
       <button class="tb" onclick="show('s8',this)">9 · Finance</button>
     </div>
-    <div class="nav-right" id="nav_updated">Loading...</div>
+    <div class="nav-right" style="display:flex;align-items:center;gap:10px">
+      <button onclick="exportReport()" style="padding:4px 13px;background:var(--acc);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap">⬇ Export Report</button>
+      <span id="nav_updated"></span>
+    </div>
   </div>
   <div class="nav-row2">
     <div id="year_filter" class="mf" style="margin-right:0">
@@ -428,7 +431,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="stitle">Plant Intelligence — Production Gap & Root Cause Analysis
     <span class="resp">— Management View</span>
     <span id="si_period" class="mo-badge">All Months</span>
-    <button onclick="exportReport()" style="margin-left:auto;padding:5px 14px;background:var(--acc);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600">Export Report</button>
   </div>
 
   <!-- HEADLINE KPIs -->
