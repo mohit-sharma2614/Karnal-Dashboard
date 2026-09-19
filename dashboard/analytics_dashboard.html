@@ -682,8 +682,8 @@ function dArr(section, key){
   return (D.D[section]?.[mo]?.[key])||[];
 }
 function dDates(section){ return (D.D[section]?.[curMonth]?.dates)||[]; }
-function healthDArr(field){ return (D.D[field]?.[curMonth]?.vals)||[]; }
-function healthDDates(field){ return (D.D[field]?.[curMonth]?.dates)||[]; }
+function healthDArr(field){ return (D.D.health?.[curMonth]?.[field])||[]; }
+function healthDDates(field){ return (D.D.health?.[curMonth]?.dates)||[]; }
 
 function getLabels(section){ return curMonth==='ALL'?MONTHS:dDates(section); }
 
@@ -1371,8 +1371,8 @@ function renderS3(){
   const d1ExpSum=sumA(mo==='ALL'?mArr('d1_exp'):dArr('exp','d1_exp'));
   const d2ExpSum=sumA(mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp'));
   const d1BgSum=sumA(d1bg); const d2BgSum=sumA(d2bg);
-  const d1EffVal=d1BgSum>0?Math.round(d1ExpSum/d1BgSum*100):null;
-  const d2EffVal=d2BgSum>0?Math.round(d2ExpSum/d2BgSum*100):null;
+  const d1EffVal=d1ExpSum>0?Math.round(d1BgSum/d1ExpSum*100):null;
+  const d2EffVal=d2ExpSum>0?Math.round(d2BgSum/d2ExpSum*100):null;
   const effEl1=document.getElementById('kv_d1_eff'); if(effEl1) effEl1.textContent=(d1EffVal??'—')+(d1EffVal!=null?'%':'');
   const effEl2=document.getElementById('kv_d2_eff'); if(effEl2) effEl2.textContent=(d2EffVal??'—')+(d2EffVal!=null?'%':'');
   const fexpEl1=document.getElementById('kv_d1_feed_exp'); if(fexpEl1) fexpEl1.textContent=fmtN(d1ExpSum)+' m³';
@@ -1381,8 +1381,8 @@ function renderS3(){
     line('c_s3_digeff',MONTHS,[lDS('D1 Efficiency %',mArr('d1_dig_eff'),C.blue),lDS('D2 Efficiency %',mArr('d2_dig_eff'),C.teal)],{min:50,max:150});
   } else {
     const expDts=dDates('exp');
-    const d1EffD=dArr('exp','d1_exp').map((v,i)=>{const bg=dArr('d1','bg_act')[i]; return v&&bg?Math.round(v/bg*100):null;});
-    const d2EffD=dArr('exp','d2_exp').map((v,i)=>{const bg=dArr('d2','bg_act')[i]; return v&&bg?Math.round(v/bg*100):null;});
+    const d1EffD=dArr('exp','tot_exp').map((v,i)=>{const bg=dArr('d1','bg_act')[i]; return v&&bg?Math.round(bg/v*100):null;});
+    const d2EffD=dArr('exp','d2_exp').map((v,i)=>{const bg=dArr('d2','bg_act')[i]; return v&&bg?Math.round(bg/v*100):null;});
     line('c_s3_digeff',expDts,[lDS('D1 Efficiency %',d1EffD,C.blue),lDS('D2 Efficiency %',d2EffD,C.teal)],{min:50,max:150});
   }
 }
@@ -2765,7 +2765,7 @@ async function buildAnalyticsD() {
   M.psa_hrs=aggMonth(psa,gD,psaH); M.comp_hrs=aggMonth(psa,gD,r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;});
   M.ch4=aggMonth(psa,gD,22,'avg'); M.d1_bg=aggMonth(psa,gD,5); M.d2_bg=aggMonth(psa,gD,6);
   M.d1_cbg=aggMonth(psa,gD,10); M.d2_cbg=aggMonth(psa,gD,11); M.act_pur=aggMonth(psa,gD,9);
-  M.ideal_pur=aggMonth(d1,gD,32); M.ideal_cbg=aggMonth(d1,gD,38); M.exp_tot=aggMonth(d1,gD,10);
+  M.ideal_pur=aggMonth(d1,gD,32); M.ideal_cbg=aggMonth(d1,gD,38); M.exp_tot=aggMonth(d1,gD,10); M.d1_exp=M.exp_tot;
   M.d1_eff=aggMonth(d1,gD,50,'avg'); M.d2_eff=aggMonth(d2,gD,51,'avg');
   M.d1_olr=aggMonth(d1,gD,49,'avg'); M.d2_olr=aggMonth(d2,gD,50,'avg');
   M.d1_feed=aggMonth(d1,gD,24); M.d2_feed=aggMonth(d2,gD,25);
@@ -2776,6 +2776,7 @@ async function buildAnalyticsD() {
   M.pa_d1=aggMonth(iapa_,gD,1,'avg'); M.pa_d2=aggMonth(iapa_,gD,9,'avg');
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
+  M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
   M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4);
   M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12);
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45);
@@ -2821,13 +2822,13 @@ async function buildAnalyticsD() {
     exp.act_cbg=(exp.dates||[]).map(d=>psaMap[d]?.cbg||0);
   });
   // Merge D2 BPP into DD.exp daily arrays
-  const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46});
+  const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46,d2_exp:10});
   months.forEach(m=>{if(DD.exp[m]&&d2ExpDA[m]){Object.assign(DD.exp[m],d2ExpDA[m]);}})
   DD.health=buildDA(ph,gD,{ph_d1:1,ph_d2:4});
   // Merge temp, ts/vs, ia/pa into DD.health by date alignment
   const tmpDA=buildDA(tmp_,gD,{tp_d1:1,tp_d2:4});
   const tsvsDA=buildDA(tsvs_,gD,{ts_d1:1,vs_d1:2,ts_d2:7,vs_d2:8});
-  const iapaDA=buildDA(iapa_,gD,{ia_d1:4,ia_d2:12,pa_d1:1,pa_d2:9});
+  const iapaDA=buildDA(iapa_,gD,{ia_d1:4,ia_d2:12,pa_d1:1,pa_d2:9,ia_ind_d1:2,ia_ind_d2:10,ta_d1:3,ta_d2:11});
   months.forEach(m=>{
     if(DD.health[m]&&tmpDA[m]) Object.assign(DD.health[m],tmpDA[m]);
     if(DD.health[m]&&tsvsDA[m]) Object.assign(DD.health[m],tsvsDA[m]);
