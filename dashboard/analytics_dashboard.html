@@ -2305,42 +2305,374 @@ function renderSI(){
   document.getElementById('si_reco').innerHTML=buildRecommendations(issues.filter(i=>i.sev!=='green'));
 }
 
-// PDF Export
+// ── PLANT HEALTH REPORT (medical-style) ─────────────────────────
 function exportReport(){
-  const mo=curMonth==='ALL'?'All Months':curMonth;
-  const w=window.open('','_blank');
-  const cbgArr=D.M.cbg||[];
-  const rows=D.months.map((m,i)=>`<tr>
-    <td>${m}</td><td>${cbgArr[i]?Math.round(cbgArr[i]).toLocaleString():'-'}</td>
-    <td>${TGT.cbg_month.toLocaleString()}</td>
-    <td>${cbgArr[i]?Math.round(cbgArr[i]/TGT.cbg_month*100)+'%':'-'}</td>
-    <td>${D.cost_per_kg[m]?'₹'+D.cost_per_kg[m].toFixed(1):'-'}</td>
-  </tr>`).join('');
-  w.document.write(`<html><head><title>CBG Plant Report</title>
-  <style>body{font-family:Segoe UI,sans-serif;color:#222;padding:24px}
-  h1{font-size:18px;margin-bottom:4px}h2{font-size:13px;color:#546e7a;margin-bottom:16px;font-weight:400}
-  table{border-collapse:collapse;width:100%;margin-top:16px;font-size:12px}
-  th{background:#1565C0;color:#fff;padding:8px 12px;text-align:left}
-  td{padding:7px 12px;border-bottom:1px solid #dde3ea}
-  tr:nth-child(even) td{background:#f7f9fb}
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
-  .kpi{background:#f0f2f5;border-radius:8px;padding:12px;border-left:3px solid #1565C0}
-  .kpi-v{font-size:22px;font-weight:700;color:#1565C0}.kpi-l{font-size:10px;color:#546e7a;text-transform:uppercase}
-  </style></head><body>
-  <h1>LREKPL — 5.4 TPD CBG Plant, Karnal</h1>
-  <h2>Production Report — ${mo} &nbsp;|&nbsp; Generated: ${D.meta.updated}</h2>
-  <div class="kpis">
-    <div class="kpi"><div class="kpi-l">Total CBG Produced</div><div class="kpi-v">${Math.round(D.kpis.ytd_cbg).toLocaleString()} kg</div></div>
-    <div class="kpi"><div class="kpi-l">Total Revenue</div><div class="kpi-v">₹${(D.kpis.ytd_rev/1e5).toFixed(1)}L</div></div>
-    <div class="kpi"><div class="kpi-l">Net Margin</div><div class="kpi-v">${D.kpis.ytd_margin}%</div></div>
-    <div class="kpi"><div class="kpi-l">Target Achievement</div><div class="kpi-v">${Math.round(D.kpis.ytd_cbg/TGT.cbg_total*100)}%</div></div>
+  if(!D||!D.months||!D.months.length){alert('Data not loaded yet. Please wait for the dashboard to finish loading.');return;}
+
+  const months=D.months, cbgArr=D.M.cbg||[], tgt=TGT.cbg_month;
+  const latIdx=months.length-1, latMo=months[latIdx];
+
+  // ── Health Score ──────────────────────────────────────────────
+  const totalCBG=cbgArr.reduce((s,v)=>s+(v||0),0);
+  const totalTgt=tgt*months.length;
+  const cbgScore=totalTgt>0?Math.min(100,totalCBG/totalTgt*100):0;
+  const ph1=D.kpis.ph_d1||0, ph2=D.kpis.ph_d2||0;
+  const phOk=p=>p>=6.8&&p<=7.5;
+  const phScore=((ph1?phOk(ph1)?100:Math.max(0,100-Math.abs(ph1-7.15)*120):50)+(ph2?phOk(ph2)?100:Math.max(0,100-Math.abs(ph2-7.15)*120):50))/2;
+  const psaArr=(D.M.psa_hrs||[]).filter(v=>v>0);
+  const avgPsa=psaArr.length?psaArr.reduce((s,v)=>s+v,0)/psaArr.length:0;
+  const psaScore=Math.min(100,avgPsa/22*100);
+  const ia1=D.kpis.iapa_d1||0, ia2=D.kpis.iapa_d2||0;
+  const iaScore=((ia1?Math.max(0,100-(ia1>0.4?(ia1-0.4)*250:0)):100)+(ia2?Math.max(0,100-(ia2>0.4?(ia2-0.4)*250:0)):100))/2;
+  const cpkVals=Object.values(D.cost_per_kg||{}).filter(v=>v>0);
+  const avgCpk=cpkVals.length?cpkVals.reduce((s,v)=>s+v,0)/cpkVals.length:0;
+  const cpkScore=avgCpk>0?Math.min(100,TGT.cost_kg/avgCpk*100):50;
+  const healthScore=Math.round(cbgScore*0.40+phScore*0.20+psaScore*0.20+iaScore*0.10+cpkScore*0.10);
+  const hBand=healthScore>=80?'Healthy':healthScore>=60?'Caution':'Critical';
+  const hColor=healthScore>=80?'#2e7d32':healthScore>=60?'#e65100':'#c62828';
+
+  // ── Report meta ────────────────────────────────────────────────
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const MNAMES2=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const rptDate=`${pad(now.getDate())}-${MNAMES2[now.getMonth()]}-${now.getFullYear()}`;
+  const rptTime=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const rptNum=`RPT-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${pad(months.length)}M`;
+  const scope=curMonth!=='ALL'?curMonth+' 2026':'Period: '+D.meta.period;
+
+  // ── Gauge SVG ──────────────────────────────────────────────────
+  function arcPt(deg){const r=Math.PI/180;return [100+75*Math.cos(deg*r),100-75*Math.sin(deg*r)];}
+  const [gx20,gy20]=arcPt(180); // left end (score=0)
+  // Full background arc
+  const bgArc=`<path d="M ${gx20.toFixed(2)} ${gy20.toFixed(2)} A 75 75 0 0 0 ${arcPt(0)[0].toFixed(2)} ${arcPt(0)[1].toFixed(2)}" fill="none" stroke="#eeeeee" stroke-width="14" stroke-linecap="round"/>`;
+  // Score progress arc
+  let scoreArc='';
+  if(healthScore>0){
+    const endDeg=180-Math.min(healthScore,99.9)*1.8;
+    const [ex,ey]=arcPt(endDeg);
+    const sweep=healthScore*1.8;
+    scoreArc=`<path d="M ${gx20.toFixed(2)} ${gy20.toFixed(2)} A 75 75 0 ${sweep>180?1:0} 0 ${ex.toFixed(2)} ${ey.toFixed(2)}" fill="none" stroke="${hColor}" stroke-width="14" stroke-linecap="round"/>`;
+  }
+  // Zone tick marks
+  const tickAt=deg=>{const [x,y]=arcPt(deg),[x2,y2]=arcPt(deg);return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2" fill="#bdbdbd"/>`;};
+  const gaugeSVG=`<svg viewBox="0 0 200 120" width="180" height="108" xmlns="http://www.w3.org/2000/svg">
+    ${bgArc}${scoreArc}
+    <text x="25" y="112" font-size="9" fill="#bdbdbd" text-anchor="middle" font-family="Arial,sans-serif">0</text>
+    <text x="100" y="22" font-size="9" fill="#bdbdbd" text-anchor="middle" font-family="Arial,sans-serif">50</text>
+    <text x="175" y="112" font-size="9" fill="#bdbdbd" text-anchor="middle" font-family="Arial,sans-serif">100</text>
+    <text x="100" y="98" font-size="34" font-weight="700" fill="${hColor}" text-anchor="middle" font-family="Georgia,serif">${healthScore}</text>
+    <text x="100" y="113" font-size="9.5" fill="${hColor}" text-anchor="middle" font-family="Arial,sans-serif" letter-spacing="1.5">${hBand.toUpperCase()}</text>
+  </svg>`;
+
+  // ── Vitals ─────────────────────────────────────────────────────
+  const latCbg=cbgArr[latIdx]||0;
+  const latPsa=(D.M.psa_hrs||[])[latIdx]||0;
+  const t1=D.kpis.temp_d1, t2=D.kpis.temp_d2;
+  const ch4raw=(D.M.ch4||[])[latIdx]||0;
+  const ch4pct=ch4raw>1?ch4raw:ch4raw*100;
+  function fN(){return {t:'N',c:'#2e7d32',bg:'#f1f8e9'};}
+  function fL(){return {t:'L',c:'#e65100',bg:'#fff8e1'};}
+  function fLL(){return {t:'LL',c:'#c62828',bg:'#ffebee'};}
+  function fH(){return {t:'H',c:'#c62828',bg:'#ffebee'};}
+  function fNA(){return {t:'N/A',c:'#9e9e9e',bg:'#f5f5f5'};}
+  function flagRange(v,lo,hi){if(!v)return fNA();return v>=lo&&v<=hi?fN():v>hi?fH():fL();}
+  function flagMin(v,lo){if(!v)return fNA();return v>=lo?fN():fL();}
+  function flagMax(v,hi){if(!v)return fNA();return v<=hi?fN():fH();}
+  function flagCbg(v){if(!v)return fNA();const p=v/tgt*100;return p>=90?fN():p>=70?fL():fLL();}
+  function flagPsa(v){if(!v)return fNA();return v>=20?fN():v>=16?fL():fLL();}
+  function flagCh4(v){if(!v)return fNA();return v>=55?fN():v>=45?fL():fLL();}
+
+  const vitals=[
+    {name:'CBG Output (Latest Month)',val:latCbg?Math.round(latCbg).toLocaleString('en-IN'):'-',unit:'kg/month',ref:'≥ 1,30,000',f:flagCbg(latCbg)},
+    {name:'PSA Operating Hours',val:latPsa?latPsa.toFixed(1):'-',unit:'hrs/day',ref:'≥ 20',f:flagPsa(latPsa)},
+    {name:'D1 Digester pH',val:ph1?ph1.toFixed(2):'-',unit:'',ref:'6.80 – 7.50',f:flagRange(ph1,6.8,7.5)},
+    {name:'D2 Digester pH',val:ph2?ph2.toFixed(2):'-',unit:'',ref:'6.80 – 7.50',f:flagRange(ph2,6.8,7.5)},
+    {name:'D1 Temperature',val:t1?t1.toFixed(1):'-',unit:'°C',ref:'35 – 40',f:flagRange(t1,35,40)},
+    {name:'D2 Temperature',val:t2?t2.toFixed(1):'-',unit:'°C',ref:'35 – 40',f:flagRange(t2,35,40)},
+    {name:'D1 IA/PA Ratio',val:ia1?ia1.toFixed(3):'-',unit:'',ref:'< 0.40',f:flagMax(ia1,0.4)},
+    {name:'D2 IA/PA Ratio',val:ia2?ia2.toFixed(3):'-',unit:'',ref:'< 0.40',f:flagMax(ia2,0.4)},
+    {name:'CH₄ Purity',val:ch4pct?ch4pct.toFixed(1):'-',unit:'%',ref:'> 55',f:flagCh4(ch4pct)},
+  ];
+  const vitalsHTML=vitals.map(v=>`<div style="border:1px solid #e4e9f0;border-radius:6px;padding:10px 12px;position:relative;background:#fff">
+    <div style="font-size:9px;font-weight:600;color:#9e9e9e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">${v.name}</div>
+    <div style="display:flex;align-items:baseline;gap:4px">
+      <span style="font-size:21px;font-weight:700;color:#263238;font-family:'Courier New',Courier,monospace">${v.val}</span>
+      <span style="font-size:10px;color:#9e9e9e">${v.unit}</span>
+    </div>
+    <div style="font-size:9px;color:#c5cbd4;margin-top:3px">Ref: ${v.ref}</div>
+    <span style="position:absolute;top:9px;right:9px;background:${v.f.bg};color:${v.f.c};padding:2px 8px;border-radius:10px;font-size:10.5px;font-weight:700;font-family:'Courier New',monospace">${v.f.t}</span>
+  </div>`).join('');
+
+  // ── Sparklines ─────────────────────────────────────────────────
+  function sparkline(vals){
+    if(!vals||!vals.length)return '-';
+    const max=Math.max(...vals.map(v=>v||0),1);
+    const n=vals.length, W=72, H=18, bw=Math.max(1,Math.floor(W/n)-1);
+    const bars=vals.map((v,i)=>{
+      const h=Math.round((v||0)/max*H), x=i*(bw+1);
+      const clr=v>=tgt/30?'#2e7d32':v>=tgt/30*0.7?'#e65100':v>0?'#c62828':'#eeeeee';
+      return `<rect x="${x}" y="${H-h}" width="${bw}" height="${h}" fill="${clr}" rx="1"/>`;
+    }).join('');
+    return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" style="display:block">${bars}</svg>`;
+  }
+
+  // ── Trend arrows ───────────────────────────────────────────────
+  function trend(curr,prev,higherGood){
+    if(curr==null||prev==null||prev===0)return '<span style="color:#c5cbd4">—</span>';
+    const p=(curr-prev)/prev*100;
+    if(Math.abs(p)<3)return '<span style="color:#90a4ae">→</span>';
+    const up=p>0,good=up===higherGood;
+    return `<span style="color:${good?'#2e7d32':'#c62828'}">${up?'↑':'↓'} ${Math.abs(p).toFixed(0)}%</span>`;
+  }
+
+  // ── Monthly lab rows ───────────────────────────────────────────
+  const monthRowsHTML=months.map((m,i)=>{
+    const cbg=cbgArr[i]||0, ach=cbg?Math.round(cbg/tgt*100):0;
+    const cpk=D.cost_per_kg[m];
+    const prevCbg=i>0?cbgArr[i-1]||null:null;
+    const prevCpk=i>0?D.cost_per_kg[months[i-1]]||null:null;
+    const f=ach>=90?fN():ach>=70?fL():fLL();
+    const dayVals=Object.keys(D.days).filter(d=>D.days[d].mo===m).sort((a,b)=>parseInt(a)-parseInt(b)).map(d=>D.days[d]?.psa?.cbg_tot||0);
+    return `<tr>
+      <td style="font-weight:600;white-space:nowrap">${m} 2026</td>
+      <td style="font-variant-numeric:tabular-nums">${cbg?Math.round(cbg).toLocaleString('en-IN'):'-'}</td>
+      <td style="color:#9e9e9e">${tgt.toLocaleString('en-IN')}</td>
+      <td style="font-weight:600">${cbg?ach+'%':'-'}</td>
+      <td>${trend(cbg,prevCbg,true)}</td>
+      <td><span style="background:${f.bg};color:${f.c};padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:700;letter-spacing:.4px;font-family:'Courier New',monospace">${f.t}</span></td>
+      <td>${cpk?'₹'+cpk.toFixed(1):'-'}</td>
+      <td>${trend(cpk,prevCpk,false)}</td>
+      <td style="padding:5px 8px">${sparkline(dayVals)}</td>
+    </tr>`;
+  }).join('');
+
+  // ── pH Timeline SVG ────────────────────────────────────────────
+  const trailDates=D.olr_trail.dates||[];
+  const phPts=trailDates.map(d=>({d,p1:D.days[d]?.health?.ph?.d1||null,p2:D.days[d]?.health?.ph?.d2||null})).filter(p=>p.p1||p.p2);
+  function timelineSVG(){
+    if(!phPts.length)return '<p style="color:#9e9e9e;font-size:11px;padding:12px 0">No pH data available.</p>';
+    const W=530,H=88,pL=36,pR=10,pT=8,pB=22;
+    const cw=W-pL-pR,ch=H-pT-pB;
+    const minPH=6.0,maxPH=8.5;
+    const py=v=>pT+ch-(v-minPH)/(maxPH-minPH)*ch;
+    const px=i=>pL+(phPts.length>1?i/(phPts.length-1)*cw:cw/2);
+    const bandTop=py(7.5),bandBot=py(6.8);
+    const yTicks=[6.0,6.5,7.0,7.5,8.0,8.5].map(v=>`
+      <line x1="${pL}" y1="${py(v).toFixed(1)}" x2="${pL+cw}" y2="${py(v).toFixed(1)}" stroke="#f5f5f5" stroke-width="1"/>
+      <text x="${pL-4}" y="${(py(v)+3.5).toFixed(1)}" text-anchor="end" font-size="8" fill="#c5cbd4">${v}</text>`).join('');
+    const step=Math.max(1,Math.floor(phPts.length/7));
+    const xLabels=phPts.map((p,i)=>i%step===0?`<text x="${px(i).toFixed(1)}" y="${H-5}" text-anchor="middle" font-size="8" fill="#c5cbd4">${p.d.split('-')[0]}</text>`:'').join('');
+    function buildPath(key){let d='',m=true;phPts.forEach((p,i)=>{const v=p[key];if(!v||v===0){m=true;return;}d+=(m?'M ':'L ')+`${px(i).toFixed(1)} ${py(v).toFixed(1)} `;m=false;});return d;}
+    const d1=buildPath('p1'),d2=buildPath('p2');
+    return `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      ${yTicks}
+      <rect x="${pL}" y="${bandTop.toFixed(1)}" width="${cw}" height="${(bandBot-bandTop).toFixed(1)}" fill="#e8f5e9" opacity="0.55"/>
+      <line x1="${pL}" y1="${bandTop.toFixed(1)}" x2="${pL+cw}" y2="${bandTop.toFixed(1)}" stroke="#a5d6a7" stroke-width="0.8" stroke-dasharray="3,2"/>
+      <line x1="${pL}" y1="${bandBot.toFixed(1)}" x2="${pL+cw}" y2="${bandBot.toFixed(1)}" stroke="#a5d6a7" stroke-width="0.8" stroke-dasharray="3,2"/>
+      ${d1?`<path d="${d1}" fill="none" stroke="#1565c0" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`:''}
+      ${d2?`<path d="${d2}" fill="none" stroke="#c62828" stroke-width="1.5" stroke-linejoin="round" stroke-linecap="round"/>`:''}
+      ${xLabels}
+      <line x1="${pL}" y1="${pT}" x2="${pL}" y2="${pT+ch}" stroke="#e8edf2" stroke-width="1"/>
+      <line x1="${pL}" y1="${pT+ch}" x2="${pL+cw}" y2="${pT+ch}" stroke="#e8edf2" stroke-width="1"/>
+      <line x1="${pL+cw-120}" y1="${pT+5}" x2="${pL+cw-110}" y2="${pT+5}" stroke="#1565c0" stroke-width="2"/>
+      <text x="${pL+cw-107}" y="${pT+8.5}" font-size="9" fill="#546e7a">D1 pH</text>
+      <line x1="${pL+cw-72}" y1="${pT+5}" x2="${pL+cw-62}" y2="${pT+5}" stroke="#c62828" stroke-width="2"/>
+      <text x="${pL+cw-59}" y="${pT+8.5}" font-size="9" fill="#546e7a">D2 pH</text>
+      <rect x="${pL+cw-22}" y="${pT+1}" width="9" height="8" fill="#e8f5e9" stroke="#a5d6a7" stroke-width="0.5"/>
+      <text x="${pL+cw-11}" y="${pT+8.5}" font-size="8" fill="#a5d6a7">Norm.</text>
+    </svg>`;
+  }
+
+  // ── Diagnostic issues ──────────────────────────────────────────
+  const seenCats=new Set();
+  const uniqueIssues=months.map((m,i)=>diagnose(
+    (D.M.exp_tot||[])[i],(D.M.ideal_pur||[])[i],(D.M.act_pur||[])[i],cbgArr[i],(D.M.ideal_cbg||[])[i],
+    (D.M.ph_d1||[])[i],(D.M.ph_d2||[])[i],(D.M.tmp_d1||[])[i],(D.M.tmp_d2||[])[i],
+    (D.M.ia_d1||[])[i],(D.M.ia_d2||[])[i],null,null,null,null,
+    (D.M.psa_hrs||[])[i],(D.M.d1_eff||[])[i],(D.M.d2_eff||[])[i],(D.M.ch4||[])[i],'ALL'
+  )).flat().filter(iss=>{if(seenCats.has(iss.cat))return false;seenCats.add(iss.cat);return true;});
+  const redIss=uniqueIssues.filter(i=>i.sev==='red');
+  const amberIss=uniqueIssues.filter(i=>i.sev==='amber');
+  const greenIss=uniqueIssues.filter(i=>i.sev==='green');
+  const recs=uniqueIssues.filter(i=>i.sev!=='green');
+  function issBlock(arr,clr,bg){return arr.map(iss=>`<div style="display:flex;align-items:flex-start;gap:10px;padding:7px 12px;background:${bg};border-radius:5px;border-left:3px solid ${clr};margin-bottom:5px">
+    <div style="font-size:10px;font-weight:700;color:${clr};min-width:76px;flex-shrink:0">${iss.cat}</div>
+    <div style="font-size:10.5px;color:#455a64">${iss.msg||''}${iss.detail?`<br><span style="color:#90a4ae;font-size:9px">${iss.detail}</span>`:''}</div>
+  </div>`).join('');}
+  const rxHTML=recs.length?recs.map((r,i)=>`<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid #f0f3f6">
+    <div style="min-width:26px;height:26px;background:${r.sev==='red'?'#c62828':'#e65100'};color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${i+1}</div>
+    <div style="flex:1"><div style="font-size:11.5px;font-weight:600;color:#263238">${r.cat}</div>
+    <div style="font-size:10.5px;color:#546e7a;margin-top:2px">${r.msg||''}</div>
+    ${r.detail?`<div style="font-size:9.5px;color:#90a4ae;margin-top:1px">${r.detail}</div>`:''}</div>
+    <span style="margin-left:auto;background:${r.sev==='red'?'#ffebee':'#fff8e1'};color:${r.sev==='red'?'#c62828':'#e65100'};padding:2px 9px;border-radius:10px;font-size:8.5px;font-weight:700;text-transform:uppercase;white-space:nowrap;align-self:flex-start">${r.sev==='red'?'Urgent':'Advisory'}</span>
+  </div>`).join(''):`<div style="padding:14px;color:#2e7d32;font-size:11.5px;font-weight:600">✓ All parameters within normal limits — no corrective action required.</div>`;
+
+  // ── Assemble HTML ──────────────────────────────────────────────
+  const dashUrl='https://mohit-sharma2614.github.io/Karnal-Dashboard/dashboard/analytics_dashboard.html';
+  const html=`<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><title>Plant Health Report — ${rptNum}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;color:#263238;background:#fff;font-size:11.5px;line-height:1.5}
+@page{size:A4;margin:14mm 17mm 18mm 17mm}
+@media print{.pb{page-break-after:always}.no-print{display:none!important}body{font-size:11px}}
+.hdr{border-top:4px solid #1a237e;padding:14px 0 10px;display:flex;align-items:flex-start;justify-content:space-between}
+.hdr h1{font-family:Georgia,'Times New Roman',serif;font-size:9px;font-weight:400;color:#9e9e9e;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:2px}
+.hdr h2{font-family:Georgia,'Times New Roman',serif;font-size:20px;font-weight:700;color:#1a237e;line-height:1.15}
+.hdr p{font-size:9.5px;color:#546e7a;margin-top:2px}
+.hdr-r{text-align:right;font-size:9.5px;color:#546e7a;line-height:1.9}
+.hdr-r strong{color:#263238;font-size:10.5px}
+.pt-bar{background:#f6f8fb;border:1px solid #e4e9f0;border-radius:6px;padding:9px 14px;display:flex;gap:20px;flex-wrap:wrap;margin:10px 0}
+.pt-f{font-size:10px} .pt-f span{display:block;color:#9e9e9e;font-size:8.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}
+.sec{font-family:Georgia,'Times New Roman',serif;font-size:12.5px;font-weight:700;color:#1a237e;border-bottom:1.5px solid #e4e9f0;padding-bottom:5px;margin:14px 0 9px;display:flex;align-items:center;gap:7px}
+.sec::before{content:'';display:block;width:3px;height:14px;background:#1a237e;border-radius:2px;flex-shrink:0}
+.vg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.hs-wrap{display:flex;align-items:center;gap:20px;background:#fafbfd;border:1px solid #e4e9f0;border-radius:8px;padding:14px 18px;margin-bottom:6px}
+.hs-leg{font-size:10px;color:#546e7a} .hs-leg div{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+table.lab{width:100%;border-collapse:collapse;font-size:10.5px}
+table.lab th{background:#1a237e;color:#fff;padding:6px 9px;text-align:left;font-weight:600;font-size:9.5px;letter-spacing:.2px}
+table.lab td{padding:5px 9px;border-bottom:1px solid #f0f3f6;vertical-align:middle}
+table.lab tr:nth-child(even) td{background:#fafbfc}
+.ftr{border-top:1px solid #e4e9f0;padding:9px 0 0;display:flex;align-items:flex-end;justify-content:space-between;margin-top:14px;font-size:8.5px;color:#9e9e9e}
+.cont-hdr{border-top:2px solid #1a237e;padding:10px 0 8px;display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+</style></head><body>
+
+<!-- PAGE 1: Assessment Overview -->
+<div class="pb">
+  <div class="hdr">
+    <div><h1>Plant Health Report</h1><h2>LREKPL — CBG Plant, Karnal</h2>
+    <p>5.4 TPD Compressed Bio-Gas Facility · Karnal, Haryana</p></div>
+    <div class="hdr-r">
+      <div><strong>Report No.</strong> ${rptNum}</div>
+      <div><strong>Date</strong> ${rptDate} · ${rptTime}</div>
+      <div><strong>Reporting Period</strong> ${scope}</div>
+      <div><strong>Prepared by</strong> LREKPL Analytics System</div>
+    </div>
   </div>
-  <table><thead><tr><th>Month</th><th>CBG Produced (kg)</th><th>Target (kg)</th><th>Achievement</th><th>Cost/kg</th></tr></thead>
-  <tbody>${rows}</tbody></table>
-  <p style="margin-top:24px;font-size:10px;color:#90a4ae">Generated from LREKPL CBG Dashboard · ${D.meta.updated}</p>
-  </body></html>`);
+  <div class="pt-bar">
+    <div class="pt-f"><span>Plant</span>Laxmi Ram Eka Nath Private Ltd.</div>
+    <div class="pt-f"><span>Technology</span>Wet Anaerobic Digestion + PSA</div>
+    <div class="pt-f"><span>Capacity</span>5.4 TPD CBG</div>
+    <div class="pt-f"><span>Digesters</span>D1 · D2 (Series)</div>
+    <div class="pt-f"><span>Data Period</span>${D.meta.period}</div>
+    <div class="pt-f"><span>Last Updated</span>${D.meta.updated}</div>
+  </div>
+
+  <div class="sec">Plant Health Assessment</div>
+  <div class="hs-wrap">
+    <div>${gaugeSVG}</div>
+    <div style="flex:1">
+      <div style="font-size:10px;font-weight:600;color:#546e7a;letter-spacing:.5px;margin-bottom:7px">COMPOSITE HEALTH SCORE — WEIGHTED PARAMETERS</div>
+      <div style="font-size:11px;color:#263238;display:grid;grid-template-columns:1fr 1fr;gap:3px 24px">
+        <div>CBG Achievement <span style="color:#9e9e9e;font-size:9px">(40%)</span> → <strong>${Math.round(cbgScore)}%</strong> of target</div>
+        <div>PSA Utilisation <span style="color:#9e9e9e;font-size:9px">(20%)</span> → <strong>${avgPsa?avgPsa.toFixed(1):'-'} hrs/day</strong></div>
+        <div>Digester pH Stability <span style="color:#9e9e9e;font-size:9px">(20%)</span> → <strong>${Math.round(phScore)}%</strong></div>
+        <div>IA/PA Ratio Health <span style="color:#9e9e9e;font-size:9px">(10%)</span> → <strong>${Math.round(iaScore)}%</strong></div>
+        <div>Cost Efficiency <span style="color:#9e9e9e;font-size:9px">(10%)</span> → <strong>${avgCpk?'₹'+avgCpk.toFixed(1)+'/kg':'-'}</strong></div>
+      </div>
+    </div>
+    <div class="hs-leg" style="margin-left:auto;flex-shrink:0">
+      <div style="font-weight:700;color:#263238;font-size:10.5px;margin-bottom:7px">Score Bands</div>
+      <div><span class="dot" style="background:#2e7d32"></span>80 – 100 &nbsp;Healthy</div>
+      <div><span class="dot" style="background:#e65100"></span>60 – 79 &nbsp;Caution</div>
+      <div><span class="dot" style="background:#c62828"></span>0 – 59 &nbsp;Critical</div>
+    </div>
+  </div>
+
+  <div class="sec">Vital Signs <span style="font-size:9.5px;color:#9e9e9e;font-weight:400;font-family:'Segoe UI',sans-serif">— Latest readings &nbsp;·&nbsp; N = Normal &nbsp;·&nbsp; H = High &nbsp;·&nbsp; L = Low</span></div>
+  <div class="vg">${vitalsHTML}</div>
+</div>
+
+<!-- PAGE 2: Lab Results -->
+<div class="pb">
+  <div class="cont-hdr">
+    <span style="font-size:9px;color:#9e9e9e;letter-spacing:1px;text-transform:uppercase">Continued — </span>
+    <span style="font-size:12px;font-weight:700;color:#1a237e;font-family:Georgia,serif;margin-left:6px">Monthly Production Results</span>
+    <span style="margin-left:auto;font-size:9.5px;color:#9e9e9e">${rptNum} · ${rptDate}</span>
+  </div>
+  <div class="sec">Diagnostic Results — Monthly Production</div>
+  <table class="lab">
+    <thead><tr>
+      <th>Month</th><th>CBG Produced (kg)</th><th>Target (kg)</th><th>Achievement</th>
+      <th>CBG Trend</th><th>Status</th><th>Cost / kg</th><th>Cost Trend</th><th>Daily Profile</th>
+    </tr></thead>
+    <tbody>${monthRowsHTML}</tbody>
+  </table>
+  <div style="margin-top:7px;font-size:8.5px;color:#9e9e9e;display:flex;gap:14px;align-items:center;flex-wrap:wrap">
+    <span>Status:</span>
+    <span><span style="background:#f1f8e9;color:#2e7d32;padding:1px 6px;border-radius:8px;font-weight:700;font-family:'Courier New',monospace">N</span> ≥ 90% target</span>
+    <span><span style="background:#fff8e1;color:#e65100;padding:1px 6px;border-radius:8px;font-weight:700;font-family:'Courier New',monospace">L</span> 70–89% target</span>
+    <span><span style="background:#ffebee;color:#c62828;padding:1px 6px;border-radius:8px;font-weight:700;font-family:'Courier New',monospace">LL</span> &lt; 70% target</span>
+    <span style="margin-left:8px">Daily bars: <span style="color:#2e7d32">■</span> ≥ target &nbsp;<span style="color:#e65100">■</span> 70–99% &nbsp;<span style="color:#c62828">■</span> &lt; 70%</span>
+  </div>
+</div>
+
+<!-- PAGE 3: Diagnostics & Rx -->
+<div>
+  <div class="cont-hdr">
+    <span style="font-size:9px;color:#9e9e9e;letter-spacing:1px;text-transform:uppercase">Continued — </span>
+    <span style="font-size:12px;font-weight:700;color:#1a237e;font-family:Georgia,serif;margin-left:6px">Diagnostic Analysis &amp; Treatment Plan</span>
+    <span style="margin-left:auto;font-size:9.5px;color:#9e9e9e">${rptNum} · ${rptDate}</span>
+  </div>
+
+  <div class="sec">Digester Vitals — pH Trend (Last ${phPts.length} Days)</div>
+  <div style="border:1px solid #e4e9f0;border-radius:6px;padding:10px 12px;background:#fafbfc">${timelineSVG()}</div>
+
+  <div class="sec" style="margin-top:14px">Diagnostic Summary</div>
+  ${redIss.length?`<div style="font-size:9px;font-weight:700;color:#c62828;margin-bottom:5px;letter-spacing:.4px">● CRITICAL / ABNORMAL</div>${issBlock(redIss,'#c62828','#ffebee')}`:''}
+  ${amberIss.length?`<div style="font-size:9px;font-weight:700;color:#e65100;margin-bottom:5px;letter-spacing:.4px;${redIss.length?'margin-top:10px':''}">● ADVISORY / BORDERLINE</div>${issBlock(amberIss,'#e65100','#fff8e1')}`:''}
+  ${greenIss.length?`<div style="font-size:9px;font-weight:700;color:#2e7d32;margin-bottom:5px;letter-spacing:.4px;${(redIss.length||amberIss.length)?'margin-top:10px':''}">● WITHIN NORMAL LIMITS</div>${issBlock(greenIss,'#2e7d32','#f1f8e9')}`:''}
+  ${!redIss.length&&!amberIss.length&&!greenIss.length?'<p style="color:#9e9e9e;font-size:11px;padding:10px">No diagnostic data available for the selected period.</p>':''}
+
+  <div class="sec" style="margin-top:14px">Treatment Plan</div>
+  <div style="font-family:Georgia,serif;font-size:18px;color:#1a237e;font-weight:700;margin-bottom:2px">℞</div>
+  <div style="font-size:9px;color:#9e9e9e;font-style:italic;margin-bottom:9px">The following corrective actions are recommended based on diagnostic findings. Priority actions should be addressed within 48–72 hours.</div>
+  <div style="border:1px solid #e4e9f0;border-radius:7px;overflow:hidden">${rxHTML}</div>
+
+  <div class="ftr">
+    <div>
+      <div style="font-weight:600;color:#546e7a;margin-bottom:2px">LREKPL — Laxmi Ram Eka Nath Private Ltd.</div>
+      <div>5.4 TPD CBG Plant · Karnal, Haryana · Generated by LREKPL Analytics System</div>
+      <div style="margin-top:1px">${rptNum} · ${rptDate} · ${rptTime} &nbsp;·&nbsp; Data: ${D.meta.updated}</div>
+    </div>
+    <div style="text-align:center">
+      <div style="font-size:7.5px;color:#c5cbd4;margin-bottom:3px;letter-spacing:.5px">SCAN FOR LIVE DASHBOARD</div>
+      <div id="qr_wrap" style="width:80px;height:80px;background:#f6f8fb;border:1px solid #e4e9f0;border-radius:4px;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:8px;color:#c5cbd4;text-align:center;line-height:1.3">QR<br>Loading…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"><\/script>
+<script>
+(function(){
+  var url="${dashUrl}";
+  function doPrint(){setTimeout(function(){window.print();},400);}
+  if(typeof QRCode!=="undefined"){
+    var c=document.createElement("canvas");
+    QRCode.toCanvas(c,url,{width:78,margin:1,color:{dark:"#1a237e",light:"#ffffff"}},function(err){
+      var wrap=document.getElementById("qr_wrap");
+      if(!err&&wrap){
+        var img=document.createElement("img");
+        img.src=c.toDataURL("image/png");
+        img.width=78;img.height=78;
+        img.style.cssText="display:block;border-radius:3px";
+        wrap.innerHTML="";
+        wrap.appendChild(img);
+      }
+      doPrint();
+    });
+  } else {doPrint();}
+})();
+<\/script>
+</body></html>`;
+
+  const w=window.open('','_blank');
+  if(!w){alert('Pop-up blocked — please allow pop-ups for this site and try again.');return;}
+  w.document.write(html);
   w.document.close();
-  setTimeout(()=>w.print(),500);
 }
 
 // ── ANALYTICS CONFIG & AUTH ─────────────────────────────────
