@@ -2785,8 +2785,11 @@ async function buildAnalyticsD() {
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
-  M.d2_exp=aggMonth(d2,gD,10); M.d1_drain=mkA(); M.d2_drain=mkA();
-  M.d1_sfom=mkA(); M.d2_sfom=mkA(); M.d1_lfom=mkA(); M.d2_lfom=mkA();
+  M.d2_exp=aggMonth(d2,gD,10); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
+  M.d1_sfom=aggMonth(d1,gD,12); M.d2_sfom=aggMonth(d2,gD,12); M.d1_lfom=aggMonth(d1,gD,13); M.d2_lfom=aggMonth(d2,gD,13);
+  const _d1bg=aggMonth(d1,gD,31),_d2bg=aggMonth(d2,gD,31);
+  M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
+  M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
   M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
@@ -2803,8 +2806,8 @@ async function buildAnalyticsD() {
   }
   const DD={};
   DD.psa=buildDA(psa,gD,{cbg_tot:12,purified:9,dispatched:15,psa_hrs:psaH,rbg_d1:5,rbg_d2:6,rbg_tot:7,cbg_d1:10,cbg_d2:11,ch4:22,veer:16,adinath:17,kfs:18,ksk:19,om:20,sps:21});
-  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:r=>0,lfom:r=>0,feed_act:24,psa_eff_pct:50});
-  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:r=>0,lfom:r=>0,feed_act:25,psa_eff_pct:51});
+  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50});
+  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
@@ -2846,8 +2849,8 @@ async function buildAnalyticsD() {
     const dt=toDate(p[0]||d1r[0]);if(!dt)return;
     days[k]={mo:moKey(dt),dt:k,
       psa:{psa_hrs:psaH(p),comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:nv(p[7]),purified:nv(p[9]),cbg_d1:nv(p[10]),cbg_d2:nv(p[11]),cbg_tot:nv(p[12]),dispatched:nv(p[15]),veer:nv(p[16]),adinath:nv(p[17]),kfs:nv(p[18]),ksk:nv(p[19]),om:nv(p[20]),sps:nv(p[21]),ch4:nv(p[22]),cascade:nv(p[27]),storage:nv(p[28]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51])},
-      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:null,lfom:null},
-      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:null,lfom:null},
+      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30])},
+      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30])},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),pm_feed:nv(fbr[9]),gs_feed:nv(fbr[10]),csl_feed:nv(fbr[11]),cd_feed:nv(fbr[12]),pm_bal:nv(fbr[14]),gs_bal:nv(fbr[15]),csl_bal:nv(fbr[16]),cd_bal:nv(fbr[17])},
       rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
       exp:{tot_exp:nv(d1r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),
