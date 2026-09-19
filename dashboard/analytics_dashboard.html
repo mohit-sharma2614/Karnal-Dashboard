@@ -3027,7 +3027,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Digester%20TS-VS')/range(address='A4:N400')"),
     gFetch("/worksheets('Digester%20IA-PA')/range(address='A4:R400')"),
     gFetch("/worksheets('Daily%20Revenue%20%26%20Costs')/range(address='A4:H700')"),
-    gFetch("/worksheets('Feed%20%26%20Balance')/range(address='A4:R700')"),
+    gFetch("/worksheets('Feed%20%26%20Balance')/range(address='A4:V700')"),
     gFetch("/worksheets('Manure%20Sales')/range(address='A3:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A5:K400')"),
   ]);
@@ -3072,9 +3072,9 @@ async function buildAnalyticsD() {
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
   M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
-  M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4); M.sg_in=aggMonth(fb,gD,18);
-  M.pm_feed=aggMonth(fb,gD,9); M.gs_feed=aggMonth(fb,gD,10); M.csl_feed=aggMonth(fb,gD,11); M.cd_feed=aggMonth(fb,gD,12); M.sg_feed=aggMonth(fb,gD,20);
-  M.sg_cost=aggMonth(fb,gD,19); M.sg_bal=aggMonth(fb,gD,21);
+  M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4); M.sg_in=aggMonth(fb,gD,5);
+  M.pm_feed=aggMonth(fb,gD,11); M.gs_feed=aggMonth(fb,gD,12); M.csl_feed=aggMonth(fb,gD,13); M.cd_feed=aggMonth(fb,gD,14); M.sg_feed=aggMonth(fb,gD,15);
+  M.sg_cost=aggMonth(fb,gD,10); M.sg_bal=aggMonth(fb,gD,21);
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45); M.sg_bpp=aggMonth(d1,gD,46);
   M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46); M.d2_sg_bpp=aggMonth(d2,gD,47); M.act_cbg=M.cbg;
   M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
@@ -3105,7 +3105,7 @@ async function buildAnalyticsD() {
   DD.psa=buildDA(psa,gD,{cbg_tot:12,purified:9,dispatched:15,psa_hrs:psaH,rbg_d1:5,rbg_d2:6,rbg_tot:7,cbg_d1:10,cbg_d2:11,ch4:22,veer:16,adinath:17,kfs:18,ksk:19,om:20,sps:21});
   DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50});
   DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51});
-  DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:18,pm_feed:9,gs_feed:10,csl_feed:11,cd_feed:12,sg_feed:20,pm_bal:14,gs_bal:15,csl_bal:16,cd_bal:17,sg_bal:21});
+  DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
   // Merge PSA data into DD.exp by day key (local DD.psa — global D is null at this point)
@@ -3148,7 +3148,7 @@ async function buildAnalyticsD() {
       psa:{psa_hrs:psaH(p),comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:nv(p[7]),purified:nv(p[9]),cbg_d1:nv(p[10]),cbg_d2:nv(p[11]),cbg_tot:nv(p[12]),dispatched:nv(p[15]),veer:nv(p[16]),adinath:nv(p[17]),kfs:nv(p[18]),ksk:nv(p[19]),om:nv(p[20]),sps:nv(p[21]),ch4:nv(p[22]),cascade:nv(p[27]),storage:nv(p[28]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51])},
       d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30])},
       d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30])},
-      feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[18]),pm_feed:nv(fbr[9]),gs_feed:nv(fbr[10]),csl_feed:nv(fbr[11]),cd_feed:nv(fbr[12]),sg_feed:nv(fbr[20]),pm_bal:nv(fbr[14]),gs_bal:nv(fbr[15]),csl_bal:nv(fbr[16]),cd_bal:nv(fbr[17]),sg_bal:nv(fbr[21])},
+      feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
       rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
       exp:{tot_exp:nv(d1r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),
         d1_cd_bpp:nv(d1r[42]),d1_pm_bpp:nv(d1r[43]),d1_gs_bpp:nv(d1r[44]),d1_csl_bpp:nv(d1r[45]),d1_sg_bpp:nv(d1r[46]),
@@ -3160,9 +3160,9 @@ async function buildAnalyticsD() {
   const lastPsa=psa[psa.length-1]||[],lastPh=ph[ph.length-1]||[],lastFb=fb[fb.length-1]||[];
   const latDt=toDate(lastPsa[0]);
   const ytd_rev=M.total_rev.reduce((s,v)=>s+(v||0),0),ytd_cost=M.total_cost.reduce((s,v)=>s+(v||0),0);
-  const stock={pm:nv(lastFb[14])||0,gs:nv(lastFb[15])||0,csl:nv(lastFb[16])||0,cd:nv(lastFb[17])||0,sg:nv(lastFb[21])||0,date:dayKey(toDate(lastFb[0]))||'—'};
+  const stock={pm:nv(lastFb[17])||0,gs:nv(lastFb[18])||0,csl:nv(lastFb[19])||0,cd:nv(lastFb[20])||0,sg:nv(lastFb[21])||0,date:dayKey(toDate(lastFb[0]))||'—'};
   const avgF=ci=>{const v=fb.map(r=>nv(r[ci])).filter(x=>x!==null&&x>0);return v.length?v.reduce((s,x)=>s+x,0)/v.length:1;};
-  const inv_days={pm:stock.pm/avgF(9),gs:stock.gs/avgF(10),csl:stock.csl/avgF(11),cd:stock.cd/avgF(12),sg:stock.sg>0?stock.sg/avgF(20):0};
+  const inv_days={pm:stock.pm/avgF(11),gs:stock.gs/avgF(12),csl:stock.csl/avgF(13),cd:stock.cd/avgF(14),sg:stock.sg>0?stock.sg/avgF(15):0};
   const td=Math.round(130000/30);
   const heatmap={};
   months.forEach(m=>{const dp=DD.psa[m]||{};heatmap[m]=(dp.dates||[]).map((_,i)=>{const c=(dp.cbg_tot||[])[i]||0;return c>=td?'g':c>=td*.7?'a':c>0?'r':'empty';});});
