@@ -2096,6 +2096,7 @@ function renderHeatmap(){
       const cbg=D.days[d]?.psa?.cbg_tot||0;
       const cls=hmDay||(cbg>0?'r':'empty');
       const day=d.split('-')[0];
+      const pct=cbg>0?Math.round(cbg/TGT.cbg_month*100):null;
       html+=`<div class="hm-day ${cls}" title="${d}: ${cbg?Math.round(cbg).toLocaleString()+' kg':'-'} (${pct!=null?pct+'%':'no data'})"
         onclick="setMonth('${mo}',null);setTimeout(()=>setDay('${d}',null),100)">${day}</div>`;
     });
