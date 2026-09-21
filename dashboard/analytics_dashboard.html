@@ -1459,8 +1459,46 @@ function renderS3(){
   }
 
   // ── Month / All view ──────────────────────────────────────
-  dayPanel.style.display='none';
   chartsWrap.style.display='';
+  // Blue summary banner (month totals)
+  const sumArr=arr=>(arr||[]).reduce((s,v)=>s+(v||0),0);
+  const moCbg=mo==='ALL'?sumArr(mArr('cbg')):sumArr((D.D.psa?.[mo]?.cbg_tot));
+  const moD1Exp=mo==='ALL'?sumArr(mArr('d1_exp')):sumArr(D.D.exp?.[mo]?.tot_exp);
+  const moD2Exp=mo==='ALL'?sumArr(mArr('d2_exp')):sumArr(D.D.exp?.[mo]?.d2_exp);
+  const moD1Feed=mo==='ALL'?sumArr(mArr('d1_feed')):sumArr(D.D.d1?.[mo]?.feed_act);
+  const moD2Feed=mo==='ALL'?sumArr(mArr('d2_feed')):sumArr(D.D.d2?.[mo]?.feed_act);
+  const moD1Bg=mo==='ALL'?sumArr(mArr('d1_bg')):sumArr(D.D.d1?.[mo]?.bg_act);
+  const moD2Bg=mo==='ALL'?sumArr(mArr('d2_bg')):sumArr(D.D.d2?.[mo]?.bg_act);
+  const periodLbl=mo==='ALL'?'YTD Total':mo+' Total';
+  dayPanel.style.display='block';
+  dayPanel.innerHTML=`<div style="background:linear-gradient(135deg,var(--acc) 0%,#1976D2 100%);border-radius:10px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+    <div>
+      <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,.7);text-transform:uppercase">Production Summary — ${periodLbl}</div>
+      <div style="font-size:18px;font-weight:800;color:#fff;margin-top:2px">D1 Feed: ${fmtN(moD1Feed)} MT &nbsp;·&nbsp; D2 Feed: ${fmtN(moD2Feed)} MT</div>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="text-align:right">
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">Total CBG Produced</div>
+        <div style="font-size:26px;font-weight:800;color:#fff">${moCbg?fmtN(moCbg)+' kg':'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Expected</div>
+        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.8)">0 kg</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Actual</div>
+        <div style="font-size:26px;font-weight:800;color:#fff">${moCbg?fmtN(moCbg)+' kg':'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">D1 BPP Expected</div>
+        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.85)">${moD1Exp?fmtN(moD1Exp)+' m³':'—'}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">D2 BPP Expected</div>
+        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.85)">${moD2Exp?fmtN(moD2Exp)+' m³':'—'}</div>
+      </div>
+    </div>
+  </div>`;
   const lbl=mo==='ALL'?MONTHS:dDates('d1');
   // Feeding
   const d1FeedExp=mo==='ALL'?sumMo('d1','feed_exp'):dArr('d1','feed_exp');
