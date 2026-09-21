@@ -919,9 +919,9 @@ function renderDigesterDetail(){
 
   html+=acc('⚗️ Biogas Production',[
     {head:'Gas Estimates & Output'},
-    {label:'Biogas Estimated (Expected)',unit:'m³',val:fv(d[10])},
-    {label:'Biogas Estimated (Actual)',unit:'m³',val:fi(d[31])},
-    {label:'Raw Biogas at PSA Inlet',unit:'m³',val:fi(d[32])},
+    {label:'Biogas Estimated — BPP (K)', unit:'m³',val:fv(d[10])},
+    {label:'Biogas Estimated — BPP (AF)',unit:'m³',val:fi(d[31])},
+    {label:'Raw Biogas at PSA Inlet (B)',unit:'m³',val:fi(d[32])},
     {label:'Raw Biogas Vent / Flare',unit:'m³',val:fi(d[33])},
     {label:'Raw Biogas Total (B+C)',unit:'m³',val:fi(d[34])},
     {label:'CBG Produced',unit:'kg',val:fi(d[35])},
@@ -1048,9 +1048,9 @@ function renderProduction() {
 
   const d1tbl = dataTable([
     {head:'Digester 1 — Gas Production'},
-    {label:'Biogas Estimated (Expected)',   unit:'m³',  val:fv(d1[10])},
-    {label:'Biogas Estimated (Actual)',     unit:'m³',  val:fi(d1[31])},
-    {label:'Raw Biogas at PSA Inlet',       unit:'m³',  val:fi(d1[32])},
+    {label:'Biogas Estimated — BPP (K)',    unit:'m³',  val:fv(d1[10])},
+    {label:'Biogas Estimated — BPP (AF)',  unit:'m³',  val:fi(d1[31])},
+    {label:'Raw Biogas at PSA Inlet (B)',  unit:'m³',  val:fi(d1[32])},
     {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d1[33])},
     {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d1[34])},
     {label:'CBG Produced',                 unit:'kg',  val:fi(d1[35])},
@@ -1074,9 +1074,9 @@ function renderProduction() {
 
   const d2tbl = dataTable([
     {head:'Digester 2 — Gas Production'},
-    {label:'Biogas Estimated (Expected)',   unit:'m³',  val:fv(d2[10])},
-    {label:'Biogas Estimated (Actual)',     unit:'m³',  val:fi(d2[31])},
-    {label:'Raw Biogas at PSA Inlet',       unit:'m³',  val:fi(d2[32])},
+    {label:'Biogas Estimated — BPP (K)',    unit:'m³',  val:fv(d2[10])},
+    {label:'Biogas Estimated — BPP (AF)',  unit:'m³',  val:fi(d2[31])},
+    {label:'Raw Biogas at PSA Inlet (B)',  unit:'m³',  val:fi(d2[32])},
     {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d2[33])},
     {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d2[34])},
     {label:'CBG Produced',                 unit:'kg',  val:fi(d2[35])},

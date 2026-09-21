@@ -3273,10 +3273,10 @@ async function buildAnalyticsD() {
   M.psa_hrs=aggMonth(psa,gD,psaH); M.comp_hrs=aggMonth(psa,gD,r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;});
   M.ch4=aggMonth(psa,gD,22,'avg'); M.d1_bg=aggMonth(psa,gD,5); M.d2_bg=aggMonth(psa,gD,6);
   M.d1_cbg=aggMonth(psa,gD,10); M.d2_cbg=aggMonth(psa,gD,11); M.act_pur=aggMonth(psa,gD,9);
-  M.ideal_pur=aggMonth(d1,gD,32); M.ideal_cbg=aggMonth(d1,gD,38); M.exp_tot=aggMonth(d1,gD,10); M.d1_exp=M.exp_tot;
+  M.ideal_pur=M.psa_hrs.map(h=>(h||0)*370); M.ideal_cbg=aggMonth(d1,gD,38); M.exp_tot=aggMonth(d1,gD,10); M.d1_exp=M.exp_tot;
   M.d1_eff=aggMonth(d1,gD,50,'avg'); M.d2_eff=aggMonth(d2,gD,51,'avg');
   M.d1_olr=aggMonth(d1,gD,49,'avg'); M.d2_olr=aggMonth(d2,gD,50,'avg');
-  M.d1_feed=aggMonth(d1,gD,24); M.d2_feed=aggMonth(d2,gD,25);
+  M.d1_feed=aggMonth(d1,gD,24); M.d2_feed=aggMonth(d2,gD,24);
   M.ph_d1=aggMonth(ph,gD,1,'avg'); M.ph_d2=aggMonth(ph,gD,4,'avg');
   M.tmp_d1=aggMonth(tmp_,gD,1,'avg'); M.tmp_d2=aggMonth(tmp_,gD,4,'avg');
   M.ts_d1=aggMonth(tsvs_,gD,1,'avg'); M.ts_d2=aggMonth(tsvs_,gD,7,'avg');
@@ -3297,7 +3297,7 @@ async function buildAnalyticsD() {
   M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
   M.d2_exp=aggMonth(d2,gD,10); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
   M.d1_sfom=aggMonth(d1,gD,12); M.d2_sfom=aggMonth(d2,gD,12); M.d1_lfom=aggMonth(d1,gD,13); M.d2_lfom=aggMonth(d2,gD,13);
-  const _d1bg=aggMonth(d1,gD,31),_d2bg=aggMonth(d2,gD,31);
+  const _d1bg=aggMonth(d1,gD,32),_d2bg=aggMonth(d2,gD,32);
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
   M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
@@ -3370,7 +3370,7 @@ async function buildAnalyticsD() {
       psa:{psa_hrs:_psaHrs?+_psaHrs.toFixed(3):_psaHrs,comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:_rbgTot,
         purified:_purified,act_cbg:_cbgTot,cbg_d1:nv(p[10]),cbg_d2:nv(p[11]),cbg_tot:_cbgTot,
         dispatched:nv(p[15]),veer:nv(p[16]),adinath:nv(p[17]),kfs:nv(p[18]),ksk:nv(p[19]),om:nv(p[20]),sps:nv(p[21]),
-        ch4:nv(p[22]),cascade:nv(p[27]),storage:nv(p[28]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51]),
+        ch4:nv(p[22]),cascade:nv(p[25]),storage:nv(p[27]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51]),
         ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg,
         raw_pct:(_idealRaw&&_rbgTot)?Math.round(_rbgTot/_idealRaw*100):null,
         pur_pct:(_idealPur&&_purified)?Math.round(_purified/_idealPur*100):null,
