@@ -48,8 +48,11 @@
     .date-row input[type="date"]{padding:5px 8px;border:1px solid var(--border);border-radius:6px;
       background:var(--bg);color:var(--text);font-size:.85rem;}
     .sec{margin-bottom:20px;}
-    .sec-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-      color:var(--muted);padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:11px;}
+    .sec-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:11px;}
+    .sec-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+    .clear-btn{font-size:.65rem;font-weight:600;color:var(--danger);background:none;border:1px solid var(--danger);
+      border-radius:4px;padding:2px 8px;cursor:pointer;opacity:.7;transition:opacity .15s;}
+    .clear-btn:hover{opacity:1;}
     .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px;}
     .fg{display:flex;flex-direction:column;gap:3px;}
     .fg label{font-size:.71rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
@@ -796,7 +799,7 @@ function runCalcs(sheet, inp, ds){
 // ══════════════════════════════════════════════════════════
 // STATE & UI
 // ══════════════════════════════════════════════════════════
-let cur=null, inp={}
+let cur=null, inp={}, drafts={}
 
 function buildNav(){
   const nav=document.getElementById('nav')
@@ -811,7 +814,11 @@ function buildNav(){
 }
 
 function loadSheet(id){
-  cur=SHEETS.find(s=>s.id===id); inp={}
+  // Save current section values before switching
+  if(cur) drafts[cur.id]=Object.assign({},inp)
+  cur=SHEETS.find(s=>s.id===id)
+  // Restore draft values for this sheet (persist across section switches)
+  inp=Object.assign({},drafts[id]||{})
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id))
   let html=`<div class="sh"><h2>${cur.label}</h2><div class="sub">Sheet: <b>${cur.sheet}</b></div></div>`
   if(cur.hasDate){
@@ -820,23 +827,24 @@ function loadSheet(id){
       <span id="dp-display" style="font-size:.83rem;font-weight:600;color:var(--accent)">${fmtDisplay(today())}</span>
       <span id="dp-err" style="font-size:.77rem;color:#e53935;display:none">Invalid date</span></div>`
   }
-  cur.sections.forEach(sec=>{
-    html+=`<div class="sec"><div class="sec-title">${sec.t}</div><div class="fgrid">`
+  cur.sections.forEach((sec,si)=>{
+    html+=`<div class="sec"><div class="sec-title-row"><span class="sec-title">${sec.t}</span><button class="clear-btn" onclick="clearSection('${id}',${si})">Clear</button></div><div class="fgrid">`
     sec.f.forEach(f=>{
       if(f.tp==='info'){
         html+=`<div class="info-row">${f.l}</div>`; return
       }
+      const saved=inp[f.k]
       html+=`<div class="fg"><label>${f.l}${f.tp==='calc'?'<span class="atag">auto</span>':''}</label>`
       if(f.tp==='calc'||f.tp==='fetch'){
         html+=`<input type="text" id="f_${f.k}" class="cf" readonly placeholder="—" tabindex="-1"/>`
       } else if(f.tp==='sel'){
         html+=`<select id="f_${f.k}" onchange="onInp('${f.k}',this.value)"><option value="">— select —</option>`
-        f.opts.forEach(o=>html+=`<option>${o}</option>`)
+        f.opts.forEach(o=>html+=`<option${saved==o?' selected':''}>${o}</option>`)
         html+=`</select>`
       } else if(f.tp==='txt'){
-        html+=`<input type="text" id="f_${f.k}" oninput="onInp('${f.k}',this.value)"/>`
+        html+=`<input type="text" id="f_${f.k}" value="${saved!=null?saved:''}" oninput="onInp('${f.k}',this.value)"/>`
       } else {
-        html+=`<input type="number" id="f_${f.k}" step="any" placeholder="0" oninput="onInp('${f.k}',this.value)"/>`
+        html+=`<input type="number" id="f_${f.k}" step="any" placeholder="0" value="${saved!=null?saved:''}" oninput="onInp('${f.k}',this.value)"/>`
       }
       html+=`</div>`
     })
@@ -849,6 +857,21 @@ function loadSheet(id){
 
 function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
 window.onInp=onInp
+
+function clearSection(sheetId,sectionIndex){
+  const sheet=SHEETS.find(s=>s.id===sheetId); if(!sheet) return
+  const sec=sheet.sections[sectionIndex]; if(!sec) return
+  sec.f.forEach(f=>{
+    if(f.tp==='calc'||f.tp==='fetch'||f.tp==='info') return
+    delete inp[f.k]
+    if(drafts[sheetId]) delete drafts[sheetId][f.k]
+    const el=document.getElementById('f_'+f.k); if(!el) return
+    if(el.tagName==='SELECT') el.value=''
+    else el.value=''
+  })
+  recompute()
+}
+window.clearSection=clearSection
 
 function recompute(){
   if(!cur) return

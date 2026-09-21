@@ -178,6 +178,20 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 /* ── NO DATA ─────────────────────────────────────────────── */
 .no-data{color:var(--text3);font-size:12px;padding:24px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:9px}
 
+/* ── DIGESTER DETAIL / ACCORDION ────────────────────────── */
+#dig-detail-view{display:none}
+.dig-detail-hdr{background:linear-gradient(135deg,var(--acc) 0%,#1565C0 100%);color:#fff;border-radius:9px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.dig-detail-hdr-title{font-size:16px;font-weight:700}
+.dig-detail-back{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.4);color:#fff;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.dig-detail-back:hover{background:rgba(255,255,255,.25)}
+.acc-section{border:1px solid var(--bdr);border-radius:9px;margin-bottom:8px;overflow:hidden;box-shadow:var(--shadow)}
+.acc-hdr{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;background:var(--surf2);cursor:pointer;user-select:none;transition:background .15s}
+.acc-hdr:hover{background:var(--surf)}
+.acc-hdr-label{font-size:11.5px;font-weight:700;color:var(--text);letter-spacing:.3px}
+.acc-hdr-arrow{font-size:13px;color:var(--text3);transition:transform .2s}
+.acc-hdr.open .acc-hdr-arrow{transform:rotate(180deg)}
+.acc-body{display:none;padding:14px 15px;background:var(--surf)}
+
 /* ── TOAST ───────────────────────────────────────────────── */
 #toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--text);color:#fff;border-radius:8px;padding:10px 18px;font-size:12px;display:none;z-index:999;white-space:nowrap;box-shadow:var(--shadow-md)}
 #toast.err{background:var(--red)}
@@ -274,7 +288,7 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 
     <!-- KPI TABS -->
     <div>
-      <div class="tabs">
+      <div class="tabs" id="tab-bar">
         <button class="tab-btn on" onclick="switchTab('production',this)">Production</button>
         <button class="tab-btn" onclick="switchTab('feedstock',this)">Feedstock</button>
         <button class="tab-btn" onclick="switchTab('finance',this)">Finance</button>
@@ -284,6 +298,7 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
       <div id="tab-feedstock"  style="display:none"></div>
       <div id="tab-finance"    style="display:none"></div>
       <div id="tab-health"     style="display:none"></div>
+      <div id="dig-detail-view"></div>
     </div>
   </div>
 </div>
@@ -833,10 +848,111 @@ function selectDigester(dig) {
   _selDig = (_selDig === dig) ? null : dig
   _focusSheet = null
   renderSubmissions()
-  renderProduction()
-  renderFeedstock()
-  renderFinance()
-  renderHealth()
+  if(_selDig){
+    // Show digester detail accordion, hide normal tabs
+    document.getElementById('tab-bar').style.display='none';
+    ['tab-production','tab-feedstock','tab-finance','tab-health'].forEach(id=>{
+      document.getElementById(id).style.display='none'
+    })
+    document.getElementById('dig-detail-view').style.display=''
+    renderDigesterDetail()
+  } else {
+    // Restore normal tab view
+    document.getElementById('tab-bar').style.display=''
+    document.getElementById('dig-detail-view').style.display='none'
+    document.getElementById('tab-production').style.display=''
+    renderProduction()
+    renderFeedstock()
+    renderFinance()
+    renderHealth()
+  }
+}
+
+function toggleAcc(hdr){
+  hdr.classList.toggle('open')
+  const body=hdr.nextElementSibling
+  body.style.display=body.style.display==='block'?'none':'block'
+}
+
+function renderDigesterDetail(){
+  const isD2=_selDig==='Digester 2'
+  const d=isD2?_D.d2:_D.d1
+  const label=_selDig
+  const accentClr=isD2?'#1A7A4A':'#1D6FA8'
+  const bppOff=isD2?43:42
+
+  const acc=(title,rows)=>`
+    <div class="acc-section">
+      <div class="acc-hdr" onclick="toggleAcc(this)">
+        <span class="acc-hdr-label">${title}</span>
+        <span class="acc-hdr-arrow">▼</span>
+      </div>
+      <div class="acc-body">${dataTable(rows)}</div>
+    </div>`
+
+  const bppTot=fv(n(d[bppOff])+n(d[bppOff+1])+n(d[bppOff+2])+n(d[bppOff+3])+n(d[bppOff+4]))
+
+  let html=`<div class="dig-detail-hdr">
+    <div>
+      <div style="font-size:10px;font-weight:600;letter-spacing:1px;opacity:.8;text-transform:uppercase">Digester Detail View</div>
+      <div class="dig-detail-hdr-title">${label}</div>
+    </div>
+    <button class="dig-detail-back" onclick="selectDigester('${_selDig}')">← Back to Overview</button>
+  </div>`
+
+  html+=acc('🌾 Feedstock — Expected vs Actual',[
+    {head:'Expected (BPP Calculation)'},
+    {label:'CD Expected',unit:'MT',val:fv(d[1])},
+    {label:'PM Expected',unit:'MT',val:fv(d[2])},
+    {label:'CSL Expected',unit:'KL',val:fv(d[4])},
+    {label:'SG Expected',unit:'MT',val:fv(d[5])},
+    {label:'GS Expected',unit:'KL',val:fv(d[6])},
+    {label:'Total Feed Expected',unit:'MT',val:fv(d[7])},
+    {head:'Actual Feed'},
+    {label:'CD Actual',unit:'MT',val:fv(d[14])},
+    {label:'PM Actual',unit:'MT',val:fv(d[15])},
+    {label:'CSL Actual',unit:'KL',val:fv(d[17])},
+    {label:'GS Actual',unit:'KL',val:fv(d[22])},
+    {label:'SG Actual',unit:'MT',val:fv(d[23])},
+    {label:'Total Feed Actual',unit:'MT',val:fv(d[24])},
+  ])
+
+  html+=acc('⚗️ Biogas Production',[
+    {head:'Gas Estimates & Output'},
+    {label:'Biogas Estimated (Expected)',unit:'m³',val:fv(d[10])},
+    {label:'Biogas Estimated (Actual)',unit:'m³',val:fi(d[31])},
+    {label:'Raw Biogas at PSA Inlet',unit:'m³',val:fi(d[32])},
+    {label:'Raw Biogas Vent / Flare',unit:'m³',val:fi(d[33])},
+    {label:'Raw Biogas Total (B+C)',unit:'m³',val:fi(d[34])},
+    {label:'CBG Produced',unit:'kg',val:fi(d[35])},
+    {label:'CBG Vent',unit:'kg',val:fi(d[36])},
+  ])
+
+  html+=acc('🧮 BPP Calculations',[
+    {head:'BPP (m³ biogas per MT/KL feed)'},
+    {label:'CD BPP',unit:'m³',val:fv(d[bppOff])},
+    {label:'PM BPP',unit:'m³',val:fv(d[bppOff+1])},
+    {label:'GS BPP',unit:'m³',val:fv(d[bppOff+2])},
+    {label:'CSL BPP',unit:'m³',val:fv(d[bppOff+3])},
+    {label:'SG BPP',unit:'m³',val:fv(d[bppOff+4])},
+    {label:'Total BPP',unit:'m³',val:bppTot},
+    {head:'Digester Parameters'},
+    {label:'Working Volume',unit:'m³',val:fv(d[bppOff+5])},
+    {label:'Slurry Height',unit:'m',val:fv(d[isD2?49:48])},
+    {label:'OLR',unit:'kg VS/m³/day',val:fv(d[isD2?50:49])},
+    {label:'PSA Efficiency %',unit:'%',val:fv(d[isD2?51:50])},
+  ])
+
+  html+=acc('💧 Manure & Digestate',[
+    {head:'Drain'},
+    {label:'Planned Drain',unit:'m³',val:fv(d[29])},
+    {label:'Actual Drain',unit:'m³',val:fi(d[30])},
+    {head:'Digestate'},
+    {label:'SFOM (Solid)',unit:'T',val:fv(d[12])},
+    {label:'LFOM (Liquid)',unit:'KL',val:fv(d[13])},
+  ])
+
+  document.getElementById('dig-detail-view').innerHTML=html
 }
 
 // ── SHEET CARD NAVIGATION (focus mode) ───────────────────

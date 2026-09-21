@@ -66,6 +66,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   letter-spacing:.8px;padding:8px 0 10px;border-bottom:2px solid var(--bdr);margin-bottom:12px;margin-top:16px;
   display:flex;align-items:center;gap:8px}
 .stitle .resp{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+.s3-sec-hdr{font-size:11px;font-weight:800;color:var(--blue,#1565C0);text-transform:uppercase;letter-spacing:.8px;
+  padding:10px 0 8px;margin-top:18px;border-bottom:2px solid var(--bdr);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.s3-sec-sub{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
 /* KPI GRID */
 .kg{display:grid;gap:12px;margin-bottom:14px}
 .k3{grid-template-columns:repeat(3,1fr)}.k4{grid-template-columns:repeat(4,1fr)}
@@ -178,7 +181,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb on" onclick="show('ov',this)">Overview</button>
       <button class="tb" onclick="show('s1',this)">1 · Feedstock</button>
       <button class="tb" onclick="show('s2',this)">2 · Lab & Process</button>
-      <button class="tb" onclick="show('s3',this)">3 · Digestion</button>
+      <button class="tb" onclick="show('s3',this)">3 · Production</button>
       <button class="tb" onclick="show('s4',this)">4 · Purification</button>
       <button class="tb" onclick="show('si',this)">5 · Intelligence</button>
       <button class="tb" onclick="show('s5',this)">6 · Compression</button>
@@ -349,32 +352,41 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
 </div>
 
-<!-- ══ S3 DIGESTION ══ -->
+<!-- ══ S3 PRODUCTION ══ -->
 <div id="s3" class="pg">
-  <div class="stitle">Feedstock Prep, Digestion & RBG <span class="resp">— Sohan Lal</span><span id="s3_period" class="mo-badge">All Months</span></div>
-  <div class="kg k4">
-    <div class="kc c"><div class="kl">YTD D1 Biogas</div><div class="kv c" id="d1_ytd_bg">—</div><div class="ks">m³</div></div>
-    <div class="kc g"><div class="kl">YTD D2 Biogas</div><div class="kv g" id="d2_ytd_bg">—</div><div class="ks">m³</div></div>
-    <div class="kc a"><div class="kl">YTD D1 Drain</div><div class="kv a" id="d1_drain">—</div><div class="ks">m³</div></div>
-    <div class="kc"><div class="kl">YTD D2 Drain</div><div class="kv" id="d2_drain">—</div><div class="ks">m³</div></div>
-  </div>
-  <div class="kg k4">
-    <div class="kc" id="d1_eff_card"><div class="kl">D1 Digester Efficiency</div><div class="kv" id="kv_d1_eff">—</div><div class="ks">Expected gas / Actual gas × 100</div></div>
-    <div class="kc" id="d2_eff_card"><div class="kl">D2 Digester Efficiency</div><div class="kv" id="kv_d2_eff">—</div><div class="ks">Expected gas / Actual gas × 100</div></div>
-    <div class="kc" id="d1_feed_exp_card"><div class="kl">D1 Feed Expected (BPP)</div><div class="kv c" id="kv_d1_feed_exp">—</div><div class="ks">m³</div></div>
-    <div class="kc" id="d2_feed_exp_card"><div class="kl">D2 Feed Expected (BPP)</div><div class="kv c" id="kv_d2_feed_exp">—</div><div class="ks">m³</div></div>
-  </div>
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s3_d1feed">D1 — Feed Actual (MT)</div><div class="cw"><canvas id="c_s3_d1feed"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s3_d2feed">D2 — Feed Actual (MT)</div><div class="cw"><canvas id="c_s3_d2feed"></canvas></div></div>
-  </div>
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s3_bg">Raw Biogas — D1 vs D2 (m³)</div><div class="cw"><canvas id="c_s3_bg"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s3_digestate">SFOM & LFOM (D1+D2)</div><div class="cw"><canvas id="c_s3_digestate"></canvas></div></div>
-  </div>
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s3_drain">Feed vs Drain — D1 &amp; D2 (m³)</div><div class="cw"><canvas id="c_s3_drain"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s3_digeff">Digester Efficiency % (Expected / Actual Gas × 100)</div><div class="cw"><canvas id="c_s3_digeff"></canvas></div></div>
+  <div class="stitle">Digester Production <span class="resp">— Sohan Lal</span><span id="s3_period" class="mo-badge">All Months</span></div>
+  <div id="s3_day_panel" style="display:none"></div>
+  <div id="s3_charts_wrap">
+    <div class="s3-sec-hdr">FEEDING <span class="s3-sec-sub">Feedstock input to digesters</span></div>
+    <div class="cg c2">
+      <div class="cc"><div class="ct">D1 Total Feed — Expected vs Actual (MT)</div><div class="cw"><canvas id="c_s3_d1feed_tot"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Total Feed — Expected vs Actual (MT)</div><div class="cw"><canvas id="c_s3_d2feed_tot"></canvas></div></div>
+    </div>
+    <div class="cg c1">
+      <div class="cc"><div class="ct">D1 Individual Feedstock — Expected vs Actual by Type (MT)</div><div class="cw t"><canvas id="c_s3_d1feed_indiv"></canvas></div></div>
+    </div>
+    <div class="cg c1">
+      <div class="cc"><div class="ct">D2 Individual Feedstock — Expected vs Actual by Type (MT)</div><div class="cw t"><canvas id="c_s3_d2feed_indiv"></canvas></div></div>
+    </div>
+    <div class="s3-sec-hdr">BIOGAS PRODUCTION <span class="s3-sec-sub">Raw gas output from digesters</span></div>
+    <div class="cg c2">
+      <div class="cc"><div class="ct">D1 Biogas — BPP Estimated vs Actual B+C (m³)</div><div class="cw"><canvas id="c_s3_d1bg_ea"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Biogas — BPP Estimated vs Actual B+C (m³)</div><div class="cw"><canvas id="c_s3_d2bg_ea"></canvas></div></div>
+    </div>
+    <div class="cg c2">
+      <div class="cc"><div class="ct">D1 Biogas Vent / Flare (m³)</div><div class="cw"><canvas id="c_s3_d1vent"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Biogas Vent / Flare (m³)</div><div class="cw"><canvas id="c_s3_d2vent"></canvas></div></div>
+    </div>
+    <div class="s3-sec-hdr">MANURE <span class="s3-sec-sub">Drain / digestate output</span></div>
+    <div class="cg c2">
+      <div class="cc"><div class="ct">D1 Drain — Planned vs Actual (m³)</div><div class="cw"><canvas id="c_s3_d1drain"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Drain — Planned vs Actual (m³)</div><div class="cw"><canvas id="c_s3_d2drain"></canvas></div></div>
+    </div>
+    <div class="s3-sec-hdr">DIGESTER EFFICIENCY <span class="s3-sec-sub">Actual biogas ÷ BPP expected × 100</span></div>
+    <div class="cg c2">
+      <div class="cc"><div class="ct">D1 Digester Efficiency % (Actual B+C ÷ BPP Expected × 100)</div><div class="cw"><canvas id="c_s3_d1eff"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Digester Efficiency % (Actual B+C ÷ BPP Expected × 100)</div><div class="cw"><canvas id="c_s3_d2eff"></canvas></div></div>
+    </div>
   </div>
 </div>
 
@@ -973,31 +985,7 @@ function renderSectionDay(sectionId){
       metricCard('OLR — Digester 2',d2r.olr!=null?d2r.olr.toFixed(3):null,'kg VS/m³/d',olrCls2,'Safe: 2.0 – 4.0',true,d2r.olr?Math.min(d2r.olr/6*100,100):0),
     ]);
   } else if(sectionId==='s3'){
-    const d1eff=ex.d1_exp&&d1r.bg_act?Math.round(ex.d1_exp/d1r.bg_act*100):null;
-    const d2eff=ex.d2_exp&&d2r.bg_act?Math.round(ex.d2_exp/d2r.bg_act*100):null;
-    const effCls1=d1eff!=null?(d1eff<=110&&d1eff>=90?'g':d1eff<=120?'a':'r'):'';
-    const effCls2=d2eff!=null?(d2eff<=110&&d2eff>=90?'g':d2eff<=120?'a':'r'):'';
-    html+=groupHeader('Feedstock to Digester','Actual feed vs BPP expectation');
-    html+=grid([
-      metricCard('D1 Feed Actual',fN(d1r.feed_act),'MT','b','',true,d1r.feed_act&&ex.d1_exp?d1r.feed_act/(ex.d1_exp/150)*100:0),
-      metricCard('D2 Feed Actual',fN(d2r.feed_act),'MT','g','',true,d2r.feed_act&&ex.d2_exp?d2r.feed_act/(ex.d2_exp/150)*100:0),
-      metricCard('D1 BPP Gas Expected',fN(ex.d1_exp),'m³','c','From actual feed BPP'),
-      metricCard('D2 BPP Gas Expected',fN(ex.d2_exp),'m³','p','From actual feed BPP'),
-    ]);
-    html+=groupHeader('Biogas Production','Actual vs expected output');
-    html+=grid([
-      metricCard('D1 Biogas Actual',fN(d1r.bg_act),'m³','b','',true,ex.d1_exp&&d1r.bg_act?Math.min(d1r.bg_act/ex.d1_exp*100,120):0),
-      metricCard('D2 Biogas Actual',fN(d2r.bg_act),'m³','g','',true,ex.d2_exp&&d2r.bg_act?Math.min(d2r.bg_act/ex.d2_exp*100,120):0),
-      metricCard('D1 Drain Volume',fN(d1r.drain_ac),'m³','a'),
-      metricCard('D2 Drain Volume',fN(d2r.drain_ac),'m³','a'),
-    ]);
-    html+=groupHeader('Digester Efficiency & Manure','Performance score and digestate output');
-    html+=grid([
-      metricCard('D1 Digester Efficiency',d1eff,'%',effCls1,'Expected ÷ Actual gas × 100',true,d1eff?Math.min(d1eff,120):0),
-      metricCard('D2 Digester Efficiency',d2eff,'%',effCls2,'Expected ÷ Actual gas × 100',true,d2eff?Math.min(d2eff,120):0),
-      metricCard('SFOM Produced (D1+D2)',fN((d1r.sfom||0)+(d2r.sfom||0)),'T','g'),
-      metricCard('LFOM Produced (D1+D2)',fN((d1r.lfom||0)+(d2r.lfom||0)),'KL','c'),
-    ]);
+    // s3 (Production) day view is handled by renderS3() directly — this branch is not called
   } else if(sectionId==='s4'){
     const purPct=p.purified&&p.ideal_pur?Math.round(p.purified/p.ideal_pur*100):null;
     const cbgPct=p.act_cbg&&p.ideal_cbg?Math.round(p.act_cbg/p.ideal_cbg*100):null;
@@ -1348,53 +1336,206 @@ function renderS2(){
   }
 }
 
-// ═══ S3 DIGESTION ════════════════════════════════════════════
+// ═══ S3 PRODUCTION ════════════════════════════════════════════
 function renderS3(){
-  if(renderSectionDay('s3')) return; else hideSectionDay('s3');
+  const dayPanel=document.getElementById('s3_day_panel');
+  const chartsWrap=document.getElementById('s3_charts_wrap');
   const mo=curMonth;
-  document.getElementById('d1_ytd_bg').textContent=fmtN(sumA(mo==='ALL'?mArr('d1_bg'):dArr('d1','bg_act')));
-  document.getElementById('d2_ytd_bg').textContent=fmtN(sumA(mo==='ALL'?mArr('d2_bg'):dArr('d2','bg_act')));
-  document.getElementById('d1_drain').textContent=fmtN(sumA(mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac')));
-  document.getElementById('d2_drain').textContent=fmtN(sumA(mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac')));
-  const lbl=mo==='ALL'?MONTHS:dDates('d1');
-  const d1fa=mo==='ALL'?mArr('d1_feed'):dArr('d1','feed_act');
-  const d2fa=mo==='ALL'?mArr('d2_feed'):dArr('d2','feed_act');
-  const d1bg=mo==='ALL'?mArr('d1_bg'):dArr('d1','bg_act');
-  const d2bg=mo==='ALL'?mArr('d2_bg'):dArr('d2','bg_act');
-  bar('c_s3_d1feed',lbl,[bDS('D1 Feed (MT)',d1fa,C.blue)]);
-  bar('c_s3_d2feed',lbl,[bDS('D2 Feed (MT)',d2fa,C.teal)]);
-  bar('c_s3_bg',lbl,[bDS('D1 Biogas',d1bg,C.blue),bDS('D2 Biogas',d2bg,C.cyan)],true);
-  const sfom=mo==='ALL'?MONTHS.map((_,i)=>mArr('d1_sfom')[i]+mArr('d2_sfom')[i]):
-    dArr('d1','sfom').map((v,i)=>(v||0)+(dArr('d2','sfom')[i]||0));
-  const lfom=mo==='ALL'?MONTHS.map((_,i)=>mArr('d1_lfom')[i]+mArr('d2_lfom')[i]):
-    dArr('d1','lfom').map((v,i)=>(v||0)+(dArr('d2','lfom')[i]||0));
-  bar('c_s3_digestate',lbl,[bDS('SFOM (T)',sfom,C.amber),bDS('LFOM (KL)',lfom,C.orange)],true);
-  // Feed vs Drain chart
-  const d1dr=mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac');
-  const d2dr=mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac');
-  bar('c_s3_drain',lbl,[bDS('D1 Feed',d1fa,C.blue),bDS('D1 Drain',d1dr,C.cyan,.7),bDS('D2 Feed',d2fa,C.teal),bDS('D2 Drain',d2dr,C.green,.7)],false);
-  // Digester efficiency chart & KPI cards
-  const d1eff=mo==='ALL'?mArr('d1_dig_eff'):null;
-  const d2eff=mo==='ALL'?mArr('d2_dig_eff'):null;
-  const avgD1Eff=d1eff?avgA(d1eff.filter(v=>v)):null;
-  const avgD2Eff=d2eff?avgA(d2eff.filter(v=>v)):null;
-  const d1ExpSum=sumA(mo==='ALL'?mArr('d1_exp'):dArr('exp','d1_exp'));
-  const d2ExpSum=sumA(mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp'));
-  const d1BgSum=sumA(d1bg); const d2BgSum=sumA(d2bg);
-  const d1EffVal=d1ExpSum>0?Math.round(d1BgSum/d1ExpSum*100):null;
-  const d2EffVal=d2ExpSum>0?Math.round(d2BgSum/d2ExpSum*100):null;
-  const effEl1=document.getElementById('kv_d1_eff'); if(effEl1) effEl1.textContent=(d1EffVal??'—')+(d1EffVal!=null?'%':'');
-  const effEl2=document.getElementById('kv_d2_eff'); if(effEl2) effEl2.textContent=(d2EffVal??'—')+(d2EffVal!=null?'%':'');
-  const fexpEl1=document.getElementById('kv_d1_feed_exp'); if(fexpEl1) fexpEl1.textContent=fmtN(d1ExpSum)+' m³';
-  const fexpEl2=document.getElementById('kv_d2_feed_exp'); if(fexpEl2) fexpEl2.textContent=fmtN(d2ExpSum)+' m³';
-  if(mo==='ALL'){
-    line('c_s3_digeff',MONTHS,[lDS('D1 Efficiency %',mArr('d1_dig_eff'),C.blue),lDS('D2 Efficiency %',mArr('d2_dig_eff'),C.teal)],{min:50,max:150});
-  } else {
-    const expDts=dDates('exp');
-    const d1EffD=dArr('exp','tot_exp').map((v,i)=>{const bg=dArr('d1','bg_act')[i]; return v&&bg?Math.round(bg/v*100):null;});
-    const d2EffD=dArr('exp','d2_exp').map((v,i)=>{const bg=dArr('d2','bg_act')[i]; return v&&bg?Math.round(bg/v*100):null;});
-    line('c_s3_digeff',expDts,[lDS('D1 Efficiency %',d1EffD,C.blue),lDS('D2 Efficiency %',d2EffD,C.teal)],{min:50,max:150});
+  const pb=document.getElementById('s3_period');
+  if(pb) pb.textContent=mo==='ALL'?'All Months':mo;
+
+  const sumMo=(sect,field)=>
+    D.months.map(m=>(D.D[sect]?.[m]?.[field]||[]).reduce((s,v)=>s+(v||0),0));
+
+  if(curDay!=='ALL'){
+    // ── Day view ─────────────────────────────────────────────
+    chartsWrap.style.display='none';
+    ['c_s3_d1feed_tot','c_s3_d2feed_tot','c_s3_d1feed_indiv','c_s3_d2feed_indiv',
+     'c_s3_d1bg_ea','c_s3_d2bg_ea','c_s3_d1vent','c_s3_d2vent',
+     'c_s3_d1drain','c_s3_d2drain','c_s3_d1eff','c_s3_d2eff'].forEach(id=>{
+      if(charts[id]){try{charts[id].destroy();}catch(e){}charts[id]=null;}
+    });
+    dayPanel.style.display='block';
+    const rec=D.days[curDay]||{};
+    const d1r=rec.d1||{},d2r=rec.d2||{},ex=rec.exp||{},p=rec.psa||{};
+    const fN=v=>v!=null&&v!==0?fmtN(v):null;
+    const card=(label,value,unit,cls='',hint='',showBar=false,pct=0)=>{
+      const cols={g:'var(--green)',a:'var(--amber)',r:'var(--red)',c:'var(--cyan)',b:'var(--blue)',p:'var(--purple)'};
+      const ac=cols[cls]||'var(--acc)';
+      const barHtml=showBar&&pct>0?`<div style="margin-top:8px;background:var(--bg3);border-radius:4px;height:5px;overflow:hidden"><div style="width:${Math.min(pct,100)}%;height:5px;background:${ac};border-radius:4px"></div></div>`:'';
+      return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${ac};border-radius:8px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.7px;color:var(--text2);text-transform:uppercase;margin-bottom:6px">${label}</div>
+        <div style="font-size:24px;font-weight:700;color:${ac};line-height:1">${value??'—'}<span style="font-size:12px;font-weight:500;color:var(--text2);margin-left:4px">${value!=null?unit:''}</span></div>
+        ${hint?`<div style="margin-top:4px;font-size:10px;color:var(--text3)">${hint}</div>`:''}
+        ${barHtml}</div>`;
+    };
+    const g4=cards=>`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px">${cards.join('')}</div>`;
+    const g2=cards=>`<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:12px">${cards.join('')}</div>`;
+    const sHdr=(t,sub)=>`<div style="display:flex;align-items:baseline;gap:10px;padding:10px 0 8px;margin-top:16px;border-bottom:2px solid var(--bdr);margin-bottom:12px">
+      <span style="font-size:11px;font-weight:800;letter-spacing:.8px;color:var(--blue,#1565C0);text-transform:uppercase">${t}</span>
+      ${sub?`<span style="font-size:10px;color:var(--text3)">${sub}</span>`:''}
+    </div>`;
+    const dayOfWeek=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const dp=curDay.split('-');const dateObj=new Date(dp[1]+' '+dp[0]+' 2026');
+    const dow=isNaN(dateObj)?'':dayOfWeek[dateObj.getDay()];
+    let html=`<div style="background:linear-gradient(135deg,var(--acc) 0%,#1976D2 100%);border-radius:10px;padding:16px 20px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:11px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,.7);text-transform:uppercase">Daily Production Report</div>
+        <div style="font-size:22px;font-weight:800;color:#fff;margin-top:2px">${dow?dow+', ':''}${curDay} 2026</div>
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div style="text-align:right">
+          <div style="font-size:11px;color:rgba(255,255,255,.7)">CBG Produced</div>
+          <div style="font-size:28px;font-weight:800;color:#fff">${p.act_cbg?fmtN(p.act_cbg)+' kg':'—'}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Expected</div>
+          <div style="font-size:28px;font-weight:800;color:rgba(255,255,255,.8)">0 kg</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Actual</div>
+          <div style="font-size:28px;font-weight:800;color:#fff">${p.cbg_tot?fmtN(p.cbg_tot)+' kg':'—'}</div>
+        </div>
+      </div>
+    </div>`;
+    // A: Feeding
+    html+=sHdr('FEEDING','Feedstock input to digesters');
+    html+=g4([
+      card('D1 Feed Expected (BPP)',fN(ex.d1_exp),'m³','a'),
+      card('D1 Feed Actual',fN(d1r.feed_act),'MT','b','',true,ex.d1_exp&&d1r.feed_act?d1r.feed_act/(ex.d1_exp/150)*100:0),
+      card('D2 Feed Expected (BPP)',fN(ex.d2_exp),'m³','a'),
+      card('D2 Feed Actual',fN(d2r.feed_act),'MT','g','',true,ex.d2_exp&&d2r.feed_act?d2r.feed_act/(ex.d2_exp/150)*100:0),
+    ]);
+    html+=g4([
+      card('D1 CD Exp',fN(d1r.cd_exp),'MT','a'),card('D1 CD Act',fN(d1r.cd_act),'MT','b','',true,d1r.cd_exp&&d1r.cd_act?d1r.cd_act/d1r.cd_exp*100:0),
+      card('D2 CD Exp',fN(d2r.cd_exp),'MT','a'),card('D2 CD Act',fN(d2r.cd_act),'MT','g','',true,d2r.cd_exp&&d2r.cd_act?d2r.cd_act/d2r.cd_exp*100:0),
+    ]);
+    html+=g4([
+      card('D1 PM Exp',fN(d1r.pm_exp),'MT','a'),card('D1 PM Act',fN(d1r.pm_act),'MT','b','',true,d1r.pm_exp&&d1r.pm_act?d1r.pm_act/d1r.pm_exp*100:0),
+      card('D2 PM Exp',fN(d2r.pm_exp),'MT','a'),card('D2 PM Act',fN(d2r.pm_act),'MT','g','',true,d2r.pm_exp&&d2r.pm_act?d2r.pm_act/d2r.pm_exp*100:0),
+    ]);
+    html+=g4([
+      card('D1 GS Exp',fN(d1r.gs_exp),'KL','a'),card('D1 GS Act',fN(d1r.gs_act),'KL','b','',true,d1r.gs_exp&&d1r.gs_act?d1r.gs_act/d1r.gs_exp*100:0),
+      card('D2 GS Exp',fN(d2r.gs_exp),'KL','a'),card('D2 GS Act',fN(d2r.gs_act),'KL','g','',true,d2r.gs_exp&&d2r.gs_act?d2r.gs_act/d2r.gs_exp*100:0),
+    ]);
+    html+=g4([
+      card('D1 CSL Exp',fN(d1r.csl_exp),'KL','a'),card('D1 CSL Act',fN(d1r.csl_act),'KL','b','',true,d1r.csl_exp&&d1r.csl_act?d1r.csl_act/d1r.csl_exp*100:0),
+      card('D2 CSL Exp',fN(d2r.csl_exp),'KL','a'),card('D2 CSL Act',fN(d2r.csl_act),'KL','g','',true,d2r.csl_exp&&d2r.csl_act?d2r.csl_act/d2r.csl_exp*100:0),
+    ]);
+    // B: Biogas Production
+    html+=sHdr('BIOGAS PRODUCTION','Raw gas output from digesters');
+    html+=g4([
+      card('D1 BPP Gas Expected',fN(ex.d1_exp),'m³','a','From actual feed BPP'),
+      card('D1 Actual Biogas (B+C)',fN(d1r.bg_total),'m³','b','',true,ex.d1_exp&&d1r.bg_total?d1r.bg_total/ex.d1_exp*100:0),
+      card('D2 BPP Gas Expected',fN(ex.d2_exp),'m³','a','From actual feed BPP'),
+      card('D2 Actual Biogas (B+C)',fN(d2r.bg_total),'m³','g','',true,ex.d2_exp&&d2r.bg_total?d2r.bg_total/ex.d2_exp*100:0),
+    ]);
+    html+=g4([
+      card('D1 Biogas Vent/Flare',fN(d1r.bg_vent),'m³','r'),
+      card('D2 Biogas Vent/Flare',fN(d2r.bg_vent),'m³','r'),
+      card('D1 Biogas to PSA',fN(d1r.bg_act),'m³','c'),
+      card('D2 Biogas to PSA',fN(d2r.bg_act),'m³','c'),
+    ]);
+    // C: Manure
+    html+=sHdr('MANURE','Drain / digestate output');
+    html+=g4([
+      card('D1 Drain Planned',fN(d1r.drain_exp),'m³','a'),
+      card('D1 Drain Actual',fN(d1r.drain_ac),'m³','b','',true,d1r.drain_exp&&d1r.drain_ac?d1r.drain_ac/d1r.drain_exp*100:0),
+      card('D2 Drain Planned',fN(d2r.drain_exp),'m³','a'),
+      card('D2 Drain Actual',fN(d2r.drain_ac),'m³','g','',true,d2r.drain_exp&&d2r.drain_ac?d2r.drain_ac/d2r.drain_exp*100:0),
+    ]);
+    // D: Digester Efficiency
+    html+=sHdr('DIGESTER EFFICIENCY','Actual biogas ÷ BPP expected × 100');
+    const d1eff=ex.d1_exp&&d1r.bg_total?Math.round(d1r.bg_total/ex.d1_exp*100):null;
+    const d2eff=ex.d2_exp&&d2r.bg_total?Math.round(d2r.bg_total/ex.d2_exp*100):null;
+    const ec1=d1eff!=null?(d1eff>=90&&d1eff<=110?'g':d1eff>=70?'a':'r'):'';
+    const ec2=d2eff!=null?(d2eff>=90&&d2eff<=110?'g':d2eff>=70?'a':'r'):'';
+    html+=g2([
+      card('D1 Digester Efficiency',d1eff,'%',ec1,'Actual B+C ÷ BPP Expected × 100',true,d1eff?Math.min(d1eff,120):0),
+      card('D2 Digester Efficiency',d2eff,'%',ec2,'Actual B+C ÷ BPP Expected × 100',true,d2eff?Math.min(d2eff,120):0),
+    ]);
+    dayPanel.innerHTML=html;
+    return;
   }
+
+  // ── Month / All view ──────────────────────────────────────
+  dayPanel.style.display='none';
+  chartsWrap.style.display='';
+  const lbl=mo==='ALL'?MONTHS:dDates('d1');
+  // Feeding
+  const d1FeedExp=mo==='ALL'?sumMo('d1','feed_exp'):dArr('d1','feed_exp');
+  const d2FeedExp=mo==='ALL'?sumMo('d2','feed_exp'):dArr('d2','feed_exp');
+  const d1FeedAct=mo==='ALL'?mArr('d1_feed'):dArr('d1','feed_act');
+  const d2FeedAct=mo==='ALL'?mArr('d2_feed'):dArr('d2','feed_act');
+  bar('c_s3_d1feed_tot',lbl,[bDS('D1 Feed Expected (m³ BPP)',d1FeedExp,C.amber),bDS('D1 Feed Actual (MT)',d1FeedAct,C.blue)]);
+  bar('c_s3_d2feed_tot',lbl,[bDS('D2 Feed Expected (m³ BPP)',d2FeedExp,C.amber),bDS('D2 Feed Actual (MT)',d2FeedAct,C.teal)]);
+  const d1CdE=mo==='ALL'?sumMo('d1','cd_exp'):dArr('d1','cd_exp');
+  const d1PmE=mo==='ALL'?sumMo('d1','pm_exp'):dArr('d1','pm_exp');
+  const d1GsE=mo==='ALL'?sumMo('d1','gs_exp'):dArr('d1','gs_exp');
+  const d1CslE=mo==='ALL'?sumMo('d1','csl_exp'):dArr('d1','csl_exp');
+  const d1CdA=mo==='ALL'?sumMo('d1','cd_act'):dArr('d1','cd_act');
+  const d1PmA=mo==='ALL'?sumMo('d1','pm_act'):dArr('d1','pm_act');
+  const d1GsA=mo==='ALL'?sumMo('d1','gs_act'):dArr('d1','gs_act');
+  const d1CslA=mo==='ALL'?sumMo('d1','csl_act'):dArr('d1','csl_act');
+  bar('c_s3_d1feed_indiv',lbl,[
+    {label:'CD Exp',data:d1CdE,backgroundColor:a(C.orange,.4),stack:'exp'},
+    {label:'PM Exp',data:d1PmE,backgroundColor:a(C.blue,.4),stack:'exp'},
+    {label:'GS Exp',data:d1GsE,backgroundColor:a(C.cyan,.4),stack:'exp'},
+    {label:'CSL Exp',data:d1CslE,backgroundColor:a(C.purple,.4),stack:'exp'},
+    {label:'CD Act',data:d1CdA,backgroundColor:a(C.orange,.9),stack:'act'},
+    {label:'PM Act',data:d1PmA,backgroundColor:a(C.blue,.9),stack:'act'},
+    {label:'GS Act',data:d1GsA,backgroundColor:a(C.cyan,.9),stack:'act'},
+    {label:'CSL Act',data:d1CslA,backgroundColor:a(C.purple,.9),stack:'act'},
+  ],true);
+  const d2CdE=mo==='ALL'?sumMo('d2','cd_exp'):dArr('d2','cd_exp');
+  const d2PmE=mo==='ALL'?sumMo('d2','pm_exp'):dArr('d2','pm_exp');
+  const d2GsE=mo==='ALL'?sumMo('d2','gs_exp'):dArr('d2','gs_exp');
+  const d2CslE=mo==='ALL'?sumMo('d2','csl_exp'):dArr('d2','csl_exp');
+  const d2CdA=mo==='ALL'?sumMo('d2','cd_act'):dArr('d2','cd_act');
+  const d2PmA=mo==='ALL'?sumMo('d2','pm_act'):dArr('d2','pm_act');
+  const d2GsA=mo==='ALL'?sumMo('d2','gs_act'):dArr('d2','gs_act');
+  const d2CslA=mo==='ALL'?sumMo('d2','csl_act'):dArr('d2','csl_act');
+  bar('c_s3_d2feed_indiv',lbl,[
+    {label:'CD Exp',data:d2CdE,backgroundColor:a(C.orange,.4),stack:'exp'},
+    {label:'PM Exp',data:d2PmE,backgroundColor:a(C.blue,.4),stack:'exp'},
+    {label:'GS Exp',data:d2GsE,backgroundColor:a(C.cyan,.4),stack:'exp'},
+    {label:'CSL Exp',data:d2CslE,backgroundColor:a(C.purple,.4),stack:'exp'},
+    {label:'CD Act',data:d2CdA,backgroundColor:a(C.orange,.9),stack:'act'},
+    {label:'PM Act',data:d2PmA,backgroundColor:a(C.blue,.9),stack:'act'},
+    {label:'GS Act',data:d2GsA,backgroundColor:a(C.cyan,.9),stack:'act'},
+    {label:'CSL Act',data:d2CslA,backgroundColor:a(C.purple,.9),stack:'act'},
+  ],true);
+  // Biogas Production
+  const d1BgEst=mo==='ALL'?mArr('d1_exp'):dArr('exp','tot_exp');
+  const d2BgEst=mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp');
+  const d1BgTot=mo==='ALL'?sumMo('d1','bg_total'):dArr('d1','bg_total');
+  const d2BgTot=mo==='ALL'?sumMo('d2','bg_total'):dArr('d2','bg_total');
+  bar('c_s3_d1bg_ea',lbl,[bDS('D1 BPP Expected (m³)',d1BgEst,C.amber),bDS('D1 Actual B+C (m³)',d1BgTot,C.blue)]);
+  bar('c_s3_d2bg_ea',lbl,[bDS('D2 BPP Expected (m³)',d2BgEst,C.amber),bDS('D2 Actual B+C (m³)',d2BgTot,C.teal)]);
+  const d1Vent=mo==='ALL'?sumMo('d1','bg_vent'):dArr('d1','bg_vent');
+  const d2Vent=mo==='ALL'?sumMo('d2','bg_vent'):dArr('d2','bg_vent');
+  bar('c_s3_d1vent',lbl,[bDS('D1 Vent/Flare (m³)',d1Vent,C.red)]);
+  bar('c_s3_d2vent',lbl,[bDS('D2 Vent/Flare (m³)',d2Vent,C.orange)]);
+  // Manure
+  const d1DrainExp=mo==='ALL'?sumMo('d1','drain_exp'):dArr('d1','drain_exp');
+  const d2DrainExp=mo==='ALL'?sumMo('d2','drain_exp'):dArr('d2','drain_exp');
+  const d1Drain=mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac');
+  const d2Drain=mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac');
+  bar('c_s3_d1drain',lbl,[bDS('D1 Drain Planned (m³)',d1DrainExp,C.amber),bDS('D1 Drain Actual (m³)',d1Drain,C.blue)]);
+  bar('c_s3_d2drain',lbl,[bDS('D2 Drain Planned (m³)',d2DrainExp,C.amber),bDS('D2 Drain Actual (m³)',d2Drain,C.teal)]);
+  // Digester Efficiency
+  let d1Eff,d2Eff;
+  if(mo==='ALL'){
+    const d1ExpMo=mArr('d1_exp'),d2ExpMo=mArr('d2_exp');
+    d1Eff=MONTHS.map((_,i)=>{const e=d1ExpMo[i],a=d1BgTot[i];return e&&a?Math.round(a/e*100):null;});
+    d2Eff=MONTHS.map((_,i)=>{const e=d2ExpMo[i],a=d2BgTot[i];return e&&a?Math.round(a/e*100):null;});
+  } else {
+    const d1ExpD=dArr('exp','tot_exp'),d2ExpD=dArr('exp','d2_exp');
+    d1Eff=d1BgTot.map((v,i)=>{const e=d1ExpD[i];return e&&v?Math.round(v/e*100):null;});
+    d2Eff=d2BgTot.map((v,i)=>{const e=d2ExpD[i];return e&&v?Math.round(v/e*100):null;});
+  }
+  line('c_s3_d1eff',lbl,[lDS('D1 Efficiency %',d1Eff,C.blue)],{min:50,max:150});
+  line('c_s3_d2eff',lbl,[lDS('D2 Efficiency %',d2Eff,C.teal)],{min:50,max:150});
 }
 
 // ═══ S4 PURIFICATION ═════════════════════════════════════════
@@ -3103,8 +3244,12 @@ async function buildAnalyticsD() {
   }
   const DD={};
   DD.psa=buildDA(psa,gD,{cbg_tot:12,purified:9,dispatched:15,psa_hrs:psaH,rbg_d1:5,rbg_d2:6,rbg_tot:7,cbg_d1:10,cbg_d2:11,ch4:22,veer:16,adinath:17,kfs:18,ksk:19,om:20,sps:21});
-  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50});
-  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51});
+  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50,
+    feed_exp:7,bg_total:34,bg_vent:33,drain_exp:29,
+    cd_exp:1,pm_exp:2,csl_exp:4,gs_exp:6,sg_exp:5,cd_act:14,pm_act:15,csl_act:17,gs_act:22,sg_act:23});
+  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51,
+    feed_exp:7,bg_total:34,bg_vent:33,drain_exp:29,
+    cd_exp:1,pm_exp:2,csl_exp:4,gs_exp:6,sg_exp:5,cd_act:14,pm_act:15,csl_act:17,gs_act:22,sg_act:23});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45,d1_sg_bpp:46});
@@ -3158,8 +3303,14 @@ async function buildAnalyticsD() {
         raw_pct:(_idealRaw&&_rbgTot)?Math.round(_rbgTot/_idealRaw*100):null,
         pur_pct:(_idealPur&&_purified)?Math.round(_purified/_idealPur*100):null,
         cbg_pct:(_idealCbg&&_cbgTot)?Math.round(_cbgTot/_idealCbg*100):null},
-      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30]),psa_eff_pct:nv(d1r[50])},
-      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30]),psa_eff_pct:nv(d2r[51])},
+      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30]),psa_eff_pct:nv(d1r[50]),
+        feed_exp:nv(d1r[7]),bg_total:nv(d1r[34]),bg_vent:nv(d1r[33]),drain_exp:nv(d1r[29]),
+        cd_exp:nv(d1r[1]),pm_exp:nv(d1r[2]),csl_exp:nv(d1r[4]),gs_exp:nv(d1r[6]),sg_exp:nv(d1r[5]),
+        cd_act:nv(d1r[14]),pm_act:nv(d1r[15]),csl_act:nv(d1r[17]),gs_act:nv(d1r[22]),sg_act:nv(d1r[23])},
+      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30]),psa_eff_pct:nv(d2r[51]),
+        feed_exp:nv(d2r[7]),bg_total:nv(d2r[34]),bg_vent:nv(d2r[33]),drain_exp:nv(d2r[29]),
+        cd_exp:nv(d2r[1]),pm_exp:nv(d2r[2]),csl_exp:nv(d2r[4]),gs_exp:nv(d2r[6]),sg_exp:nv(d2r[5]),
+        cd_act:nv(d2r[14]),pm_act:nv(d2r[15]),csl_act:nv(d2r[17]),gs_act:nv(d2r[22]),sg_act:nv(d2r[23])},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
       rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
       exp:{tot_exp:nv(d1r[10]),d1_exp:nv(d1r[10]),d2_exp:nv(d2r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),act_cbg:nv(p[12]),
