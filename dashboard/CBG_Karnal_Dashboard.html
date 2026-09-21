@@ -96,16 +96,26 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 .sec-date{font-size:11px;color:var(--text3)}
 
 /* ── SUBMISSION GRID ─────────────────────────────────────── */
-.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:7px}
-.sub-card{background:var(--surf);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:3px;border-left:3px solid var(--bdr);box-shadow:var(--shadow)}
+.sub-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:8px}
+.sub-card{background:var(--surf);border:1px solid var(--bdr);border-radius:9px;padding:11px 13px;display:flex;flex-direction:column;gap:0;border-left:3px solid var(--bdr);box-shadow:var(--shadow)}
 .sub-card.done{border-left-color:var(--green);background:#FAFFFE}
 .sub-card.avail{border-left-color:var(--blue);background:#F6FAFF}
 .sub-card.pend{border-left-color:var(--bdr2)}
 .sub-card.selected{outline:2px solid var(--blue);outline-offset:1px;box-shadow:0 0 0 3px rgba(29,111,168,0.18)}
-.sub-sheet{font-size:11.5px;font-weight:600;color:var(--text);line-height:1.3}
-.sub-by{font-size:10.5px;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.sub-time{font-size:10px;color:var(--text3)}
-.sub-status{font-size:10px;font-weight:600;margin-top:3px}
+.sub-sheet{font-size:11.5px;font-weight:700;color:var(--text);line-height:1.3;margin-bottom:5px}
+.sub-state-badge{display:inline-block;font-size:8.5px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;padding:2px 7px;border-radius:10px;margin-bottom:5px}
+.sub-state-badge.ok{background:rgba(22,163,74,.12);color:var(--green)}
+.sub-state-badge.avail{background:rgba(29,111,168,.1);color:var(--blue)}
+.sub-state-badge.pend{background:var(--bg3);color:var(--text3)}
+.sub-divider{height:1px;background:var(--bdr);margin:5px 0}
+.sub-by{font-size:10.5px;font-weight:600;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sub-time{font-size:9.5px;color:var(--text3);margin-top:1px;margin-bottom:5px}
+.sub-fields{display:flex;gap:10px;margin-top:2px}
+.sub-field-item{display:flex;flex-direction:column;gap:1px}
+.sub-field-lbl{font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;font-weight:600}
+.sub-field-val{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.sub-field-val.ok{color:var(--green)}.sub-field-val.pend{color:var(--amber)}
+.sub-status{font-size:9.5px;font-weight:600;margin-top:6px;padding-top:5px;border-top:1px solid var(--bdr)}
 .sub-status.ok{color:var(--green)}
 .sub-status.avail{color:var(--blue)}
 .sub-status.pend{color:var(--text3)}
@@ -608,7 +618,7 @@ async function loadData() {
       rowD2   ? readRow('D2',                    rowD2,  52) : Promise.resolve([]),
       rowPSA  ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
       rowRC   ? readRow('Daily Revenue & Costs', rowRC,   8) : Promise.resolve([]),
-      rowFB   ? readRow('Feed & Balance',        rowFB,  18) : Promise.resolve([]),
+      rowFB   ? readRow('Feed & Balance',        rowFB,  22) : Promise.resolve([]),
       rowFS   ? readRow('Feedstock Supply',      rowFS,  32) : Promise.resolve([]),
       rowPH   ? readRow('Digester pH',           rowPH,   7) : Promise.resolve([]),
       rowTMP  ? readRow('Digester Temp',         rowTMP,  7) : Promise.resolve([]),
@@ -667,6 +677,37 @@ function clearKpis() {
 }
 
 // ── SUBMISSION STATUS ─────────────────────────────────────
+// Count filled vs total fields for a given sheet
+function countFields(sheet) {
+  const {d1,d2,psa,rc,fb,fs,ph,tmp,tsvs,iapa,
+         fixedData,maintData,manureData,salesData,calData,serial} = _D
+  const filled = arr => (arr||[]).filter(v => v !== null && v !== '' && v !== undefined).length
+  const calRow = arr => (arr||[]).find(r => r && Math.round(n(r[1])) === serial) || []
+  const entries = arr => (arr||[]).filter(r => r && r[1] && Math.round(n(r[1])) === serial).length
+  switch (sheet) {
+    case 'Digester 1':            return {inp: filled(d1),   tot: 52}
+    case 'Digester 2':            return {inp: filled(d2),   tot: 52}
+    case 'PSA Production':        return {inp: filled(psa),  tot: 29}
+    case 'Daily Revenue & Costs': return {inp: filled(rc),   tot: 8}
+    case 'Feed & Balance':        return {inp: filled(fb),   tot: fb.length||18}
+    case 'Feedstock Supply':      return {inp: filled(fs),   tot: 32}
+    case 'Digester pH':           return {inp: filled(ph),   tot: 7}
+    case 'Digester Temp':         return {inp: filled(tmp),  tot: 7}
+    case 'TS-VS Analysis':        return {inp: filled(tsvs), tot: 13}
+    case 'IA-PA':                 return {inp: filled(iapa), tot: 18}
+    case 'Monthly Fixed Costs': { const f=filled((fixedData||[]).flat()); return {inp:f,tot:f+(fixedData||[]).flat().filter(v=>v===null||v==='').length} }
+    case 'Manure Sales':          return {inp: entries(manureData), tot: null, entryMode: true}
+    case 'Sales Detail':          return {inp: (salesData||[]).filter(r=>r&&r[0]&&Math.round(n(r[0]))===serial).length, tot: null, entryMode: true}
+    case 'Maintenance':           return {inp: entries(maintData),  tot: null, entryMode: true}
+    case 'Pressmud Cal':          { const r=calRow(calData.pm);  return {inp:filled(r),tot:10} }
+    case 'CD Cal':                { const r=calRow(calData.cd);  return {inp:filled(r),tot:10} }
+    case 'Grain Syrup Cal':       { const r=calRow(calData.gs);  return {inp:filled(r),tot:10} }
+    case 'CSL Cal':               { const r=calRow(calData.csl); return {inp:filled(r),tot:10} }
+    case 'Spent Grain Cal':       { const r=calRow(calData.sg);  return {inp:filled(r),tot:10} }
+    default: return {inp:0,tot:0}
+  }
+}
+
 function renderSubmissions() {
   const {d1,d2,psa,rc,fb,fs,ph,tmp,tsvs,iapa,
          fixedData,maintData,manureData,salesData,calData,serial} = _D
@@ -678,9 +719,7 @@ function renderSubmissions() {
     subMap[r[1]] = { by: r[2] || r[3] || '—', time: r[4] || '' }
   })
 
-  // --- actual data presence: drives pendingSet, amber banners and "—" values ---
-  // A sheet is "no data" only when the loaded arrays are empty / no matching rows.
-  // This correctly handles historical back-dates where data exists without a portal log entry.
+  // --- actual data presence ---
   const hasData = {
     'Digester 1':            d1.length > 0,
     'Digester 2':            d2.length > 0,
@@ -704,7 +743,7 @@ function renderSubmissions() {
   }
   _D.pendingSet = new Set(TRACKED.filter(s => !hasData[s]))
 
-  // --- alert strip counts sheets with NO data (truly pending) ---
+  // --- alert strip ---
   const noData = TRACKED.filter(s => !hasData[s])
   const alert  = document.getElementById('alertStrip')
   if (noData.length) {
@@ -719,38 +758,70 @@ function renderSubmissions() {
 
   let html = ''
   TRACKED.forEach(s => {
-    const logged   = subMap[s]       // portal submission entry
-    const dataOK   = hasData[s]      // data actually found in sheet
-    const isDig    = s === 'Digester 1' || s === 'Digester 2'
+    const logged     = subMap[s]
+    const dataOK     = hasData[s]
+    const isDig      = s === 'Digester 1' || s === 'Digester 2'
     const isSelected = _selDig === s
-    const clickAttr = isDig
+    const clickAttr  = isDig
       ? ` onclick="selectDigester('${s}')" style="cursor:pointer"`
       : ` onclick="showSection('${s}')" style="cursor:pointer"`
-    const selStyle = isSelected ? ' selected' : ''
+    const selStyle   = isSelected ? ' selected' : ''
+
+    // Field counts
+    const fc = dataOK ? countFields(s) : {inp:0, tot: null}
+    const isEntry = fc.entryMode
+    let fieldHtml = ''
+    if (dataOK) {
+      if (isEntry) {
+        fieldHtml = `<div class="sub-fields">
+          <div class="sub-field-item">
+            <div class="sub-field-lbl">Entries</div>
+            <div class="sub-field-val ok">${fc.inp}</div>
+          </div>
+        </div>`
+      } else if (fc.tot) {
+        const notInp = fc.tot - fc.inp
+        fieldHtml = `<div class="sub-fields">
+          <div class="sub-field-item">
+            <div class="sub-field-lbl">Fields Input</div>
+            <div class="sub-field-val ok">${fc.inp}</div>
+          </div>
+          <div class="sub-field-item">
+            <div class="sub-field-lbl">Not Input</div>
+            <div class="sub-field-val${notInp > 0 ? ' pend' : ' ok'}">${notInp}</div>
+          </div>
+        </div>`
+      }
+    }
 
     if (logged) {
-      // Portal-submitted: green border, submitter name + time
       html += `<div class="sub-card done${selStyle}"${clickAttr}>
         <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
+        <span class="sub-state-badge ok">Data Submitted</span>
+        <div class="sub-divider"></div>
         <div class="sub-by">${logged.by}</div>
         <div class="sub-time">${fmtTS(logged.time)}</div>
-        <div class="sub-status ok">✓ Submitted</div>
+        ${fieldHtml}
+        <div class="sub-status ok">✓ Data available</div>
       </div>`
     } else if (dataOK) {
-      // Data exists but not logged through portal (historical / direct entry)
       html += `<div class="sub-card avail${selStyle}"${clickAttr}>
         <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
-        <div class="sub-by">Direct entry</div>
+        <span class="sub-state-badge avail">Direct Entry</span>
+        <div class="sub-divider"></div>
+        <div class="sub-by">Expected data present</div>
         <div class="sub-time">—</div>
+        ${fieldHtml}
         <div class="sub-status avail">✓ Data available</div>
       </div>`
     } else {
-      // No data at all for this date
       html += `<div class="sub-card pend${selStyle}"${clickAttr}>
         <div class="sub-sheet">${s}${isDig ? (isSelected ? ' ◀' : ' ▶') : ''}</div>
+        <span class="sub-state-badge pend">Pending</span>
+        <div class="sub-divider"></div>
         <div class="sub-by">—</div>
         <div class="sub-time">—</div>
-        <div class="sub-status pend">Pending</div>
+        <div class="sub-status pend">No data for this date</div>
       </div>`
     }
   })
