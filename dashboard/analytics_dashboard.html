@@ -391,8 +391,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     </div>
     <div class="s3-sec-hdr">BIOGAS PRODUCTION <span class="s3-sec-sub">Raw gas output from digesters</span></div>
     <div class="cg c2">
-      <div class="cc"><div class="ct">D1 Biogas — BPP Estimated vs Actual B+C (m³)</div><div class="cw"><canvas id="c_s3_d1bg_ea"></canvas></div></div>
-      <div class="cc"><div class="ct">D2 Biogas — BPP Estimated vs Actual B+C (m³)</div><div class="cw"><canvas id="c_s3_d2bg_ea"></canvas></div></div>
+      <div class="cc"><div class="ct">D1 Biogas — Actual B+C vs Biogas to PSA (m³)</div><div class="cw"><canvas id="c_s3_d1bg_ea"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Biogas — Actual B+C vs Biogas to PSA (m³)</div><div class="cw"><canvas id="c_s3_d2bg_ea"></canvas></div></div>
     </div>
     <div class="cg c2">
       <div class="cc"><div class="ct">D1 Biogas Vent / Flare (m³)</div><div class="cw"><canvas id="c_s3_d1vent"></canvas></div></div>
@@ -403,10 +403,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <div class="cc"><div class="ct">D1 Drain — Planned vs Actual (m³)</div><div class="cw"><canvas id="c_s3_d1drain"></canvas></div></div>
       <div class="cc"><div class="ct">D2 Drain — Planned vs Actual (m³)</div><div class="cw"><canvas id="c_s3_d2drain"></canvas></div></div>
     </div>
-    <div class="s3-sec-hdr">DIGESTER EFFICIENCY <span class="s3-sec-sub">Actual biogas ÷ BPP expected × 100</span></div>
+    <div class="s3-sec-hdr">BIOGAS UTILIZATION <span class="s3-sec-sub">Biogas to PSA ÷ Total Biogas B+C × 100</span></div>
     <div class="cg c2">
-      <div class="cc"><div class="ct">D1 Digester Efficiency % (Actual B+C ÷ BPP Expected × 100)</div><div class="cw"><canvas id="c_s3_d1eff"></canvas></div></div>
-      <div class="cc"><div class="ct">D2 Digester Efficiency % (Actual B+C ÷ BPP Expected × 100)</div><div class="cw"><canvas id="c_s3_d2eff"></canvas></div></div>
+      <div class="cc"><div class="ct">D1 Biogas Utilization % (To PSA ÷ Total B+C)</div><div class="cw"><canvas id="c_s3_d1eff"></canvas></div></div>
+      <div class="cc"><div class="ct">D2 Biogas Utilization % (To PSA ÷ Total B+C)</div><div class="cw"><canvas id="c_s3_d2eff"></canvas></div></div>
     </div>
   </div>
 </div>
@@ -1479,14 +1479,14 @@ function renderS3(){
       card('D2 Drain Actual',fN(d2r.drain_ac),'m³','g','',true,d2r.drain_exp&&d2r.drain_ac?d2r.drain_ac/d2r.drain_exp*100:0),
     ]);
     // D: Digester Efficiency
-    html+=sHdr('DIGESTER EFFICIENCY','Actual biogas ÷ Expected × 100');
-    const d1eff=ex.d1_exp&&d1r.bg_total?Math.round(d1r.bg_total/ex.d1_exp*100):null;
-    const d2eff=ex.d2_exp&&d2r.bg_total?Math.round(d2r.bg_total/ex.d2_exp*100):null;
-    const ec1=d1eff!=null?(d1eff>=90&&d1eff<=110?'g':d1eff>=70?'a':'r'):'';
-    const ec2=d2eff!=null?(d2eff>=90&&d2eff<=110?'g':d2eff>=70?'a':'r'):'';
+    html+=sHdr('BIOGAS UTILIZATION','Biogas to PSA ÷ Total Biogas B+C × 100');
+    const d1eff=d1r.bg_act&&d1r.bg_total?Math.round(d1r.bg_act/d1r.bg_total*100):null;
+    const d2eff=d2r.bg_act&&d2r.bg_total?Math.round(d2r.bg_act/d2r.bg_total*100):null;
+    const ec1=d1eff!=null?(d1eff>=90?'g':d1eff>=75?'a':'r'):'';
+    const ec2=d2eff!=null?(d2eff>=90?'g':d2eff>=75?'a':'r'):'';
     html+=g2([
-      card('D1 Digester Efficiency',d1eff,'%',ec1,'Actual B+C ÷ BPP Expected × 100',true,d1eff?Math.min(d1eff,120):0),
-      card('D2 Digester Efficiency',d2eff,'%',ec2,'Actual B+C ÷ BPP Expected × 100',true,d2eff?Math.min(d2eff,120):0),
+      card('D1 Biogas Utilization',d1eff,'%',ec1,'Biogas to PSA ÷ Total B+C × 100',true,d1eff?Math.min(d1eff,100):0),
+      card('D2 Biogas Utilization',d2eff,'%',ec2,'Biogas to PSA ÷ Total B+C × 100',true,d2eff?Math.min(d2eff,100):0),
     ]);
     dayPanel.innerHTML=html;
     return;
@@ -1524,12 +1524,12 @@ function renderS3(){
         <div style="font-size:26px;font-weight:800;color:#fff">${moCbg?fmtN(moCbg)+' kg':'—'}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-size:11px;color:rgba(255,255,255,.7)">D1 BPP Expected</div>
-        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.85)">${moD1Exp?fmtN(moD1Exp)+' m³':'—'}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">D1 Total Biogas (m³)</div>
+        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.85)">${moD1Bg?fmtN(moD1Bg)+' m³':'—'}</div>
       </div>
       <div style="text-align:right">
-        <div style="font-size:11px;color:rgba(255,255,255,.7)">D2 BPP Expected</div>
-        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.85)">${moD2Exp?fmtN(moD2Exp)+' m³':'—'}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.7)">D2 Total Biogas (m³)</div>
+        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.85)">${moD2Bg?fmtN(moD2Bg)+' m³':'—'}</div>
       </div>
     </div>
   </div>`;
@@ -1539,8 +1539,8 @@ function renderS3(){
   const d2FeedExp=mo==='ALL'?sumMo('d2','feed_exp'):dArr('d2','feed_exp');
   const d1FeedAct=mo==='ALL'?mArr('d1_feed'):dArr('d1','feed_act');
   const d2FeedAct=mo==='ALL'?mArr('d2_feed'):dArr('d2','feed_act');
-  bar('c_s3_d1feed_tot',lbl,[bDS('D1 Feed Expected (m³ BPP)',d1FeedExp,C.amber),bDS('D1 Feed Actual (MT)',d1FeedAct,C.blue)]);
-  bar('c_s3_d2feed_tot',lbl,[bDS('D2 Feed Expected (m³ BPP)',d2FeedExp,C.amber),bDS('D2 Feed Actual (MT)',d2FeedAct,C.teal)]);
+  bar('c_s3_d1feed_tot',lbl,[bDS('D1 Feed Expected (MT)',d1FeedExp,C.amber),bDS('D1 Feed Actual (MT)',d1FeedAct,C.blue)]);
+  bar('c_s3_d2feed_tot',lbl,[bDS('D2 Feed Expected (MT)',d2FeedExp,C.amber),bDS('D2 Feed Actual (MT)',d2FeedAct,C.teal)]);
   const d1CdE=mo==='ALL'?sumMo('d1','cd_exp'):dArr('d1','cd_exp');
   const d1PmE=mo==='ALL'?sumMo('d1','pm_exp'):dArr('d1','pm_exp');
   const d1GsE=mo==='ALL'?sumMo('d1','gs_exp'):dArr('d1','gs_exp');
@@ -1578,12 +1578,12 @@ function renderS3(){
     {label:'CSL Act',data:d2CslA,backgroundColor:a(C.purple,.9),stack:'act'},
   ],true);
   // Biogas Production
-  const d1BgEst=mo==='ALL'?mArr('d1_exp'):dArr('exp','tot_exp');
-  const d2BgEst=mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp');
   const d1BgTot=mo==='ALL'?sumMo('d1','bg_total'):dArr('d1','bg_total');
   const d2BgTot=mo==='ALL'?sumMo('d2','bg_total'):dArr('d2','bg_total');
-  bar('c_s3_d1bg_ea',lbl,[bDS('D1 BPP Expected (m³)',d1BgEst,C.amber),bDS('D1 Actual B+C (m³)',d1BgTot,C.blue)]);
-  bar('c_s3_d2bg_ea',lbl,[bDS('D2 BPP Expected (m³)',d2BgEst,C.amber),bDS('D2 Actual B+C (m³)',d2BgTot,C.teal)]);
+  const d1BgPSA=mo==='ALL'?sumMo('d1','bg_act'):dArr('d1','bg_act');
+  const d2BgPSA=mo==='ALL'?sumMo('d2','bg_act'):dArr('d2','bg_act');
+  bar('c_s3_d1bg_ea',lbl,[bDS('D1 Actual B+C (m³)',d1BgTot,C.blue),bDS('D1 Biogas to PSA (m³)',d1BgPSA,C.cyan)]);
+  bar('c_s3_d2bg_ea',lbl,[bDS('D2 Actual B+C (m³)',d2BgTot,C.teal),bDS('D2 Biogas to PSA (m³)',d2BgPSA,C.green)]);
   const d1Vent=mo==='ALL'?sumMo('d1','bg_vent'):dArr('d1','bg_vent');
   const d2Vent=mo==='ALL'?sumMo('d2','bg_vent'):dArr('d2','bg_vent');
   bar('c_s3_d1vent',lbl,[bDS('D1 Vent/Flare (m³)',d1Vent,C.red)]);
@@ -1595,19 +1595,11 @@ function renderS3(){
   const d2Drain=mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac');
   bar('c_s3_d1drain',lbl,[bDS('D1 Drain Planned (m³)',d1DrainExp,C.amber),bDS('D1 Drain Actual (m³)',d1Drain,C.blue)]);
   bar('c_s3_d2drain',lbl,[bDS('D2 Drain Planned (m³)',d2DrainExp,C.amber),bDS('D2 Drain Actual (m³)',d2Drain,C.teal)]);
-  // Digester Efficiency
-  let d1Eff,d2Eff;
-  if(mo==='ALL'){
-    const d1ExpMo=mArr('d1_exp'),d2ExpMo=mArr('d2_exp');
-    d1Eff=MONTHS.map((_,i)=>{const e=d1ExpMo[i],a=d1BgTot[i];return e&&a?Math.round(a/e*100):null;});
-    d2Eff=MONTHS.map((_,i)=>{const e=d2ExpMo[i],a=d2BgTot[i];return e&&a?Math.round(a/e*100):null;});
-  } else {
-    const d1ExpD=dArr('exp','tot_exp'),d2ExpD=dArr('exp','d2_exp');
-    d1Eff=d1BgTot.map((v,i)=>{const e=d1ExpD[i];return e&&v?Math.round(v/e*100):null;});
-    d2Eff=d2BgTot.map((v,i)=>{const e=d2ExpD[i];return e&&v?Math.round(v/e*100):null;});
-  }
-  line('c_s3_d1eff',lbl,[lDS('D1 Efficiency %',d1Eff,C.blue)],{min:50,max:150});
-  line('c_s3_d2eff',lbl,[lDS('D2 Efficiency %',d2Eff,C.teal)],{min:50,max:150});
+  // Biogas Utilization: Biogas to PSA / Total Biogas B+C × 100
+  const d1Util=d1BgTot.map((v,i)=>{const p=d1BgPSA[i];return v&&p?Math.round(p/v*100):null;});
+  const d2Util=d2BgTot.map((v,i)=>{const p=d2BgPSA[i];return v&&p?Math.round(p/v*100):null;});
+  line('c_s3_d1eff',lbl,[lDS('D1 Utilization %',d1Util,C.blue)],{min:50,max:105});
+  line('c_s3_d2eff',lbl,[lDS('D2 Utilization %',d2Util,C.teal)],{min:50,max:105});
 }
 
 // ═══ S4 PURIFICATION ═════════════════════════════════════════
