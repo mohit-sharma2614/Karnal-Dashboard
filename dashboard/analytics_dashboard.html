@@ -3141,16 +3141,24 @@ async function buildAnalyticsD() {
   fb.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.fb[k]=r;});
   rc.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.rc[k]=r;});
   const days={};
-  new Set([...Object.keys(mp.psa),...Object.keys(mp.d1)]).forEach(k=>{
+  new Set([...Object.keys(mp.psa),...Object.keys(mp.d1),...Object.keys(mp.d2)]).forEach(k=>{
     const p=mp.psa[k]||[],d1r=mp.d1[k]||[],d2r=mp.d2[k]||[],phr=mp.ph[k]||[],tmr=mp.tm[k]||[],fbr=mp.fb[k]||[],rcr=mp.rc[k]||[];
     const dt=toDate(p[0]||d1r[0]);if(!dt)return;
+    const _psaHrs=psaH(p);
+    const _idealRaw=_psaHrs?Math.round(_psaHrs*600):null;
+    const _idealPur=_psaHrs?Math.round(_psaHrs*369.9):null;
+    const _idealCbg=_idealPur?Math.round(_idealPur*0.7434):null;
     days[k]={mo:moKey(dt),dt:k,
-      psa:{psa_hrs:psaH(p),comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:nv(p[7]),purified:nv(p[9]),cbg_d1:nv(p[10]),cbg_d2:nv(p[11]),cbg_tot:nv(p[12]),dispatched:nv(p[15]),veer:nv(p[16]),adinath:nv(p[17]),kfs:nv(p[18]),ksk:nv(p[19]),om:nv(p[20]),sps:nv(p[21]),ch4:nv(p[22]),cascade:nv(p[27]),storage:nv(p[28]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51])},
-      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30])},
-      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30])},
+      psa:{psa_hrs:_psaHrs,comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:nv(p[7]),
+        purified:nv(p[9]),act_cbg:nv(p[12]),cbg_d1:nv(p[10]),cbg_d2:nv(p[11]),cbg_tot:nv(p[12]),
+        dispatched:nv(p[15]),veer:nv(p[16]),adinath:nv(p[17]),kfs:nv(p[18]),ksk:nv(p[19]),om:nv(p[20]),sps:nv(p[21]),
+        ch4:nv(p[22]),cascade:nv(p[27]),storage:nv(p[28]),d1_eff:nv(d1r[50]),d2_eff:nv(d2r[51]),
+        ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg},
+      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30]),psa_eff_pct:nv(d1r[50])},
+      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30]),psa_eff_pct:nv(d2r[51])},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
-      rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
-      exp:{tot_exp:nv(d1r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),
+      rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
+      exp:{tot_exp:nv(d1r[10]),d1_exp:nv(d1r[10]),d2_exp:nv(d2r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),act_cbg:nv(p[12]),
         d1_cd_bpp:nv(d1r[42]),d1_pm_bpp:nv(d1r[43]),d1_gs_bpp:nv(d1r[44]),d1_csl_bpp:nv(d1r[45]),d1_sg_bpp:nv(d1r[46]),
         d2_cd_bpp:nv(d2r[43]),d2_pm_bpp:nv(d2r[44]),d2_gs_bpp:nv(d2r[45]),d2_csl_bpp:nv(d2r[46]),d2_sg_bpp:nv(d2r[47])},
       health:{ph:{d1:nv(phr[1]),d2:nv(phr[4])},tp:{d1:nv(tmr[1]),d2:nv(tmr[4])},ia:{d1:null,d2:null},ts:{d1:null},vs:{d1:null}}
