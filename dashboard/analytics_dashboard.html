@@ -3316,10 +3316,10 @@ async function buildAnalyticsD() {
   }
   const DD={};
   DD.psa=buildDA(psa,gD,{cbg_tot:12,purified:9,dispatched:15,psa_hrs:psaH,rbg_d1:5,rbg_d2:6,rbg_tot:7,cbg_d1:10,cbg_d2:11,ch4:22,veer:16,adinath:17,kfs:18,ksk:19,om:20,sps:21});
-  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50,
+  DD.d1=buildDA(d1,gD,{cbg:35,bg_act:32,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50,
     feed_exp:7,bg_total:34,bg_vent:33,drain_exp:29,
     cd_exp:1,pm_exp:2,csl_exp:4,gs_exp:6,sg_exp:5,cd_act:14,pm_act:15,csl_act:17,gs_act:22,sg_act:23});
-  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51,
+  DD.d2=buildDA(d2,gD,{cbg:35,bg_act:32,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:51,
     feed_exp:7,bg_total:34,bg_vent:33,drain_exp:29,
     cd_exp:1,pm_exp:2,csl_exp:4,gs_exp:6,sg_exp:5,cd_act:14,pm_act:15,csl_act:17,gs_act:22,sg_act:23});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
@@ -3375,11 +3375,11 @@ async function buildAnalyticsD() {
         raw_pct:(_idealRaw&&_rbgTot)?Math.round(_rbgTot/_idealRaw*100):null,
         pur_pct:(_idealPur&&_purified)?Math.round(_purified/_idealPur*100):null,
         cbg_pct:(_idealCbg&&_cbgTot)?Math.round(_cbgTot/_idealCbg*100):null},
-      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[31]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30]),psa_eff_pct:nv(d1r[50]),
+      d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[32]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30]),psa_eff_pct:nv(d1r[50]),
         feed_exp:nv(d1r[7]),bg_total:nv(d1r[34]),bg_vent:nv(d1r[33]),drain_exp:nv(d1r[29]),
         cd_exp:nv(d1r[1]),pm_exp:nv(d1r[2]),csl_exp:nv(d1r[4]),gs_exp:nv(d1r[6]),sg_exp:nv(d1r[5]),
         cd_act:nv(d1r[14]),pm_act:nv(d1r[15]),csl_act:nv(d1r[17]),gs_act:nv(d1r[22]),sg_act:nv(d1r[23])},
-      d2:{feed_act:nv(d2r[25]),bg_act:nv(d2r[31]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30]),psa_eff_pct:nv(d2r[51]),
+      d2:{feed_act:nv(d2r[24]),bg_act:nv(d2r[32]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30]),psa_eff_pct:nv(d2r[51]),
         feed_exp:nv(d2r[7]),bg_total:nv(d2r[34]),bg_vent:nv(d2r[33]),drain_exp:nv(d2r[29]),
         cd_exp:nv(d2r[1]),pm_exp:nv(d2r[2]),csl_exp:nv(d2r[4]),gs_exp:nv(d2r[6]),sg_exp:nv(d2r[5]),
         cd_act:nv(d2r[14]),pm_act:nv(d2r[15]),csl_act:nv(d2r[17]),gs_act:nv(d2r[22]),sg_act:nv(d2r[23])},
