@@ -69,6 +69,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .s3-sec-hdr{font-size:11px;font-weight:800;color:var(--blue,#1565C0);text-transform:uppercase;letter-spacing:.8px;
   padding:10px 0 8px;margin-top:18px;border-bottom:2px solid var(--bdr);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .s3-sec-sub{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+/* Feed comparison table */
+.ftbl-wrap{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:4px}
+.ftbl{width:100%;border-collapse:collapse;font-size:12px}
+.ftbl thead tr:first-child th{padding:9px 14px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;background:var(--surf2)}
+.ftbl .ftbl-d1h{color:#1565C0;background:rgba(21,101,192,.07);text-align:center}
+.ftbl .ftbl-d2h{color:#2E7D32;background:rgba(46,125,50,.07);text-align:center}
+.ftbl .ftbl-lbl-h{color:var(--text3);font-weight:600;min-width:110px}
+.ftbl-subhdr th{padding:5px 14px;font-size:10px;font-weight:600;color:var(--text3);background:var(--surf2);border-bottom:2px solid var(--bdr);text-align:right}
+.ftbl-subhdr .ftbl-lbl-h{text-align:left}
+.ftbl tbody tr{border-bottom:1px solid var(--bdr);transition:background .12s}
+.ftbl tbody tr:last-child{border-bottom:none}
+.ftbl tbody tr:hover{background:var(--surf2)}
+.ftbl tbody tr.ftbl-total{background:var(--surf2);font-weight:700}
+.ftbl tbody tr.ftbl-total td{font-size:13px}
+.ftbl td{padding:9px 14px;vertical-align:middle}
+.ftbl .ftbl-lbl{font-size:11.5px;font-weight:600;color:var(--text);white-space:nowrap}
+.ftbl .ftbl-exp{text-align:right;color:var(--text3);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.ftbl .ftbl-act{text-align:right;font-weight:700;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:90px}
+.ftbl .ftbl-sep{width:1px;background:var(--bdr);padding:0}
+.ftbl .ftbl-bar{height:3px;background:var(--bdr);border-radius:2px;margin-top:4px;overflow:hidden}
+.ftbl .ftbl-bar-fill{height:100%;border-radius:2px;transition:width .3s}
 /* KPI GRID */
 .kg{display:grid;gap:12px;margin-bottom:14px}
 .k3{grid-template-columns:repeat(3,1fr)}.k4{grid-template-columns:repeat(4,1fr)}
@@ -1398,30 +1419,45 @@ function renderS3(){
         </div>
       </div>
     </div>`;
-    // A: Feeding
+    // A: Feeding — comparison table
     html+=sHdr('FEEDING','Feedstock input to digesters');
-    html+=g4([
-      card('D1 Feed Expected',fN(d1r.feed_exp),'MT','a'),
-      card('D1 Feed Actual',fN(d1r.feed_act),'MT','b','',true,d1r.feed_exp&&d1r.feed_act?d1r.feed_act/d1r.feed_exp*100:0),
-      card('D2 Feed Expected',fN(d2r.feed_exp),'MT','a'),
-      card('D2 Feed Actual',fN(d2r.feed_act),'MT','g','',true,d2r.feed_exp&&d2r.feed_act?d2r.feed_act/d2r.feed_exp*100:0),
-    ]);
-    html+=g4([
-      card('D1 CD Exp',fN(d1r.cd_exp),'MT','a'),card('D1 CD Act',fN(d1r.cd_act),'MT','b','',true,d1r.cd_exp&&d1r.cd_act?d1r.cd_act/d1r.cd_exp*100:0),
-      card('D2 CD Exp',fN(d2r.cd_exp),'MT','a'),card('D2 CD Act',fN(d2r.cd_act),'MT','g','',true,d2r.cd_exp&&d2r.cd_act?d2r.cd_act/d2r.cd_exp*100:0),
-    ]);
-    html+=g4([
-      card('D1 PM Exp',fN(d1r.pm_exp),'MT','a'),card('D1 PM Act',fN(d1r.pm_act),'MT','b','',true,d1r.pm_exp&&d1r.pm_act?d1r.pm_act/d1r.pm_exp*100:0),
-      card('D2 PM Exp',fN(d2r.pm_exp),'MT','a'),card('D2 PM Act',fN(d2r.pm_act),'MT','g','',true,d2r.pm_exp&&d2r.pm_act?d2r.pm_act/d2r.pm_exp*100:0),
-    ]);
-    html+=g4([
-      card('D1 GS Exp',fN(d1r.gs_exp),'KL','a'),card('D1 GS Act',fN(d1r.gs_act),'KL','b','',true,d1r.gs_exp&&d1r.gs_act?d1r.gs_act/d1r.gs_exp*100:0),
-      card('D2 GS Exp',fN(d2r.gs_exp),'KL','a'),card('D2 GS Act',fN(d2r.gs_act),'KL','g','',true,d2r.gs_exp&&d2r.gs_act?d2r.gs_act/d2r.gs_exp*100:0),
-    ]);
-    html+=g4([
-      card('D1 CSL Exp',fN(d1r.csl_exp),'KL','a'),card('D1 CSL Act',fN(d1r.csl_act),'KL','b','',true,d1r.csl_exp&&d1r.csl_act?d1r.csl_act/d1r.csl_exp*100:0),
-      card('D2 CSL Exp',fN(d2r.csl_exp),'KL','a'),card('D2 CSL Act',fN(d2r.csl_act),'KL','g','',true,d2r.csl_exp&&d2r.csl_act?d2r.csl_act/d2r.csl_exp*100:0),
-    ]);
+    const fRow=(label,unit,e1,a1,e2,a2,isTot)=>{
+      const p1=e1&&a1?Math.round(a1/e1*100):null;
+      const p2=e2&&a2?Math.round(a2/e2*100):null;
+      const barClr=p=>p==null?'#ccc':p>=90?'#2E7D32':p>=70?'#F57C00':'#C62828';
+      const actCell=(a,p,isD2)=>`<td class="ftbl-act" style="color:${isD2?'#2E7D32':'#1565C0'}">${a!=null?fN(a)+' '+unit:'—'}${p!=null?`<div class="ftbl-bar"><div class="ftbl-bar-fill" style="width:${Math.min(p,100)}%;background:${barClr(p)}"></div></div>`:'<div class="ftbl-bar"></div>'}</td>`;
+      return `<tr${isTot?' class="ftbl-total"':''}>
+        <td class="ftbl-lbl">${label}</td>
+        <td class="ftbl-exp">${e1!=null?fN(e1)+' '+unit:'—'}</td>
+        ${actCell(a1,p1,false)}
+        <td class="ftbl-sep"></td>
+        <td class="ftbl-exp">${e2!=null?fN(e2)+' '+unit:'—'}</td>
+        ${actCell(a2,p2,true)}
+      </tr>`;
+    };
+    html+=`<div class="ftbl-wrap"><table class="ftbl">
+      <thead>
+        <tr>
+          <th class="ftbl-lbl-h">Feedstock</th>
+          <th colspan="2" class="ftbl-d1h">Digester 1</th>
+          <th class="ftbl-sep-h"></th>
+          <th colspan="2" class="ftbl-d2h">Digester 2</th>
+        </tr>
+        <tr class="ftbl-subhdr">
+          <th class="ftbl-lbl-h"></th>
+          <th>Expected</th><th>Actual</th>
+          <th class="ftbl-sep-h"></th>
+          <th>Expected</th><th>Actual</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${fRow('Total Feed','MT',d1r.feed_exp,d1r.feed_act,d2r.feed_exp,d2r.feed_act,true)}
+        ${fRow('Cow Dung','MT',d1r.cd_exp,d1r.cd_act,d2r.cd_exp,d2r.cd_act)}
+        ${fRow('Press Mud','MT',d1r.pm_exp,d1r.pm_act,d2r.pm_exp,d2r.pm_act)}
+        ${fRow('Green Slurry','KL',d1r.gs_exp,d1r.gs_act,d2r.gs_exp,d2r.gs_act)}
+        ${fRow('CSL','KL',d1r.csl_exp,d1r.csl_act,d2r.csl_exp,d2r.csl_act)}
+      </tbody>
+    </table></div>`;
     // B: Biogas Production
     html+=sHdr('BIOGAS PRODUCTION','Raw gas output from digesters');
     html+=g4([
