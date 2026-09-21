@@ -1401,10 +1401,10 @@ function renderS3(){
     // A: Feeding
     html+=sHdr('FEEDING','Feedstock input to digesters');
     html+=g4([
-      card('D1 Feed Expected (BPP)',fN(ex.d1_exp),'m³','a'),
-      card('D1 Feed Actual',fN(d1r.feed_act),'MT','b','',true,ex.d1_exp&&d1r.feed_act?d1r.feed_act/(ex.d1_exp/150)*100:0),
-      card('D2 Feed Expected (BPP)',fN(ex.d2_exp),'m³','a'),
-      card('D2 Feed Actual',fN(d2r.feed_act),'MT','g','',true,ex.d2_exp&&d2r.feed_act?d2r.feed_act/(ex.d2_exp/150)*100:0),
+      card('D1 Feed Expected',fN(d1r.feed_exp),'MT','a'),
+      card('D1 Feed Actual',fN(d1r.feed_act),'MT','b','',true,d1r.feed_exp&&d1r.feed_act?d1r.feed_act/d1r.feed_exp*100:0),
+      card('D2 Feed Expected',fN(d2r.feed_exp),'MT','a'),
+      card('D2 Feed Actual',fN(d2r.feed_act),'MT','g','',true,d2r.feed_exp&&d2r.feed_act?d2r.feed_act/d2r.feed_exp*100:0),
     ]);
     html+=g4([
       card('D1 CD Exp',fN(d1r.cd_exp),'MT','a'),card('D1 CD Act',fN(d1r.cd_act),'MT','b','',true,d1r.cd_exp&&d1r.cd_act?d1r.cd_act/d1r.cd_exp*100:0),
