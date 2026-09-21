@@ -1258,7 +1258,7 @@ function renderS1(){
   const cdBpp=mo==='ALL'?mArr('cd_bpp'):dArr('exp','d1_cd_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_cd_bpp')[i]||0));
   const cslBpp=mo==='ALL'?mArr('csl_bpp'):dArr('exp','d1_csl_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_csl_bpp')[i]||0));
   const gsBpp=mo==='ALL'?mArr('gs_bpp'):dArr('exp','d1_gs_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_gs_bpp')[i]||0));
-  const sgBpp=mo==='ALL'?mArr('sg_bpp'):[];
+  const sgBpp=mo==='ALL'?mArr('sg_bpp'):dArr('exp','d1_sg_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_sg_bpp')[i]||0));
   bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange)],true);
   // Received / Used / Balance table
   const rulTbl=document.getElementById('s1_rul_tbl');
@@ -3106,8 +3106,8 @@ async function buildAnalyticsD() {
   DD.d1=buildDA(d1,gD,{cbg:35,bg_act:31,olr:49,sfom:12,lfom:13,drain_ac:30,feed_act:24,psa_eff_pct:50});
   DD.d2=buildDA(d2,gD,{cbg:35,bg_act:31,olr:50,sfom:12,lfom:13,drain_ac:30,feed_act:25,psa_eff_pct:51});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
-  DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
-  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45});
+  DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
+  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45,d1_sg_bpp:46});
   // Merge PSA data into DD.exp by day key (local DD.psa — global D is null at this point)
   months.forEach(m=>{
     const exp=DD.exp[m]; if(!exp) return;
@@ -3118,7 +3118,7 @@ async function buildAnalyticsD() {
     exp.act_cbg=(exp.dates||[]).map(d=>psaMap[d]?.cbg||0);
   });
   // Merge D2 BPP into DD.exp daily arrays
-  const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46,d2_exp:10});
+  const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46,d2_sg_bpp:47,d2_exp:10});
   months.forEach(m=>{if(DD.exp[m]&&d2ExpDA[m]){Object.assign(DD.exp[m],d2ExpDA[m]);}})
   DD.health=buildDA(ph,gD,{ph_d1:1,ph_d2:4});
   // Merge temp, ts/vs, ia/pa into DD.health by date alignment
