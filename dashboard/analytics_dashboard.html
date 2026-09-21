@@ -1425,16 +1425,14 @@ function renderS3(){
     // B: Biogas Production
     html+=sHdr('BIOGAS PRODUCTION','Raw gas output from digesters');
     html+=g4([
-      card('D1 BPP Gas Expected',fN(ex.d1_exp),'m³','a','From actual feed BPP'),
-      card('D1 Actual Biogas (B+C)',fN(d1r.bg_total),'m³','b','',true,ex.d1_exp&&d1r.bg_total?d1r.bg_total/ex.d1_exp*100:0),
-      card('D2 BPP Gas Expected',fN(ex.d2_exp),'m³','a','From actual feed BPP'),
-      card('D2 Actual Biogas (B+C)',fN(d2r.bg_total),'m³','g','',true,ex.d2_exp&&d2r.bg_total?d2r.bg_total/ex.d2_exp*100:0),
+      card('D1 Actual Biogas (B+C)',fN(d1r.bg_total),'m³','b'),
+      card('D1 Biogas to PSA',fN(d1r.bg_act),'m³','c'),
+      card('D2 Actual Biogas (B+C)',fN(d2r.bg_total),'m³','g'),
+      card('D2 Biogas to PSA',fN(d2r.bg_act),'m³','c'),
     ]);
     html+=g4([
       card('D1 Biogas Vent/Flare',fN(d1r.bg_vent),'m³','r'),
       card('D2 Biogas Vent/Flare',fN(d2r.bg_vent),'m³','r'),
-      card('D1 Biogas to PSA',fN(d1r.bg_act),'m³','c'),
-      card('D2 Biogas to PSA',fN(d2r.bg_act),'m³','c'),
     ]);
     // C: Manure
     html+=sHdr('MANURE','Drain / digestate output');
@@ -1445,7 +1443,7 @@ function renderS3(){
       card('D2 Drain Actual',fN(d2r.drain_ac),'m³','g','',true,d2r.drain_exp&&d2r.drain_ac?d2r.drain_ac/d2r.drain_exp*100:0),
     ]);
     // D: Digester Efficiency
-    html+=sHdr('DIGESTER EFFICIENCY','Actual biogas ÷ BPP expected × 100');
+    html+=sHdr('DIGESTER EFFICIENCY','Actual biogas ÷ Expected × 100');
     const d1eff=ex.d1_exp&&d1r.bg_total?Math.round(d1r.bg_total/ex.d1_exp*100):null;
     const d2eff=ex.d2_exp&&d2r.bg_total?Math.round(d2r.bg_total/ex.d2_exp*100):null;
     const ec1=d1eff!=null?(d1eff>=90&&d1eff<=110?'g':d1eff>=70?'a':'r'):'';
