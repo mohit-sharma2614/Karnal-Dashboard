@@ -339,18 +339,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S2 LAB ══ -->
 <div id="s2" class="pg">
   <div class="stitle">Process & Testing — Laboratory <span class="resp">— Dr. Shikha, Mr. Jatin</span><span id="s2_period" class="mo-badge">All Months</span></div>
-  <div class="kg k4">
-    <div class="kc" id="ph_card"><div class="kl">pH — Latest</div><div class="kv" id="kv_ph">—</div><div class="ks" id="ks_ph">—</div></div>
-    <div class="kc" id="tp_card"><div class="kl">Temperature — Latest</div><div class="kv" id="kv_tp">—</div><div class="ks" id="ks_tp">—</div></div>
-    <div class="kc" id="ia_card"><div class="kl">IA/PA Ratio — Latest</div><div class="kv" id="kv_ia">—</div><div class="ks" id="ks_ia">—</div></div>
-    <div class="kc" id="olr_card"><div class="kl">Avg OLR (kg VS/m³/d)</div><div class="kv" id="kv_olr">—</div><div class="ks">Safe: 2.0 – 4.0</div></div>
-  </div>
-  <div class="kg k4">
-    <div class="kc" id="pa_card"><div class="kl">PA — Partial Alkalinity (mg/L)</div><div class="kv" id="kv_pa">—</div><div class="ks" id="ks_pa">D1 / D2 · Latest</div></div>
-    <div class="kc" id="ia_ind_card"><div class="kl">IA — Intermediate Alkalinity (mg/L)</div><div class="kv" id="kv_ia_ind">—</div><div class="ks" id="ks_ia_ind">D1 / D2 · Latest</div></div>
-    <div class="kc" id="ta_card"><div class="kl">Total Alkalinity IA+PA (mg/L)</div><div class="kv" id="kv_ta">—</div><div class="ks" id="ks_ta">D1 / D2 · Latest</div></div>
-    <div class="kc"><div class="kl">IA/PA Ratio (latest entry)</div><div class="kv" id="kv_iapa2">—</div><div class="ks">D1 / D2 · &lt;0.4 safe</div></div>
-  </div>
+  <div id="s2_kpi_table" style="margin-bottom:12px"></div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s2_ph">pH — D1 vs D2 (safe: 6.8–7.5)</div><div class="cw"><canvas id="c_s2_ph"></canvas></div></div>
     <div class="cc"><div class="ct" id="ct_s2_tp">Temperature °C — D1 vs D2 (optimal: 35–40)</div><div class="cw"><canvas id="c_s2_tp"></canvas></div></div>
@@ -369,7 +358,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s2_ta">Total Alkalinity (IA+PA) — D1 vs D2 (mg/L)</div><div class="cw"><canvas id="c_s2_ta"></canvas></div></div>
-    <div class="cc" style="visibility:hidden"></div>
+    <div class="cc"><div class="ct">TS% / VS% — Sludge Line D1 vs D2</div><div class="cw s"><canvas id="c_s2_ts_sl"></canvas></div></div>
   </div>
 </div>
 
@@ -720,6 +709,99 @@ function dDates(section){ return (D.D[section]?.[curMonth]?.dates)||[]; }
 function healthDArr(field){ return (D.D.health?.[curMonth]?.[field])||[]; }
 function healthDDates(field){ return (D.D.health?.[curMonth]?.dates)||[]; }
 
+// Returns latest non-null value for every health field on or before dateKey
+function latestHealthSnapshot(dateKey){
+  const MNAMES=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const fields=['ph_d1','ph_d2','tp_d1','tp_d2','ia_d1','ia_d2','pa_d1','pa_d2',
+    'ia_ind_d1','ia_ind_d2','ta_d1','ta_d2',
+    'ts_d1','vs_d1','ts_d1_6m','vs_d1_6m','ts_d1_sl','vs_d1_sl',
+    'ts_d2','vs_d2','ts_d2_6m','vs_d2_6m','ts_d2_sl','vs_d2_sl'];
+  const snap={_dates:{}};
+  const dp=dateKey.split('-');
+  const selMoIdx=MNAMES.indexOf(dp[1]);
+  const selDay=parseInt(dp[0]);
+  MNAMES.forEach((m,mi)=>{
+    if(mi>selMoIdx) return;
+    const h=D.D.health?.[m]; if(!h) return;
+    (h.dates||[]).forEach((d,i)=>{
+      const dp2=d.split('-');
+      const dMoIdx=MNAMES.indexOf(dp2[1]);
+      if(dMoIdx>selMoIdx||(dMoIdx===selMoIdx&&parseInt(dp2[0])>selDay)) return;
+      fields.forEach(f=>{const v=(h[f]||[])[i];if(v!=null&&v!==0){snap[f]=v;snap._dates[f]=d;}});
+    });
+  });
+  return snap;
+}
+
+// Returns the HTML for the Lab comparison table; used by both renderS2 and renderSectionDay
+function _labTableHtml(tv, periodNote){
+  const ragPh=v=>v==null?'':v>=6.8&&v<=7.5?'g':v>=6.5&&v<=8.0?'a':'r';
+  const ragTp=v=>v==null?'':v>=35&&v<=40?'g':v>=30&&v<=45?'a':'r';
+  const ragOlr=v=>v==null?'':v>=2&&v<=4?'g':v>=1&&v<=5?'a':'r';
+  const ragIa=v=>v==null?'':v<0.3?'g':v<0.4?'a':'r';
+  const ragPa=v=>v==null?'':v>=2500&&v<=4000?'g':v>=2000&&v<=5000?'a':'r';
+  const ragIaInd=v=>v==null?'':v<1000?'g':v<1500?'a':'r';
+  const ragTs=v=>v==null?'':v>=5&&v<=10?'g':v>=3&&v<=15?'a':'r';
+  const ragVs=v=>v==null?'':v>=55?'g':v>=50?'a':'r';
+  const cv={g:'#2E7D32',a:'#E65100',r:'#C62828'};
+  const bp=v=>v!=null?Math.round(Math.max(0,Math.min(v,100))):null;
+  const bPh=v=>bp(v!=null?(v-6)/(8.5-6)*100:null);
+  const bTp=v=>bp(v!=null?(v-20)/30*100:null);
+  const bOlr=v=>bp(v!=null?v/6*100:null);
+  const bIa=v=>bp(v!=null?(0.6-Math.min(v,0.6))/0.6*100:null);
+  const bPa=v=>bp(v!=null?v/5000*100:null);
+  const bIaInd=v=>bp(v!=null?(2000-Math.min(v,2000))/2000*100:null);
+  const bTa=v=>bp(v!=null?v/6000*100:null);
+  const bTs=v=>bp(v!=null?v/15*100:null);
+  const bVs=v=>bp(v!=null?v/100*100:null);
+  const labCell=(v,cls,barPct,dec)=>{
+    if(v==null) return '<td class="ftbl-exp" style="text-align:right;color:var(--text3)">—</td>';
+    const col=cv[cls]||'var(--text1)';
+    const bar=barPct!=null?`<div style="margin-top:3px;background:var(--bg3);border-radius:2px;height:4px;overflow:hidden"><div style="width:${barPct}%;height:4px;background:${col};border-radius:2px"></div></div>`:'';
+    return `<td class="ftbl-exp" style="text-align:right"><span style="font-size:13px;font-weight:700;color:${col}">${(+v).toFixed(dec)}</span>${bar}</td>`;
+  };
+  const grpHdr=(t,s)=>`<tr style="background:var(--bg3)"><td colspan="5" style="padding:6px 10px;font-size:10px;font-weight:800;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;border-bottom:1px solid var(--bdr)">${t}<span style="font-size:9px;font-weight:400;color:var(--text3);letter-spacing:0;margin-left:8px">${s||''}</span></td></tr>`;
+  const labRow=(label,range,d1v,d1r_,b1,d2v,d2r_,b2,dec=2)=>`<tr>
+    <td class="ftbl-lbl">${label}</td>
+    <td style="font-size:10px;color:var(--text3);padding:5px 8px;white-space:nowrap">${range}</td>
+    ${labCell(d1v,d1r_,b1,dec)}
+    <td class="ftbl-sep"></td>
+    ${labCell(d2v,d2r_,b2,dec)}
+  </tr>`;
+  const tsNote=tv.ts_date?`Latest test: ${tv.ts_date}`:'';
+  const iaNote=tv.ia_date?`Latest test: ${tv.ia_date}`:'';
+  return `<div class="ftbl-wrap"><table class="ftbl">
+    <thead><tr>
+      <th class="ftbl-lbl-h">Parameter <span style="font-size:9px;font-weight:400;color:var(--text3)">${periodNote||''}</span></th>
+      <th style="font-size:10px;color:var(--text3);padding:6px 8px;font-weight:500;text-align:left">Safe Range</th>
+      <th class="ftbl-d1h" style="text-align:right">Digester 1</th>
+      <th class="ftbl-sep-h"></th>
+      <th class="ftbl-d2h" style="text-align:right">Digester 2</th>
+    </tr></thead>
+    <tbody>
+      ${grpHdr('A — Stability','pH · Temperature · OLR')}
+      ${labRow('pH','6.8 – 7.5',tv.ph_d1,ragPh(tv.ph_d1),bPh(tv.ph_d1),tv.ph_d2,ragPh(tv.ph_d2),bPh(tv.ph_d2),2)}
+      ${labRow('Temperature','35 – 40 °C',tv.tp_d1,ragTp(tv.tp_d1),bTp(tv.tp_d1),tv.tp_d2,ragTp(tv.tp_d2),bTp(tv.tp_d2),1)}
+      ${labRow('OLR','2 – 4 kg VS/m³/d',tv.olr_d1,ragOlr(tv.olr_d1),bOlr(tv.olr_d1),tv.olr_d2,ragOlr(tv.olr_d2),bOlr(tv.olr_d2),3)}
+      ${grpHdr('B — Alkalinity',iaNote)}
+      ${labRow('IA/PA Ratio','< 0.40',tv.ia_d1,ragIa(tv.ia_d1),bIa(tv.ia_d1),tv.ia_d2,ragIa(tv.ia_d2),bIa(tv.ia_d2),3)}
+      ${labRow('Partial Alkalinity (PA)','2500 – 4000 mg/L',tv.pa_d1,ragPa(tv.pa_d1),bPa(tv.pa_d1),tv.pa_d2,ragPa(tv.pa_d2),bPa(tv.pa_d2),0)}
+      ${labRow('Interm. Alkalinity (IA)','< 1500 mg/L',tv.ia_ind_d1,ragIaInd(tv.ia_ind_d1),bIaInd(tv.ia_ind_d1),tv.ia_ind_d2,ragIaInd(tv.ia_ind_d2),bIaInd(tv.ia_ind_d2),0)}
+      ${labRow('Total Alkalinity (TA)','mg/L',tv.ta_d1,'',bTa(tv.ta_d1),tv.ta_d2,'',bTa(tv.ta_d2),0)}
+      ${grpHdr('C — Digester TS / VS',tsNote)}
+      ${labRow('TS% — 3M','5 – 10%',tv.ts_d1,ragTs(tv.ts_d1),bTs(tv.ts_d1),tv.ts_d2,ragTs(tv.ts_d2),bTs(tv.ts_d2),1)}
+      ${labRow('VS% — 3M','> 55%',tv.vs_d1,ragVs(tv.vs_d1),bVs(tv.vs_d1),tv.vs_d2,ragVs(tv.vs_d2),bVs(tv.vs_d2),1)}
+      ${labRow('TS% — 6M','5 – 10%',tv.ts_d1_6m,ragTs(tv.ts_d1_6m),bTs(tv.ts_d1_6m),tv.ts_d2_6m,ragTs(tv.ts_d2_6m),bTs(tv.ts_d2_6m),1)}
+      ${labRow('VS% — 6M','> 55%',tv.vs_d1_6m,ragVs(tv.vs_d1_6m),bVs(tv.vs_d1_6m),tv.vs_d2_6m,ragVs(tv.vs_d2_6m),bVs(tv.vs_d2_6m),1)}
+      ${labRow('TS% — Sludge Line','5 – 10%',tv.ts_d1_sl,ragTs(tv.ts_d1_sl),bTs(tv.ts_d1_sl),tv.ts_d2_sl,ragTs(tv.ts_d2_sl),bTs(tv.ts_d2_sl),1)}
+      ${labRow('VS% — Sludge Line','> 55%',tv.vs_d1_sl,ragVs(tv.vs_d1_sl),bVs(tv.vs_d1_sl),tv.vs_d2_sl,ragVs(tv.vs_d2_sl),bVs(tv.vs_d2_sl),1)}
+    </tbody>
+  </table></div>`;
+}
+function _renderLabTable(containerId,tv,periodNote){
+  const el=document.getElementById(containerId);if(el)el.innerHTML=_labTableHtml(tv,periodNote);
+}
+
 function getLabels(section){ return curMonth==='ALL'?MONTHS:dDates(section); }
 
 function rag(v,p){
@@ -982,29 +1064,26 @@ function renderSectionDay(sectionId){
       metricCard('Feedstock Cost',fL2(rv.feed_cost),'','a','Daily procurement cost'),
     ]);
   } else if(sectionId==='s2'){
-    const ph=h.ph||{},tp=h.tp||{},ia=h.ia||{};
-    const phCls1=ph.d1!=null?(ph.d1>=6.8&&ph.d1<=7.5?'g':'r'):'';
-    const phCls2=ph.d2!=null?(ph.d2>=6.8&&ph.d2<=7.5?'g':'r'):'';
-    const tpCls1=tp.d1!=null?(tp.d1>=35&&tp.d1<=40?'g':tp.d1>=30?'a':'r'):'';
-    const tpCls2=tp.d2!=null?(tp.d2>=35&&tp.d2<=40?'g':tp.d2>=30?'a':'r'):'';
-    const iaCls1=ia.d1!=null?(ia.d1<0.3?'g':ia.d1<0.4?'a':'r'):'';
-    const iaCls2=ia.d2!=null?(ia.d2<0.3?'g':ia.d2<0.4?'a':'r'):'';
-    const olrCls1=d1r.olr!=null?(d1r.olr>=2&&d1r.olr<=4?'g':d1r.olr<5?'a':'r'):'';
-    const olrCls2=d2r.olr!=null?(d2r.olr>=2&&d2r.olr<=4?'g':d2r.olr<5?'a':'r'):'';
-    html+=groupHeader('pH & Temperature','Safe: pH 6.8–7.5 · Temp 35–40°C');
-    html+=grid([
-      metricCard('pH — Digester 1',ph.d1??null,'',phCls1,'Safe: 6.8 – 7.5',true,ph.d1?Math.min(ph.d1/8.5*100,100):0),
-      metricCard('pH — Digester 2',ph.d2??null,'',phCls2,'Safe: 6.8 – 7.5',true,ph.d2?Math.min(ph.d2/8.5*100,100):0),
-      metricCard('Temperature — D1',tp.d1??null,'°C',tpCls1,'Optimal: 35 – 40°C',true,tp.d1?Math.min(tp.d1/45*100,100):0),
-      metricCard('Temperature — D2',tp.d2??null,'°C',tpCls2,'Optimal: 35 – 40°C',true,tp.d2?Math.min(tp.d2/45*100,100):0),
-    ]);
-    html+=groupHeader('Alkalinity & OLR','Safe: IA/PA < 0.4 · OLR 2–4 kg VS/m³/d');
-    html+=grid([
-      metricCard('IA/PA Ratio — D1',ia.d1!=null?ia.d1.toFixed(3):null,'',iaCls1,'< 0.30 optimal',true,ia.d1?Math.min(ia.d1/0.6*100,100):0),
-      metricCard('IA/PA Ratio — D2',ia.d2!=null?ia.d2.toFixed(3):null,'',iaCls2,'< 0.30 optimal',true,ia.d2?Math.min(ia.d2/0.6*100,100):0),
-      metricCard('OLR — Digester 1',d1r.olr!=null?d1r.olr.toFixed(3):null,'kg VS/m³/d',olrCls1,'Safe: 2.0 – 4.0',true,d1r.olr?Math.min(d1r.olr/6*100,100):0),
-      metricCard('OLR — Digester 2',d2r.olr!=null?d2r.olr.toFixed(3):null,'kg VS/m³/d',olrCls2,'Safe: 2.0 – 4.0',true,d2r.olr?Math.min(d2r.olr/6*100,100):0),
-    ]);
+    const snap=latestHealthSnapshot(curDay);
+    const tv={
+      ph_d1:snap.ph_d1??h.ph?.d1, ph_d2:snap.ph_d2??h.ph?.d2,
+      tp_d1:snap.tp_d1??h.tp?.d1, tp_d2:snap.tp_d2??h.tp?.d2,
+      olr_d1:d1r.olr, olr_d2:d2r.olr,
+      ia_d1:snap.ia_d1, ia_d2:snap.ia_d2,
+      pa_d1:snap.pa_d1, pa_d2:snap.pa_d2,
+      ia_ind_d1:snap.ia_ind_d1, ia_ind_d2:snap.ia_ind_d2,
+      ta_d1:snap.ta_d1, ta_d2:snap.ta_d2,
+      ts_d1:snap.ts_d1, ts_d2:snap.ts_d2,
+      vs_d1:snap.vs_d1, vs_d2:snap.vs_d2,
+      ts_d1_6m:snap.ts_d1_6m, ts_d2_6m:snap.ts_d2_6m,
+      vs_d1_6m:snap.vs_d1_6m, vs_d2_6m:snap.vs_d2_6m,
+      ts_d1_sl:snap.ts_d1_sl, ts_d2_sl:snap.ts_d2_sl,
+      vs_d1_sl:snap.vs_d1_sl, vs_d2_sl:snap.vs_d2_sl,
+      ts_date:snap._dates.ts_d1||null,
+      ia_date:snap._dates.ia_d1||null
+    };
+    html+=groupHeader('Digester Process Parameters','Latest available lab readings');
+    html+=_labTableHtml(tv,'Latest reading');
   } else if(sectionId==='s3'){
     // s3 (Production) day view is handled by renderS3() directly — this branch is not called
   } else if(sectionId==='s4'){
@@ -1302,58 +1381,61 @@ function renderS1(){
 function renderS2(){
   if(renderSectionDay('s2')) return; else hideSectionDay('s2');
   const mo=curMonth; const k=D.kpis;
-  const setCard=(cid,kvid,ksid,v1,v2,p,unit='')=>{
-    const r=rag((v1+v2)/2,p);
-    document.getElementById(cid).className='kc '+r.cls;
-    document.getElementById(kvid).className='kv '+r.cls;
-    document.getElementById(kvid).textContent=(v1??'—')+' / '+(v2??'—')+unit;
-    document.getElementById(ksid).textContent='D1 / D2 · '+r.lbl;
-  };
-  setCard('ph_card','kv_ph','ks_ph',k.ph_d1,k.ph_d2,'pH');
-  setCard('tp_card','kv_tp','ks_tp',k.temp_d1,k.temp_d2,'Temp','°C');
-  setCard('ia_card','kv_ia','ks_ia',k.iapa_d1,k.iapa_d2,'IAPA');
-  // New alkalinity cards
-  const fv=v=>v!=null?Math.round(v):null;
-  document.getElementById('kv_pa').textContent=(fv(k.pa_d1)??'—')+' / '+(fv(k.pa_d2)??'—')+' mg/L';
-  document.getElementById('kv_ia_ind').textContent=(fv(k.ia_ind_d1)??'—')+' / '+(fv(k.ia_ind_d2)??'—')+' mg/L';
-  document.getElementById('kv_ta').textContent=(fv(k.ta_d1)??'—')+' / '+(fv(k.ta_d2)??'—')+' mg/L';
-  document.getElementById('kv_iapa2').textContent=(k.iapa_d1??'—')+' / '+(k.iapa_d2??'—');
-  const olrData=mo==='ALL'?mArr('d1_olr'):dArr('d1','olr');
-  const avgOlr=(avgA(olrData)||0).toFixed(3);
-  const ro=rag(avgOlr,'OLR');
-  document.getElementById('olr_card').className='kc '+ro.cls;
-  document.getElementById('kv_olr').className='kv '+ro.cls;
-  document.getElementById('kv_olr').textContent=avgOlr;
+  const pb=document.getElementById('s2_period');
+  if(pb) pb.textContent=mo==='ALL'?'All Months':mo;
+  const avgArr=arr=>{const v=(arr||[]).filter(x=>x!=null&&x!==0);return v.length?+(v.reduce((s,x)=>s+x,0)/v.length):null;};
+  let tv;
+  if(mo==='ALL'){
+    tv={ph_d1:k.ph_d1,ph_d2:k.ph_d2,tp_d1:k.temp_d1,tp_d2:k.temp_d2,
+      olr_d1:avgArr(mArr('d1_olr')),olr_d2:avgArr(mArr('d2_olr')),
+      ia_d1:k.iapa_d1,ia_d2:k.iapa_d2,pa_d1:k.pa_d1,pa_d2:k.pa_d2,
+      ia_ind_d1:k.ia_ind_d1,ia_ind_d2:k.ia_ind_d2,ta_d1:k.ta_d1,ta_d2:k.ta_d2,
+      ts_d1:k.ts_d1,ts_d2:k.ts_d2,vs_d1:k.vs_d1,vs_d2:k.vs_d2,
+      ts_d1_6m:k.ts_d1_6m,ts_d2_6m:k.ts_d2_6m,vs_d1_6m:k.vs_d1_6m,vs_d2_6m:k.vs_d2_6m,
+      ts_d1_sl:k.ts_d1_sl,ts_d2_sl:k.ts_d2_sl,vs_d1_sl:k.vs_d1_sl,vs_d2_sl:k.vs_d2_sl,
+      ts_date:k.ts_latest_date,ia_date:k.iapa_latest_date};
+  } else {
+    tv={ph_d1:avgArr(healthDArr('ph_d1')),ph_d2:avgArr(healthDArr('ph_d2')),
+      tp_d1:avgArr(healthDArr('tp_d1')),tp_d2:avgArr(healthDArr('tp_d2')),
+      olr_d1:avgArr(dArr('d1','olr')),olr_d2:avgArr(dArr('d2','olr')),
+      ia_d1:avgArr(healthDArr('ia_d1')),ia_d2:avgArr(healthDArr('ia_d2')),
+      pa_d1:avgArr(healthDArr('pa_d1')),pa_d2:avgArr(healthDArr('pa_d2')),
+      ia_ind_d1:avgArr(healthDArr('ia_ind_d1')),ia_ind_d2:avgArr(healthDArr('ia_ind_d2')),
+      ta_d1:avgArr(healthDArr('ta_d1')),ta_d2:avgArr(healthDArr('ta_d2')),
+      ts_d1:avgArr(healthDArr('ts_d1')),ts_d2:avgArr(healthDArr('ts_d2')),
+      vs_d1:avgArr(healthDArr('vs_d1')),vs_d2:avgArr(healthDArr('vs_d2')),
+      ts_d1_6m:avgArr(healthDArr('ts_d1_6m')),ts_d2_6m:avgArr(healthDArr('ts_d2_6m')),
+      vs_d1_6m:avgArr(healthDArr('vs_d1_6m')),vs_d2_6m:avgArr(healthDArr('vs_d2_6m')),
+      ts_d1_sl:avgArr(healthDArr('ts_d1_sl')),ts_d2_sl:avgArr(healthDArr('ts_d2_sl')),
+      vs_d1_sl:avgArr(healthDArr('vs_d1_sl')),vs_d2_sl:avgArr(healthDArr('vs_d2_sl')),
+      ts_date:null,ia_date:null};
+  }
+  _renderLabTable('s2_kpi_table',tv,mo==='ALL'?'YTD latest':mo+' avg');
+  // Charts
   if(mo==='ALL'){
     line('c_s2_ph',MONTHS,[lDS('D1 pH',mArr('ph_d1'),C.green),lDS('D2 pH',mArr('ph_d2'),C.cyan)],{min:6,max:8.5});
     line('c_s2_tp',MONTHS,[lDS('D1 Temp',mArr('tmp_d1'),C.amber),lDS('D2 Temp',mArr('tmp_d2'),C.orange)],{min:25,max:45});
     line('c_s2_ia',MONTHS,[lDS('D1 IA/PA',mArr('ia_d1'),C.red),lDS('D2 IA/PA',mArr('ia_d2'),C.pink)],{min:0,max:.6});
     line('c_s2_olr',MONTHS,[lDS('D1 OLR',mArr('d1_olr'),C.green),lDS('D2 OLR',mArr('d2_olr'),C.cyan)],{min:0,max:6});
-    line('c_s2_ts',MONTHS,[lDS('D1 TS%',mArr('ts_d1'),C.blue),lDS('D2 TS%',mArr('ts_d2'),C.cyan)]);
-    line('c_s2_vs',MONTHS,[lDS('D1 VS%',mArr('vs_d1'),C.green),lDS('D2 VS%',mArr('vs_d2'),C.teal)],{min:40,max:75});
-  } else {
-    const ph1=healthDArr('ph_d1'); const ph2=healthDArr('ph_d2'); const phD=healthDDates('ph_d1');
-    const tp1=healthDArr('tp_d1'); const tp2=healthDArr('tp_d2'); const tpD=healthDDates('tp_d1');
-    const ia1=healthDArr('ia_d1'); const ia2=healthDArr('ia_d2'); const iaD=healthDDates('ia_d1');
-    const ts1=healthDArr('ts_d1'); const ts2=healthDArr('ts_d2'); const tsD=healthDDates('ts_d1');
-    const vs1=healthDArr('vs_d1'); const vs2=healthDArr('vs_d2'); const vsD=healthDDates('vs_d1');
-    line('c_s2_ph',phD,[lDS('D1 pH',ph1,C.green),lDS('D2 pH',ph2,C.cyan)],{min:6,max:8.5});
-    line('c_s2_tp',tpD,[lDS('D1 Temp',tp1,C.amber),lDS('D2 Temp',tp2,C.orange)],{min:25,max:45});
-    line('c_s2_ia',iaD,[lDS('D1 IA/PA',ia1,C.red),lDS('D2 IA/PA',ia2,C.pink)],{min:0,max:.6});
-    line('c_s2_olr',dDates('d1'),[lDS('D1 OLR',dArr('d1','olr'),C.green),lDS('D2 OLR',dArr('d2','olr'),C.cyan)],{min:0,max:6});
-    line('c_s2_ts',tsD,[lDS('D1 TS%',ts1,C.blue),lDS('D2 TS%',ts2,C.cyan)]);
-    line('c_s2_vs',vsD,[lDS('D1 VS%',vs1,C.green),lDS('D2 VS%',vs2,C.teal)],{min:40,max:75});
-    const pa1=healthDArr('pa_d1'); const pa2=healthDArr('pa_d2'); const paD=healthDDates('pa_d1');
-    const iai1=healthDArr('ia_ind_d1'); const iai2=healthDArr('ia_ind_d2'); const iaiD=healthDDates('ia_ind_d1');
-    const ta1a=healthDArr('ta_d1'); const ta2a=healthDArr('ta_d2'); const taD=healthDDates('ta_d1');
-    line('c_s2_pa',paD,[lDS('D1 PA',pa1,C.blue),lDS('D2 PA',pa2,C.cyan)]);
-    line('c_s2_ia_ind',iaiD,[lDS('D1 IA',iai1,C.amber),lDS('D2 IA',iai2,C.orange)]);
-    line('c_s2_ta',taD,[lDS('D1 TA',ta1a,C.green),lDS('D2 TA',ta2a,C.teal)]);
-  }
-  if(mo==='ALL'){
+    line('c_s2_ts',MONTHS,[lDS('D1 TS% 3M',mArr('ts_d1'),C.blue),lDS('D2 TS% 3M',mArr('ts_d2'),C.cyan),lDS('D1 TS% 6M',mArr('ts_d1_6m'),C.teal),lDS('D2 TS% 6M',mArr('ts_d2_6m'),C.green)]);
+    line('c_s2_vs',MONTHS,[lDS('D1 VS% 3M',mArr('vs_d1'),C.green),lDS('D2 VS% 3M',mArr('vs_d2'),C.teal),lDS('D1 VS% 6M',mArr('vs_d1_6m'),C.blue),lDS('D2 VS% 6M',mArr('vs_d2_6m'),C.cyan)],{min:40,max:75});
     line('c_s2_pa',MONTHS,[lDS('D1 PA',mArr('pa_d1'),C.blue),lDS('D2 PA',mArr('pa_d2'),C.cyan)]);
     line('c_s2_ia_ind',MONTHS,[lDS('D1 IA',mArr('ia_ind_d1'),C.amber),lDS('D2 IA',mArr('ia_ind_d2'),C.orange)]);
     line('c_s2_ta',MONTHS,[lDS('D1 TA',mArr('ta_d1'),C.green),lDS('D2 TA',mArr('ta_d2'),C.teal)]);
+    line('c_s2_ts_sl',MONTHS,[lDS('D1 TS% SL',mArr('ts_d1_sl'),C.blue),lDS('D2 TS% SL',mArr('ts_d2_sl'),C.cyan),lDS('D1 VS% SL',mArr('vs_d1_sl'),C.green),lDS('D2 VS% SL',mArr('vs_d2_sl'),C.teal)]);
+  } else {
+    const phD=healthDDates('ph_d1'),tpD=healthDDates('tp_d1'),iaD=healthDDates('ia_d1'),tsD=healthDDates('ts_d1');
+    line('c_s2_ph',phD,[lDS('D1 pH',healthDArr('ph_d1'),C.green),lDS('D2 pH',healthDArr('ph_d2'),C.cyan)],{min:6,max:8.5});
+    line('c_s2_tp',tpD,[lDS('D1 Temp',healthDArr('tp_d1'),C.amber),lDS('D2 Temp',healthDArr('tp_d2'),C.orange)],{min:25,max:45});
+    line('c_s2_ia',iaD,[lDS('D1 IA/PA',healthDArr('ia_d1'),C.red),lDS('D2 IA/PA',healthDArr('ia_d2'),C.pink)],{min:0,max:.6});
+    line('c_s2_olr',dDates('d1'),[lDS('D1 OLR',dArr('d1','olr'),C.green),lDS('D2 OLR',dArr('d2','olr'),C.cyan)],{min:0,max:6});
+    line('c_s2_ts',tsD,[lDS('D1 TS% 3M',healthDArr('ts_d1'),C.blue),lDS('D2 TS% 3M',healthDArr('ts_d2'),C.cyan),lDS('D1 TS% 6M',healthDArr('ts_d1_6m'),C.teal),lDS('D2 TS% 6M',healthDArr('ts_d2_6m'),C.green)]);
+    line('c_s2_vs',tsD,[lDS('D1 VS% 3M',healthDArr('vs_d1'),C.green),lDS('D2 VS% 3M',healthDArr('vs_d2'),C.teal),lDS('D1 VS% 6M',healthDArr('vs_d1_6m'),C.blue),lDS('D2 VS% 6M',healthDArr('vs_d2_6m'),C.cyan)],{min:40,max:75});
+    const paD=healthDDates('pa_d1'),iaiD=healthDDates('ia_ind_d1'),taD=healthDDates('ta_d1');
+    line('c_s2_pa',paD,[lDS('D1 PA',healthDArr('pa_d1'),C.blue),lDS('D2 PA',healthDArr('pa_d2'),C.cyan)]);
+    line('c_s2_ia_ind',iaiD,[lDS('D1 IA',healthDArr('ia_ind_d1'),C.amber),lDS('D2 IA',healthDArr('ia_ind_d2'),C.orange)]);
+    line('c_s2_ta',taD,[lDS('D1 TA',healthDArr('ta_d1'),C.green),lDS('D2 TA',healthDArr('ta_d2'),C.teal)]);
+    line('c_s2_ts_sl',healthDDates('ts_d1_sl'),[lDS('D1 TS% SL',healthDArr('ts_d1_sl'),C.blue),lDS('D2 TS% SL',healthDArr('ts_d2_sl'),C.cyan),lDS('D1 VS% SL',healthDArr('vs_d1_sl'),C.green),lDS('D2 VS% SL',healthDArr('vs_d2_sl'),C.teal)]);
   }
 }
 
@@ -3306,6 +3388,10 @@ async function buildAnalyticsD() {
   M.tmp_d1=aggMonth(tmp_,gD,1,'avg'); M.tmp_d2=aggMonth(tmp_,gD,4,'avg');
   M.ts_d1=aggMonth(tsvs_,gD,1,'avg'); M.ts_d2=aggMonth(tsvs_,gD,7,'avg');
   M.vs_d1=aggMonth(tsvs_,gD,2,'avg'); M.vs_d2=aggMonth(tsvs_,gD,8,'avg');
+  M.ts_d1_6m=aggMonth(tsvs_,gD,3,'avg'); M.vs_d1_6m=aggMonth(tsvs_,gD,4,'avg');
+  M.ts_d1_sl=aggMonth(tsvs_,gD,5,'avg'); M.vs_d1_sl=aggMonth(tsvs_,gD,6,'avg');
+  M.ts_d2_6m=aggMonth(tsvs_,gD,9,'avg'); M.vs_d2_6m=aggMonth(tsvs_,gD,10,'avg');
+  M.ts_d2_sl=aggMonth(tsvs_,gD,11,'avg'); M.vs_d2_sl=aggMonth(tsvs_,gD,12,'avg');
   M.pa_d1=aggMonth(iapa_,gD,1,'avg'); M.pa_d2=aggMonth(iapa_,gD,9,'avg');
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
@@ -3365,7 +3451,7 @@ async function buildAnalyticsD() {
   DD.health=buildDA(ph,gD,{ph_d1:1,ph_d2:4});
   // Merge temp, ts/vs, ia/pa into DD.health by date alignment
   const tmpDA=buildDA(tmp_,gD,{tp_d1:1,tp_d2:4});
-  const tsvsDA=buildDA(tsvs_,gD,{ts_d1:1,vs_d1:2,ts_d2:7,vs_d2:8});
+  const tsvsDA=buildDA(tsvs_,gD,{ts_d1:1,vs_d1:2,ts_d1_6m:3,vs_d1_6m:4,ts_d1_sl:5,vs_d1_sl:6,ts_d2:7,vs_d2:8,ts_d2_6m:9,vs_d2_6m:10,ts_d2_sl:11,vs_d2_sl:12});
   const iapaDA=buildDA(iapa_,gD,{ia_d1:4,ia_d2:12,pa_d1:1,pa_d2:9,ia_ind_d1:2,ia_ind_d2:10,ta_d1:3,ta_d2:11});
   months.forEach(m=>{
     if(DD.health[m]&&tmpDA[m]) Object.assign(DD.health[m],tmpDA[m]);
@@ -3448,6 +3534,12 @@ async function buildAnalyticsD() {
       ta_d1:iapa_.length?nv(iapa_[iapa_.length-1][3]):null,ta_d2:iapa_.length?nv(iapa_[iapa_.length-1][11]):null,
       ts_d1:tsvs_.length?nv(tsvs_[tsvs_.length-1][1]):null,ts_d2:tsvs_.length?nv(tsvs_[tsvs_.length-1][7]):null,
       vs_d1:tsvs_.length?nv(tsvs_[tsvs_.length-1][2]):null,vs_d2:tsvs_.length?nv(tsvs_[tsvs_.length-1][8]):null,
+      ts_d1_6m:tsvs_.length?nv(tsvs_[tsvs_.length-1][3]):null,vs_d1_6m:tsvs_.length?nv(tsvs_[tsvs_.length-1][4]):null,
+      ts_d1_sl:tsvs_.length?nv(tsvs_[tsvs_.length-1][5]):null,vs_d1_sl:tsvs_.length?nv(tsvs_[tsvs_.length-1][6]):null,
+      ts_d2_6m:tsvs_.length?nv(tsvs_[tsvs_.length-1][9]):null,vs_d2_6m:tsvs_.length?nv(tsvs_[tsvs_.length-1][10]):null,
+      ts_d2_sl:tsvs_.length?nv(tsvs_[tsvs_.length-1][11]):null,vs_d2_sl:tsvs_.length?nv(tsvs_[tsvs_.length-1][12]):null,
+      ts_latest_date:tsvs_.length?dayKey(toDate(tsvs_[tsvs_.length-1][0])):null,
+      iapa_latest_date:iapa_.length?dayKey(toDate(iapa_[iapa_.length-1][0])):null,
       lat_date:dayKey(latDt)||'—'},
     stock,latest_psa:{date:dayKey(latDt)||'—',psa_hrs:psaH(lastPsa),act_raw:nv(lastPsa[7]),act_pur:nv(lastPsa[9]),act_cbg:nv(lastPsa[12]),dispatched:nv(lastPsa[15]),ch4:nv(lastPsa[22]),cascade:nv(lastPsa[27]),storage:nv(lastPsa[28])},
     finance:{ytd_rev,ytd_cost,ytd_cbg_rev:M.cbg_rev.reduce((s,v)=>s+(v||0),0),ytd_manure:M.sfom_mn.reduce((s,v)=>s+(v||0),0)+M.lfom_mn.reduce((s,v)=>s+(v||0),0),
