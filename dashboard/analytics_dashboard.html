@@ -319,22 +319,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S1 FEEDSTOCK ══ -->
 <div id="s1" class="pg">
   <div class="stitle">Feedstock Procurement & Management <span class="resp">— Mr. Vivek Kumar</span><span id="s1_period" class="mo-badge">All Months</span></div>
-  <div class="kg" style="grid-template-columns:repeat(5,1fr)">
-    <div class="kc"><div class="kl">Stock — Pressmud</div><div class="kv" id="s1_pm">—</div><div class="ks">MT (as of last entry)</div></div>
-    <div class="kc c"><div class="kl">Stock — Grain Syrup</div><div class="kv c" id="s1_gs">—</div><div class="ks">KL</div></div>
-    <div class="kc a"><div class="kl">Stock — CSL</div><div class="kv a" id="s1_csl">—</div><div class="ks">KL</div></div>
-    <div class="kc g"><div class="kl">Stock — Cow Dung</div><div class="kv g" id="s1_cd">—</div><div class="ks">MT</div></div>
-    <div class="kc" style="border-color:#f97316"><div class="kl">Stock — Spent Grain</div><div class="kv" id="s1_sg" style="color:#f97316">—</div><div class="ks">MT</div></div>
-  </div>
-  <!-- Inventory days remaining -->
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:12px">
-    <div class="inv-card"><div class="kl">Pressmud — Days Left</div><div class="inv-days" id="inv_pm">—</div><div class="ks">at current feed rate</div></div>
-    <div class="inv-card"><div class="kl">Grain Syrup — Days Left</div><div class="inv-days" id="inv_gs">—</div><div class="ks">at current feed rate</div></div>
-    <div class="inv-card"><div class="kl">CSL — Days Left</div><div class="inv-days" id="inv_csl">—</div><div class="ks">at current feed rate</div></div>
-    <div class="inv-card"><div class="kl">Cow Dung — Days Left</div><div class="inv-days" id="inv_cd">—</div><div class="ks">at current feed rate</div></div>
-    <div class="inv-card"><div class="kl">Spent Grain — Days Left</div><div class="inv-days" id="inv_sg">—</div><div class="ks">at current feed rate</div></div>
-  </div>
-  <div id="s1_stock_bars" style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px;margin-bottom:12px"></div>
+  <div id="s1_inv_panel" style="margin-bottom:14px"></div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s1_pm">Pressmud Procurement (MT)</div><div class="cw"><canvas id="c_s1_pm"></canvas></div></div>
     <div class="cc"><div class="ct" id="ct_s1_gs">Grain Syrup, CSL & Cow Dung Procurement</div><div class="cw"><canvas id="c_s1_gs"></canvas></div></div>
@@ -1267,6 +1252,7 @@ function renderSectionDay(sectionId){
       metricCard('Grain Syrup Received',fN(f.gs_in),'KL','c'),
       metricCard('CSL Received',fN(f.csl_in),'KL','p'),
       metricCard('Cow Dung Received',fN(f.cd_in),'MT','g'),
+      metricCard('Spent Grain Received',fN(f.sg_in),'MT','a'),
     ]);
     html+=groupHeader('Feedstock Used','Fed into digesters');
     html+=grid([
@@ -1274,12 +1260,14 @@ function renderSectionDay(sectionId){
       metricCard('Grain Syrup Fed',fN(f.gs_feed),'KL','c','',true,f.gs_feed&&f.gs_in?f.gs_feed/f.gs_in*100:0),
       metricCard('CSL Fed',fN(f.csl_feed),'KL','p','',true,f.csl_feed&&f.csl_in?f.csl_feed/f.csl_in*100:0),
       metricCard('Cow Dung Fed',fN(f.cd_feed),'MT','g','',true,f.cd_feed&&f.cd_in?f.cd_feed/f.cd_in*100:0),
+      metricCard('Spent Grain Fed',fN(f.sg_feed),'MT','a','',true,f.sg_feed&&f.sg_in?f.sg_feed/f.sg_in*100:0),
     ]);
     html+=groupHeader('Balance & Cost','Closing stock and daily spend');
     html+=grid([
       metricCard('PM Closing Balance',fN(f.pm_bal),'MT','b'),
       metricCard('GS Closing Balance',fN(f.gs_bal),'KL','c'),
       metricCard('CSL Closing Balance',fN(f.csl_bal),'KL','p'),
+      metricCard('CD Closing Balance',fN(f.cd_bal),'MT','g'),
       metricCard('Feedstock Cost',fL2(rv.feed_cost),'','a','Daily procurement cost'),
     ]);
   } else if(sectionId==='s2'){
@@ -1530,30 +1518,35 @@ function renderS1(){
   if(renderSectionDay('s1')) return; else hideSectionDay('s1');
   const mo=curMonth;
   const s=D.stock;
-  document.getElementById('s1_pm').textContent=s.pm.toFixed(1)+' MT';
-  document.getElementById('s1_gs').textContent=s.gs.toFixed(1)+' KL';
-  document.getElementById('s1_csl').textContent=s.csl.toFixed(1)+' KL';
-  document.getElementById('s1_cd').textContent=s.cd.toFixed(1)+' MT';
-  const s1_sg=document.getElementById('s1_sg'); if(s1_sg) s1_sg.textContent=s.sg.toFixed(2)+' MT';
-  // Inventory days
   const inv=D.inv_days||{};
-  [['pm','inv_pm'],['gs','inv_gs'],['csl','inv_csl'],['cd','inv_cd'],['sg','inv_sg']].forEach(([k,id])=>{
-    const el=document.getElementById(id); if(!el) return;
-    const d=inv[k]||0;
-    el.className='inv-days '+(d>=15?'ok':d>=7?'warn':'low');
-    el.textContent=d>0?Math.round(d)+' days':'—';
-  });
-  const stocks=[['Pressmud',s.pm,200,'MT',C.amber],['Grain Syrup',s.gs,100,'KL',C.cyan],
-    ['CSL',s.csl,50,'KL',C.blue],['Cow Dung',s.cd,150,'MT',C.green],['Spent Grain',s.sg,50,'MT',C.orange]];
-  document.getElementById('s1_stock_bars').innerHTML=stocks.map(([nm,v,max,u,c])=>{
-    const pct=Math.min(v/max*100,100).toFixed(0);
-    const fc=v>max*.5?C.green:v>max*.15?C.amber:C.red;
-    return`<div style="margin-bottom:10px">
-      <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px">
-        <span style="color:var(--text);font-weight:600">${nm}</span>
-        <span style="color:${fc};font-weight:700">${v.toFixed(1)} ${u}</span></div>
-      <div class="sbar-bg"><div class="sbar-fill" style="width:${pct}%;background:${fc}"></div></div></div>`;
-  }).join('');
+  const invRows=[
+    {nm:'Pressmud',k:'pm',u:'MT',max:200,clr:'#1565C0'},
+    {nm:'Grain Syrup',k:'gs',u:'KL',max:100,clr:'#00695C'},
+    {nm:'CSL',k:'csl',u:'KL',max:50,clr:'#6A1B00'},
+    {nm:'Cow Dung',k:'cd',u:'MT',max:150,clr:'#2E7D32'},
+    {nm:'Spent Grain',k:'sg',u:'MT',max:50,clr:'#E65100'},
+  ];
+  const invEl=document.getElementById('s1_inv_panel');
+  if(invEl) invEl.innerHTML=`<table class="tbl"><thead><tr>
+    <th>Feedstock</th><th>Current Stock</th><th>Days Remaining</th><th style="width:32%">Inventory Level</th>
+  </tr></thead><tbody>${invRows.map(r=>{
+    const v=s[r.k]||0; const d=inv[r.k]||0;
+    const pct=Math.min(v/r.max*100,100);
+    const stClr=v>r.max*.5?'#2E7D32':v>r.max*.15?'#E65100':'#C62828';
+    const dClr=d>=15?'#2E7D32':d>=7?'#E65100':'#C62828';
+    const badge=d>=15?'OK':d>=7?'LOW':'CRITICAL';
+    return`<tr>
+      <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+      <td style="font-weight:700;color:${stClr};font-variant-numeric:tabular-nums">${v.toFixed(1)} ${r.u}</td>
+      <td><span style="font-weight:700;color:${dClr}">${d>0?Math.round(d)+' days':'—'}</span>
+        <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;background:${dClr};color:#fff;margin-left:6px">${badge}</span></td>
+      <td><div style="display:flex;align-items:center;gap:6px">
+        <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+          <div style="width:${pct.toFixed(0)}%;height:100%;background:${stClr};border-radius:3px"></div></div>
+        <span style="font-size:10px;color:var(--text3);min-width:30px;text-align:right">${pct.toFixed(0)}%</span>
+      </div></td>
+    </tr>`;
+  }).join('')}</tbody></table>`;
   const labels=mo==='ALL'?MONTHS:dDates('feed');
   const pmIn=mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in');
   const gsIn=mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in');
@@ -1569,9 +1562,9 @@ function renderS1(){
   bar('c_s1_gs',labels,[bDS('Grain Syrup (KL)',gsIn,C.indigo,.9),bDS('CSL (KL)',cslIn,C.cyan,.9),bDS('Cow Dung (MT)',cdIn,C.green,.9)]);
   bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan),bDS('Spent Grain',sgFeed,C.orange)],true);
   const cal=D.cal;
-  const qL=['Pressmud','Grain Syrup','CSL','Cow Dung'];
-  const ts=[cal.pm.ts||0,cal.gs.ts||0,cal.csl.ts||0,cal.cd.ts||0];
-  const vs=[cal.pm.vs?cal.pm.vs<2?cal.pm.vs*100:cal.pm.vs:0,cal.gs.vs||0,cal.csl.vs||0,cal.cd.vs||0];
+  const qL=['Pressmud','Grain Syrup','CSL','Cow Dung','Spent Grain'];
+  const ts=[cal.pm.ts||0,cal.gs.ts||0,cal.csl.ts||0,cal.cd.ts||0,cal.sg.ts||0];
+  const vs=[cal.pm.vs||0,cal.gs.vs||0,cal.csl.vs||0,cal.cd.vs||0,cal.sg.vs||0];
   bar('c_s1_qual',qL,[bDS('TS %',ts,C.amber),bDS('VS %',vs,C.green)]);
   // Feedstock cost chart
   const fcLabels=mo==='ALL'?MONTHS:dDates('feed');
@@ -1607,11 +1600,14 @@ function renderS1(){
     <tr><td><b>Spent Grain</b></td><td>${fmtV(sgR,'MT')}</td><td>${fmtV(sgU,'MT')}</td><td>${s.sg.toFixed(3)} MT</td><td>MT</td></tr>
   </tbody>`;
   const tbl=document.getElementById('s1_cal_tbl');
-  tbl.innerHTML=`<thead><tr><th>Feedstock</th><th>Date</th><th>TS %</th><th>VS %</th><th>TS (T)</th><th>VS (T)</th></tr></thead>
-  <tbody>${[['Pressmud',cal.pm],['Grain Syrup',cal.gs],['CSL',cal.csl],['Cow Dung',cal.cd]].map(([nm,c])=>
-    `<tr><td>${nm}</td><td>${c.date||'—'}</td><td>${c.ts??'—'}</td>
-    <td>${c.vs!=null?(c.vs<2?(c.vs*100).toFixed(2):c.vs.toFixed(2)):'—'}</td>
-    <td>${c.ts_t??'—'}</td><td>${c.vs_t??'—'}</td></tr>`).join('')}</tbody>`;
+  tbl.innerHTML=`<thead><tr><th>Feedstock</th><th>Date</th><th>TS %</th><th>VS %</th><th>TS (T)</th><th>VS (T)</th><th>Qty</th></tr></thead>
+  <tbody>${[['Pressmud',cal.pm,'MT'],['Grain Syrup',cal.gs,'KL'],['CSL',cal.csl,'KL'],['Cow Dung',cal.cd,'MT'],['Spent Grain',cal.sg,'MT']].map(([nm,c,u])=>
+    `<tr><td style="font-weight:700">${nm}</td><td>${c.date||'—'}</td>
+    <td style="font-variant-numeric:tabular-nums">${c.ts!=null?c.ts.toFixed(2):'—'}</td>
+    <td style="font-variant-numeric:tabular-nums">${c.vs!=null?c.vs.toFixed(2):'—'}</td>
+    <td style="font-variant-numeric:tabular-nums">${c.ts_t!=null?c.ts_t.toFixed(3):'—'}</td>
+    <td style="font-variant-numeric:tabular-nums">${c.vs_t!=null?c.vs_t.toFixed(3):'—'}</td>
+    <td style="color:var(--text2)">${c.qty!=null?c.qty.toFixed(1)+' '+u:'—'}</td></tr>`).join('')}</tbody>`;
 }
 
 // ═══ S2 LAB ══════════════════════════════════════════════════
