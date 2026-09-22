@@ -3995,7 +3995,7 @@ async function buildAnalyticsD() {
       const byMonth={};
       fsRows.forEach(r=>{
         const dt=toDate(r[0]); if(!dt) return;
-        const mk=dt.toLocaleString('en-US',{month:'short'}).toUpperCase()+' '+dt.getFullYear();
+        const mk=moKey(dt); if(!mk||!months.includes(mk)) return;
         byMonth[mk]=(byMonth[mk]||0)+(nv(r[v.i])||0);
       });
       const total=Object.values(byMonth).reduce((s,x)=>s+x,0);
