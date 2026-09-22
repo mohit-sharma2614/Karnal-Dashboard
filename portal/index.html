@@ -467,30 +467,41 @@ const SHEETS = [
 // ─── FEED & BALANCE ───────────────────────────────────────
 {id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance', hasDate:true, sections:[
   {t:'Qty Received Today',f:[
-    {k:'pm_rcv',  l:'PM Received (MT)',           tp:'num'},
-    {k:'gs_rcv',  l:'Grain Syrup Received (KL)', tp:'num'},
-    {k:'csl_rcv', l:'CSL Received (KL)',          tp:'num'},
-    {k:'cd_rcv',  l:'CD Received (MT)',           tp:'num'},
+    {k:'pm_rcv',  l:'PM Received (MT)',            tp:'num'},
+    {k:'gs_rcv',  l:'Grain Syrup Received (KL)',   tp:'num'},
+    {k:'csl_rcv', l:'CSL Received (KL)',           tp:'num'},
+    {k:'cd_rcv',  l:'CD Received (MT)',            tp:'num'},
+    {k:'sg_rcv',  l:'Spent Grain Received (MT)',   tp:'num'},
   ]},
   {t:'Cost (₹) — Manual Entry',f:[
     {k:'pm_cost', l:'PM Cost (₹)  [₹997–1449/MT by vendor]', tp:'num'},
-    {k:'gs_cost', l:'Grain Syrup Cost (₹)',       tp:'num'},
+    {k:'gs_cost', l:'Grain Syrup Cost (₹)',        tp:'num'},
     {k:'csl_cost',l:'CSL Cost (₹)  [₹1942–2257/KL]',        tp:'num'},
-    {k:'cd_cost', l:'CD Cost (₹)  [₹540/MT]',    tp:'num'},
-    {k:'tot_cost',l:'Total Cost (₹)',             tp:'calc', fn:'fb_tot_cost'},
+    {k:'cd_cost', l:'CD Cost (₹)  [₹540/MT]',     tp:'num'},
+    {k:'sg_cost', l:'Spent Grain Cost (₹)',        tp:'num'},
+    {k:'tot_cost',l:'Total Cost (₹)',              tp:'calc', fn:'fb_tot_cost'},
   ]},
   {t:'Qty Fed (D1+D2 Combined)',f:[
-    {k:'pm_fed',  l:'PM Fed (MT)',                tp:'num'},
-    {k:'gs_fed',  l:'Grain Syrup Fed (KL)',       tp:'num'},
-    {k:'csl_fed', l:'CSL Fed (KL)',               tp:'num'},
-    {k:'cd_fed',  l:'CD Fed (MT)',                tp:'num'},
-    {k:'tot_fed', l:'Total Feed (MT)',            tp:'calc', fn:'fb_tot_fed'},
+    {k:'pm_fed',  l:'PM Fed (MT)',                 tp:'num'},
+    {k:'gs_fed',  l:'Grain Syrup Fed (KL)',        tp:'num'},
+    {k:'csl_fed', l:'CSL Fed (KL)',                tp:'num'},
+    {k:'cd_fed',  l:'CD Fed (MT)',                 tp:'num'},
+    {k:'sg_fed',  l:'Spent Grain Fed (MT)',        tp:'num'},
+    {k:'tot_fed', l:'Total Feed (MT)',             tp:'calc', fn:'fb_tot_fed'},
   ]},
-  {t:'Auto Calculations — Running Balance',f:[
-    {k:'pm_bal',  l:'PM Balance (MT)',            tp:'calc', fn:'fb_pm_bal'},
-    {k:'gs_bal',  l:'GS Balance (KL)',            tp:'calc', fn:'fb_gs_bal'},
-    {k:'csl_bal', l:'CSL Balance (KL)',           tp:'calc', fn:'fb_csl_bal'},
-    {k:'cd_bal',  l:'CD Balance (MT)',            tp:'calc', fn:'fb_cd_bal'},
+  {t:'Opening Balance — Previous Day (fetched from Excel)',f:[
+    {k:'ob_pm',  l:'PM Opening Balance (MT)',      tp:'fetch'},
+    {k:'ob_gs',  l:'GS Opening Balance (KL)',      tp:'fetch'},
+    {k:'ob_csl', l:'CSL Opening Balance (KL)',     tp:'fetch'},
+    {k:'ob_cd',  l:'CD Opening Balance (MT)',      tp:'fetch'},
+    {k:'ob_sg',  l:'SG Opening Balance (MT)',      tp:'fetch'},
+  ]},
+  {t:'Closing Balance — Auto Calculated (Opening + Received − Fed)',f:[
+    {k:'fb_pm_bal',  l:'PM Closing Balance (MT)',  tp:'calc', fn:'fb_pm_bal'},
+    {k:'fb_gs_bal',  l:'GS Closing Balance (KL)',  tp:'calc', fn:'fb_gs_bal'},
+    {k:'fb_csl_bal', l:'CSL Closing Balance (KL)', tp:'calc', fn:'fb_csl_bal'},
+    {k:'fb_cd_bal',  l:'CD Closing Balance (MT)',  tp:'calc', fn:'fb_cd_bal'},
+    {k:'fb_sg_bal',  l:'SG Closing Balance (MT)',  tp:'calc', fn:'fb_sg_bal'},
   ]},
 ]},
 
@@ -768,12 +779,13 @@ const FN = {
                       n(v.pm_vaibhav_ramala)+n(v.carlsberg)+n(v.gs_rcv),
 
   // Feed & Balance
-  fb_tot_cost: (v) => n(v.pm_cost)+n(v.gs_cost)+n(v.csl_cost)+n(v.cd_cost),
-  fb_tot_fed:  (v) => n(v.pm_fed)+n(v.gs_fed)+n(v.csl_fed)+n(v.cd_fed),
-  fb_pm_bal:   (v) => n(v.pm_rcv)-n(v.pm_fed),
-  fb_gs_bal:   (v) => n(v.gs_rcv)-n(v.gs_fed),
-  fb_csl_bal:  (v) => n(v.csl_rcv)-n(v.csl_fed),
-  fb_cd_bal:   (v) => n(v.cd_rcv)-n(v.cd_fed),
+  fb_tot_cost: (v) => n(v.pm_cost)+n(v.gs_cost)+n(v.csl_cost)+n(v.cd_cost)+n(v.sg_cost),
+  fb_tot_fed:  (v) => n(v.pm_fed)+n(v.gs_fed)+n(v.csl_fed)+n(v.cd_fed)+n(v.sg_fed),
+  fb_pm_bal:   (v) => n(v.ob_pm) +n(v.pm_rcv)-n(v.pm_fed),
+  fb_gs_bal:   (v) => n(v.ob_gs) +n(v.gs_rcv)-n(v.gs_fed),
+  fb_csl_bal:  (v) => n(v.ob_csl)+n(v.csl_rcv)-n(v.csl_fed),
+  fb_cd_bal:   (v) => n(v.ob_cd) +n(v.cd_rcv)-n(v.cd_fed),
+  fb_sg_bal:   (v) => n(v.ob_sg) +n(v.sg_rcv)-n(v.sg_fed),
 
   // Manure: amount = qty_mt × rate (calc, written to col 6)
   manure_amount:(v) => n(v.qty_mt)*n(v.rate),
@@ -853,6 +865,7 @@ function loadSheet(id){
   document.getElementById('main').innerHTML=html
   recompute()
   if(CAL_QTY_COLS[id]) fetchCalQty(id)
+  if(id==='FB') fetchFBPrevBal(today())
 }
 
 function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
@@ -969,11 +982,11 @@ const COLUMN_MAP = {
     carlsberg:32,
   },
   FB: {
-    pm_rcv:2, gs_rcv:3, csl_rcv:4, cd_rcv:5,
-    pm_cost:6, gs_cost:7, csl_cost:8, cd_cost:9,
-    pm_fed:10, gs_fed:11, csl_fed:12, cd_fed:13,
-    fb_tot_fed:14,   // calc
-    fb_pm_bal:15, fb_gs_bal:16, fb_csl_bal:17, fb_cd_bal:18,
+    pm_rcv:2,  gs_rcv:3,   csl_rcv:4,  cd_rcv:5,  sg_rcv:6,
+    pm_cost:7, gs_cost:8,  csl_cost:9, cd_cost:10, sg_cost:11,
+    pm_fed:12, gs_fed:13,  csl_fed:14, cd_fed:15,  sg_fed:16,
+    fb_tot_fed:17,
+    fb_pm_bal:18, fb_gs_bal:19, fb_csl_bal:20, fb_cd_bal:21, fb_sg_bal:22,
   },
   // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6, TS Tonnes=7(formula), VS Tonnes=8(formula), Remarks=9
   // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
@@ -1104,6 +1117,40 @@ const CAL_QTY_COLS = {
   CSLCAL: { col: 18, label:'csl_act' },  // CSL actual (KL/day)
   GSCAL:  { col: 23, label:'gs_act'  },  // Grain Syrup actual (KL/day) — master C23
   SGCAL:  { col: 24, label:'sg_act'  },  // Spent Grain actual (tons/day) — master C24
+}
+
+async function fetchFBPrevBal(ds){
+  const keys=['pm','gs','csl','cd','sg']
+  keys.forEach(k=>{ inp['ob_'+k]=0; const el=document.getElementById('f_ob_'+k); if(el) el.value='Fetching…' })
+  try{
+    const serial=toExcelSerial(ds)
+    const d=await gGet(`/worksheets('${encodeURIComponent('Feed & Balance')}')/range(address='A3:V500')`)
+    const rows=(d&&d.values)||[]
+    let lastRow=null
+    for(const r of rows){
+      const v=r[0]; if(v===null||v===undefined) continue
+      let s=null
+      if(typeof v==='number') s=Math.round(v)
+      else if(typeof v==='string'){
+        const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso) s=toExcelSerial(iso[1])
+        const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy) s=toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)
+      }
+      if(s!==null && s<serial) lastRow=r
+    }
+    // Balance cols: idx 17=PM, 18=GS, 19=CSL, 20=CD, 21=SG (0-based in the row array)
+    const balIdx={pm:17,gs:18,csl:19,cd:20,sg:21}
+    keys.forEach(k=>{
+      const val=lastRow ? (parseFloat(lastRow[balIdx[k]])||0) : 0
+      inp['ob_'+k]=val
+      const el=document.getElementById('f_ob_'+k)
+      if(el) el.value=val
+    })
+    if(!lastRow) keys.forEach(k=>{ const el=document.getElementById('f_ob_'+k); if(el) el.value='0 (no prior data)' })
+    recompute()
+  } catch(e){
+    console.error('fetchFBPrevBal',e)
+    keys.forEach(k=>{ const el=document.getElementById('f_ob_'+k); if(el) el.value='Error' })
+  }
 }
 
 async function fetchCalQty(sheetId){
