@@ -69,6 +69,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .s3-sec-hdr{font-size:11px;font-weight:800;color:var(--blue,#1565C0);text-transform:uppercase;letter-spacing:.8px;
   padding:10px 0 8px;margin-top:18px;border-bottom:2px solid var(--bdr);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .s3-sec-sub{font-size:10px;color:var(--text3);font-weight:400;text-transform:none;letter-spacing:0}
+.s2-sub-hdr{display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:7px;margin:20px 0 14px;font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff}
+.s2-sub-sub{font-size:10px;font-weight:400;letter-spacing:0;opacity:.75;text-transform:none}
+.s2-health-hdr{background:linear-gradient(120deg,#1565C0,#1976D2)}
+.s2-feed-hdr{background:linear-gradient(120deg,#BF360C,#E64A19)}
+.s2-pred-hdr{background:linear-gradient(120deg,#4527A0,#6A1B9A)}
+.fq-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:900px){.fq-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:600px){.fq-grid{grid-template-columns:repeat(2,1fr)}}
+.fq-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px;border-top:3px solid var(--fqc)}
+.fq-name{font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text2);margin-bottom:6px}
+.fq-badge{float:right;font-size:9px;font-weight:700;letter-spacing:.5px;padding:2px 6px;border-radius:3px;color:#fff}
+.fq-row{display:flex;justify-content:space-between;align-items:center;margin-top:4px;gap:4px}
+.fq-key{font-size:10px;color:var(--text3)}
+.fq-val{font-size:12px;font-weight:700;font-variant-numeric:tabular-nums}
+.fq-bar-wrap{height:3px;background:var(--bg3);border-radius:2px;margin-top:2px;overflow:hidden}
+.fq-bar{height:3px;border-radius:2px;background:var(--fqc)}
+.fq-date{font-size:9px;color:var(--text3);margin-top:8px;border-top:1px solid var(--bdr);padding-top:5px}
+.pred-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:14px}
+@media(max-width:600px){.pred-grid{grid-template-columns:1fr}}
 /* Feed comparison table */
 .ftbl-wrap{border:1px solid var(--bdr);border-radius:10px;overflow:hidden;margin-bottom:4px}
 .ftbl{width:100%;border-collapse:collapse;font-size:12px}
@@ -339,6 +358,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S2 LAB ══ -->
 <div id="s2" class="pg">
   <div class="stitle">Process & Testing — Laboratory <span class="resp">— Dr. Shikha, Mr. Jatin</span><span id="s2_period" class="mo-badge">All Months</span></div>
+  <!-- Sub-section 1: Digester Health -->
+  <div class="s2-sub-hdr s2-health-hdr">🔬 Digester Health <span class="s2-sub-sub">pH · Temperature · OLR · Alkalinity · TS/VS</span></div>
   <div id="s2_kpi_table" style="margin-bottom:12px"></div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s2_ph">pH — D1 vs D2 (safe: 6.8–7.5)</div><div class="cw"><canvas id="c_s2_ph"></canvas></div></div>
@@ -359,6 +380,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s2_ta">Total Alkalinity (IA+PA) — D1 vs D2 (mg/L)</div><div class="cw"><canvas id="c_s2_ta"></canvas></div></div>
     <div class="cc"><div class="ct">TS% / VS% — Sludge Line D1 vs D2</div><div class="cw s"><canvas id="c_s2_ts_sl"></canvas></div></div>
+  </div>
+  <!-- Sub-section 2: Feedstock Monitoring -->
+  <div class="s2-sub-hdr s2-feed-hdr">🌾 Feedstock Monitoring <span class="s2-sub-sub">Latest lab quality · TS% · VS% · BPP contribution</span></div>
+  <div id="s2_feed_quality" style="margin-bottom:12px"></div>
+  <div id="s2_bpp_table" style="margin-bottom:12px"></div>
+  <!-- Sub-section 3: Biogas Prediction -->
+  <div class="s2-sub-hdr s2-pred-hdr">📈 Biogas Prediction <span class="s2-sub-sub">Estimate accuracy · Expected vs Actual comparison</span></div>
+  <div id="s2_pred_panel" style="margin-bottom:12px"></div>
+  <div id="s2_pred_chart_wrap" class="cg c1" style="display:none">
+    <div class="cc"><div class="ct">Monthly BPP Contribution by Feedstock — D1 &amp; D2 (m³)</div><div class="cw"><canvas id="c_s2_pred_bpp"></canvas></div></div>
   </div>
 </div>
 
@@ -802,6 +833,154 @@ function _renderLabTable(containerId,tv,periodNote){
   const el=document.getElementById(containerId);if(el)el.innerHTML=_labTableHtml(tv,periodNote);
 }
 
+// ── Feedstock Quality Cards + BPP Contribution Table ─────────────────────
+function _feedQualityHtml(calData, bppData, periodLabel){
+  const feedList=[
+    {key:'pm',name:'Pressmud',unit:'MT',clr:'#1565C0',tsRange:[8,15],vsRange:[55,80]},
+    {key:'cd',name:'Cow Dung',unit:'MT',clr:'#00695C',tsRange:[8,15],vsRange:[60,80]},
+    {key:'gs',name:'Grain Syrup',unit:'KL',clr:'#4527A0',tsRange:[10,25],vsRange:[60,85]},
+    {key:'csl',name:'CSL',unit:'KL',clr:'#6A1B00',tsRange:[5,20],vsRange:[55,80]},
+    {key:'sg',name:'Dry Spent Grain',unit:'MT',clr:'#E65100',tsRange:[25,45],vsRange:[70,90]},
+  ];
+  const ragVal=(v,lo,hi)=>v==null?'':v>=lo&&v<=hi?'g':v>=(lo*.7)&&v<=(hi*1.3)?'a':'r';
+  const ragClr={g:'#2E7D32',a:'#E65100',r:'#C62828'};
+  const ragBg={g:'rgba(46,125,50,.15)',a:'rgba(230,81,0,.15)',r:'rgba(198,40,40,.15)'};
+  const ragLbl={g:'GOOD',a:'WATCH',r:'ALERT'};
+
+  // Quality cards
+  let cards='<div class="fq-grid">';
+  feedList.forEach(f=>{
+    const c=calData[f.key]||{};
+    const tsR=ragVal(c.ts,...f.tsRange);
+    const vsR=ragVal(c.vs,...f.vsRange);
+    const ovrR=!c.hasData?'':tsR==='r'||vsR==='r'?'r':tsR==='a'||vsR==='a'?'a':'g';
+    const bclr=ragClr[ovrR]||'#666';
+    const bbg=ragBg[ovrR]||'rgba(102,102,102,.1)';
+    const badge=c.hasData?(ovrR?`<span class="fq-badge" style="background:${bclr}">${ragLbl[ovrR]||'?'}</span>`:'')
+      :'<span class="fq-badge" style="background:#78909C">NO DATA</span>';
+
+    const tsBar=c.ts!=null?Math.min(c.ts/f.tsRange[1]*100,100):0;
+    const vsBar=c.vs!=null?Math.min((c.vs-40)/50*100,100):0;
+
+    const tsClr=ragClr[ragVal(c.ts,...f.tsRange)]||'#666';
+    const vsClr=ragClr[ragVal(c.vs,...f.vsRange)]||'#666';
+
+    cards+=`<div class="fq-card" style="--fqc:${f.clr}">
+      <div class="fq-name">${badge}${f.name}</div>
+      ${c.hasData?`
+      <div class="fq-row"><span class="fq-key">TS%</span><span class="fq-val" style="color:${tsClr}">${c.ts!=null?c.ts.toFixed(1)+'%':'—'}</span></div>
+      <div class="fq-bar-wrap"><div class="fq-bar" style="width:${tsBar}%;background:${tsClr}"></div></div>
+      <div class="fq-row" style="margin-top:5px"><span class="fq-key">VS%</span><span class="fq-val" style="color:${vsClr}">${c.vs!=null?c.vs.toFixed(1)+'%':'—'}</span></div>
+      <div class="fq-bar-wrap"><div class="fq-bar" style="width:${vsBar}%;background:${vsClr}"></div></div>
+      ${c.qty!=null?`<div class="fq-row" style="margin-top:6px"><span class="fq-key">Qty</span><span class="fq-val" style="color:var(--text2)">${c.qty.toFixed(1)} ${f.unit}</span></div>`:''}
+      ${c.ts_t!=null?`<div class="fq-row"><span class="fq-key">TS (T)</span><span class="fq-val" style="color:var(--text2)">${c.ts_t.toFixed(2)}</span></div>`:''}
+      <div class="fq-date">Last test: ${c.date||'—'}</div>`
+      :`<div style="color:var(--text3);font-size:11px;padding:12px 0">No lab data available</div>`}
+    </div>`;
+  });
+  cards+='</div>';
+
+  // BPP Contribution table
+  const bpp=bppData||{};
+  const fN=v=>v!=null&&v!==0?Math.round(v):'—';
+  const rows=feedList.map(f=>{
+    const d1b=bpp['d1_'+f.key+'_bpp'],d2b=bpp['d2_'+f.key+'_bpp'];
+    const tot=(d1b||0)+(d2b||0);
+    return{name:f.name,d1:d1b,d2:d2b,tot,clr:f.clr};
+  });
+  const d1tot=rows.reduce((s,r)=>s+(r.d1||0),0);
+  const d2tot=rows.reduce((s,r)=>s+(r.d2||0),0);
+  const maxTot=Math.max(...rows.map(r=>r.tot),1);
+
+  let tbl=`<div class="ftbl-wrap"><table class="ftbl">
+    <thead><tr>
+      <th class="ftbl-lbl-h">Feedstock <span style="font-size:9px;font-weight:400;color:var(--text3)">${periodLabel||''}</span></th>
+      <th class="ftbl-d1h" style="text-align:right">D1 BPP (m³)</th>
+      <th class="ftbl-sep-h"></th>
+      <th class="ftbl-d2h" style="text-align:right">D2 BPP (m³)</th>
+      <th style="font-size:10px;color:var(--text3);text-align:right;padding:6px 10px;font-weight:500">Combined</th>
+    </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const pct=maxTot>0?Math.round((r.tot/maxTot)*100):0;
+    tbl+=`<tr>
+      <td class="ftbl-lbl"><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${r.clr};margin-right:6px;vertical-align:middle"></span>${r.name}</td>
+      <td class="ftbl-exp" style="text-align:right"><span style="font-size:13px;font-weight:700;color:#1565C0">${fN(r.d1)}</span></td>
+      <td class="ftbl-sep"></td>
+      <td class="ftbl-exp" style="text-align:right"><span style="font-size:13px;font-weight:700;color:#2E7D32">${fN(r.d2)}</span></td>
+      <td style="padding:6px 10px;text-align:right;min-width:80px">
+        <span style="font-size:11px;font-weight:600;color:var(--text2)">${fN(r.tot)}</span>
+        <div style="margin-top:3px;background:var(--bg3);border-radius:2px;height:3px;overflow:hidden"><div style="width:${pct}%;height:3px;background:${r.clr};border-radius:2px"></div></div>
+      </td>
+    </tr>`;
+  });
+  tbl+=`<tr class="ftbl-total">
+    <td class="ftbl-lbl">TOTAL</td>
+    <td class="ftbl-exp" style="text-align:right"><span style="font-size:14px;color:#1565C0">${Math.round(d1tot)||'—'}</span></td>
+    <td class="ftbl-sep"></td>
+    <td class="ftbl-exp" style="text-align:right"><span style="font-size:14px;color:#2E7D32">${Math.round(d2tot)||'—'}</span></td>
+    <td style="padding:6px 10px;text-align:right"><span style="font-size:13px;font-weight:700">${Math.round(d1tot+d2tot)||'—'}</span></td>
+  </tr></tbody></table></div>`;
+
+  return cards+tbl;
+}
+
+// ── Biogas Prediction Panel ───────────────────────────────────────────────
+function _biogasPredHtml(d1v, d2v, periodLabel){
+  // d1v/d2v: {bg_est_exp, bg_est_act, bg_total, bg_act}
+  const fN=v=>v!=null&&v!==0?Math.round(v).toLocaleString('en-IN'):'—';
+  const pct=(a,b)=>a&&b?Math.round(a/b*100):null;
+  const acc1exp=pct(d1v.bg_total,d1v.bg_est_exp);
+  const acc1act=pct(d1v.bg_total,d1v.bg_est_act);
+  const acc2exp=pct(d2v.bg_total,d2v.bg_est_exp);
+  const acc2act=pct(d2v.bg_total,d2v.bg_est_act);
+  const arcClr=p=>p==null?'#78909C':p>=90?'#2E7D32':p>=70?'#E65100':'#C62828';
+  const arcSvg=(p,clr,size=64)=>{
+    if(p==null) return`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${size/2}" cy="${size/2}" r="${size/2-4}" fill="none" stroke="#e0e0e0" stroke-width="5"/><text x="${size/2}" y="${size/2+4}" text-anchor="middle" font-size="12" fill="#999">N/A</text></svg>`;
+    const r=size/2-4;const circ=2*Math.PI*r;const dash=Math.min(p,100)/100*circ;
+    return`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)">
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--bg3)" stroke-width="5"/>
+      <circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${clr}" stroke-width="5" stroke-dasharray="${dash} ${circ}" stroke-linecap="round"/>
+    </svg>`;
+  };
+  const panelHtml=(label,clr,v,accExp,accAct)=>{
+    const clrE=arcClr(accExp);const clrA=arcClr(accAct);
+    return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;overflow:hidden">
+      <div style="background:linear-gradient(120deg,${clr}22,${clr}11);border-bottom:2px solid ${clr};padding:10px 16px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;font-weight:800;letter-spacing:.7px;color:${clr};text-transform:uppercase">${label}</span>
+        <span style="font-size:10px;color:var(--text3)">${periodLabel||''}</span>
+      </div>
+      <div style="padding:14px 16px">
+        <div style="display:flex;gap:16px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="position:relative;width:64px;height:64px">
+              ${arcSvg(accExp,clrE)}
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:${clrE}">${accExp!=null?accExp+'%':'—'}</div>
+            </div>
+            <div><div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">vs Exp Est</div><div style="font-size:10px;color:${clrE};font-weight:700;margin-top:2px">${accExp!=null?(accExp>=90?'ON TRACK':accExp>=70?'WATCH':'BELOW TARGET'):'No data'}</div></div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="position:relative;width:64px;height:64px">
+              ${arcSvg(accAct,clrA)}
+              <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:${clrA}">${accAct!=null?accAct+'%':'—'}</div>
+            </div>
+            <div><div style="font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase">vs Act Est</div><div style="font-size:10px;color:${clrA};font-weight:700;margin-top:2px">${accAct!=null?(accAct>=90?'ON TRACK':accAct>=70?'WATCH':'BELOW TARGET'):'No data'}</div></div>
+          </div>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:var(--text3)">Est. Biogas (Exp. Feed)</td><td style="text-align:right;font-weight:600;color:${clr};font-variant-numeric:tabular-nums">${fN(v.bg_est_exp)} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
+          <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:var(--text3)">Est. Biogas (Act. Feed)</td><td style="text-align:right;font-weight:600;color:${clr};font-variant-numeric:tabular-nums">${fN(v.bg_est_act)} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
+          <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:var(--text2);font-weight:600">Actual Biogas (B+C)</td><td style="text-align:right;font-size:14px;font-weight:800;color:${clrE};font-variant-numeric:tabular-nums">${fN(v.bg_total)} <span style="font-size:10px;font-weight:400">m³</span></td></tr>
+          <tr><td style="padding:5px 0;color:var(--text3)">Biogas to PSA</td><td style="text-align:right;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums">${fN(v.bg_act)} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
+        </table>
+      </div>
+    </div>`;
+  };
+  return`<div class="pred-grid">
+    ${panelHtml('Digester 1','#1565C0',d1v,acc1exp,acc1act)}
+    ${panelHtml('Digester 2','#2E7D32',d2v,acc2exp,acc2act)}
+  </div>`;
+}
+
 function getLabels(section){ return curMonth==='ALL'?MONTHS:dDates(section); }
 
 function rag(v,p){
@@ -1084,6 +1263,22 @@ function renderSectionDay(sectionId){
     };
     html+=groupHeader('Digester Process Parameters','Latest available lab readings');
     html+=_labTableHtml(tv,'Latest reading');
+    // Section 2: Feedstock Monitoring (Cal data is latest from sheets — same for all days)
+    html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:7px;margin:20px 0 14px;background:linear-gradient(120deg,#BF360C,#E64A19);font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff">
+      🌾 Feedstock Monitoring <span style="font-size:10px;font-weight:400;letter-spacing:0;opacity:.75;text-transform:none">Latest lab quality data</span></div>`;
+    const dayBppData={
+      d1_pm_bpp:ex.d1_pm_bpp,d1_cd_bpp:ex.d1_cd_bpp,d1_gs_bpp:ex.d1_gs_bpp,
+      d1_csl_bpp:ex.d1_csl_bpp,d1_sg_bpp:ex.d1_sg_bpp,
+      d2_pm_bpp:ex.d2_pm_bpp,d2_cd_bpp:ex.d2_cd_bpp,d2_gs_bpp:ex.d2_gs_bpp,
+      d2_csl_bpp:ex.d2_csl_bpp,d2_sg_bpp:ex.d2_sg_bpp,
+    };
+    html+=_feedQualityHtml(D.cal,dayBppData,'Today\'s BPP');
+    // Section 3: Biogas Prediction
+    html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:7px;margin:20px 0 14px;background:linear-gradient(120deg,#4527A0,#6A1B9A);font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff">
+      📈 Biogas Prediction <span style="font-size:10px;font-weight:400;letter-spacing:0;opacity:.75;text-transform:none">Estimate vs actual for this day</span></div>`;
+    const predD1Day={bg_est_exp:d1r.bg_est_exp,bg_est_act:d1r.bg_est_act,bg_total:d1r.bg_total,bg_act:d1r.bg_act};
+    const predD2Day={bg_est_exp:d2r.bg_est_exp,bg_est_act:d2r.bg_est_act,bg_total:d2r.bg_total,bg_act:d2r.bg_act};
+    html+=_biogasPredHtml(predD1Day,predD2Day,curDay);
   } else if(sectionId==='s3'){
     // s3 (Production) day view is handled by renderS3() directly — this branch is not called
   } else if(sectionId==='s4'){
@@ -1411,6 +1606,49 @@ function renderS2(){
       ts_date:null,ia_date:null};
   }
   _renderLabTable('s2_kpi_table',tv,mo==='ALL'?'YTD latest':mo+' avg');
+  // ── Section 2: Feedstock Monitoring ───────────────────────────────────
+  const _mSumOrNull=key=>{const a=mArr(key);const s=a.reduce((t,v)=>t+(v||0),0);return s>0?s:null;};
+  const _mAvgOrLast=key=>{
+    if(mo==='ALL'){const a=mArr(key);const v=a.filter(x=>x!=null&&x!==0);return v.length?v[v.length-1]:null;}
+    else{const mi=D.months.indexOf(mo);return mi>=0&&(mArr(key)[mi]||0)>0?mArr(key)[mi]:null;}
+  };
+  const bppPeriod=mo==='ALL'?'YTD sum':'Month total';
+  const getMoBpp=k=>mo==='ALL'?_mSumOrNull(k):(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
+  const bppData={
+    d1_pm_bpp:getMoBpp('pm_bpp'),d1_cd_bpp:getMoBpp('cd_bpp'),d1_gs_bpp:getMoBpp('gs_bpp'),
+    d1_csl_bpp:getMoBpp('csl_bpp'),d1_sg_bpp:getMoBpp('sg_bpp'),
+    d2_pm_bpp:getMoBpp('d2_pm_bpp'),d2_cd_bpp:getMoBpp('d2_cd_bpp'),d2_gs_bpp:getMoBpp('d2_gs_bpp'),
+    d2_csl_bpp:getMoBpp('d2_csl_bpp'),d2_sg_bpp:getMoBpp('d2_sg_bpp'),
+  };
+  const fqEl=document.getElementById('s2_feed_quality');
+  if(fqEl) fqEl.innerHTML=_feedQualityHtml(D.cal,bppData,bppPeriod);
+  const bppEl=document.getElementById('s2_bpp_table');
+  if(bppEl) bppEl.innerHTML='';
+  // ── Section 3: Biogas Prediction ──────────────────────────────────────
+  const getSum=k=>mo==='ALL'?mArr(k).reduce((s,v)=>s+(v||0),0)||null:(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
+  const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg')};
+  const predD2={bg_est_exp:getSum('d2_bg_est_exp'),bg_est_act:getSum('d2_bg_est_act'),bg_total:getSum('d2_bg_total'),bg_act:getSum('d2_bg')};
+  const predEl=document.getElementById('s2_pred_panel');
+  if(predEl) predEl.innerHTML=_biogasPredHtml(predD1,predD2,mo==='ALL'?'YTD':mo);
+  // BPP trend chart for month/year view
+  const predChartWrap=document.getElementById('s2_pred_chart_wrap');
+  if(predChartWrap){predChartWrap.style.display='block';}
+  if(mo!=='ALL'){
+    if(predChartWrap) predChartWrap.style.display='none';
+  } else {
+    bar('c_s2_pred_bpp',MONTHS,[
+      {label:'D1 PM BPP',data:mArr('pm_bpp'),backgroundColor:'rgba(21,101,192,.7)'},
+      {label:'D1 CD BPP',data:mArr('cd_bpp'),backgroundColor:'rgba(0,105,92,.7)'},
+      {label:'D1 GS BPP',data:mArr('gs_bpp'),backgroundColor:'rgba(69,39,160,.7)'},
+      {label:'D1 CSL BPP',data:mArr('csl_bpp'),backgroundColor:'rgba(106,27,0,.7)'},
+      {label:'D1 SG BPP',data:mArr('sg_bpp'),backgroundColor:'rgba(230,81,0,.7)'},
+      {label:'D2 PM BPP',data:mArr('d2_pm_bpp'),backgroundColor:'rgba(21,101,192,.35)'},
+      {label:'D2 CD BPP',data:mArr('d2_cd_bpp'),backgroundColor:'rgba(0,105,92,.35)'},
+      {label:'D2 GS BPP',data:mArr('d2_gs_bpp'),backgroundColor:'rgba(69,39,160,.35)'},
+      {label:'D2 CSL BPP',data:mArr('d2_csl_bpp'),backgroundColor:'rgba(106,27,0,.35)'},
+      {label:'D2 SG BPP',data:mArr('d2_sg_bpp'),backgroundColor:'rgba(230,81,0,.35)'},
+    ],true);
+  }
   // Charts
   if(mo==='ALL'){
     line('c_s2_ph',MONTHS,[lDS('D1 pH',mArr('ph_d1'),C.green),lDS('D2 pH',mArr('ph_d2'),C.cyan)],{min:6,max:8.5});
@@ -3338,7 +3576,7 @@ async function gFetch(path) {
 function setStatus(msg) { const el=document.getElementById('authStatus'); if(el) el.textContent=msg; }
 async function buildAnalyticsD() {
   setStatus('Fetching plant data (15–30 seconds)…');
-  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR] = await Promise.all([
+  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR] = await Promise.all([
     gFetch("/worksheets('PSA%20Production')/range(address='A3:AC700')"),
     gFetch("/worksheets('D1')/range(address='A3:AZ700')"),
     gFetch("/worksheets('D2')/range(address='A3:AZ700')"),
@@ -3350,6 +3588,11 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Feed%20%26%20Balance')/range(address='A4:V700')"),
     gFetch("/worksheets('Manure%20Sales')/range(address='A3:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A5:K400')"),
+    gFetch("/worksheets('Pressmud%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('CSL%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('Cow%20Dung%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
   ]);
   const nv=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
   const toDate=v=>{if(!v)return null;const n=parseFloat(v);if(isNaN(n)||n<40000)return null;return new Date(Math.round((n-25569)*86400000));};
@@ -3407,6 +3650,9 @@ async function buildAnalyticsD() {
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
   M.d2_exp=aggMonth(d2,gD,10); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
+  M.d1_bg_est_exp=aggMonth(d1,gD,10); M.d1_bg_est_act=aggMonth(d1,gD,31);
+  M.d2_bg_est_exp=aggMonth(d2,gD,10); M.d2_bg_est_act=aggMonth(d2,gD,31);
+  M.d1_bg_total=aggMonth(d1,gD,34); M.d2_bg_total=aggMonth(d2,gD,34);
   M.d1_sfom=aggMonth(d1,gD,12); M.d2_sfom=aggMonth(d2,gD,12); M.d1_lfom=aggMonth(d1,gD,13); M.d2_lfom=aggMonth(d2,gD,13);
   const _d1bg=aggMonth(d1,gD,32),_d2bg=aggMonth(d2,gD,32);
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
@@ -3519,7 +3765,24 @@ async function buildAnalyticsD() {
   const olr_trail={d1:d1.slice(-30).map(r=>nv(r[49])),d2:d2.slice(-30).map(r=>nv(r[50])),dates:d1.slice(-30).map(r=>dayKey(toDate(r[0])))};
   const psa_days={};
   psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(!k)return;const m=moKey(toDate(r[0]));psa_days[k]={date:k,mo:m,psa_hrs:psaH(r),act_raw:nv(r[7]),act_pur:nv(r[9]),act_cbg:nv(r[12]),dispatched:nv(r[15]),veer:nv(r[16]),adinath:nv(r[17]),kfs:nv(r[18]),ksk:nv(r[19]),om:nv(r[20]),sps:nv(r[21]),ch4:nv(r[22]),cascade:nv(r[27]),storage:nv(r[28]),d1_eff:0,d2_eff:0};});
-  const cal={pm:{ts:0,vs:0},cd:{ts:0,vs:0},gs:{ts:0,vs:0},csl:{ts:0,vs:0}};
+  // Process Cal sheet data — idx1=Date,4=TS%,5=VS%,6=TS(T),7=VS(T),9=Qty
+  const parseCalSheet=(raw,key)=>{
+    const rows=(raw?.values||[]).filter(r=>r[1]!==null&&r[1]!==''&&r[4]!==null&&r[4]!=='');
+    if(!rows.length) return{key,hasData:false,ts:null,vs:null,ts_t:null,vs_t:null,qty:null,date:null,rows:[]};
+    const last=rows[rows.length-1];
+    const dt=toDate(last[1]);
+    return{key,hasData:true,
+      ts:nv(last[4]),vs:nv(last[5]),ts_t:nv(last[6]),vs_t:nv(last[7]),qty:nv(last[9]),
+      date:dayKey(dt)||'—',
+      rows:rows.map(r=>({date:dayKey(toDate(r[1])),ts:nv(r[4]),vs:nv(r[5]),ts_t:nv(r[6]),vs_t:nv(r[7]),qty:nv(r[9])}))};
+  };
+  const cal={
+    pm:parseCalSheet(pmCalR,'pm'),
+    csl:parseCalSheet(cslCalR,'csl'),
+    cd:parseCalSheet(cdCalR,'cd'),
+    gs:parseCalSheet(gsCalR,'gs'),
+    sg:parseCalSheet(sgCalR,'sg'),
+  };
   const tgts={cbg_month:130000,cbg_total:months.length*130000,cost_kg:30};
   const ts=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   return {
