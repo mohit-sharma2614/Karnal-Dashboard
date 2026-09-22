@@ -325,10 +325,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     Feedstock Procurement <span class="s2-sub-sub">Received quantities &amp; vendor-wise supply</span>
   </div>
   <div id="s1_procurement" style="margin-bottom:14px"></div>
-  <div class="cg c2" style="margin-bottom:14px">
-    <div class="cc"><div class="ct" id="ct_s1_pm">Pressmud Procurement (MT)</div><div class="cw"><canvas id="c_s1_pm"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s1_gs">Grain Syrup, CSL &amp; Cow Dung Procurement</div><div class="cw"><canvas id="c_s1_gs"></canvas></div></div>
-  </div>
 
   <!-- Sub-section 2: Feedstock Fed -->
   <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#1565C0,#1976D2)">
@@ -1633,13 +1629,6 @@ function renderS1(){
       </div>
     </div>`;
   }
-  const labels=mo==='ALL'?MONTHS:dDates('feed');
-  const pmIn=mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in');
-  const gsIn=mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in');
-  const cslIn=mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in');
-  const cdIn=mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in');
-  bar('c_s1_pm',labels,[bDS('Procured (MT)',pmIn,C.blue,.9),bDS('Fed (MT)',mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed'),C.teal,.9)]);
-  bar('c_s1_gs',labels,[bDS('Grain Syrup (KL)',gsIn,C.indigo,.9),bDS('CSL (KL)',cslIn,C.cyan,.9),bDS('Cow Dung (MT)',cdIn,C.green,.9)]);
 
   // ── 2. Feedstock Fed — D1/D2 split table ─────────────────────
   const fedDefs=[
