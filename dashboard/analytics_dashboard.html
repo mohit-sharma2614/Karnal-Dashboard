@@ -3845,7 +3845,8 @@ async function buildAnalyticsD() {
   M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
   M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4); M.sg_in=aggMonth(fb,gD,5);
   M.pm_feed=aggMonth(fb,gD,11); M.gs_feed=aggMonth(fb,gD,12); M.csl_feed=aggMonth(fb,gD,13); M.cd_feed=aggMonth(fb,gD,14); M.sg_feed=aggMonth(fb,gD,15);
-  M.sg_cost=aggMonth(fb,gD,10); M.sg_bal=aggMonth(fb,gD,21);
+  M.sg_cost=aggMonth(fb,gD,10);
+  M.pm_bal=aggMonth(fb,gD,17); M.gs_bal=aggMonth(fb,gD,18); M.csl_bal=aggMonth(fb,gD,19); M.cd_bal=aggMonth(fb,gD,20); M.sg_bal=aggMonth(fb,gD,21);
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45); M.sg_bpp=aggMonth(d1,gD,46);
   M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46); M.d2_sg_bpp=aggMonth(d2,gD,47); M.act_cbg=M.cbg;
   M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
