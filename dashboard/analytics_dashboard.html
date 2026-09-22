@@ -1281,134 +1281,161 @@ function renderSectionDay(sectionId){
   </div>`;
 
   if(sectionId==='s1'){
-    // Feedstock summary table: Received | D1 Fed | D2 Fed | Total Fed | Closing Balance | Zone
-    const fsItems=[
-      {nm:'Pressmud',u:'MT',in:f.pm_in,d1:d1r.pm_act,d2:d2r.pm_act,feed:f.pm_feed,bal:f.pm_bal,thr:500},
-      {nm:'Grain Syrup',u:'KL',in:f.gs_in,d1:d1r.gs_act,d2:d2r.gs_act,feed:f.gs_feed,bal:f.gs_bal,thr:30},
-      {nm:'CSL',u:'KL',in:f.csl_in,d1:d1r.csl_act,d2:d2r.csl_act,feed:f.csl_feed,bal:f.csl_bal,thr:30},
-      {nm:'Cow Dung',u:'MT',in:f.cd_in,d1:d1r.cd_act,d2:d2r.cd_act,feed:f.cd_feed,bal:f.cd_bal,thr:40},
-      {nm:'Spent Grain',u:'MT',in:f.sg_in,d1:d1r.sg_act,d2:d2r.sg_act,feed:f.sg_feed,bal:f.sg_bal,thr:30},
+    const dayMo=rec.mo; // e.g. 'Jun'
+
+    // ── 1. Procurement ────────────────────────────────────────────
+    html+=groupHeader('Feedstock Procurement','Received on this date');
+    const procDefs=[
+      {nm:'Pressmud',   k:'pm_in',   u:'MT', clr:'#1565C0'},
+      {nm:'Grain Syrup',k:'gs_in',   u:'KL', clr:'#00695C'},
+      {nm:'CSL',        k:'csl_in',  u:'KL', clr:'#6A1B00'},
+      {nm:'Cow Dung',   k:'cd_in',   u:'MT', clr:'#2E7D32'},
+      {nm:'Spent Grain',k:'sg_in',   u:'MT', clr:'#E65100'},
     ];
-    const zoneOf=(bal,thr)=>{if(bal==null||thr==null)return null;const p=bal/thr*100;return p>=60?{label:'SAFE',clr:'#2E7D32'}:p>=45?{label:'WARNING',clr:'#E65100'}:{label:'DANGER',clr:'#C62828'};};
-    const fv=(v,d=1)=>v!=null&&v!==0?(+v.toFixed(d)):null;
-    const cell=(v,u,bold=false,clr='')=>{
-      const display=v!=null?`${fmtN(v)} <span style="font-size:9px;color:var(--text3)">${u}</span>`:'<span style="color:var(--text3)">—</span>';
-      return`<td style="text-align:right;padding:6px 10px;font-variant-numeric:tabular-nums;${bold?'font-weight:700;':''}${clr?'color:'+clr+';':''}">${display}</td>`;
-    };
-    const fsRows=fsItems.map(it=>{
-      const z=zoneOf(it.bal,it.thr);
-      const balClr=it.bal!=null&&it.bal<0?'#C62828':z?z.clr:'var(--text1)';
-      const zoneBadge=z?`<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;background:${z.clr}18;color:${z.clr}">${z.label}</span>`:'—';
-      return`<tr style="border-bottom:1px solid var(--bdr)">
-        <td style="padding:6px 10px;font-weight:600;white-space:nowrap">${it.nm} <span style="font-size:9px;color:var(--text3)">(${it.u})</span></td>
-        ${cell(fv(it.in),it.u)}
-        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;color:#1565C0">${it.d1!=null?fmtN(it.d1)+' <span style="font-size:9px;color:#1565C090">'+it.u+'</span>':'<span style="color:var(--text3)">—</span>'}</td>
-        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;color:#2E7D32">${it.d2!=null?fmtN(it.d2)+' <span style="font-size:9px;color:#2E7D3290">'+it.u+'</span>':'<span style="color:var(--text3)">—</span>'}</td>
-        ${cell(fv(it.feed),it.u,true)}
-        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:${balClr}">${it.bal!=null?fmtN(it.bal)+' <span style="font-size:9px">'+it.u+'</span>':'<span style="color:var(--text3)">—</span>'}</td>
-        <td style="padding:6px 10px;text-align:center">${zoneBadge}</td>
-      </tr>`;
-    }).join('');
-    html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr>
-      <th>Feedstock</th>
-      <th style="text-align:right">Received</th>
-      <th style="text-align:right;color:#1565C0">D1 Fed</th>
-      <th style="text-align:right;color:#2E7D32">D2 Fed</th>
-      <th style="text-align:right">Total Fed</th>
-      <th style="text-align:right">Closing Balance</th>
-      <th style="text-align:center">Zone</th>
-    </tr></thead><tbody>${fsRows}</tbody></table>`;
-    // Cost card
-    if(rv.feed_cost){
-      html+=`<div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid var(--amber);border-radius:8px;padding:10px 16px;margin-bottom:14px">
-        <span style="font-size:11px;font-weight:600;color:var(--text2)">Daily Feedstock Cost</span>
-        <span style="font-size:20px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">${fmtL(rv.feed_cost)}</span>
+    const hasProc=procDefs.some(r=>f[r.k]!=null&&f[r.k]!==0);
+    if(!hasProc){
+      html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No data available for this date.</div>`;
+    } else {
+      const procRows=procDefs.map(r=>`<tr>
+        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+        <td style="font-variant-numeric:tabular-nums;font-weight:700">${f[r.k]!=null&&f[r.k]!==0?fmtN(f[r.k])+' '+r.u:'—'}</td>
+      </tr>`).join('');
+      html+=`<div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;margin-bottom:14px">
+        <div><table class="tbl"><thead><tr><th>Feedstock</th><th>Received</th></tr></thead><tbody>${procRows}</tbody></table></div>
+        <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
+          <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:6px">VENDOR-WISE SUPPLY</div>
+          <div style="font-size:11px;color:var(--text3)">Vendor breakdown not available at day level — view month filter for vendor details.</div>
+        </div>
       </div>`;
     }
-    // BPP Contribution table
-    const bppItems=[
-      {nm:'Pressmud',  d1:ex.d1_pm_bpp,  d2:ex.d2_pm_bpp},
-      {nm:'Cow Dung',  d1:ex.d1_cd_bpp,  d2:ex.d2_cd_bpp},
-      {nm:'Grain Syrup',d1:ex.d1_gs_bpp, d2:ex.d2_gs_bpp},
-      {nm:'CSL',       d1:ex.d1_csl_bpp, d2:ex.d2_csl_bpp},
-      {nm:'Spent Grain',d1:ex.d1_sg_bpp, d2:ex.d2_sg_bpp},
+
+    // ── 2. Feedstock Fed — D1/D2 split ───────────────────────────
+    html+=groupHeader('Feedstock Fed','D1 / D2 split for this date');
+    const fedDefs=[
+      {nm:'Pressmud',   k1:'pm_act',  kf:'pm_feed',  u:'MT', clr:'#1565C0'},
+      {nm:'Cow Dung',   k1:'cd_act',  kf:'cd_feed',  u:'MT', clr:'#2E7D32'},
+      {nm:'CSL',        k1:'csl_act', kf:'csl_feed', u:'KL', clr:'#6A1B00'},
+      {nm:'Grain Syrup',k1:'gs_act',  kf:'gs_feed',  u:'KL', clr:'#00695C'},
+      {nm:'Spent Grain',k1:'sg_act',  kf:'sg_feed',  u:'MT', clr:'#E65100'},
     ];
-    const hasBpp=bppItems.some(b=>b.d1||b.d2);
-    if(hasBpp){
-      const totalD1=bppItems.reduce((s,b)=>s+(b.d1||0),0);
-      const totalD2=bppItems.reduce((s,b)=>s+(b.d2||0),0);
-      const bppRows=bppItems.map(b=>{
-        const tot=(b.d1||0)+(b.d2||0);
-        return`<tr style="border-bottom:1px solid var(--bdr)">
-          <td style="padding:5px 10px;font-weight:600">${b.nm}</td>
-          <td style="padding:5px 10px;text-align:right;color:#1565C0;font-variant-numeric:tabular-nums">${b.d1!=null?fmtN(b.d1)+' m³':'—'}</td>
-          <td style="padding:5px 10px;text-align:right;color:#2E7D32;font-variant-numeric:tabular-nums">${b.d2!=null?fmtN(b.d2)+' m³':'—'}</td>
-          <td style="padding:5px 10px;text-align:right;font-weight:700;font-variant-numeric:tabular-nums">${tot?fmtN(tot)+' m³':'—'}</td>
+    const hasFed=fedDefs.some(r=>d1r[r.k1]||d2r[r.k1]||f[r.kf]);
+    if(!hasFed){
+      html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No data available for this date.</div>`;
+    } else {
+      let d1Tot=0,d2Tot=0,totTot=0;
+      const fedRows=fedDefs.map(r=>{
+        const d1v=d1r[r.k1]||0,d2v=d2r[r.k1]||0,tot=f[r.kf]||0;
+        d1Tot+=d1v; d2Tot+=d2v; totTot+=tot;
+        const pct=tot>0&&(d1v+d2v)>0?Math.min((d1v+d2v)/tot*100,200):0;
+        const bClr=pct>=90?'#2E7D32':pct>=70?'#E65100':'#C62828';
+        return`<tr>
+          <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+          <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1)+' '+r.u:'—'}</td>
+          <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1)+' '+r.u:'—'}</td>
+          <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
+          <td style="width:25%"><div style="display:flex;align-items:center;gap:5px">
+            <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="width:${Math.min(pct,100).toFixed(0)}%;height:100%;background:${bClr};border-radius:3px"></div></div>
+            <span style="font-size:10px;color:${bClr};font-weight:700;min-width:30px">${pct.toFixed(0)}%</span>
+          </div></td>
         </tr>`;
       }).join('');
-      html+=groupHeader('BPP Contribution','Biogas potential by feedstock (m³)');
       html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr>
         <th>Feedstock</th>
-        <th style="text-align:right;color:#1565C0">D1 BPP</th>
-        <th style="text-align:right;color:#2E7D32">D2 BPP</th>
-        <th style="text-align:right">Total BPP</th>
-      </tr></thead><tbody>${bppRows}
-      <tr style="background:var(--bg2);font-weight:700">
-        <td style="padding:6px 10px">Total</td>
-        <td style="padding:6px 10px;text-align:right;color:#1565C0;font-variant-numeric:tabular-nums">${totalD1?fmtN(totalD1)+' m³':'—'}</td>
-        <td style="padding:6px 10px;text-align:right;color:#2E7D32;font-variant-numeric:tabular-nums">${totalD2?fmtN(totalD2)+' m³':'—'}</td>
-        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums">${(totalD1+totalD2)?fmtN(totalD1+totalD2)+' m³':'—'}</td>
+        <th style="color:#1565C0;text-align:right">D1 Fed</th>
+        <th style="color:#2E7D32;text-align:right">D2 Fed</th>
+        <th style="text-align:right">Total (F&B)</th>
+        <th>D1+D2 vs F&B</th>
+      </tr></thead><tbody>${fedRows}
+      <tr style="border-top:2px solid var(--bdr);font-weight:800">
+        <td>TOTAL</td>
+        <td style="color:#1565C0;text-align:right;font-variant-numeric:tabular-nums">${d1Tot>0?fmtN(d1Tot):'—'}</td>
+        <td style="color:#2E7D32;text-align:right;font-variant-numeric:tabular-nums">${d2Tot>0?fmtN(d2Tot):'—'}</td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums">${totTot>0?fmtN(totTot):'—'}</td>
+        <td></td>
       </tr></tbody></table>`;
     }
-    // OLR & Working Volume cards
-    if(d1r.olr||d2r.olr){
-      html+=groupHeader('Digester Load','Organic Loading Rate (safe: 2–4 kg VS/m³/d)');
-      html+=grid([
-        metricCard('OLR — D1',fN(d1r.olr),'kg VS/m³/d',d1r.olr!=null?(d1r.olr<=3.5?'g':d1r.olr<=4?'a':'r'):''),
-        metricCard('OLR — D2',fN(d2r.olr),'kg VS/m³/d',d2r.olr!=null?(d2r.olr<=3.5?'g':d2r.olr<=4?'a':'r'):''),
-        metricCard('D1 Biogas Act',fN(d1r.bg_act),'m³','b'),
-        metricCard('D2 Biogas Act',fN(d2r.bg_act),'m³','b'),
-      ],4);
-    }
-    // Anomaly Detection — same format as monthly view
-    html+=groupHeader('Anomaly Detection','Negative values in received / fed / balance');
-    const dayChecks=[
-      {label:'Pressmud Received (MT)',    k:'pm_in',   isBal:false},
-      {label:'Grain Syrup Received (KL)', k:'gs_in',   isBal:false},
-      {label:'CSL Received (KL)',         k:'csl_in',  isBal:false},
-      {label:'Cow Dung Received (MT)',    k:'cd_in',   isBal:false},
-      {label:'Spent Grain Received (MT)', k:'sg_in',   isBal:false},
-      {label:'Pressmud Fed (MT)',         k:'pm_feed', isBal:false},
-      {label:'Grain Syrup Fed (KL)',      k:'gs_feed', isBal:false},
-      {label:'CSL Fed (KL)',              k:'csl_feed',isBal:false},
-      {label:'Cow Dung Fed (MT)',         k:'cd_feed', isBal:false},
-      {label:'Spent Grain Fed (MT)',      k:'sg_feed', isBal:false},
-      {label:'Pressmud Balance (MT)',     k:'pm_bal',  isBal:true},
-      {label:'Grain Syrup Balance (KL)',  k:'gs_bal',  isBal:true},
-      {label:'CSL Balance (KL)',          k:'csl_bal', isBal:true},
-      {label:'Cow Dung Balance (MT)',     k:'cd_bal',  isBal:true},
-      {label:'Spent Grain Balance (MT)',  k:'sg_bal',  isBal:true},
+
+    // ── 3. Inventory Balance ──────────────────────────────────────
+    html+=groupHeader('Inventory Balance','Closing balance for this date');
+    const thresholds={pm:{v:500,u:'MT'},gs:{v:30,u:'KL'},csl:{v:30,u:'KL'},cd:{v:40,u:'MT'},sg:{v:30,u:'MT'}};
+    const balDefs=[
+      {nm:'Pressmud',   k:'pm_bal',  tk:'pm',  clr:'#1565C0'},
+      {nm:'Grain Syrup',k:'gs_bal',  tk:'gs',  clr:'#00695C'},
+      {nm:'CSL',        k:'csl_bal', tk:'csl', clr:'#6A1B00'},
+      {nm:'Cow Dung',   k:'cd_bal',  tk:'cd',  clr:'#2E7D32'},
+      {nm:'Spent Grain',k:'sg_bal',  tk:'sg',  clr:'#E65100'},
     ];
-    const dayAnomalies=dayChecks.filter(c=>f[c.k]!=null&&f[c.k]<0).map(c=>({...c,value:f[c.k]}));
-    if(!dayAnomalies.length){
+    const hasBal=balDefs.some(r=>f[r.k]!=null);
+    if(!hasBal){
+      html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No data available for this date.</div>`;
+    } else {
+      const balRows=balDefs.map(r=>{
+        const bal=f[r.k]; const thr=thresholds[r.tk];
+        if(bal==null) return`<tr><td style="font-weight:700;color:${r.clr}">${r.nm}</td><td colspan="5" style="color:var(--text3);font-size:10px">—</td></tr>`;
+        const pct=thr.v>0?bal/thr.v*100:0;
+        const zone=pct>=60?0:pct>=45?1:2;
+        const zClr=zone===0?'#2E7D32':zone===1?'#E65100':'#C62828';
+        const zTxt=zone===0?'SAFE ZONE':zone===1?'WARNING ZONE':'DANGER ZONE';
+        return`<tr>
+          <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+          <td style="font-weight:700;font-variant-numeric:tabular-nums;color:${bal<0?'#C62828':'inherit'}">${bal.toFixed(1)} ${thr.u}</td>
+          <td style="color:var(--text3);font-variant-numeric:tabular-nums">${thr.v} ${thr.u}</td>
+          <td style="font-weight:700;color:${zClr};font-variant-numeric:tabular-nums">${pct.toFixed(1)}%</td>
+          <td><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;background:${zClr};color:#fff">${zTxt}</span></td>
+          <td style="width:22%"><div style="display:flex;align-items:center;gap:5px">
+            <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="width:${Math.max(0,Math.min(pct,100)).toFixed(0)}%;height:100%;background:${zClr};border-radius:3px"></div></div>
+            <span style="font-size:10px;color:var(--text3);min-width:28px">${pct.toFixed(0)}%</span>
+          </div></td>
+        </tr>`;
+      }).join('');
+      html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr>
+        <th>Feedstock</th><th>Closing Balance</th><th>Threshold</th><th>% of Threshold</th><th>Zone</th><th style="width:22%">Level</th>
+      </tr></thead><tbody>${balRows}</tbody></table>`;
+    }
+
+    // ── 4. Anomaly Detection — full month anomalies ───────────────
+    html+=groupHeader('Anomaly Detection',`Negative values in ${dayMo} 2026 (full month)`);
+    const _fd=dDates('feed'); const _fa=(k)=>dArr('feed',k);
+    const moChecks=[
+      {label:'Pressmud Received (MT)',    arr:_fa('pm_in'),   dates:_fd, isBal:false},
+      {label:'Grain Syrup Received (KL)', arr:_fa('gs_in'),   dates:_fd, isBal:false},
+      {label:'CSL Received (KL)',         arr:_fa('csl_in'),  dates:_fd, isBal:false},
+      {label:'Cow Dung Received (MT)',    arr:_fa('cd_in'),   dates:_fd, isBal:false},
+      {label:'Spent Grain Received (MT)', arr:_fa('sg_in'),   dates:_fd, isBal:false},
+      {label:'Pressmud Fed (MT)',         arr:_fa('pm_feed'), dates:_fd, isBal:false},
+      {label:'Grain Syrup Fed (KL)',      arr:_fa('gs_feed'), dates:_fd, isBal:false},
+      {label:'CSL Fed (KL)',              arr:_fa('csl_feed'),dates:_fd, isBal:false},
+      {label:'Cow Dung Fed (MT)',         arr:_fa('cd_feed'), dates:_fd, isBal:false},
+      {label:'Spent Grain Fed (MT)',      arr:_fa('sg_feed'), dates:_fd, isBal:false},
+      {label:'Pressmud Balance (MT)',     arr:_fa('pm_bal'),  dates:_fd, isBal:true},
+      {label:'Grain Syrup Balance (KL)',  arr:_fa('gs_bal'),  dates:_fd, isBal:true},
+      {label:'CSL Balance (KL)',          arr:_fa('csl_bal'), dates:_fd, isBal:true},
+      {label:'Cow Dung Balance (MT)',     arr:_fa('cd_bal'),  dates:_fd, isBal:true},
+      {label:'Spent Grain Balance (MT)',  arr:_fa('sg_bal'),  dates:_fd, isBal:true},
+    ];
+    const moAnomalies=[];
+    moChecks.forEach(c=>(c.arr||[]).forEach((v,i)=>{if(v!=null&&v<0)moAnomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal});}));
+    if(!moAnomalies.length){
       html+=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px;margin-bottom:14px">
         <span style="font-size:18px">✓</span>
         <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
-        <div style="font-size:11px;color:var(--text3)">No negative values detected in received or fed data for this date.</div></div>
+        <div style="font-size:11px;color:var(--text3)">No negative values in ${dayMo} 2026.</div></div>
       </div>`;
     } else {
-      const rows=dayAnomalies.map(a=>`<tr>
+      const aRows=moAnomalies.map(a=>`<tr>
         <td style="font-weight:700;color:#C62828">${a.label}</td>
-        <td style="font-variant-numeric:tabular-nums">${curDay} 2026</td>
+        <td style="font-variant-numeric:tabular-nums">${a.date}</td>
         <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(2)}</td>
         <td style="font-size:10px;color:var(--text2)">${a.isBal?'Stock overdrawn — fed more than available balance':'Negative received/fed entry — possible data entry error'}</td>
         <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. VIVEK KUMAR</span></td>
       </tr>`).join('');
       html+=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#B71C1C;font-size:11px;font-weight:700">
-        ⚠ ${dayAnomalies.length} anomal${dayAnomalies.length===1?'y':'ies'} detected — negative values in feedstock data. Verify with Mr. Vivek Kumar.
+        ⚠ ${moAnomalies.length} anomal${moAnomalies.length===1?'y':'ies'} in ${dayMo} 2026 — verify with Mr. Vivek Kumar.
       </div>
-      <table class="tbl"><thead><tr><th>Metric</th><th>Period</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
-      <tbody>${rows}</tbody></table>`;
+      <table class="tbl"><thead><tr><th>Metric</th><th>Date</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
+      <tbody>${aRows}</tbody></table>`;
     }
   } else if(sectionId==='s2'){
     const s2sc=document.getElementById('s2_static_content');
