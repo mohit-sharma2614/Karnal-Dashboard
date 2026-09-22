@@ -319,19 +319,42 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S1 FEEDSTOCK ══ -->
 <div id="s1" class="pg">
   <div class="stitle">Feedstock Procurement & Management <span class="resp">— Mr. Vivek Kumar</span><span id="s1_period" class="mo-badge">All Months</span></div>
-  <div id="s1_inv_panel" style="margin-bottom:14px"></div>
-  <div class="cg c2">
+
+  <!-- Sub-section 1: Procurement -->
+  <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#BF360C,#E64A19)">
+    Feedstock Procurement <span class="s2-sub-sub">Received quantities &amp; vendor-wise supply</span>
+  </div>
+  <div id="s1_procurement" style="margin-bottom:14px"></div>
+  <div class="cg c2" style="margin-bottom:14px">
     <div class="cc"><div class="ct" id="ct_s1_pm">Pressmud Procurement (MT)</div><div class="cw"><canvas id="c_s1_pm"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s1_gs">Grain Syrup, CSL & Cow Dung Procurement</div><div class="cw"><canvas id="c_s1_gs"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s1_gs">Grain Syrup, CSL &amp; Cow Dung Procurement</div><div class="cw"><canvas id="c_s1_gs"></canvas></div></div>
   </div>
-  <div class="cg c2">
+
+  <!-- Sub-section 2: Feedstock Fed -->
+  <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#1565C0,#1976D2)">
+    Feedstock Fed <span class="s2-sub-sub">D1 vs D2 digester consumption</span>
+  </div>
+  <div id="s1_fed_table" style="margin-bottom:14px"></div>
+  <div class="cg c1" style="margin-bottom:14px">
     <div class="cc"><div class="ct" id="ct_s1_feed">Feedstock Fed per Day/Month</div><div class="cw"><canvas id="c_s1_feed"></canvas></div></div>
-    <div class="cc"><div class="ct">Latest Lab Quality — TS% & VS%</div><div class="cw"><canvas id="c_s1_qual"></canvas></div></div>
   </div>
-  <!-- Received / Used / Left summary table -->
-  <div class="stitle">Feedstock Received, Used & Balance</div>
-  <table class="tbl" id="s1_rul_tbl"></table>
-  <!-- Feedstock Cost & BPP Value -->
+
+  <!-- Sub-section 3: Inventory Balance -->
+  <div id="s1_bal_hdr" class="s2-sub-hdr" style="background:linear-gradient(120deg,#2E7D32,#388E3C)">
+    Inventory Balance <span class="s2-sub-sub">Stock vs threshold — zone classification</span>
+  </div>
+  <div id="s1_balance" style="margin-bottom:14px"></div>
+
+  <!-- Sub-section 4: Anomaly Detection -->
+  <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#E65100,#F57C00)">
+    Anomaly Detection <span class="s2-sub-sub">Negative values in received / fed / balance</span>
+  </div>
+  <div id="s1_anomaly" style="margin-bottom:14px"></div>
+
+  <!-- Cost & BPP charts -->
+  <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#4527A0,#6A1B9A)">
+    Cost &amp; BPP Contribution <span class="s2-sub-sub">Monthly feedstock cost and biogas yield</span>
+  </div>
   <div class="cg c2">
     <div class="cc"><div class="ct">Monthly Feedstock Cost (₹)</div><div class="cw"><canvas id="c_s1_cost"></canvas></div></div>
     <div class="cc"><div class="ct">Feedstock BPP Contribution — D1+D2 (m³)</div><div class="cw"><canvas id="c_s1_bpp"></canvas></div></div>
@@ -1515,60 +1538,214 @@ function renderOV(){
 function renderS1(){
   if(renderSectionDay('s1')) return; else hideSectionDay('s1');
   const mo=curMonth;
-  const s=D.stock;
-  const inv=D.inv_days||{};
-  const invRows=[
-    {nm:'Pressmud',k:'pm',u:'MT',max:200,clr:'#1565C0'},
-    {nm:'Grain Syrup',k:'gs',u:'KL',max:100,clr:'#00695C'},
-    {nm:'CSL',k:'csl',u:'KL',max:50,clr:'#6A1B00'},
-    {nm:'Cow Dung',k:'cd',u:'MT',max:150,clr:'#2E7D32'},
-    {nm:'Spent Grain',k:'sg',u:'MT',max:50,clr:'#E65100'},
+  const s=D.stock||{pm:0,gs:0,csl:0,cd:0,sg:0};
+  const pb=document.getElementById('s1_period');
+  if(pb) pb.textContent=mo==='ALL'?'All Months':mo;
+
+  // helpers
+  const getIn=(k)=>sumA(mo==='ALL'?mArr(k):dArr('feed',k));
+  const getFed=(k)=>sumA(mo==='ALL'?mArr(k):dArr('feed',k));
+  // D1/D2 fed: sum each month's daily totals then sum across months (or sum daily for month view)
+  const getD1=(k)=>mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d1?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
+                              :sumA(dArr('d1',k));
+  const getD2=(k)=>mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d2?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
+                              :sumA(dArr('d2',k));
+
+  // ── 1. Procurement ────────────────────────────────────────────
+  const procRows=[
+    {nm:'Pressmud',k:'pm_in',u:'MT',clr:'#1565C0'},
+    {nm:'Grain Syrup',k:'gs_in',u:'KL',clr:'#00695C'},
+    {nm:'CSL',k:'csl_in',u:'KL',clr:'#6A1B00'},
+    {nm:'Cow Dung',k:'cd_in',u:'MT',clr:'#2E7D32'},
+    {nm:'Spent Grain',k:'sg_in',u:'MT',clr:'#E65100'},
   ];
-  const invEl=document.getElementById('s1_inv_panel');
-  if(invEl) invEl.innerHTML=`<table class="tbl"><thead><tr>
-    <th>Feedstock</th><th>Current Stock</th><th>Days Remaining</th><th style="width:32%">Inventory Level</th>
-  </tr></thead><tbody>${invRows.map(r=>{
-    const v=s[r.k]||0; const d=inv[r.k]||0;
-    const pct=Math.min(v/r.max*100,100);
-    const stClr=v>r.max*.5?'#2E7D32':v>r.max*.15?'#E65100':'#C62828';
-    const dClr=d>=15?'#2E7D32':d>=7?'#E65100':'#C62828';
-    const badge=d>=15?'OK':d>=7?'LOW':'CRITICAL';
-    return`<tr>
-      <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
-      <td style="font-weight:700;color:${stClr};font-variant-numeric:tabular-nums">${v.toFixed(1)} ${r.u}</td>
-      <td><span style="font-weight:700;color:${dClr}">${d>0?Math.round(d)+' days':'—'}</span>
-        <span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;background:${dClr};color:#fff;margin-left:6px">${badge}</span></td>
-      <td><div style="display:flex;align-items:center;gap:6px">
-        <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
-          <div style="width:${pct.toFixed(0)}%;height:100%;background:${stClr};border-radius:3px"></div></div>
-        <span style="font-size:10px;color:var(--text3);min-width:30px;text-align:right">${pct.toFixed(0)}%</span>
-      </div></td>
-    </tr>`;
-  }).join('')}</tbody></table>`;
+  // vendor lookup for current period
+  const vend=D.vendors||{};
+  const vendorForPeriod=(cat)=>{
+    const list=vend[cat]||[];
+    if(!list.length) return '<span style="color:var(--text3);font-size:10px">—</span>';
+    const filtered=mo==='ALL'?list:list.map(v=>({name:v.name,total:v.byMonth?.[mo]||0})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
+    if(!filtered.length) return '<span style="color:var(--text3);font-size:10px">No data</span>';
+    return filtered.map(v=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:1px 0;border-bottom:1px solid var(--bdr)">
+      <span style="font-size:10px;color:var(--text2)">${v.name}</span>
+      <span style="font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap">${fmtN(v.total)}</span>
+    </div>`).join('');
+  };
+  const procEl=document.getElementById('s1_procurement');
+  if(procEl){
+    // Procurement summary table + vendor breakdown side by side
+    const procSummary=procRows.map(r=>{
+      const v=getIn(r.k);
+      return`<tr>
+        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+        <td style="font-variant-numeric:tabular-nums;font-weight:700">${v>0?fmtN(v)+' '+r.u:'—'}</td>
+      </tr>`;
+    }).join('');
+    // vendor blocks per feedstock (PM has most vendors)
+    const vCats=[{nm:'Pressmud',k:'pm',u:'MT'},{nm:'Cow Dung',k:'cd',u:'MT'},{nm:'CSL',k:'csl',u:'KL'},{nm:'Grain Syrup',k:'gs',u:'—'},{nm:'Spent Grain',k:'sg',u:'MT'}];
+    const vendorBlocks=vCats.map(c=>`
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid var(--bdr)">${c.nm}${c.k==='gs'?' <span style="font-weight:400;font-style:italic;text-transform:none">(direct procurement)</span>':''}</div>
+        ${c.k==='gs'?'<span style="font-size:10px;color:var(--text3)">Vendor tracking not available in supply sheet</span>':vendorForPeriod(c.k)}
+      </div>`).join('');
+    procEl.innerHTML=`<div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start">
+      <div>
+        <table class="tbl"><thead><tr><th>Feedstock</th><th>Received</th></tr></thead>
+        <tbody>${procSummary}</tbody></table>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;max-height:320px;overflow-y:auto">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:10px">VENDOR-WISE SUPPLY</div>
+        ${vendorBlocks}
+      </div>
+    </div>`;
+  }
   const labels=mo==='ALL'?MONTHS:dDates('feed');
   const pmIn=mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in');
   const gsIn=mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in');
   const cslIn=mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in');
   const cdIn=mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in');
-  const sgIn=mo==='ALL'?mArr('sg_in'):dArr('feed','sg_in');
+  bar('c_s1_pm',labels,[bDS('Procured (MT)',pmIn,C.blue,.9),bDS('Fed (MT)',mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed'),C.teal,.9)]);
+  bar('c_s1_gs',labels,[bDS('Grain Syrup (KL)',gsIn,C.indigo,.9),bDS('CSL (KL)',cslIn,C.cyan,.9),bDS('Cow Dung (MT)',cdIn,C.green,.9)]);
+
+  // ── 2. Feedstock Fed — D1/D2 split table ─────────────────────
+  const fedDefs=[
+    {nm:'Pressmud',k1:'pm_act',kf:'pm_feed',u:'MT',clr:'#1565C0'},
+    {nm:'Cow Dung',k1:'cd_act',kf:'cd_feed',u:'MT',clr:'#2E7D32'},
+    {nm:'CSL',k1:'csl_act',kf:'csl_feed',u:'KL',clr:'#6A1B00'},
+    {nm:'Grain Syrup',k1:'gs_act',kf:'gs_feed',u:'KL',clr:'#00695C'},
+    {nm:'Spent Grain',k1:'sg_act',kf:'sg_feed',u:'MT',clr:'#E65100'},
+  ];
+  const fedEl=document.getElementById('s1_fed_table');
+  if(fedEl){
+    let d1Tot=0,d2Tot=0,totTot=0;
+    const fedRows=fedDefs.map(r=>{
+      const d1v=getD1(r.k1), d2v=getD2(r.k1), tot=getFed(r.kf);
+      d1Tot+=d1v; d2Tot+=d2v; totTot+=tot;
+      const pct=tot>0&&(d1v+d2v)>0?Math.min((d1v+d2v)/tot*100,200):0;
+      const bar60=Math.min(pct,100).toFixed(0);
+      const bClr=pct>=90?'#2E7D32':pct>=70?'#E65100':'#C62828';
+      return`<tr>
+        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+        <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1)+' '+r.u:'—'}</td>
+        <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1)+' '+r.u:'—'}</td>
+        <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
+        <td style="width:25%"><div style="display:flex;align-items:center;gap:5px">
+          <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+            <div style="width:${bar60}%;height:100%;background:${bClr};border-radius:3px"></div></div>
+          <span style="font-size:10px;color:${bClr};font-weight:700;min-width:30px">${pct.toFixed(0)}%</span>
+        </div></td>
+      </tr>`;
+    }).join('');
+    fedEl.innerHTML=`<table class="tbl"><thead><tr>
+      <th>Feedstock</th>
+      <th style="color:#1565C0;text-align:right">D1 Fed</th>
+      <th style="color:#2E7D32;text-align:right">D2 Fed</th>
+      <th style="text-align:right">Total (F&B)</th>
+      <th>D1+D2 vs F&B</th>
+    </tr></thead><tbody>${fedRows}
+    <tr style="border-top:2px solid var(--bdr);font-weight:800">
+      <td>TOTAL</td>
+      <td style="color:#1565C0;text-align:right;font-variant-numeric:tabular-nums">${d1Tot>0?fmtN(d1Tot):'—'}</td>
+      <td style="color:#2E7D32;text-align:right;font-variant-numeric:tabular-nums">${d2Tot>0?fmtN(d2Tot):'—'}</td>
+      <td style="text-align:right;font-variant-numeric:tabular-nums">${totTot>0?fmtN(totTot):'—'}</td>
+      <td></td>
+    </tr></tbody></table>`;
+  }
   const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
   const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
   const cslFeed=mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
   const cdFeed=mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed');
   const sgFeed=mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed');
-  bar('c_s1_pm',labels,[bDS('Procured (MT)',pmIn,C.blue,.9),bDS('Fed (MT)',pmFeed,C.teal,.9)]);
-  bar('c_s1_gs',labels,[bDS('Grain Syrup (KL)',gsIn,C.indigo,.9),bDS('CSL (KL)',cslIn,C.cyan,.9),bDS('Cow Dung (MT)',cdIn,C.green,.9)]);
   bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan),bDS('Spent Grain',sgFeed,C.orange)],true);
-  const cal=D.cal;
-  const qL=['Pressmud','Grain Syrup','CSL','Cow Dung','Spent Grain'];
-  const ts=[cal.pm.ts||0,cal.gs.ts||0,cal.csl.ts||0,cal.cd.ts||0,cal.sg.ts||0];
-  const vs=[cal.pm.vs||0,cal.gs.vs||0,cal.csl.vs||0,cal.cd.vs||0,cal.sg.vs||0];
-  bar('c_s1_qual',qL,[bDS('TS %',ts,C.amber),bDS('VS %',vs,C.green)]);
-  // Feedstock cost chart
+
+  // ── 3. Inventory Balance — zone classification ────────────────
+  const thresholds={pm:{v:500,u:'MT'},cd:{v:40,u:'MT'},csl:{v:30,u:'KL'},sg:{v:30,u:'MT'},gs:{v:30,u:'KL'}};
+  const balDefs=[
+    {nm:'Pressmud',k:'pm',clr:'#1565C0'},{nm:'Grain Syrup',k:'gs',clr:'#00695C'},
+    {nm:'CSL',k:'csl',clr:'#6A1B00'},{nm:'Cow Dung',k:'cd',clr:'#2E7D32'},
+    {nm:'Spent Grain',k:'sg',clr:'#E65100'},
+  ];
+  const balEl=document.getElementById('s1_balance');
+  const balHdr=document.getElementById('s1_bal_hdr');
+  if(balEl){
+    let worstZone=0; // 0=safe,1=warn,2=danger
+    const balRows=balDefs.map(r=>{
+      const bal=s[r.k]||0; const thr=thresholds[r.k];
+      const pct=thr.v>0?bal/thr.v*100:0;
+      const zone=pct>=60?0:pct>=45?1:2;
+      if(zone>worstZone) worstZone=zone;
+      const zClr=zone===0?'#2E7D32':zone===1?'#E65100':'#C62828';
+      const zTxt=zone===0?'SAFE ZONE':zone===1?'WARNING ZONE':'DANGER ZONE';
+      const barW=Math.min(pct,100).toFixed(0);
+      return`<tr>
+        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+        <td style="font-weight:700;font-variant-numeric:tabular-nums">${bal.toFixed(1)} ${thr.u}</td>
+        <td style="color:var(--text3);font-variant-numeric:tabular-nums">${thr.v} ${thr.u}</td>
+        <td style="font-weight:700;font-variant-numeric:tabular-nums;color:${zClr}">${pct.toFixed(1)}%</td>
+        <td><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;background:${zClr};color:#fff;letter-spacing:.4px">${zTxt}</span></td>
+        <td style="width:22%"><div style="display:flex;align-items:center;gap:5px">
+          <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+            <div style="width:${barW}%;height:100%;background:${zClr};border-radius:3px"></div></div>
+          <span style="font-size:10px;color:var(--text3);min-width:28px">${pct.toFixed(0)}%</span>
+        </div></td>
+      </tr>`;
+    }).join('');
+    // Update header color to worst zone
+    if(balHdr){
+      const hdrClr=worstZone===0?'linear-gradient(120deg,#2E7D32,#388E3C)':worstZone===1?'linear-gradient(120deg,#E65100,#F57C00)':'linear-gradient(120deg,#B71C1C,#C62828)';
+      balHdr.style.background=hdrClr;
+    }
+    balEl.innerHTML=`<table class="tbl"><thead><tr>
+      <th>Feedstock</th><th>Current Balance</th><th>Threshold</th><th>% of Threshold</th><th>Zone</th><th style="width:22%">Level</th>
+    </tr></thead><tbody>${balRows}</tbody></table>`;
+  }
+
+  // ── 4. Anomaly Detection ──────────────────────────────────────
+  const anomalyEl=document.getElementById('s1_anomaly');
+  if(anomalyEl){
+    const checks=[
+      {label:'Pressmud Received',arr:mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Grain Syrup Received',arr:mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'CSL Received',arr:mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Cow Dung Received',arr:mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Spent Grain Received',arr:mo==='ALL'?mArr('sg_in'):dArr('feed','sg_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Pressmud Fed',arr:mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Grain Syrup Fed',arr:mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'CSL Fed',arr:mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Cow Dung Fed',arr:mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Spent Grain Fed',arr:mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+    ];
+    const anomalies=[];
+    checks.forEach(c=>{
+      (c.arr||[]).forEach((v,i)=>{
+        if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v});
+      });
+    });
+    if(!anomalies.length){
+      anomalyEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px">
+        <span style="font-size:18px">✓</span>
+        <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
+        <div style="font-size:11px;color:var(--text3)">No negative values detected in received or fed data for this period.</div></div>
+      </div>`;
+    } else {
+      const rows=anomalies.map(a=>`<tr>
+        <td style="font-weight:700;color:#C62828">${a.label}</td>
+        <td>${a.date}</td>
+        <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(3)}</td>
+        <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px">⚠ CHECK WITH MR. VIVEK KUMAR</span></td>
+      </tr>`).join('');
+      anomalyEl.innerHTML=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#B71C1C;font-size:11px;font-weight:700">
+        ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} found — negative values detected. Verify entries with Mr. Vivek Kumar.
+      </div>
+      <table class="tbl"><thead><tr><th>Metric</th><th>Period</th><th>Value</th><th>Action</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
+    }
+  }
+
+  // ── Cost & BPP charts ─────────────────────────────────────────
   const fcLabels=mo==='ALL'?MONTHS:dDates('feed');
   const fcArr=mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost');
   bar('c_s1_cost',fcLabels,[bDS('Feed Cost (₹)',fcArr,C.amber)]);
-  // BPP per feedstock chart
   const bppLabels=mo==='ALL'?MONTHS:dDates('exp');
   const pmBpp=mo==='ALL'?mArr('pm_bpp'):dArr('exp','d1_pm_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_pm_bpp')[i]||0));
   const cdBpp=mo==='ALL'?mArr('cd_bpp'):dArr('exp','d1_cd_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_cd_bpp')[i]||0));
@@ -1576,27 +1753,6 @@ function renderS1(){
   const gsBpp=mo==='ALL'?mArr('gs_bpp'):dArr('exp','d1_gs_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_gs_bpp')[i]||0));
   const sgBpp=mo==='ALL'?mArr('sg_bpp'):dArr('exp','d1_sg_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_sg_bpp')[i]||0));
   bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange)],true);
-  // Received / Used / Balance table
-  const rulTbl=document.getElementById('s1_rul_tbl');
-  const pmR=sumA(mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in'));
-  const gsR=sumA(mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in'));
-  const cslR=sumA(mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in'));
-  const cdR=sumA(mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in'));
-  const sgR=sumA(mo==='ALL'?mArr('sg_in'):dArr('feed','sg_in'));
-  const pmU=sumA(mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed'));
-  const gsU=sumA(mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed'));
-  const cslU=sumA(mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed'));
-  const cdU=sumA(mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed'));
-  const sgU=sumA(mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed'));
-  const fmtV=(v,u)=>v>0?fmtN(v)+' '+u:'—';
-  rulTbl.innerHTML=`<thead><tr><th>Feedstock</th><th>Received</th><th>Used (Fed)</th><th>Balance (Latest)</th><th>Unit</th></tr></thead>
-  <tbody>
-    <tr><td><b>Pressmud</b></td><td>${fmtV(pmR,'MT')}</td><td>${fmtV(pmU,'MT')}</td><td>${s.pm.toFixed(1)} MT</td><td>MT</td></tr>
-    <tr><td><b>Grain Syrup</b></td><td>${fmtV(gsR,'KL')}</td><td>${fmtV(gsU,'KL')}</td><td>${s.gs.toFixed(1)} KL</td><td>KL</td></tr>
-    <tr><td><b>CSL</b></td><td>${fmtV(cslR,'KL')}</td><td>${fmtV(cslU,'KL')}</td><td>${s.csl.toFixed(1)} KL</td><td>KL</td></tr>
-    <tr><td><b>Cow Dung</b></td><td>${fmtV(cdR,'MT')}</td><td>${fmtV(cdU,'MT')}</td><td>${s.cd.toFixed(1)} MT</td><td>MT</td></tr>
-    <tr><td><b>Spent Grain</b></td><td>${fmtV(sgR,'MT')}</td><td>${fmtV(sgU,'MT')}</td><td>${s.sg.toFixed(3)} MT</td><td>MT</td></tr>
-  </tbody>`;
 }
 
 // ═══ S2 LAB ══════════════════════════════════════════════════
@@ -3604,7 +3760,7 @@ async function gFetch(path) {
 function setStatus(msg) { const el=document.getElementById('authStatus'); if(el) el.textContent=msg; }
 async function buildAnalyticsD() {
   setStatus('Fetching plant data (15–30 seconds)…');
-  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR] = await Promise.all([
+  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,fsR] = await Promise.all([
     gFetch("/worksheets('PSA%20Production')/range(address='A3:AC700')"),
     gFetch("/worksheets('D1')/range(address='A3:AZ700')"),
     gFetch("/worksheets('D2')/range(address='A3:AZ700')"),
@@ -3621,6 +3777,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Cow%20Dung%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('Feedstock%20Supply')/range(address='A3:AJ400')"),
   ]);
   const nv=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
   const toDate=v=>{if(!v)return null;const n=parseFloat(v);if(isNaN(n)||n<40000)return null;return new Date(Math.round((n-25569)*86400000));};
@@ -3820,11 +3977,36 @@ async function buildAnalyticsD() {
     gs:parseCalSheet(gsCalR,'gs'),
     sg:parseCalSheet(sgCalR,'sg'),
   };
+  // ── Vendor supply parsing ─────────────────────────────────────
+  const vendorDefs={
+    pm:[{n:'Sonipat',i:14},{n:'Malakpur Sugar Mill (Baraut)',i:15},{n:'Ramala (Bhagpat)',i:16},
+        {n:'Thana Bhavan',i:17},{n:'Tikuala',i:18},{n:'Shmali Sugar Mill',i:19},
+        {n:'Laknour Biogas',i:20},{n:'Balyan Tikuala',i:21},{n:'Singh Associate',i:22},
+        {n:'Naveen',i:23},{n:'G.S.',i:24},{n:'SBEC',i:25},{n:'Sahakumbri',i:26},
+        {n:'Rathi Kathuali Sugar Mill',i:27},{n:'Devom',i:28},{n:'Vaibhav (Ramala)',i:29},{n:'Unn Sugar Mill',i:30}],
+    cd:[{n:'Gharaunda',i:7},{n:'Phoosgarh',i:8},{n:'Radha Krishna',i:9}],
+    csl:[{n:'Sadasat',i:10},{n:'Grain Syrup',i:11},{n:'Pant Nagar',i:12},{n:'Virangam',i:13}],
+    sg:[{n:'Carlsberg',i:31}],
+  };
+  const fsRows=(fsR?.values||[]).slice(1).filter(r=>r[0]!=null&&r[0]!=='');
+  const vendors={};
+  for(const [cat,defs] of Object.entries(vendorDefs)){
+    vendors[cat]=defs.map(v=>{
+      const byMonth={};
+      fsRows.forEach(r=>{
+        const dt=toDate(r[0]); if(!dt) return;
+        const mk=dt.toLocaleString('en-US',{month:'short'}).toUpperCase()+' '+dt.getFullYear();
+        byMonth[mk]=(byMonth[mk]||0)+(nv(r[v.i])||0);
+      });
+      const total=Object.values(byMonth).reduce((s,x)=>s+x,0);
+      return{name:v.n,total,byMonth};
+    }).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
+  }
   const tgts={cbg_month:130000,cbg_total:months.length*130000,cost_kg:30};
   const ts=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   return {
     meta:{plant:'LREKPL — 5.4 TPD CBG Plant, Karnal',updated:ts,period:months.length>0?months[0]+' – '+months[months.length-1]+' '+(latDt?latDt.getFullYear():2026):'—'},
-    months,years,monthYear,M,D:DD,days,psa_days,
+    months,years,monthYear,M,D:DD,days,psa_days,vendors,
     kpis:{ytd_cbg:M.cbg.reduce((s,v)=>s+(v||0),0),ytd_rev,ytd_cost,ytd_margin:ytd_rev>0?+((ytd_rev-ytd_cost)/ytd_rev*100).toFixed(1):0,
       ph_d1:nv(lastPh[1]),ph_d2:nv(lastPh[4]),
       temp_d1:tmp_.length?nv(tmp_[tmp_.length-1][1]):null,temp_d2:tmp_.length?nv(tmp_[tmp_.length-1][4]):null,
