@@ -336,8 +336,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct">Monthly Feedstock Cost (₹)</div><div class="cw"><canvas id="c_s1_cost"></canvas></div></div>
     <div class="cc"><div class="ct">Feedstock BPP Contribution — D1+D2 (m³)</div><div class="cw"><canvas id="c_s1_bpp"></canvas></div></div>
   </div>
-  <div class="stitle">Latest Lab Results</div>
-  <table class="tbl" id="s1_cal_tbl"></table>
 </div>
 
 <!-- ══ S2 LAB ══ -->
@@ -1599,15 +1597,6 @@ function renderS1(){
     <tr><td><b>Cow Dung</b></td><td>${fmtV(cdR,'MT')}</td><td>${fmtV(cdU,'MT')}</td><td>${s.cd.toFixed(1)} MT</td><td>MT</td></tr>
     <tr><td><b>Spent Grain</b></td><td>${fmtV(sgR,'MT')}</td><td>${fmtV(sgU,'MT')}</td><td>${s.sg.toFixed(3)} MT</td><td>MT</td></tr>
   </tbody>`;
-  const tbl=document.getElementById('s1_cal_tbl');
-  tbl.innerHTML=`<thead><tr><th>Feedstock</th><th>Date</th><th>TS %</th><th>VS %</th><th>TS (T)</th><th>VS (T)</th><th>Qty</th></tr></thead>
-  <tbody>${[['Pressmud',cal.pm,'MT'],['Grain Syrup',cal.gs,'KL'],['CSL',cal.csl,'KL'],['Cow Dung',cal.cd,'MT'],['Spent Grain',cal.sg,'MT']].map(([nm,c,u])=>
-    `<tr><td style="font-weight:700">${nm}</td><td>${c.date||'—'}</td>
-    <td style="font-variant-numeric:tabular-nums">${c.ts!=null?c.ts.toFixed(2):'—'}</td>
-    <td style="font-variant-numeric:tabular-nums">${c.vs!=null?c.vs.toFixed(2):'—'}</td>
-    <td style="font-variant-numeric:tabular-nums">${c.ts_t!=null?c.ts_t.toFixed(3):'—'}</td>
-    <td style="font-variant-numeric:tabular-nums">${c.vs_t!=null?c.vs_t.toFixed(3):'—'}</td>
-    <td style="color:var(--text2)">${c.qty!=null?c.qty.toFixed(1)+' '+u:'—'}</td></tr>`).join('')}</tbody>`;
 }
 
 // ═══ S2 LAB ══════════════════════════════════════════════════
