@@ -1356,6 +1356,14 @@ function renderSectionDay(sectionId){
       </tr></tbody></table>`;
     }
 
+    // ── 2b. Daily Feed Cost ───────────────────────────────────────
+    if(rv.feed_cost){
+      html+=`<div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid var(--amber);border-radius:8px;padding:10px 16px;margin-bottom:14px">
+        <span style="font-size:11px;font-weight:600;color:var(--text2)">Daily Feedstock Cost</span>
+        <span style="font-size:20px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">${fmtL(rv.feed_cost)}</span>
+      </div>`;
+    }
+
     // ── 3. Inventory Balance ──────────────────────────────────────
     html+=groupHeader('Inventory Balance','Closing balance for this date');
     const thresholds={pm:{v:500,u:'MT'},gs:{v:30,u:'KL'},csl:{v:30,u:'KL'},cd:{v:40,u:'MT'},sg:{v:30,u:'MT'}};
