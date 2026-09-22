@@ -876,11 +876,11 @@ function _renderLabTable(containerId,tv,periodNote){
 // ── Feedstock Quality Cards + BPP Contribution Table ─────────────────────
 function _feedQualityHtml(calData, bppData, periodLabel){
   const feedList=[
-    {key:'pm',name:'Pressmud',unit:'MT',clr:'#1565C0',tsRange:[8,15],vsRange:[55,80]},
-    {key:'cd',name:'Cow Dung',unit:'MT',clr:'#00695C',tsRange:[8,15],vsRange:[60,80]},
-    {key:'gs',name:'Grain Syrup',unit:'KL',clr:'#4527A0',tsRange:[10,25],vsRange:[60,85]},
-    {key:'csl',name:'CSL',unit:'KL',clr:'#6A1B00',tsRange:[5,20],vsRange:[55,80]},
-    {key:'sg',name:'Dry Spent Grain',unit:'MT',clr:'#E65100',tsRange:[25,45],vsRange:[70,90]},
+    {key:'pm', name:'Pressmud',       unit:'MT', clr:'#1565C0', tsRange:[15,28], vsRange:[45,70]},
+    {key:'cd', name:'Cow Dung',       unit:'MT', clr:'#00695C', tsRange:[12,22], vsRange:[65,90]},
+    {key:'gs', name:'Grain Syrup',    unit:'KL', clr:'#4527A0', tsRange:[30,48], vsRange:[85,98]},
+    {key:'csl',name:'CSL',            unit:'KL', clr:'#6A1B00', tsRange:[38,58], vsRange:[75,92]},
+    {key:'sg', name:'Dry Spent Grain',unit:'MT', clr:'#E65100', tsRange:[22,38], vsRange:[85,98]},
   ];
   const ragVal=(v,lo,hi)=>v==null?'':v>=lo&&v<=hi?'g':v>=(lo*.7)&&v<=(hi*1.3)?'a':'r';
   const ragClr={g:'#2E7D32',a:'#E65100',r:'#C62828'};
@@ -3631,10 +3631,10 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Feed%20%26%20Balance')/range(address='A4:V700')"),
     gFetch("/worksheets('Manure%20Sales')/range(address='A3:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A5:K400')"),
-    gFetch("/worksheets('Pressmud%20Cal')/range(address='A3:J400')"),
-    gFetch("/worksheets('CSL%20Cal')/range(address='A3:J400')"),
-    gFetch("/worksheets('Cow%20Dung%20Cal')/range(address='A3:J400')"),
-    gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('Pressmud%20Cal.')/range(address='A3:J400')"),
+    gFetch("/worksheets('CSL%20Cal.')/range(address='A3:J400')"),
+    gFetch("/worksheets('Cow%20Dung%20Cal.')/range(address='A3:J400')"),
+    gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
   ]);
   const nv=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
@@ -3809,15 +3809,24 @@ async function buildAnalyticsD() {
   const psa_days={};
   psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(!k)return;const m=moKey(toDate(r[0]));psa_days[k]={date:k,mo:m,psa_hrs:psaH(r),act_raw:nv(r[7]),act_pur:nv(r[9]),act_cbg:nv(r[12]),dispatched:nv(r[15]),veer:nv(r[16]),adinath:nv(r[17]),kfs:nv(r[18]),ksk:nv(r[19]),om:nv(r[20]),sps:nv(r[21]),ch4:nv(r[22]),cascade:nv(r[27]),storage:nv(r[28]),d1_eff:0,d2_eff:0};});
   // Process Cal sheet data — idx1=Date,4=TS%,5=VS%,6=TS(T),7=VS(T),9=Qty
+  // Note: some sheets store VS% as decimal ratio (0.506) rather than pct (50.6).
+  // Normalise by computing from Tonnes when available, otherwise multiply by 100 if <2.
+  const normaliseVs=(vsRaw,tsT,vsT)=>{
+    if(tsT&&vsT&&tsT>0) return vsT/tsT*100;
+    if(vsRaw==null) return null;
+    return vsRaw<2?vsRaw*100:vsRaw;
+  };
   const parseCalSheet=(raw,key)=>{
     const rows=(raw?.values||[]).filter(r=>r[1]!==null&&r[1]!==''&&r[4]!==null&&r[4]!=='');
     if(!rows.length) return{key,hasData:false,ts:null,vs:null,ts_t:null,vs_t:null,qty:null,date:null,rows:[]};
     const last=rows[rows.length-1];
     const dt=toDate(last[1]);
     return{key,hasData:true,
-      ts:nv(last[4]),vs:nv(last[5]),ts_t:nv(last[6]),vs_t:nv(last[7]),qty:nv(last[9]),
+      ts:nv(last[4]),
+      vs:normaliseVs(nv(last[5]),nv(last[6]),nv(last[7])),
+      ts_t:nv(last[6]),vs_t:nv(last[7]),qty:nv(last[9]),
       date:dayKey(dt)||'—',
-      rows:rows.map(r=>({date:dayKey(toDate(r[1])),ts:nv(r[4]),vs:nv(r[5]),ts_t:nv(r[6]),vs_t:nv(r[7]),qty:nv(r[9])}))};
+      rows:rows.map(r=>({date:dayKey(toDate(r[1])),ts:nv(r[4]),vs:normaliseVs(nv(r[5]),nv(r[6]),nv(r[7])),ts_t:nv(r[6]),vs_t:nv(r[7]),qty:nv(r[9])}))};
   };
   const cal={
     pm:parseCalSheet(pmCalR,'pm'),
