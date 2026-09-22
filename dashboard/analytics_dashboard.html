@@ -768,6 +768,7 @@ function latestHealthSnapshot(dateKey){
 
 // Returns the HTML for the Lab comparison table; used by both renderS2 and renderSectionDay
 function _labTableHtml(tv, periodNote){
+  // RAG classifiers
   const ragPh=v=>v==null?'':v>=6.8&&v<=7.5?'g':v>=6.5&&v<=8.0?'a':'r';
   const ragTp=v=>v==null?'':v>=35&&v<=40?'g':v>=30&&v<=45?'a':'r';
   const ragOlr=v=>v==null?'':v>=2&&v<=4?'g':v>=1&&v<=5?'a':'r';
@@ -777,57 +778,94 @@ function _labTableHtml(tv, periodNote){
   const ragTs=v=>v==null?'':v>=5&&v<=10?'g':v>=3&&v<=15?'a':'r';
   const ragVs=v=>v==null?'':v>=55?'g':v>=50?'a':'r';
   const cv={g:'#2E7D32',a:'#E65100',r:'#C62828'};
-  const bp=v=>v!=null?Math.round(Math.max(0,Math.min(v,100))):null;
-  const bPh=v=>bp(v!=null?(v-6)/(8.5-6)*100:null);
-  const bTp=v=>bp(v!=null?(v-20)/30*100:null);
-  const bOlr=v=>bp(v!=null?v/6*100:null);
-  const bIa=v=>bp(v!=null?(0.6-Math.min(v,0.6))/0.6*100:null);
-  const bPa=v=>bp(v!=null?v/5000*100:null);
-  const bIaInd=v=>bp(v!=null?(2000-Math.min(v,2000))/2000*100:null);
-  const bTa=v=>bp(v!=null?v/6000*100:null);
-  const bTs=v=>bp(v!=null?v/15*100:null);
-  const bVs=v=>bp(v!=null?v/100*100:null);
-  const labCell=(v,cls,barPct,dec)=>{
-    if(v==null) return '<td class="ftbl-exp" style="text-align:right;color:var(--text3)">—</td>';
-    const col=cv[cls]||'var(--text1)';
-    const bar=barPct!=null?`<div style="margin-top:3px;background:var(--bg3);border-radius:2px;height:4px;overflow:hidden"><div style="width:${barPct}%;height:4px;background:${col};border-radius:2px"></div></div>`:'';
-    return `<td class="ftbl-exp" style="text-align:right"><span style="font-size:13px;font-weight:700;color:${col}">${(+v).toFixed(dec)}</span>${bar}</td>`;
+  const cbg={g:'rgba(46,125,50,.1)',a:'rgba(230,81,0,.08)',r:'rgba(198,40,40,.08)'};
+  const lbl={g:'GOOD',a:'WATCH',r:'ALERT'};
+
+  // Range-with-tick bar: shows safe zone as green band, value as colored tick
+  const rangeTick=(v,scMin,scMax,szMin,szMax,rag)=>{
+    if(v==null) return '';
+    const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+    const pct=x=>((clamp(x,scMin,scMax)-scMin)/(scMax-scMin)*100).toFixed(1);
+    const szL=pct(szMin), szW=(pct(szMax)-pct(szMin)), tickP=pct(v);
+    const col=cv[rag]||'#888';
+    return `<div style="position:relative;height:5px;background:var(--bg3);border-radius:3px;margin-top:5px">
+      <div style="position:absolute;left:${szL}%;width:${szW}%;height:100%;background:rgba(46,125,50,.22);border-radius:2px"></div>
+      <div style="position:absolute;left:${tickP}%;top:-4px;width:3px;height:13px;background:${col};border-radius:2px;transform:translateX(-50%);box-shadow:0 0 0 1px #fff"></div>
+    </div>`;
   };
-  const grpHdr=(t,s)=>`<tr style="background:var(--bg3)"><td colspan="5" style="padding:6px 10px;font-size:10px;font-weight:800;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;border-bottom:1px solid var(--bdr)">${t}<span style="font-size:9px;font-weight:400;color:var(--text3);letter-spacing:0;margin-left:8px">${s||''}</span></td></tr>`;
-  const labRow=(label,range,d1v,d1r_,b1,d2v,d2r_,b2,dec=2)=>`<tr>
-    <td class="ftbl-lbl">${label}</td>
-    <td style="font-size:10px;color:var(--text3);padding:5px 8px;white-space:nowrap">${range}</td>
-    ${labCell(d1v,d1r_,b1,dec)}
-    <td class="ftbl-sep"></td>
-    ${labCell(d2v,d2r_,b2,dec)}
+  // One-sided range (e.g. "lower is better"): safe zone is 0→szMax
+  const rangeTickLo=(v,scMax,szMax,rag)=>rangeTick(v,0,scMax,0,szMax,rag);
+  // One-sided range "higher is better": safe zone is szMin→scMax
+  const rangeTickHi=(v,scMin,scMax,szMin,rag)=>rangeTick(v,scMin,scMax,szMin,scMax,rag);
+
+  // Cell: value (large, colored) + status badge + range bar
+  const labCell=(v,rag,bar,dec,dimlbl=false)=>{
+    if(v==null) return `<td style="padding:10px 14px;text-align:right;color:var(--text3);font-size:13px">—</td>`;
+    const col=cv[rag]||'var(--text2)';
+    const bg=cbg[rag]||'';
+    const badge=rag?`<span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:${col};background:${bg};border:1px solid ${col}33;padding:1px 5px;border-radius:3px;margin-left:5px">${lbl[rag]||''}</span>`:'';
+    return `<td style="padding:10px 14px;text-align:right;background:${bg}">
+      <div style="display:flex;align-items:center;justify-content:flex-end">
+        <span style="font-size:16px;font-weight:700;color:${col};font-variant-numeric:tabular-nums">${(+v).toFixed(dec)}</span>${badge}
+      </div>${bar}</td>`;
+  };
+
+  // Group header — colored left-border strip, not just a background row
+  const grpHdr=(t,sub,accentClr='#1565C0')=>`<tr>
+    <td colspan="5" style="padding:0">
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 14px;background:var(--surf2);border-top:1px solid var(--bdr);border-bottom:1px solid var(--bdr);border-left:4px solid ${accentClr}">
+        <span style="font-size:10px;font-weight:800;letter-spacing:.8px;color:${accentClr};text-transform:uppercase">${t}</span>
+        ${sub?`<span style="font-size:9px;font-weight:400;color:var(--text3)">${sub}</span>`:''}
+      </div>
+    </td></tr>`;
+
+  const labRow=(label,range,d1v,d1r_,d1bar,d2v,d2r_,d2bar,dec=2)=>`<tr style="border-bottom:1px solid var(--bdr)">
+    <td style="padding:10px 14px;font-size:11.5px;font-weight:600;color:var(--text);white-space:nowrap">${label}</td>
+    <td style="padding:6px 8px;font-size:10px;color:var(--text3);white-space:nowrap;vertical-align:middle">${range}</td>
+    ${labCell(d1v,d1r_,d1bar,dec)}
+    <td style="width:1px;background:var(--bdr);padding:0"></td>
+    ${labCell(d2v,d2r_,d2bar,dec)}
   </tr>`;
-  const tsNote=tv.ts_date?`Latest test: ${tv.ts_date}`:'';
-  const iaNote=tv.ia_date?`Latest test: ${tv.ia_date}`:'';
+
+  const tsNote=tv.ts_date?`Latest: ${tv.ts_date}`:'';
+  const iaNote=tv.ia_date?`Latest: ${tv.ia_date}`:'';
+
+  // Range bars per parameter
+  const phBar=(v,r)=>rangeTick(v,6,8.5,6.8,7.5,r);
+  const tpBar=(v,r)=>rangeTick(v,20,50,35,40,r);
+  const olrBar=(v,r)=>rangeTick(v,0,7,2,4,r);
+  const iaBar=(v,r)=>rangeTickLo(v,0.6,0.3,r);
+  const paBar=(v,r)=>rangeTick(v,0,7000,2500,4000,r);
+  const iaIndBar=(v,r)=>rangeTickLo(v,2000,1000,r);
+  const taBar=(v,r)=>rangeTickLo(v,8000,5000,r);
+  const tsBar=(v,r)=>rangeTick(v,0,15,5,10,r);
+  const vsBar=(v,r)=>rangeTickHi(v,40,100,55,r);
+
   return `<div class="ftbl-wrap"><table class="ftbl">
     <thead><tr>
-      <th class="ftbl-lbl-h">Parameter <span style="font-size:9px;font-weight:400;color:var(--text3)">${periodNote||''}</span></th>
-      <th style="font-size:10px;color:var(--text3);padding:6px 8px;font-weight:500;text-align:left">Safe Range</th>
-      <th class="ftbl-d1h" style="text-align:right">Digester 1</th>
-      <th class="ftbl-sep-h"></th>
-      <th class="ftbl-d2h" style="text-align:right">Digester 2</th>
+      <th class="ftbl-lbl-h" style="padding:10px 14px">Parameter <span style="font-size:9px;font-weight:400;color:var(--text3);text-transform:none;letter-spacing:0">${periodNote||''}</span></th>
+      <th style="font-size:10px;color:var(--text3);padding:6px 8px;font-weight:500;text-align:left;white-space:nowrap">Safe Range</th>
+      <th class="ftbl-d1h" style="text-align:right;padding:10px 14px">Digester 1</th>
+      <th style="width:1px;padding:0;background:var(--bdr)"></th>
+      <th class="ftbl-d2h" style="text-align:right;padding:10px 14px">Digester 2</th>
     </tr></thead>
     <tbody>
-      ${grpHdr('A — Stability','pH · Temperature · OLR')}
-      ${labRow('pH','6.8 – 7.5',tv.ph_d1,ragPh(tv.ph_d1),bPh(tv.ph_d1),tv.ph_d2,ragPh(tv.ph_d2),bPh(tv.ph_d2),2)}
-      ${labRow('Temperature','35 – 40 °C',tv.tp_d1,ragTp(tv.tp_d1),bTp(tv.tp_d1),tv.tp_d2,ragTp(tv.tp_d2),bTp(tv.tp_d2),1)}
-      ${labRow('OLR','2 – 4 kg VS/m³/d',tv.olr_d1,ragOlr(tv.olr_d1),bOlr(tv.olr_d1),tv.olr_d2,ragOlr(tv.olr_d2),bOlr(tv.olr_d2),3)}
-      ${grpHdr('B — Alkalinity',iaNote)}
-      ${labRow('IA/PA Ratio','< 0.40',tv.ia_d1,ragIa(tv.ia_d1),bIa(tv.ia_d1),tv.ia_d2,ragIa(tv.ia_d2),bIa(tv.ia_d2),3)}
-      ${labRow('Partial Alkalinity (PA)','2500 – 4000 mg/L',tv.pa_d1,ragPa(tv.pa_d1),bPa(tv.pa_d1),tv.pa_d2,ragPa(tv.pa_d2),bPa(tv.pa_d2),0)}
-      ${labRow('Interm. Alkalinity (IA)','< 1500 mg/L',tv.ia_ind_d1,ragIaInd(tv.ia_ind_d1),bIaInd(tv.ia_ind_d1),tv.ia_ind_d2,ragIaInd(tv.ia_ind_d2),bIaInd(tv.ia_ind_d2),0)}
-      ${labRow('Total Alkalinity (TA)','mg/L',tv.ta_d1,'',bTa(tv.ta_d1),tv.ta_d2,'',bTa(tv.ta_d2),0)}
-      ${grpHdr('C — Digester TS / VS',tsNote)}
-      ${labRow('TS% — 3M','5 – 10%',tv.ts_d1,ragTs(tv.ts_d1),bTs(tv.ts_d1),tv.ts_d2,ragTs(tv.ts_d2),bTs(tv.ts_d2),1)}
-      ${labRow('VS% — 3M','> 55%',tv.vs_d1,ragVs(tv.vs_d1),bVs(tv.vs_d1),tv.vs_d2,ragVs(tv.vs_d2),bVs(tv.vs_d2),1)}
-      ${labRow('TS% — 6M','5 – 10%',tv.ts_d1_6m,ragTs(tv.ts_d1_6m),bTs(tv.ts_d1_6m),tv.ts_d2_6m,ragTs(tv.ts_d2_6m),bTs(tv.ts_d2_6m),1)}
-      ${labRow('VS% — 6M','> 55%',tv.vs_d1_6m,ragVs(tv.vs_d1_6m),bVs(tv.vs_d1_6m),tv.vs_d2_6m,ragVs(tv.vs_d2_6m),bVs(tv.vs_d2_6m),1)}
-      ${labRow('TS% — Sludge Line','5 – 10%',tv.ts_d1_sl,ragTs(tv.ts_d1_sl),bTs(tv.ts_d1_sl),tv.ts_d2_sl,ragTs(tv.ts_d2_sl),bTs(tv.ts_d2_sl),1)}
-      ${labRow('VS% — Sludge Line','> 55%',tv.vs_d1_sl,ragVs(tv.vs_d1_sl),bVs(tv.vs_d1_sl),tv.vs_d2_sl,ragVs(tv.vs_d2_sl),bVs(tv.vs_d2_sl),1)}
+      ${grpHdr('A — Stability','pH · Temperature · OLR','#1565C0')}
+      ${labRow('pH','6.8 – 7.5',tv.ph_d1,ragPh(tv.ph_d1),phBar(tv.ph_d1,ragPh(tv.ph_d1)),tv.ph_d2,ragPh(tv.ph_d2),phBar(tv.ph_d2,ragPh(tv.ph_d2)),2)}
+      ${labRow('Temperature','35 – 40 °C',tv.tp_d1,ragTp(tv.tp_d1),tpBar(tv.tp_d1,ragTp(tv.tp_d1)),tv.tp_d2,ragTp(tv.tp_d2),tpBar(tv.tp_d2,ragTp(tv.tp_d2)),1)}
+      ${labRow('OLR','2 – 4 kg VS/m³/d',tv.olr_d1,ragOlr(tv.olr_d1),olrBar(tv.olr_d1,ragOlr(tv.olr_d1)),tv.olr_d2,ragOlr(tv.olr_d2),olrBar(tv.olr_d2,ragOlr(tv.olr_d2)),3)}
+      ${grpHdr('B — Alkalinity',iaNote,'#6A1B9A')}
+      ${labRow('IA/PA Ratio','< 0.40',tv.ia_d1,ragIa(tv.ia_d1),iaBar(tv.ia_d1,ragIa(tv.ia_d1)),tv.ia_d2,ragIa(tv.ia_d2),iaBar(tv.ia_d2,ragIa(tv.ia_d2)),3)}
+      ${labRow('Partial Alkalinity (PA)','2500 – 4000 mg/L',tv.pa_d1,ragPa(tv.pa_d1),paBar(tv.pa_d1,ragPa(tv.pa_d1)),tv.pa_d2,ragPa(tv.pa_d2),paBar(tv.pa_d2,ragPa(tv.pa_d2)),0)}
+      ${labRow('Interm. Alkalinity (IA)','< 1500 mg/L',tv.ia_ind_d1,ragIaInd(tv.ia_ind_d1),iaIndBar(tv.ia_ind_d1,ragIaInd(tv.ia_ind_d1)),tv.ia_ind_d2,ragIaInd(tv.ia_ind_d2),iaIndBar(tv.ia_ind_d2,ragIaInd(tv.ia_ind_d2)),0)}
+      ${labRow('Total Alkalinity (TA)','mg/L',tv.ta_d1,'',taBar(tv.ta_d1,''),tv.ta_d2,'',taBar(tv.ta_d2,''),0)}
+      ${grpHdr('C — Digester TS / VS',tsNote,'#00695C')}
+      ${labRow('TS% — 3M','5 – 10%',tv.ts_d1,ragTs(tv.ts_d1),tsBar(tv.ts_d1,ragTs(tv.ts_d1)),tv.ts_d2,ragTs(tv.ts_d2),tsBar(tv.ts_d2,ragTs(tv.ts_d2)),1)}
+      ${labRow('VS% — 3M','> 55%',tv.vs_d1,ragVs(tv.vs_d1),vsBar(tv.vs_d1,ragVs(tv.vs_d1)),tv.vs_d2,ragVs(tv.vs_d2),vsBar(tv.vs_d2,ragVs(tv.vs_d2)),1)}
+      ${labRow('TS% — 6M','5 – 10%',tv.ts_d1_6m,ragTs(tv.ts_d1_6m),tsBar(tv.ts_d1_6m,ragTs(tv.ts_d1_6m)),tv.ts_d2_6m,ragTs(tv.ts_d2_6m),tsBar(tv.ts_d2_6m,ragTs(tv.ts_d2_6m)),1)}
+      ${labRow('VS% — 6M','> 55%',tv.vs_d1_6m,ragVs(tv.vs_d1_6m),vsBar(tv.vs_d1_6m,ragVs(tv.vs_d1_6m)),tv.vs_d2_6m,ragVs(tv.vs_d2_6m),vsBar(tv.vs_d2_6m,ragVs(tv.vs_d2_6m)),1)}
+      ${labRow('TS% — Sludge Line','5 – 10%',tv.ts_d1_sl,ragTs(tv.ts_d1_sl),tsBar(tv.ts_d1_sl,ragTs(tv.ts_d1_sl)),tv.ts_d2_sl,ragTs(tv.ts_d2_sl),tsBar(tv.ts_d2_sl,ragTs(tv.ts_d2_sl)),1)}
+      ${labRow('VS% — Sludge Line','> 55%',tv.vs_d1_sl,ragVs(tv.vs_d1_sl),vsBar(tv.vs_d1_sl,ragVs(tv.vs_d1_sl)),tv.vs_d2_sl,ragVs(tv.vs_d2_sl),vsBar(tv.vs_d2_sl,ragVs(tv.vs_d2_sl)),1)}
     </tbody>
   </table></div>`;
 }
