@@ -1460,16 +1460,49 @@ function renderS3(){
     </table></div>`;
     // B: Biogas Production
     html+=sHdr('BIOGAS PRODUCTION','Raw gas output from digesters');
-    html+=g4([
-      card('D1 Actual Biogas (B+C)',fN(d1r.bg_total),'m³','b'),
-      card('D1 Biogas to PSA',fN(d1r.bg_act),'m³','c'),
-      card('D2 Actual Biogas (B+C)',fN(d2r.bg_total),'m³','g'),
-      card('D2 Biogas to PSA',fN(d2r.bg_act),'m³','c'),
-    ]);
-    html+=g4([
-      card('D1 Biogas Vent/Flare',fN(d1r.bg_vent),'m³','r'),
-      card('D2 Biogas Vent/Flare',fN(d2r.bg_vent),'m³','r'),
-    ]);
+    const bgRow=(label,u1,v1,u2,v2,cls)=>{
+      const c1=cls==='r'?'#C62828':cls==='a'?'#E65100':'inherit';
+      const vc1=cls==='r'?'#C62828':cls==='a'?'#E65100':'#1565C0';
+      const vc2=cls==='r'?'#C62828':cls==='a'?'#E65100':'#2E7D32';
+      return `<tr>
+        <td class="ftbl-lbl">${label}</td>
+        <td class="ftbl-exp" style="text-align:right">${u1!=null?'<span style="font-size:13px;font-weight:700;color:'+vc1+'">'+fN(u1)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'—'}</td>
+        <td class="ftbl-sep"></td>
+        <td class="ftbl-exp" style="text-align:right">${u2!=null?'<span style="font-size:13px;font-weight:700;color:'+vc2+'">'+fN(u2)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'—'}</td>
+      </tr>`;
+    };
+    html+=`<div class="ftbl-wrap"><table class="ftbl">
+      <thead>
+        <tr>
+          <th class="ftbl-lbl-h">Biogas Metric</th>
+          <th class="ftbl-d1h" style="text-align:right">Digester 1</th>
+          <th class="ftbl-sep-h"></th>
+          <th class="ftbl-d2h" style="text-align:right">Digester 2</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bgRow('Est. Biogas — Expected Section (m³)',d1r.bg_est_exp,null,d2r.bg_est_exp,null,'')}
+        ${bgRow('Est. Biogas — Actual Section (m³)',d1r.bg_est_act,null,d2r.bg_est_act,null,'')}
+        <tr class="ftbl-total">
+          <td class="ftbl-lbl">Actual Biogas B+C (m³)</td>
+          <td class="ftbl-exp" style="text-align:right">${d1r.bg_total!=null?'<span style="font-size:14px;font-weight:800;color:#1565C0">'+fN(d1r.bg_total)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'—'}</td>
+          <td class="ftbl-sep"></td>
+          <td class="ftbl-exp" style="text-align:right">${d2r.bg_total!=null?'<span style="font-size:14px;font-weight:800;color:#2E7D32">'+fN(d2r.bg_total)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'—'}</td>
+        </tr>
+        <tr>
+          <td class="ftbl-lbl" style="color:#C62828">Vent / Flare (m³)</td>
+          <td class="ftbl-exp" style="text-align:right">${d1r.bg_vent!=null&&d1r.bg_vent>0?'<span style="font-size:13px;font-weight:700;color:#C62828">'+fN(d1r.bg_vent)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'<span style="color:var(--text3)">—</span>'}</td>
+          <td class="ftbl-sep"></td>
+          <td class="ftbl-exp" style="text-align:right">${d2r.bg_vent!=null&&d2r.bg_vent>0?'<span style="font-size:13px;font-weight:700;color:#C62828">'+fN(d2r.bg_vent)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'<span style="color:var(--text3)">—</span>'}</td>
+        </tr>
+        <tr>
+          <td class="ftbl-lbl">Biogas to PSA (m³)</td>
+          <td class="ftbl-exp" style="text-align:right">${d1r.bg_act!=null?'<span style="font-size:13px;font-weight:700;color:#00838F">'+fN(d1r.bg_act)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'—'}</td>
+          <td class="ftbl-sep"></td>
+          <td class="ftbl-exp" style="text-align:right">${d2r.bg_act!=null?'<span style="font-size:13px;font-weight:700;color:#00838F">'+fN(d2r.bg_act)+'</span> <span style="font-size:11px;color:var(--text2)">m³</span>':'—'}</td>
+        </tr>
+      </tbody>
+    </table></div>`;
     // C: Manure
     html+=sHdr('MANURE','Drain / digestate output');
     html+=g4([
@@ -3369,10 +3402,12 @@ async function buildAnalyticsD() {
         cbg_pct:(_idealCbg&&_cbgTot)?Math.round(_cbgTot/_idealCbg*100):null},
       d1:{feed_act:nv(d1r[24]),bg_act:nv(d1r[32]),cbg:nv(d1r[35]),olr:nv(d1r[49]),sfom:nv(d1r[12]),lfom:nv(d1r[13]),drain_ac:nv(d1r[30]),psa_eff_pct:nv(d1r[50]),
         feed_exp:nv(d1r[7]),bg_total:nv(d1r[34]),bg_vent:nv(d1r[33]),drain_exp:nv(d1r[29]),
+        bg_est_exp:nv(d1r[10]),bg_est_act:nv(d1r[31]),
         cd_exp:nv(d1r[1]),pm_exp:nv(d1r[2]),csl_exp:nv(d1r[4]),gs_exp:nv(d1r[6]),sg_exp:nv(d1r[5]),
         cd_act:nv(d1r[14]),pm_act:nv(d1r[15]),csl_act:nv(d1r[17]),gs_act:nv(d1r[22]),sg_act:nv(d1r[23])},
       d2:{feed_act:nv(d2r[24]),bg_act:nv(d2r[32]),cbg:nv(d2r[35]),olr:nv(d2r[50]),sfom:nv(d2r[12]),lfom:nv(d2r[13]),drain_ac:nv(d2r[30]),psa_eff_pct:nv(d2r[51]),
         feed_exp:nv(d2r[7]),bg_total:nv(d2r[34]),bg_vent:nv(d2r[33]),drain_exp:nv(d2r[29]),
+        bg_est_exp:nv(d2r[10]),bg_est_act:nv(d2r[31]),
         cd_exp:nv(d2r[1]),pm_exp:nv(d2r[2]),csl_exp:nv(d2r[4]),gs_exp:nv(d2r[6]),sg_exp:nv(d2r[5]),
         cd_act:nv(d2r[14]),pm_act:nv(d2r[15]),csl_act:nv(d2r[17]),gs_act:nv(d2r[22]),sg_act:nv(d2r[23])},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
