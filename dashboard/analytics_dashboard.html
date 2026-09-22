@@ -1267,30 +1267,58 @@ function renderSectionDay(sectionId){
   </div>`;
 
   if(sectionId==='s1'){
-    html+=groupHeader('Feedstock Received','Inflow to plant on this day');
-    html+=grid([
-      metricCard('Pressmud Received',fN(f.pm_in),'MT','b'),
-      metricCard('Grain Syrup Received',fN(f.gs_in),'KL','c'),
-      metricCard('CSL Received',fN(f.csl_in),'KL','p'),
-      metricCard('Cow Dung Received',fN(f.cd_in),'MT','g'),
-      metricCard('Spent Grain Received',fN(f.sg_in),'MT','a'),
-    ]);
-    html+=groupHeader('Feedstock Used','Fed into digesters');
-    html+=grid([
-      metricCard('Pressmud Fed',fN(f.pm_feed),'MT','b','',true,f.pm_feed&&f.pm_in?f.pm_feed/f.pm_in*100:0),
-      metricCard('Grain Syrup Fed',fN(f.gs_feed),'KL','c','',true,f.gs_feed&&f.gs_in?f.gs_feed/f.gs_in*100:0),
-      metricCard('CSL Fed',fN(f.csl_feed),'KL','p','',true,f.csl_feed&&f.csl_in?f.csl_feed/f.csl_in*100:0),
-      metricCard('Cow Dung Fed',fN(f.cd_feed),'MT','g','',true,f.cd_feed&&f.cd_in?f.cd_feed/f.cd_in*100:0),
-      metricCard('Spent Grain Fed',fN(f.sg_feed),'MT','a','',true,f.sg_feed&&f.sg_in?f.sg_feed/f.sg_in*100:0),
-    ]);
-    html+=groupHeader('Balance & Cost','Closing stock and daily spend');
-    html+=grid([
-      metricCard('PM Closing Balance',fN(f.pm_bal),'MT','b'),
-      metricCard('GS Closing Balance',fN(f.gs_bal),'KL','c'),
-      metricCard('CSL Closing Balance',fN(f.csl_bal),'KL','p'),
-      metricCard('CD Closing Balance',fN(f.cd_bal),'MT','g'),
-      metricCard('Feedstock Cost',fL2(rv.feed_cost),'','a','Daily procurement cost'),
-    ]);
+    // Feedstock summary table: Received | D1 Fed | D2 Fed | Total Fed | Closing Balance | Zone
+    const fsItems=[
+      {nm:'Pressmud',u:'MT',in:f.pm_in,d1:d1r.pm_act,d2:d2r.pm_act,feed:f.pm_feed,bal:f.pm_bal,thr:500},
+      {nm:'Grain Syrup',u:'KL',in:f.gs_in,d1:d1r.gs_act,d2:d2r.gs_act,feed:f.gs_feed,bal:f.gs_bal,thr:30},
+      {nm:'CSL',u:'KL',in:f.csl_in,d1:d1r.csl_act,d2:d2r.csl_act,feed:f.csl_feed,bal:f.csl_bal,thr:30},
+      {nm:'Cow Dung',u:'MT',in:f.cd_in,d1:d1r.cd_act,d2:d2r.cd_act,feed:f.cd_feed,bal:f.cd_bal,thr:40},
+      {nm:'Spent Grain',u:'MT',in:f.sg_in,d1:d1r.sg_act,d2:d2r.sg_act,feed:f.sg_feed,bal:f.sg_bal,thr:30},
+    ];
+    const zoneOf=(bal,thr)=>{if(bal==null||thr==null)return null;const p=bal/thr*100;return p>=60?{label:'SAFE',clr:'#2E7D32'}:p>=45?{label:'WARNING',clr:'#E65100'}:{label:'DANGER',clr:'#C62828'};};
+    const fv=(v,d=1)=>v!=null&&v!==0?(+v.toFixed(d)):null;
+    const cell=(v,u,bold=false,clr='')=>{
+      const display=v!=null?`${fmtN(v)} <span style="font-size:9px;color:var(--text3)">${u}</span>`:'<span style="color:var(--text3)">—</span>';
+      return`<td style="text-align:right;padding:6px 10px;font-variant-numeric:tabular-nums;${bold?'font-weight:700;':''}${clr?'color:'+clr+';':''}">${display}</td>`;
+    };
+    const fsRows=fsItems.map(it=>{
+      const z=zoneOf(it.bal,it.thr);
+      const balClr=it.bal!=null&&it.bal<0?'#C62828':z?z.clr:'var(--text1)';
+      const zoneBadge=z?`<span style="font-size:9px;font-weight:700;padding:1px 6px;border-radius:3px;background:${z.clr}18;color:${z.clr}">${z.label}</span>`:'—';
+      return`<tr style="border-bottom:1px solid var(--bdr)">
+        <td style="padding:6px 10px;font-weight:600;white-space:nowrap">${it.nm} <span style="font-size:9px;color:var(--text3)">(${it.u})</span></td>
+        ${cell(fv(it.in),it.u)}
+        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;color:#1565C0">${it.d1!=null?fmtN(it.d1)+' <span style="font-size:9px;color:#1565C090">'+it.u+'</span>':'<span style="color:var(--text3)">—</span>'}</td>
+        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;color:#2E7D32">${it.d2!=null?fmtN(it.d2)+' <span style="font-size:9px;color:#2E7D3290">'+it.u+'</span>':'<span style="color:var(--text3)">—</span>'}</td>
+        ${cell(fv(it.feed),it.u,true)}
+        <td style="padding:6px 10px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:${balClr}">${it.bal!=null?fmtN(it.bal)+' <span style="font-size:9px">'+it.u+'</span>':'<span style="color:var(--text3)">—</span>'}</td>
+        <td style="padding:6px 10px;text-align:center">${zoneBadge}</td>
+      </tr>`;
+    }).join('');
+    html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr>
+      <th>Feedstock</th>
+      <th style="text-align:right">Received</th>
+      <th style="text-align:right;color:#1565C0">D1 Fed</th>
+      <th style="text-align:right;color:#2E7D32">D2 Fed</th>
+      <th style="text-align:right">Total Fed</th>
+      <th style="text-align:right">Closing Balance</th>
+      <th style="text-align:center">Zone</th>
+    </tr></thead><tbody>${fsRows}</tbody></table>`;
+    // Cost card
+    if(rv.feed_cost){
+      html+=`<div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid var(--amber);border-radius:8px;padding:10px 16px;margin-bottom:14px">
+        <span style="font-size:11px;font-weight:600;color:var(--text2)">Daily Feedstock Cost</span>
+        <span style="font-size:20px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">${fmtL(rv.feed_cost)}</span>
+      </div>`;
+    }
+    // Anomaly alert for this day
+    const dayAnomalies=[];
+    [{k:'pm_bal',l:'Pressmud Balance (MT)'},{k:'gs_bal',l:'Grain Syrup Balance (KL)'},{k:'csl_bal',l:'CSL Balance (KL)'},{k:'cd_bal',l:'Cow Dung Balance (MT)'},{k:'sg_bal',l:'Spent Grain Balance (MT)'}].forEach(({k,l})=>{const v=f[k];if(v!=null&&v<0)dayAnomalies.push(`${l}: <b>${fmtN(v)}</b>`);});
+    [{k:'pm_in',l:'Pressmud Received'},{k:'gs_in',l:'GS Received'},{k:'csl_in',l:'CSL Received'},{k:'cd_in',l:'CD Received'},{k:'sg_in',l:'SG Received'},{k:'pm_feed',l:'Pressmud Fed'},{k:'gs_feed',l:'GS Fed'},{k:'csl_feed',l:'CSL Fed'},{k:'cd_feed',l:'CD Fed'},{k:'sg_feed',l:'SG Fed'}].forEach(({k,l})=>{const v=f[k];if(v!=null&&v<0)dayAnomalies.push(`${l}: <b>${fmtN(v)}</b>`);});
+    if(dayAnomalies.length){
+      html+=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-left:4px solid #C62828;border-radius:8px;padding:10px 16px;font-size:11px;color:#B71C1C">
+        <span style="font-weight:700">⚠ Anomaly — verify with Mr. Vivek Kumar:</span> ${dayAnomalies.join(' &nbsp;|&nbsp; ')}</div>`;
+    }
   } else if(sectionId==='s2'){
     const s2sc=document.getElementById('s2_static_content');
     if(s2sc) s2sc.style.display='none';
