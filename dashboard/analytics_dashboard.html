@@ -358,8 +358,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S2 LAB ══ -->
 <div id="s2" class="pg">
   <div class="stitle">Process & Testing — Laboratory <span class="resp">— Dr. Shikha, Mr. Jatin</span><span id="s2_period" class="mo-badge">All Months</span></div>
+  <!-- All static (non-day) content wrapped so it can be hidden during day view -->
+  <div id="s2_static_content">
   <!-- Sub-section 1: Digester Health -->
-  <div class="s2-sub-hdr s2-health-hdr">🔬 Digester Health <span class="s2-sub-sub">pH · Temperature · OLR · Alkalinity · TS/VS</span></div>
+  <div class="s2-sub-hdr s2-health-hdr">Digester Health <span class="s2-sub-sub">pH · Temperature · OLR · Alkalinity · TS/VS</span></div>
   <div id="s2_kpi_table" style="margin-bottom:12px"></div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s2_ph">pH — D1 vs D2 (safe: 6.8–7.5)</div><div class="cw"><canvas id="c_s2_ph"></canvas></div></div>
@@ -382,15 +384,15 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct">TS% / VS% — Sludge Line D1 vs D2</div><div class="cw s"><canvas id="c_s2_ts_sl"></canvas></div></div>
   </div>
   <!-- Sub-section 2: Feedstock Monitoring -->
-  <div class="s2-sub-hdr s2-feed-hdr">🌾 Feedstock Monitoring <span class="s2-sub-sub">Latest lab quality · TS% · VS% · BPP contribution</span></div>
+  <div class="s2-sub-hdr s2-feed-hdr">Feedstock Monitoring <span class="s2-sub-sub">Latest lab quality · TS% · VS% · BPP contribution</span></div>
   <div id="s2_feed_quality" style="margin-bottom:12px"></div>
-  <div id="s2_bpp_table" style="margin-bottom:12px"></div>
   <!-- Sub-section 3: Biogas Prediction -->
-  <div class="s2-sub-hdr s2-pred-hdr">📈 Biogas Prediction <span class="s2-sub-sub">Estimate accuracy · Expected vs Actual comparison</span></div>
+  <div class="s2-sub-hdr s2-pred-hdr">Biogas Prediction <span class="s2-sub-sub">Estimate accuracy · Expected vs Actual comparison</span></div>
   <div id="s2_pred_panel" style="margin-bottom:12px"></div>
   <div id="s2_pred_chart_wrap" class="cg c1" style="display:none">
     <div class="cc"><div class="ct">Monthly BPP Contribution by Feedstock — D1 &amp; D2 (m³)</div><div class="cw"><canvas id="c_s2_pred_bpp"></canvas></div></div>
   </div>
+  </div><!-- end s2_static_content -->
 </div>
 
 <!-- ══ S3 PRODUCTION ══ -->
@@ -1243,6 +1245,8 @@ function renderSectionDay(sectionId){
       metricCard('Feedstock Cost',fL2(rv.feed_cost),'','a','Daily procurement cost'),
     ]);
   } else if(sectionId==='s2'){
+    const s2sc=document.getElementById('s2_static_content');
+    if(s2sc) s2sc.style.display='none';
     const snap=latestHealthSnapshot(curDay);
     const tv={
       ph_d1:snap.ph_d1??h.ph?.d1, ph_d2:snap.ph_d2??h.ph?.d2,
@@ -1574,7 +1578,10 @@ function renderS1(){
 
 // ═══ S2 LAB ══════════════════════════════════════════════════
 function renderS2(){
-  if(renderSectionDay('s2')) return; else hideSectionDay('s2');
+  if(renderSectionDay('s2')) return;
+  hideSectionDay('s2');
+  const s2sc=document.getElementById('s2_static_content');
+  if(s2sc) s2sc.style.display='';
   const mo=curMonth; const k=D.kpis;
   const pb=document.getElementById('s2_period');
   if(pb) pb.textContent=mo==='ALL'?'All Months':mo;
@@ -1622,8 +1629,6 @@ function renderS2(){
   };
   const fqEl=document.getElementById('s2_feed_quality');
   if(fqEl) fqEl.innerHTML=_feedQualityHtml(D.cal,bppData,bppPeriod);
-  const bppEl=document.getElementById('s2_bpp_table');
-  if(bppEl) bppEl.innerHTML='';
   // ── Section 3: Biogas Prediction ──────────────────────────────────────
   const getSum=k=>mo==='ALL'?mArr(k).reduce((s,v)=>s+(v||0),0)||null:(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg')};
