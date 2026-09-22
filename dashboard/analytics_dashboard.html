@@ -320,6 +320,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div id="s1" class="pg">
   <div class="stitle">Feedstock Procurement & Management <span class="resp">— Mr. Vivek Kumar</span><span id="s1_period" class="mo-badge">All Months</span></div>
 
+  <!-- Month/Year content — hidden in day view -->
+  <div id="s1_main_content">
+
   <!-- Sub-section 1: Procurement -->
   <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#BF360C,#E64A19)">
     Feedstock Procurement <span class="s2-sub-sub">Received quantities &amp; vendor-wise supply</span>
@@ -355,6 +358,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct">Monthly Feedstock Cost (₹)</div><div class="cw"><canvas id="c_s1_cost"></canvas></div></div>
     <div class="cc"><div class="ct">Feedstock BPP Contribution — D1+D2 (m³)</div><div class="cw"><canvas id="c_s1_bpp"></canvas></div></div>
   </div>
+
+  </div><!-- /s1_main_content -->
 </div>
 
 <!-- ══ S2 LAB ══ -->
@@ -1215,6 +1220,9 @@ function renderSectionDay(sectionId){
     else pg.prepend(el);
   }
   el.style.display='block';
+  // Hide main month/year content container if present (e.g. s1_main_content)
+  const mainContent=document.getElementById(sectionId+'_main_content');
+  if(mainContent) mainContent.style.display='none';
   pg.querySelectorAll('canvas').forEach(c=>{
     if(charts[c.id]){try{charts[c.id].destroy();}catch(e){}charts[c.id]=null;}
     c.closest('.cc')&&(c.closest('.cc').style.display='none');
@@ -1447,6 +1455,8 @@ function renderSectionDay(sectionId){
 function hideSectionDay(sectionId){
   const el=document.getElementById('sd_'+sectionId); if(!el) return;
   el.style.display='none';
+  const mainContent=document.getElementById(sectionId+'_main_content');
+  if(mainContent) mainContent.style.display='';
   const pg=document.getElementById(sectionId);
   pg.querySelectorAll('canvas').forEach(c=>{ c.closest('.cc')&&(c.closest('.cc').style.display=''); });
 }
