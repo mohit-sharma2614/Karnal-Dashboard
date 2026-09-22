@@ -1560,15 +1560,21 @@ function renderS1(){
     {nm:'Spent Grain',k:'sg_in',u:'MT',clr:'#E65100'},
   ];
   // vendor lookup for current period
+  // Feedstock Supply sheet stores quantities in KG (for MT feedstocks) or Litres (for KL feedstocks)
+  // Feed & Balance uses MT/KL → divide vendor raw values by 1000
+  const vendorUnits={pm:'MT',cd:'MT',csl:'KL',sg:'MT'};
   const vend=D.vendors||{};
   const vendorForPeriod=(cat)=>{
     const list=vend[cat]||[];
+    const u=vendorUnits[cat]||'';
     if(!list.length) return '<span style="color:var(--text3);font-size:10px">—</span>';
-    const filtered=mo==='ALL'?list:list.map(v=>({name:v.name,total:v.byMonth?.[mo]||0})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
-    if(!filtered.length) return '<span style="color:var(--text3);font-size:10px">No data</span>';
+    const filtered=mo==='ALL'
+      ?list.map(v=>({name:v.name,total:v.total/1000}))
+      :list.map(v=>({name:v.name,total:(v.byMonth?.[mo]||0)/1000})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
+    if(!filtered.length) return '<span style="color:var(--text3);font-size:10px">No data this period</span>';
     return filtered.map(v=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:1px 0;border-bottom:1px solid var(--bdr)">
       <span style="font-size:10px;color:var(--text2)">${v.name}</span>
-      <span style="font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap">${fmtN(v.total)}</span>
+      <span style="font-size:10px;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap">${v.total>0?v.total.toFixed(1)+' '+u:'—'}</span>
     </div>`).join('');
   };
   const procEl=document.getElementById('s1_procurement');
@@ -1703,22 +1709,30 @@ function renderS1(){
   // ── 4. Anomaly Detection ──────────────────────────────────────
   const anomalyEl=document.getElementById('s1_anomaly');
   if(anomalyEl){
+    const _fd=mo==='ALL'?MONTHS:dDates('feed');
+    const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
     const checks=[
-      {label:'Pressmud Received',arr:mo==='ALL'?mArr('pm_in'):dArr('feed','pm_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Grain Syrup Received',arr:mo==='ALL'?mArr('gs_in'):dArr('feed','gs_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'CSL Received',arr:mo==='ALL'?mArr('csl_in'):dArr('feed','csl_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Cow Dung Received',arr:mo==='ALL'?mArr('cd_in'):dArr('feed','cd_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Spent Grain Received',arr:mo==='ALL'?mArr('sg_in'):dArr('feed','sg_in'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Pressmud Fed',arr:mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Grain Syrup Fed',arr:mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'CSL Fed',arr:mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Cow Dung Fed',arr:mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
-      {label:'Spent Grain Fed',arr:mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed'),dates:mo==='ALL'?MONTHS:dDates('feed')},
+      {label:'Pressmud Received (MT)',arr:_fa('pm_in'),dates:_fd},
+      {label:'Grain Syrup Received (KL)',arr:_fa('gs_in'),dates:_fd},
+      {label:'CSL Received (KL)',arr:_fa('csl_in'),dates:_fd},
+      {label:'Cow Dung Received (MT)',arr:_fa('cd_in'),dates:_fd},
+      {label:'Spent Grain Received (MT)',arr:_fa('sg_in'),dates:_fd},
+      {label:'Pressmud Fed (MT)',arr:_fa('pm_feed'),dates:_fd},
+      {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
+      {label:'CSL Fed (KL)',arr:_fa('csl_feed'),dates:_fd},
+      {label:'Cow Dung Fed (MT)',arr:_fa('cd_feed'),dates:_fd},
+      {label:'Spent Grain Fed (MT)',arr:_fa('sg_feed'),dates:_fd},
+      // Balance columns — negative means fed more than available stock
+      {label:'Pressmud Balance (MT)',arr:_fa('pm_bal'),dates:_fd,isBal:true},
+      {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
+      {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
+      {label:'Cow Dung Balance (MT)',arr:_fa('cd_bal'),dates:_fd,isBal:true},
+      {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
     ];
     const anomalies=[];
     checks.forEach(c=>{
       (c.arr||[]).forEach((v,i)=>{
-        if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v});
+        if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal});
       });
     });
     if(!anomalies.length){
@@ -1728,16 +1742,21 @@ function renderS1(){
         <div style="font-size:11px;color:var(--text3)">No negative values detected in received or fed data for this period.</div></div>
       </div>`;
     } else {
-      const rows=anomalies.map(a=>`<tr>
-        <td style="font-weight:700;color:#C62828">${a.label}</td>
-        <td>${a.date}</td>
-        <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(3)}</td>
-        <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px">⚠ CHECK WITH MR. VIVEK KUMAR</span></td>
-      </tr>`).join('');
+      const rows=anomalies.map(a=>{
+        const isB=a.isBal;
+        const note=isB?'Stock overdrawn — fed more than available balance':'Negative received/fed entry — possible data entry error';
+        return`<tr>
+          <td style="font-weight:700;color:#C62828">${a.label}</td>
+          <td style="font-variant-numeric:tabular-nums">${a.date}</td>
+          <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(2)}</td>
+          <td style="font-size:10px;color:var(--text2)">${note}</td>
+          <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. VIVEK KUMAR</span></td>
+        </tr>`;
+      }).join('');
       anomalyEl.innerHTML=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#B71C1C;font-size:11px;font-weight:700">
-        ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} found — negative values detected. Verify entries with Mr. Vivek Kumar.
+        ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} detected — negative values in feedstock data. Verify with Mr. Vivek Kumar.
       </div>
-      <table class="tbl"><thead><tr><th>Metric</th><th>Period</th><th>Value</th><th>Action</th></tr></thead>
+      <table class="tbl"><thead><tr><th>Metric</th><th>Period</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
       <tbody>${rows}</tbody></table>`;
     }
   }
