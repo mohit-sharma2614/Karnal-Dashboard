@@ -443,6 +443,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S4 PURIFICATION ══ -->
 <div id="s4" class="pg">
   <div class="stitle">Purification — RBG to PBG <span class="resp">— Mr. Bobby</span><span id="s4_period" class="mo-badge">All Months</span></div>
+  <div id="s4_main_content">
   <div class="kg k4">
     <div class="kc c"><div class="kl">Ideal Raw Suction</div><div class="kv c" id="s4_ideal_raw">—</div><div class="ks">600 m³/hr × PSA hrs</div></div>
     <div class="kc a"><div class="kl">Ideal Purified</div><div class="kv a" id="s4_ideal_pur">—</div><div class="ks">370 m³/hr × PSA hrs</div></div>
@@ -486,6 +487,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct" id="ct_s4_eff">PSA Efficiency % — D1 vs D2 (Design: 45.83%)</div><div class="cw"><canvas id="c_s4_eff"></canvas></div></div>
     <div class="cc"><div class="ct">Feedstock Expected Gas vs Actual Purified (m³)</div><div class="cw"><canvas id="c_s4_exp"></canvas></div></div>
   </div>
+  </div><!-- /s4_main_content -->
 </div>
 
 <!-- ══ SI PLANT INTELLIGENCE ══ -->
@@ -544,6 +546,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S5 COMPRESSION ══ -->
 <div id="s5" class="pg">
   <div class="stitle">Compression & Filling — PBG to CBG <span class="resp">— Mr. Rajendra Kumar</span><span id="s5_period" class="mo-badge">All Months</span></div>
+  <div id="s5_main_content">
   <div class="kg k4">
     <div class="kc c"><div class="kl">YTD CBG Produced</div><div class="kv c" id="s5_cbg">—</div><div class="ks">kg</div></div>
     <div class="kc g"><div class="kl">YTD Dispatched</div><div class="kv g" id="s5_disp">—</div><div class="ks">kg</div></div>
@@ -558,11 +561,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct" id="ct_s5_ideal">Ideal vs Actual CBG (kg)</div><div class="cw"><canvas id="c_s5_ideal"></canvas></div></div>
     <div class="cc"><div class="ct" id="ct_s5_util">Compressor Utilization %</div><div class="cw"><canvas id="c_s5_util"></canvas></div></div>
   </div>
+  </div><!-- /s5_main_content -->
 </div>
 
 <!-- ══ S6 MANURE ══ -->
 <div id="s6" class="pg">
   <div class="stitle">Manure Section <span class="resp">— Mr. Vivek Kumar</span><span id="s6_period" class="mo-badge">All Months</span></div>
+  <div id="s6_main_content">
   <div class="kg k4">
     <div class="kc c"><div class="kl">SFOM Revenue</div><div class="kv c" id="s6_sfom_rev">—</div></div>
     <div class="kc g"><div class="kl">LFOM Revenue</div><div class="kv g" id="s6_lfom_rev">—</div></div>
@@ -577,11 +582,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct" id="ct_s6_d1">D1 Drain (m³)</div><div class="cw"><canvas id="c_s6_d1"></canvas></div></div>
     <div class="cc"><div class="ct" id="ct_s6_d2">D2 Drain (m³)</div><div class="cw"><canvas id="c_s6_d2"></canvas></div></div>
   </div>
+  </div><!-- /s6_main_content -->
 </div>
 
 <!-- ══ S7 SALES ══ -->
 <div id="s7" class="pg">
   <div class="stitle">Sale Section — CBG & Digestate <span class="resp">— Mr. Vivek Kumar</span><span id="s7_period" class="mo-badge">All Months</span></div>
+  <div id="s7_main_content">
   <div class="kg k3">
     <div class="kc c"><div class="kl">CBG Revenue</div><div class="kv c" id="s7_cbg_rev">—</div></div>
     <div class="kc g"><div class="kl">Total Dispatched</div><div class="kv g" id="s7_disp">—</div><div class="ks">kg</div></div>
@@ -593,11 +600,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
   <div class="stitle">Customer Dispatch Summary</div>
   <table class="tbl" id="s7_tbl"></table>
+  </div><!-- /s7_main_content -->
 </div>
 
 <!-- ══ S8 FINANCE ══ -->
 <div id="s8" class="pg">
   <div class="stitle">Finance — Management View <span id="s8_period" class="mo-badge">All Months</span></div>
+  <div id="s8_main_content">
   <div class="kg k4">
     <div class="kc g"><div class="kl">Total Revenue</div><div class="kv g" id="s8_rev_kpi">₹448.5 L</div><div class="ks">CBG + Manure</div></div>
     <div class="kc r"><div class="kl">Total Cost</div><div class="kv r" id="s8_cost_kpi">₹237.0 L</div><div class="ks">Feedstock + Fixed</div></div>
@@ -627,6 +636,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <table class="tbl" id="s8_emi_tbl"></table>
   <div class="stitle">Monthly P&L Summary</div>
   <table class="tbl" id="s8_tbl"></table>
+  </div><!-- /s8_main_content -->
 </div>
 
 <div class="footer">LREKPL — 5.4 TPD CBG Plant Karnal &nbsp;|&nbsp; Jan–Jun 2026 &nbsp;|&nbsp; Data: CBG_Karnal_D1_D2_2026.xlsx</div>
