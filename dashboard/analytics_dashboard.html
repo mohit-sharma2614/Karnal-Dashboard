@@ -1674,6 +1674,7 @@ function renderS1(){
       <td></td>
     </tr></tbody></table>`;
   }
+  const labels=mo==='ALL'?MONTHS:dDates('feed');
   const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
   const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
   const cslFeed=mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
