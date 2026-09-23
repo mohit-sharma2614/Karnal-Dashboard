@@ -1623,21 +1623,28 @@ function renderSectionDay(sectionId){
     const dispRate=p.act_cbg&&p.dispatched!=null?+(p.dispatched/p.act_cbg*100).toFixed(1):null;
     const compUtil=p.psa_hrs&&p.comp_hrs!=null?+(p.comp_hrs/p.psa_hrs*100).toFixed(1):null;
     const inHand=(p.act_cbg||0)-(p.dispatched||0);
-    const drClr=dispRate!=null?(dispRate>=95?'g':dispRate>=80?'a':'r'):'';
+    // Dispatch Rate: >100% = anomaly (dispatched > produced), flag red; normal range 80–100% = good
+    const drAnomaly=dispRate!=null&&dispRate>100;
+    const drClr=dispRate==null?'':drAnomaly?'r':dispRate>=95?'g':dispRate>=80?'a':'r';
+    const drHint=drAnomaly?'⚠ Dispatched exceeds produced — check data':'Dispatched ÷ Produced';
+    const drPct=drAnomaly?100:dispRate||0; // cap bar at 100 visually
     const cuClr=compUtil!=null?(compUtil>=95?'g':compUtil>=80?'a':'r'):'';
+    // Negative inHand = dispatched > produced = data anomaly, not "good"
+    const ihClr=inHand<0?'r':inHand===0?'g':inHand<=500?'g':'a';
+    const ihHint=inHand<0?'⚠ Dispatched > produced — data anomaly':inHand===0?'Fully dispatched':'Unsold / cascade stock';
     html+=groupHeader('Compression Status','Key metrics for today\'s compression run');
     html+=grid([
-      metricCard('Dispatch Rate',dispRate!=null?dispRate+'%':null,'',drClr,'Dispatched ÷ Produced',true,dispRate||0),
+      metricCard('Dispatch Rate',dispRate!=null?dispRate+'%':null,'',drClr,drHint,true,drPct),
       metricCard('Compressor Utilization',compUtil!=null?compUtil+'%':null,'',cuClr,'Comp hrs ÷ PSA hrs',true,compUtil||0),
       metricCard('CBG Produced',fN(p.act_cbg),'kg','c','from PSA output'),
-      metricCard('CBG In Hand',fN(inHand),'kg',inHand>0?'a':'g','Produced − Dispatched'),
+      metricCard('CBG In Hand',fN(inHand),'kg',ihClr,ihHint),
     ]);
     html+=groupHeader('PSA & Compressor Runtime','Hours logged today');
     html+=grid([
       metricCard('PSA Operating Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(1):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
       metricCard('Compressor Hours',p.comp_hrs!=null?p.comp_hrs.toFixed(1):null,'hrs','g','',true,p.comp_hrs?p.comp_hrs/24*100:0),
       metricCard('CBG Dispatched',fN(p.dispatched),'kg','g','Total sent today'),
-      metricCard('Dispatch Gap',fN(inHand),'kg',inHand>500?'a':'g',inHand>0?'Unsold / cascade stock':'Fully dispatched'),
+      metricCard('Dispatch Gap',fN(inHand),'kg',ihClr,ihHint),
     ]);
     const customers=[['Veer',p.veer],['Adinath',p.adinath],['KFS',p.kfs],['KSK',p.ksk],['OM',p.om],['SPS',p.sps]].filter(([,v])=>v>0);
     if(customers.length){
