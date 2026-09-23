@@ -2630,6 +2630,7 @@ function renderS4(){
   const d2cd=mo==='ALL'?mArr('d2_cd_bpp'):dArr('exp','d2_cd_bpp');
   const d2csl=mo==='ALL'?mArr('d2_csl_bpp'):dArr('exp','d2_csl_bpp');
   const d2gs=mo==='ALL'?mArr('d2_gs_bpp'):dArr('exp','d2_gs_bpp');
+  line('c_s4_exp',lblE,[lDS('Feedstock Expected (BPP)',expT,C.blue),lDS('Actual Purified',actP,C.green)]);
   bar('c_s4_bpp',lblE,[
     bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),
     bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan),
