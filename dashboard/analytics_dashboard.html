@@ -339,6 +339,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
 
   <!-- Sub-section 3: Inventory Balance -->
+  <div id="s1_feed_cost" style="margin-bottom:14px"></div>
   <div id="s1_bal_hdr" class="s2-sub-hdr" style="background:linear-gradient(120deg,#2E7D32,#388E3C)">
     Inventory Balance <span class="s2-sub-sub">Stock vs threshold — zone classification</span>
   </div>
@@ -1806,6 +1807,18 @@ function renderS1(){
       <td></td>
     </tr></tbody></table>`;
   }
+  // ── 2b. Total Feedstock Cost card ────────────────────────────
+  const fcEl=document.getElementById('s1_feed_cost');
+  if(fcEl){
+    const fcArr2=mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost');
+    const totalFC=sumA(fcArr2);
+    const label=mo==='ALL'?'YTD Feedstock Cost':mo+' Feedstock Cost';
+    fcEl.innerHTML=totalFC>0?`<div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid var(--amber);border-radius:8px;padding:10px 16px">
+      <span style="font-size:11px;font-weight:600;color:var(--text2)">${label}</span>
+      <span style="font-size:20px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">${fmtL(totalFC)}</span>
+    </div>`:'';
+  }
+
   const labels=mo==='ALL'?MONTHS:dDates('feed');
   const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
   const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
