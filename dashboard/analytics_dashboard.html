@@ -2593,14 +2593,17 @@ function diagnose(totExp, idealPur, actPur, actCBG, idealCBG,
   // ── 4. PSA performance — is the machine underperforming?
   const actVsFeedExp = te>0 ? pct(ap,te) : 0;
   const actVsPsaIdeal = ip>0 ? pct(ap,ip) : 0;
+  // threshold: day=8 hrs, month=150 hrs (~5/day), ALL=900 hrs (~5/day×6mo)
+  const _psaThresh = label==='day'?8:label==='ALL'?900:150;
   if(actVsFeedExp>15 && issues.filter(i=>i.sev==='red').length===0){
-    if(psaHrs && psaHrs<(label==='ALL'?1200:200)){
+    if(psaHrs && psaHrs<_psaThresh){
       issues.push({sev:'red',cat:'PSA Downtime',
         msg:`PSA ran only ${Math.round(psaHrs)} hrs — machine downtime is reducing output below what feedstock can deliver`,
         detail:'Even with good feedstock, if PSA is not running it cannot purify gas. Check maintenance logs.'});
-    } else if(d1Eff && n(d1Eff)<35){
+    } else if((d1Eff&&n(d1Eff)<35)||(d2Eff&&n(d2Eff)<35)){
+      const lowEff=d1Eff&&n(d1Eff)<35?`D1 ${n(d1Eff).toFixed(1)}%`:''+(d2Eff&&n(d2Eff)<35?` D2 ${n(d2Eff).toFixed(1)}%`:'');
       issues.push({sev:'red',cat:'PSA Efficiency Below Design',
-        msg:`PSA efficiency at ${n(d1Eff).toFixed(1)}% vs design 45.8% — membrane or valve performance degraded`,
+        msg:`PSA efficiency below design 45.8% (${lowEff.trim()}) — membrane or valve performance degraded`,
         detail:'Gas is being lost in the PSA purification stage. Check membrane integrity and valve cycles.'});
     } else {
       issues.push({sev:'amber',cat:'Digester Conversion Gap',
@@ -3286,10 +3289,11 @@ function stageBox(name,metric,label,status,cls,loss=''){
   </div>`;
 }
 
-function buildCascade(totExp,idealPur,actPur,actCBG,psaHrs,phD1,phD2,tpD1,tpD2,iaD1,iaD2,d1Feed,d2Feed,ch4,d1Eff){
+function buildCascade(totExp,idealPur,actPur,actCBG,psaHrs,phD1,phD2,tpD1,tpD2,iaD1,iaD2,d1Feed,d2Feed,ch4,d1Eff,cbgTarget){
   const nv=v=>(!v||isNaN(v))?0:+v;
   const te=nv(totExp), ip=nv(idealPur), ap=nv(actPur);
   const pct=(a,b)=>b>0?Math.round(a/b*100):0;
+  const _cbgTgt=cbgTarget||TGT.cbg_month;
 
   // Stage 1 — Feedstock
   const feedPct = ip>0?pct(te,ip):100;
@@ -3315,9 +3319,8 @@ function buildCascade(totExp,idealPur,actPur,actCBG,psaHrs,phD1,phD2,tpD1,tpD2,i
   const psaStatus = psaPct>=90?'✓ Performing':`${psaPct}% of expected`;
   const psaLoss = psaPct<90?`Loss: ${Math.round((te||ip)-ap).toLocaleString()} m³ in purification`:'';
 
-  // Stage 4 — Output
-  const tgtDay=TGT.cbg_month;
-  const cbgPct = tgtDay>0?pct(nv(actCBG),tgtDay):0;
+  // Stage 4 — Output (target is scope-aware: passed in as cbgTarget)
+  const cbgPct = _cbgTgt>0?pct(nv(actCBG),_cbgTgt):0;
   const outCls = cbgPct>=90?'g':cbgPct>=70?'a':'r';
 
   // Find primary bottleneck
@@ -3346,9 +3349,9 @@ function buildCascade(totExp,idealPur,actPur,actCBG,psaHrs,phD1,phD2,tpD1,tpD2,i
       `Actual vs ${te?Math.round(te).toLocaleString():Math.round(ip).toLocaleString()} m³ expected`,psaStatus,psaCls,psaLoss)}
     <div class="cascade-arrow">→</div>
     ${stageBox('CBG Output',actCBG?Math.round(nv(actCBG)).toLocaleString()+' kg':'—',
-      `Target: ${TGT.cbg_month.toLocaleString()} kg/month`,
+      `Target: ${_cbgTgt.toLocaleString()} kg`,
       cbgPct>=90?'On Target':`${cbgPct}% of target`,outCls,
-      cbgPct<90?`Short by ${Math.round(tgtDay-nv(actCBG)).toLocaleString()} kg`:'')}</div>`;
+      cbgPct<90?`Short by ${Math.round(_cbgTgt-nv(actCBG)).toLocaleString()} kg`:'')}</div>`;
 }
 
 function buildRecommendations(issues){
@@ -3395,7 +3398,9 @@ function renderHeatmap(){
     days.forEach((d,dayIdx)=>{
       const hmDay=(hm[mo]||[])[dayIdx];
       const cbg=D.days[d]?.psa?.cbg_tot||0;
-      const cls=hmDay||(cbg>0?'r':'empty');
+      const _dayTgt=TGT.cbg_month/30;
+      const _computed=cbg>=_dayTgt*0.9?'green':cbg>=_dayTgt*0.7?'amber':cbg>0?'red':'empty';
+      const cls=hmDay||_computed;
       const day=d.split('-')[0];
       const pct=cbg>0?Math.round(cbg/TGT.cbg_month*100):null;
       html+=`<div class="hm-day ${cls}" title="${d}: ${cbg?Math.round(cbg).toLocaleString()+' kg':'-'} (${pct!=null?pct+'%':'no data'})"
@@ -3417,11 +3422,12 @@ function renderMonthCards(selMonth){
     const cls=pct>=90?'green':pct>=70?'amber':'red';
     const clsC=pct>=90?C.green:pct>=70?C.amber:C.red;
     const bgC=pct>=90?'var(--gbg)':pct>=70?'var(--abg)':'var(--rbg)';
+    const _gM=k=>(D.M[k]||[])[i]??null;
     const issues=D.M.exp_tot&&D.M.act_pur?diagnose(
-      D.M.exp_tot[i],D.M.ideal_pur[i],D.M.act_pur[i],D.M.act_cbg[i],D.M.ideal_cbg[i],
-      D.M.ph_d1[i],D.M.ph_d2[i],D.M.tmp_d1[i],D.M.tmp_d2[i],
-      D.M.ia_d1[i],D.M.ia_d2[i],null,null,null,null,
-      D.M.psa_hrs[i],D.M.d1_eff[i],D.M.d2_eff[i],D.M.ch4[i],'ALL'):[];
+      _gM('exp_tot'),_gM('ideal_pur'),_gM('act_pur'),_gM('act_cbg'),_gM('ideal_cbg'),
+      _gM('ph_d1'),_gM('ph_d2'),_gM('tmp_d1'),_gM('tmp_d2'),
+      _gM('ia_d1'),_gM('ia_d2'),null,null,null,null,
+      _gM('psa_hrs'),_gM('d1_eff'),_gM('d2_eff'),_gM('ch4'),'ALL'):[];
     const top=issues[0]||{cat:'No data',sev:'grey'};
     const tagBg=top.sev==='green'?'var(--gbg)':top.sev==='amber'?'var(--abg)':top.sev==='red'?'var(--rbg)':'var(--bg3)';
     const tagClr=top.sev==='green'?'var(--green)':top.sev==='amber'?'var(--amber)':top.sev==='red'?'var(--red)':'var(--text3)';
@@ -3447,38 +3453,42 @@ function getSIData(mo, day){
   // Returns {totExp,idealPur,actPur,actCBG,idealCBG,psaHrs,phD1,phD2,tpD1,tpD2,iaD1,iaD2,ch4,d1Eff,cbg,cpk,label}
   if(day!=='ALL'){
     const rec=D.days[day]||{}; const p=rec.psa||{}, ex=rec.exp||{}, h=rec.health||{};
+    // d1_eff / d2_eff may live on the PSA record keyed as d1_eff, d2_eff
     return {totExp:ex.tot_exp,idealPur:ex.ideal_pur,actPur:ex.act_pur,actCBG:p.cbg_tot,
       idealCBG:ex.ideal_cbg,psaHrs:p.psa_hrs,phD1:h.ph?.d1,phD2:h.ph?.d2,
       tpD1:h.tp?.d1,tpD2:h.tp?.d2,iaD1:h.ia?.d1,iaD2:h.ia?.d2,
-      ch4:p.ch4,d1Eff:p.d1_eff,cbg:p.cbg_tot,cpk:null,
+      ch4:p.ch4,d1Eff:p.d1_eff??null,d2Eff:p.d2_eff??null,cbg:p.cbg_tot,cpk:null,
       feedActD1:rec.d1?.feed_act,feedExpD1:rec.d1?.feed_exp,
       feedActD2:rec.d2?.feed_act,feedExpD2:rec.d2?.feed_exp,
-      exp:ex,label:day,scope:'day'};
+      exp:ex,label:'day',scope:'day'};
   }
   if(mo!=='ALL'){
     const i=MONTHS_LIST.indexOf(mo);
-    return {totExp:(D.M.exp_tot||[])[i],idealPur:(D.M.ideal_pur||[])[i],
-      actPur:(D.M.act_pur||[])[i],actCBG:(D.M.cbg||[])[i],idealCBG:(D.M.ideal_cbg||[])[i],
-      psaHrs:(D.M.psa_hrs||[])[i],phD1:(D.M.ph_d1||[])[i],phD2:(D.M.ph_d2||[])[i],
-      tpD1:(D.M.tmp_d1||[])[i],tpD2:(D.M.tmp_d2||[])[i],
-      iaD1:(D.M.ia_d1||[])[i],iaD2:(D.M.ia_d2||[])[i],
-      ch4:(D.M.ch4||[])[i],d1Eff:(D.M.d1_eff||[])[i],cbg:(D.M.cbg||[])[i],
+    const gM=k=>(D.M[k]||[])[i]??null;
+    return {totExp:gM('exp_tot'),idealPur:gM('ideal_pur'),
+      actPur:gM('act_pur'),actCBG:gM('cbg'),idealCBG:gM('ideal_cbg'),
+      psaHrs:gM('psa_hrs'),phD1:gM('ph_d1'),phD2:gM('ph_d2'),
+      tpD1:gM('tmp_d1'),tpD2:gM('tmp_d2'),
+      iaD1:gM('ia_d1'),iaD2:gM('ia_d2'),
+      ch4:gM('ch4'),d1Eff:gM('d1_eff'),d2Eff:gM('d2_eff'),cbg:gM('cbg'),
       cpk:D.cost_per_kg[mo],label:mo+' 2026',scope:'month'};
   }
-  // ALL — aggregate
+  // ALL — aggregate flow values across all months; point-in-time health from latest month
   const cbgArr=D.M.cbg||[];
   const totalCBG=cbgArr.reduce((a,b)=>a+(b||0),0);
   const cpkArr=Object.values(D.cost_per_kg||{}).filter(v=>v);
   const avgCpk=cpkArr.length?cpkArr.reduce((a,b)=>a+b,0)/cpkArr.length:0;
-  // use latest month for cascade
+  const sumM=k=>(D.M[k]||[]).reduce((a,b)=>a+(b||0),0);
+  // latest month index for point-in-time readings (pH, temp, IA/PA, efficiency)
   const li=MONTHS_LIST.length-1;
-  return {totExp:(D.M.exp_tot||[])[li],idealPur:(D.M.ideal_pur||[])[li],
-    actPur:(D.M.act_pur||[])[li],actCBG:totalCBG,idealCBG:(D.M.ideal_cbg||[])[li],
-    psaHrs:(D.M.psa_hrs||[])[li],phD1:(D.M.ph_d1||[])[li],phD2:(D.M.ph_d2||[])[li],
+  return {totExp:sumM('exp_tot'),idealPur:sumM('ideal_pur'),
+    actPur:sumM('act_pur'),actCBG:totalCBG,idealCBG:sumM('ideal_cbg'),
+    psaHrs:sumM('psa_hrs'),
+    phD1:(D.M.ph_d1||[])[li],phD2:(D.M.ph_d2||[])[li],
     tpD1:(D.M.tmp_d1||[])[li],tpD2:(D.M.tmp_d2||[])[li],
     iaD1:(D.M.ia_d1||[])[li],iaD2:(D.M.ia_d2||[])[li],
-    ch4:(D.M.ch4||[])[li],d1Eff:(D.M.d1_eff||[])[li],cbg:totalCBG,cpk:avgCpk,
-    label:'All Months',scope:'all'};
+    ch4:(D.M.ch4||[])[li],d1Eff:(D.M.d1_eff||[])[li],d2Eff:(D.M.d2_eff||[])[li],
+    cbg:totalCBG,cpk:avgCpk,label:'ALL',scope:'all'};
 }
 
 function renderSI(){
@@ -3536,7 +3546,7 @@ function renderSI(){
     document.getElementById('si_ach').innerHTML=`${Math.round(cbg/tgt*100)}%${tgtBadge(cbg,tgt)}`;
     document.getElementById('si_k1').querySelector('.ks').textContent=mo+' 2026 performance';
     document.getElementById('si_k2').querySelector('.ks').textContent=`${Math.round(cbg).toLocaleString()} kg produced vs ${tgt.toLocaleString()} kg target`;
-    const issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,null,d.ch4,'ALL');
+    const issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'ALL');
     const top=issues.find(i=>i.sev!=='green')||issues[0];
     document.getElementById('si_bottleneck').textContent=top&&top.sev!=='green'?top.cat:'All Good';
     document.getElementById('si_bottleneck').style.color=top&&top.sev==='red'?'var(--red)':top&&top.sev==='amber'?'var(--amber)':'var(--green)';
@@ -3549,7 +3559,7 @@ function renderSI(){
     document.getElementById('si_ach').innerHTML=`${Math.round(cbg/dayTgt*100)}%${tgtBadge(cbg,dayTgt)}`;
     document.getElementById('si_k1').querySelector('.ks').textContent=day+' performance';
     document.getElementById('si_k2').querySelector('.ks').textContent=`${Math.round(cbg).toLocaleString()} kg produced vs ${Math.round(dayTgt).toLocaleString()} kg daily target`;
-    const issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,d.feedActD1,d.feedExpD1,d.feedActD2,d.feedExpD2,d.psaHrs,d.d1Eff,null,d.ch4,'day');
+    const issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,d.feedActD1,d.feedExpD1,d.feedActD2,d.feedExpD2,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'day');
     const top=issues.find(i=>i.sev!=='green')||issues[0];
     document.getElementById('si_bottleneck').textContent=top&&top.sev!=='green'?top.cat:'All Good';
     document.getElementById('si_bottleneck').style.color=top&&top.sev==='red'?'var(--red)':top&&top.sev==='amber'?'var(--amber)':'var(--green)';
@@ -3570,7 +3580,7 @@ function renderSI(){
   if(day!=='ALL'){
     cascTitle.textContent=`Performance Analysis — ${day}`;
     issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,
-      d.iaD1,d.iaD2,d.feedActD1,d.feedExpD1,d.feedActD2,d.feedExpD2,d.psaHrs,d.d1Eff,null,d.ch4,'day');
+      d.iaD1,d.iaD2,d.feedActD1,d.feedExpD1,d.feedActD2,d.feedExpD2,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'day');
     bppCard.style.display='block';
     const ex=d.exp||{};
     const bppCols=[
@@ -3592,17 +3602,19 @@ function renderSI(){
   } else if(mo!=='ALL'){
     cascTitle.textContent=`Performance Analysis — ${mo} 2026`;
     issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,
-      d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,null,d.ch4,'ALL');
+      d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'ALL');
     bppCard.style.display='none';
   } else {
-    cascTitle.textContent=`Performance Analysis — Latest Month (${MONTHS_LIST[MONTHS_LIST.length-1]} 2026)`;
-    issues=diagnose(d.totExp,d.idealPur,d.actPur,null,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,
-      d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,null,d.ch4,'ALL');
+    cascTitle.textContent=`Performance Analysis — All Months (YTD)`;
+    issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,
+      d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'ALL');
     bppCard.style.display='none';
   }
+  // cbgTarget: day → daily target, month → monthly, ALL → YTD total target
+  const _cascTgt=day!=='ALL'?Math.round(TGT.cbg_month/30):mo!=='ALL'?TGT.cbg_month:TGT.cbg_month*MONTHS_LIST.length;
   casc.innerHTML=buildCascade(d.totExp,d.idealPur,d.actPur,
-    day!=='ALL'?d.cbg:(mo!=='ALL'?d.cbg:null),
-    d.psaHrs,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,null,null,d.ch4,d.d1Eff);
+    day!=='ALL'?d.cbg:(mo!=='ALL'?d.cbg:d.cbg),
+    d.psaHrs,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,null,null,d.ch4,d.d1Eff,_cascTgt);
   document.getElementById('si_reco').innerHTML=buildRecommendations(issues.filter(i=>i.sev!=='green'));
 }
 
