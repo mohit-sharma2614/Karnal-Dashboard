@@ -447,18 +447,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div id="s4_main_content">
   <!-- Status bar -->
   <div id="s4_status_bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px"></div>
-  <div class="kg k4">
-    <div class="kc c"><div class="kl">Ideal Raw Suction</div><div class="kv c" id="s4_ideal_raw">—</div><div class="ks">600 m³/hr × PSA hrs</div></div>
-    <div class="kc a"><div class="kl">Ideal Purified</div><div class="kv a" id="s4_ideal_pur">—</div><div class="ks">370 m³/hr × PSA hrs</div></div>
-    <div class="kc g"><div class="kl">Actual Purified</div><div class="kv g" id="s4_pur">—</div><div class="ks">m³ · vs ideal</div></div>
-    <div class="kc" id="s4_ch4_c"><div class="kl">Avg CH4 %</div><div class="kv" id="s4_ch4">—</div><div class="ks">Gas purity</div></div>
-  </div>
-  <div class="kg k4" style="margin-bottom:12px">
-    <div class="kc a"><div class="kl">Ideal CBG</div><div class="kv a" id="s4_ideal_cbg">—</div><div class="ks">275 kg/hr × PSA hrs</div></div>
-    <div class="kc g"><div class="kl">Actual CBG</div><div class="kv g" id="s4_act_cbg">—</div><div class="ks">kg produced</div></div>
-    <div class="kc"><div class="kl">PSA Hours</div><div class="kv" id="s4_hrs">—</div><div class="ks">hrs running</div></div>
-    <div class="kc" id="s4_eff_c"><div class="kl">Avg PSA Efficiency</div><div class="kv" id="s4_eff">—</div><div class="ks">Design: 45.83%</div></div>
-  </div>
+  <div id="s4_kpi_paired" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:12px"></div>
   <!-- Chain analysis section -->
   <div style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);border-bottom:1.5px solid var(--bdr);padding-bottom:6px;margin:14px 0 10px;display:flex;justify-content:space-between;align-items:center">
     Production Chain Analysis <span style="font-size:9px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text3)">Step-by-step loss attribution · Required hrs / Shortfall / Suction eff / Purification eff</span>
@@ -496,7 +485,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct">Feedstock Expected Gas vs Actual Purified (m³)</div><div class="cw"><canvas id="c_s4_exp"></canvas></div></div>
   </div>
   <div class="cg c1">
-    <div class="cc"><div class="ct">Suction Efficiency % — Monthly Trend (Target ≥85%)</div><div class="cw"><canvas id="c_s4_suc_eff"></canvas></div></div>
+    <div class="cc"><div class="ct">Conversion Efficiency % — Monthly Trend (Design 61.67% · Actual Purified ÷ RBG Sucked)</div><div class="cw"><canvas id="c_s4_suc_eff"></canvas></div></div>
   </div>
   <div id="s4_anomaly" style="margin-top:14px"></div>
   </div><!-- /s4_main_content -->
@@ -1584,62 +1573,57 @@ function renderSectionDay(sectionId){
         </div></div>`;
     }
 
-    html+=groupHeader('PSA Unit Performance','Ideal vs actual gas processing');
-    html+=grid([
-      metricCard('Ideal Raw Suction',fN(ex.ideal_raw||p.ideal_raw),'m³','a','600 m³/hr × PSA hrs'),
-      metricCard('Ideal Purified Gas',fN(ex.ideal_pur||p.ideal_pur),'m³','a','370 m³/hr × PSA hrs'),
-      metricCard('Actual Purified Gas',fN(p.purified),'m³',purCls,purPct!=null?purPct+'% of ideal':'',true,purPct||0),
-      metricCard('CH4 Purity',ch4v,'%','g','Gas quality',true,ch4Pct),
-    ]);
-    html+=groupHeader('CBG Output','Purified gas to compression');
-    html+=grid([
-      metricCard('Ideal CBG',fN(cbgTgt),'kg','a','275 kg/hr × PSA hrs'),
-      metricCard('Actual CBG Produced',fN(actCBGD),'kg',cbgCls,cbgPct!=null?cbgPct+'% of ideal':'',true,cbgPct||0),
-      metricCard('PSA Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(2):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
-      metricCard('Avg PSA Efficiency',avgEff,'%',effCls,'Design: 45.83%',true,avgEff||0),
-    ]);
-    // ── Anomaly Detection — full month ───────────────────────────
+    // ── Paired KPI cards — day view (Tasks 1,4,5) ─────────────────
+    const idealRawD=ex.ideal_raw||p.ideal_raw;
+    const idealPurD=ex.ideal_pur||p.ideal_pur;
+    const pRawD=idealRawD>0&&actualRbg>0?Math.round(actualRbg/idealRawD*100):null;
+    const pPurD=idealPurD>0&&p.purified>0?Math.round(p.purified/idealPurD*100):null;
+    const pCBGD=cbgPct;
+    const barRow=(pct,lbl)=>{if(pct==null)return'';const pp=Math.min(Math.max(pct,0),100);const bc=pp>=90?'#16a34a':pp>=70?'#d97706':'#dc2626';
+      return`<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:var(--text3)">${lbl}</span><span style="font-size:10px;font-weight:700;color:${bc}">${pp}%</span></div>
+      <div style="background:var(--bg3);border-radius:3px;height:5px;overflow:hidden"><div style="width:${pp}%;height:5px;background:${bc};border-radius:3px;transition:width .4s"></div></div></div>`;};
+    const dPairedCard=(title,topLabel,topVal,topUnit,btmLabel,btmVal,btmUnit,pct)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:13px 14px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">${title}</div>
+      <div style="margin-bottom:5px"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${topLabel}</div>
+        <div style="font-size:14px;font-weight:700;color:var(--amber)">${topVal??'—'}<span style="font-size:10px;font-weight:400;color:var(--text2);margin-left:2px">${topVal!=null?topUnit:''}</span></div></div>
+      <div style="margin-bottom:3px"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${btmLabel}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--green)">${btmVal??'—'}<span style="font-size:11px;font-weight:400;color:var(--text2);margin-left:2px">${btmVal!=null?btmUnit:''}</span></div></div>
+      ${barRow(pct,'Actual vs Ideal')}</div>`;
+    const dOpsCard=`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:13px 14px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">Operations</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div><div style="font-size:9px;color:var(--text3)">PSA Hours</div><div style="font-size:16px;font-weight:800;color:var(--blue)">${p.psa_hrs!=null?p.psa_hrs.toFixed(2):'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${p.psa_hrs!=null?'hrs':''}</span></div></div>
+        <div><div style="font-size:9px;color:var(--text3)">Avg PSA Efficiency</div><div style="font-size:14px;font-weight:700;color:${effCls==='g'?'var(--green)':effCls==='a'?'var(--amber)':effCls==='r'?'var(--red)':'var(--text)'}">${avgEff!=null?avgEff.toFixed(1):'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${avgEff!=null?'% · Design 45.83%':''}</span></div></div>
+        <div><div style="font-size:9px;color:var(--text3)">CH4 Purity</div><div style="font-size:14px;font-weight:700;color:${ch4v!=null&&ch4v>=90?'var(--green)':ch4v!=null&&ch4v>=80?'var(--amber)':'var(--red)'}">${ch4v!=null?ch4v:'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${ch4v!=null?'%':''}</span></div></div>
+      </div></div>`;
+    html+=groupHeader('PSA Unit Performance','Ideal vs Actual — paired view');
+    html+=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
+      ${dPairedCard('Raw Gas Suction','Ideal (600 m³/hr × hrs)',fN(idealRawD),'m³','Actual RBG Sucked',fN(actualRbg),'m³',pRawD)}
+      ${dPairedCard('Purified Gas','Ideal (370 m³/hr × hrs)',fN(idealPurD),'m³','Actual Purified',fN(p.purified),'m³',pPurD)}
+      ${dPairedCard('CBG Output','CBG Target (275 kg/hr × hrs)',fN(cbgTgt),'kg','Actual CBG Produced',fN(actCBGD),'kg',pCBGD)}
+      ${dOpsCard}
+    </div>`;
+    // ── Anomaly Detection — full month (grouped — Task 6) ───────
     const dayMo4=rec.mo;
     html+=groupHeader('Anomaly Detection',`Data issues in ${dayMo4} 2026 (full month)`);
     const _lbl4=dDates('psa'); const _psa4=(k)=>dArr('psa',k); const _exp4=(k)=>dArr('exp',k);
     const ch4n4=_psa4('ch4').map(v=>v==null?null:v>1?v:v*100);
     const dayAnoms=[];
-    [{label:'Actual Purified Gas (m³)',arr:_psa4('purified'),dates:_lbl4,note:'Negative gas volume'},
-     {label:'Actual CBG Produced (kg)',arr:_psa4('cbg_tot'),dates:_lbl4,note:'Negative CBG'},
-     {label:'PSA Operating Hours',arr:_psa4('psa_hrs'),dates:_lbl4,note:'Negative hours'},
+    [{label:'Actual Purified Gas (m³)',arr:_psa4('purified'),dates:_lbl4,note:'Negative gas volume — data entry error'},
+     {label:'Actual CBG Produced (kg)',arr:_psa4('cbg_tot'),dates:_lbl4,note:'Negative CBG — data entry error'},
+     {label:'PSA Operating Hours',arr:_psa4('psa_hrs'),dates:_lbl4,note:'Negative hours — data entry error'},
     ].forEach(c=>(c.arr||[]).forEach((v,i)=>{if(v!=null&&v<0)dayAnoms.push({label:c.label,date:c.dates?.[i]||'—',value:v.toFixed(2),note:c.note,sev:'r'});}));
-    (_psa4('psa_hrs')||[]).forEach((v,i)=>{if(v!=null&&v>24)dayAnoms.push({label:'PSA Hours',date:_lbl4[i]||'—',value:v.toFixed(2),note:'Exceeds 24 hrs/day',sev:'r'});});
+    (_psa4('psa_hrs')||[]).forEach((v,i)=>{if(v!=null&&v>24)dayAnoms.push({label:'PSA Operating Hours',date:_lbl4[i]||'—',value:v.toFixed(2),note:'Exceeds 24 hrs/day — impossible value',sev:'r'});});
     const _aP4=_exp4('act_pur'),_iP4=_exp4('ideal_pur'),_aC4=_exp4('act_cbg'),_iC4=_exp4('ideal_cbg');
-    (_aP4||[]).forEach((v,i)=>{if(v!=null&&_iP4[i]!=null&&v>_iP4[i]*1.05)dayAnoms.push({label:'Actual Purified > Ideal',date:dDates('exp')[i]||'—',value:v.toFixed(0)+' > '+_iP4[i].toFixed(0),note:'Exceeds PSA design ceiling',sev:'a'});});
-    (_aC4||[]).forEach((v,i)=>{if(v!=null&&_iC4[i]!=null&&v>_iC4[i]*1.05)dayAnoms.push({label:'Actual CBG > Ideal',date:dDates('exp')[i]||'—',value:v.toFixed(0)+' > '+_iC4[i].toFixed(0),note:'Exceeds design capacity',sev:'a'});});
-    ch4n4.forEach((v,i)=>{if(v!=null&&v>0&&(v<80||v>100))dayAnoms.push({label:'CH4 Purity (%)',date:_lbl4[i]||'—',value:v.toFixed(2)+'%',note:v<80?'Below 80% — quality alert':'Above 100% — sensor error',sev:'r'});});
-    // Missing data — use D.days to catch dates with no PSA row at all
+    (_aP4||[]).forEach((v,i)=>{if(v!=null&&_iP4[i]!=null&&v>_iP4[i]*1.05)dayAnoms.push({label:'Actual Purified > Ideal',date:dDates('exp')[i]||'—',value:v.toFixed(0)+'>'+_iP4[i].toFixed(0),note:'Exceeds PSA design ceiling — verify meter reading',sev:'a'});});
+    (_aC4||[]).forEach((v,i)=>{if(v!=null&&_iC4[i]!=null&&v>_iC4[i]*1.05)dayAnoms.push({label:'Actual CBG > Ideal',date:dDates('exp')[i]||'—',value:v.toFixed(0)+'>'+_iC4[i].toFixed(0),note:'Exceeds design capacity — verify data',sev:'a'});});
+    ch4n4.forEach((v,i)=>{if(v!=null&&v>0&&(v<80||v>100))dayAnoms.push({label:'CH4 Purity',date:_lbl4[i]||'—',value:v.toFixed(2)+'%',note:v<80?'Below 80% — gas quality alert':'Above 100% — sensor/data error',sev:'r'});});
     Object.keys(D.days).filter(k=>D.days[k].mo===dayMo4).sort().forEach(k=>{
       const dp=D.days[k];
       if(dp.psa?.purified==null) dayAnoms.push({label:'Actual Purified Gas',date:k,value:'—',note:'No PSA purified gas data for this date',sev:'a'});
       if(dp.psa?.psa_hrs==null) dayAnoms.push({label:'PSA Operating Hours',date:k,value:'—',note:'No PSA runtime recorded for this date',sev:'a'});
     });
-    if(!dayAnoms.length){
-      html+=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px;margin-bottom:12px">
-        <span style="font-size:18px">✓</span>
-        <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
-        <div style="font-size:11px;color:var(--text3)">No anomalies in purification data for ${dayMo4} 2026.</div></div>
-      </div>`;
-    } else {
-      const redA4=dayAnoms.filter(a=>a.sev==='r');
-      const dRows=dayAnoms.map(a=>`<tr>
-        <td style="font-weight:700;color:${a.sev==='r'?'#C62828':'#E65100'}">${a.label}</td>
-        <td style="font-variant-numeric:tabular-nums">${a.date}</td>
-        <td style="color:${a.sev==='r'?'#C62828':'#E65100'};font-weight:700">${a.value}</td>
-        <td style="font-size:10px;color:var(--text2)">${a.note}</td>
-        <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:${a.sev==='r'?'#C62828':'#E65100'};color:#fff;border-radius:3px">⚠ MR. BOBBY</span></td>
-      </tr>`).join('');
-      html+=`<div style="background:${redA4.length?'#FFF3F3':'#FFF8F0'};border:1px solid ${redA4.length?'#FFCDD2':'#FFE0B2'};border-radius:8px;padding:10px 14px;margin-bottom:8px;color:${redA4.length?'#B71C1C':'#BF360C'};font-size:11px;font-weight:700">
-        ⚠ ${dayAnoms.length} anomal${dayAnoms.length===1?'y':'ies'} in ${dayMo4} 2026 — verify with Mr. Bobby.
-      </div>
-      <table class="tbl"><thead><tr><th>Metric</th><th>Date</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
-      <tbody>${dRows}</tbody></table>`;
-    }
+    html+=renderGroupedAnomalies(dayAnoms,'Mr. Bobby','s4d');
   } else if(sectionId==='s5'){
     const cbgPct=p.act_cbg&&p.ideal_cbg?Math.round(p.act_cbg/p.ideal_cbg*100):null;
     html+=groupHeader('Compression & Dispatch','CBG filling and delivery');
@@ -2689,6 +2673,57 @@ function renderDiagTable(containerId, labels, totExp, idealPur, actPur, actCBG, 
   el.innerHTML=html;
 }
 
+// ── Grouped anomaly renderer (shared by S4 monthly + day view) ───────────────
+function renderGroupedAnomalies(anomalies, owner, pfx){
+  if(!anomalies.length){
+    return`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px;margin-bottom:12px">
+      <span style="font-size:18px">✓</span>
+      <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
+      <div style="font-size:11px;color:var(--text3)">No anomalies detected for this period.</div></div>
+    </div>`;
+  }
+  const map=new Map();
+  anomalies.forEach(a=>{
+    const k=a.label+'||'+a.note;
+    if(!map.has(k)) map.set(k,{label:a.label,note:a.note,sev:a.sev,items:[]});
+    map.get(k).items.push({date:a.date,value:a.value});
+  });
+  const groups=[...map.values()].sort((a,b)=>(b.sev==='r'?1:0)-(a.sev==='r'?1:0));
+  const typeCount=groups.length, totalCount=anomalies.length;
+  const critCount=anomalies.filter(a=>a.sev==='r').length;
+  const warnCount=totalCount-critCount;
+  const bgH=critCount?'#FFF3F3':'#FFF8F0', bdrH=critCount?'#FFCDD2':'#FFE0B2', cH=critCount?'#B71C1C':'#BF360C';
+  let html=`<div style="background:${bgH};border:1px solid ${bdrH};border-radius:8px;padding:10px 14px;margin-bottom:10px">
+    <div style="font-size:12px;font-weight:700;color:${cH}">⚠ ${typeCount} issue type${typeCount>1?'s':''} · ${totalCount} occurrence${totalCount>1?'s':''}</div>
+    <div style="font-size:10px;color:var(--text2);margin-top:2px">${critCount} critical · ${warnCount} warning — verify with ${owner}</div>
+  </div>`;
+  groups.forEach((g,gi)=>{
+    const c=g.sev==='r'?'#C62828':'#E65100';
+    const bg2=g.sev==='r'?'#FFF3F3':'#FFF8F0', b2=g.sev==='r'?'#FFCDD2':'#FFE0B2';
+    const icon=g.sev==='r'?'🔴':'⚠';
+    const cnt=g.items.length;
+    const eid=`${pfx}_${gi}`;
+    const chip=i=>`<span style="display:inline-block;margin:2px 4px 2px 0;font-size:10px;background:${c}18;color:${c};padding:2px 7px;border-radius:4px;font-variant-numeric:tabular-nums">${i.date}${i.value!=='—'?' ('+i.value+')':''}</span>`;
+    const firstFive=g.items.slice(0,5).map(chip).join('');
+    const rest=cnt>5?`<div id="${eid}" style="display:none;margin-top:3px">${g.items.slice(5).map(chip).join('')}</div>
+      <button onclick="var e=document.getElementById('${eid}');var s=e.style.display==='none';e.style.display=s?'block':'none';this.textContent=s?'Collapse ▲':'Show all ${cnt} ▼'" style="margin-top:4px;font-size:10px;font-weight:600;color:${c};background:${c}18;border:none;border-radius:4px;padding:3px 9px;cursor:pointer">Show all ${cnt} ▼</button>`:'';
+    html+=`<div style="background:${bg2};border:1px solid ${b2};border-left:4px solid ${c};border-radius:8px;padding:11px 14px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:${c}">${icon} ${g.label}</div>
+          <div style="font-size:11px;color:var(--text2);margin-top:2px">${g.note}</div>
+          <div style="margin-top:7px">${firstFive}${rest}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:22px;font-weight:800;color:${c};line-height:1">${cnt}</div>
+          <div style="font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">${cnt===1?'date':'dates'}</div>
+        </div>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
 function renderS4(){
   if(renderSectionDay('s4')) return; else hideSectionDay('s4');
   const mo=curMonth;
@@ -2717,18 +2752,42 @@ function renderS4(){
   const iaD1=mo==='ALL'?mArr('ia_d1'):healthDArr('ia_d1');
   const iaD2=mo==='ALL'?mArr('ia_d2'):healthDArr('ia_d2');
 
-  // KPI cards
-  document.getElementById('s4_ideal_raw').textContent=fmtN(sumA(idealRaw))+' m³';
-  document.getElementById('s4_ideal_pur').textContent=fmtN(sumA(idealPur))+' m³';
-  document.getElementById('s4_pur').textContent=fmtN(sumA(pur))+' m³';
-  document.getElementById('s4_ideal_cbg').textContent=fmtN(sumA(idealCBG))+' kg';
-  document.getElementById('s4_act_cbg').textContent=fmtN(sumA(actCBG))+' kg';
-  document.getElementById('s4_hrs').textContent=fmtN(sumA(psaH))+' hrs';
+  // ── Paired KPI cards (Tasks 1,4,5) ──────────────────────────────────────────
   const effs=eff1.filter(v=>v);
-  document.getElementById('s4_eff').textContent=(effs.length?effs.reduce((a,b)=>a+b,0)/effs.length:0).toFixed(1)+'%';
-  const ch4v=ch4.filter(v=>v);
-  const ac=(ch4v.length?ch4v.reduce((a,b)=>a+b,0)/ch4v.length:0);
-  document.getElementById('s4_ch4').textContent=(ac>1?ac.toFixed(2):(ac*100).toFixed(2))+'%';
+  const avgEffV=(effs.length?effs.reduce((a,b)=>a+b,0)/effs.length:0);
+  const ch4vArr=ch4.filter(v=>v);
+  const acCh4=(ch4vArr.length?ch4vArr.reduce((a,b)=>a+b,0)/ch4vArr.length:0);
+  const acCh4Pct=(acCh4>1?acCh4:acCh4*100);
+  const tIR=sumA(idealRaw),tRBG=sumA(rbgTot),tIP=sumA(idealPur),tAP=sumA(pur);
+  const tIC=sumA(idealCBG),tAC=sumA(actCBG),tHrs=sumA(psaH);
+  const pRaw=tIR>0?Math.round(tRBG/tIR*100):null;
+  const pPur=tIP>0?Math.round(tAP/tIP*100):null;
+  const pCBG=tIC>0?Math.round(tAC/tIC*100):null;
+  const pBar=(p)=>{const pp=Math.min(Math.max(p||0,0),100);const bc=pp>=90?'#16a34a':pp>=70?'#d97706':'#dc2626';
+    return`<div style="margin-top:7px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px"><span style="font-size:10px;color:var(--text3)">Actual vs Ideal</span><span style="font-size:11px;font-weight:700;color:${bc}">${pp}%</span></div>
+    <div style="background:var(--bg3);border-radius:3px;height:5px;overflow:hidden"><div style="width:${pp}%;height:5px;background:${bc};border-radius:3px;transition:width .4s"></div></div></div>`;};
+  const pCard=(title,topLabel,topVal,topUnit,btmLabel,btmVal,btmUnit,pct)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:13px 14px">
+    <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">${title}</div>
+    <div style="margin-bottom:5px"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${topLabel}</div>
+      <div style="font-size:14px;font-weight:700;color:var(--amber)">${topVal??'—'}<span style="font-size:10px;font-weight:400;color:var(--text2);margin-left:2px">${topVal!=null?topUnit:''}</span></div></div>
+    <div style="margin-bottom:4px"><div style="font-size:9px;color:var(--text3);margin-bottom:1px">${btmLabel}</div>
+      <div style="font-size:18px;font-weight:800;color:var(--green)">${btmVal??'—'}<span style="font-size:11px;font-weight:400;color:var(--text2);margin-left:2px">${btmVal!=null?btmUnit:''}</span></div></div>
+    ${pct!=null?pBar(pct):''}</div>`;
+  const kpiPaired=document.getElementById('s4_kpi_paired');
+  if(kpiPaired){
+    const opsCard=`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:13px 14px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">Operations</div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div><div style="font-size:9px;color:var(--text3)">PSA Hours</div><div style="font-size:16px;font-weight:800;color:var(--blue)">${fmtN(tHrs)}<span style="font-size:10px;color:var(--text2);margin-left:2px">hrs</span></div></div>
+        <div><div style="font-size:9px;color:var(--text3)">Avg PSA Efficiency</div><div style="font-size:14px;font-weight:700;color:${avgEffV>=45?'var(--green)':avgEffV>=35?'var(--amber)':'var(--red)'}">${avgEffV.toFixed(1)}<span style="font-size:10px;color:var(--text2);margin-left:2px">% · Design 45.83%</span></div></div>
+        <div><div style="font-size:9px;color:var(--text3)">Avg CH4 Purity</div><div style="font-size:14px;font-weight:700;color:${acCh4Pct>=90?'var(--green)':acCh4Pct>=80?'var(--amber)':'var(--red)'}">${acCh4Pct.toFixed(2)}<span style="font-size:10px;color:var(--text2);margin-left:2px">%</span></div></div>
+      </div></div>`;
+    kpiPaired.innerHTML=
+      pCard('Raw Gas Suction','Ideal (600 m³/hr × hrs)',tIR>0?fmtN(tIR):null,'m³','Actual RBG Sucked',tRBG>0?fmtN(tRBG):null,'m³',pRaw)+
+      pCard('Purified Gas','Ideal (370 m³/hr × hrs)',tIP>0?fmtN(tIP):null,'m³','Actual Purified',tAP>0?fmtN(tAP):null,'m³',pPur)+
+      pCard('CBG Output','CBG Target (275 kg/hr × hrs)',tIC>0?fmtN(tIC):null,'kg','Actual CBG Produced',tAC>0?fmtN(tAC):null,'kg',pCBG)+
+      opsCard;
+  }
 
   // ── Status bar ────────────────────────────────────────────────
   const totPsaHrs=sumA(psaH); const totExpT=sumA(expT); const totIdealRaw=sumA(idealRaw);
@@ -2805,12 +2864,12 @@ function renderS4(){
   const d2gs=mo==='ALL'?mArr('d2_gs_bpp'):dArr('exp','d2_gs_bpp');
   line('c_s4_exp',lblE,[lDS('Feedstock Expected (BPP)',expT,C.blue),lDS('Actual Purified',actP,C.green)]);
 
-  // Suction efficiency % trend
-  const sucEffArr=(mo==='ALL'?MONTHS:dDates('psa')).map((_,i)=>{
-    const ir=idealRaw[i]; const rb=rbgTot[i];
-    return (ir>0&&rb!=null)?+(rb/ir*100).toFixed(1):null;
+  // Conversion efficiency % trend (Task 2) — Actual Purified ÷ Actual RBG × 100
+  const convEffArr=(mo==='ALL'?MONTHS:dDates('psa')).map((_,i)=>{
+    const rb=rbgTot[i]; const ap=pur[i];
+    return (rb>0&&ap!=null)?+(ap/rb*100).toFixed(1):null;
   });
-  bar('c_s4_suc_eff',lbl,[bDS('Suction Efficiency %',sucEffArr,C.amber)],false,{min:0,max:100,annotation:{value:85,label:'Target 85%'}});
+  bar('c_s4_suc_eff',lbl,[bDS('Conversion Efficiency %',convEffArr,C.cyan)],false,{min:0,max:100,annotation:{value:61.67,label:'Design 61.67%'}});
 
   bar('c_s4_bpp',lblE,[
     bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),
@@ -2819,7 +2878,7 @@ function renderS4(){
     bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink)
   ],true);
 
-  // ── Anomaly Detection ────────────────────────────────────────
+  // ── Anomaly Detection (grouped — Task 6) ─────────────────────
   const anomEl=document.getElementById('s4_anomaly');
   if(anomEl){
     const _lbl=mo==='ALL'?MONTHS:dDates('psa');
@@ -2828,48 +2887,22 @@ function renderS4(){
     const _exp=(k)=>mo==='ALL'?mArr(k):dArr('exp',k);
     const ch4Norm=_psa('ch4').map(v=>v==null?null:v>1?v:v*100);
     const anomalies=[];
-    // Negative value checks
     [{label:'Actual Purified Gas (m³)',arr:_psa('purified'),dates:_lbl,note:'Negative gas volume — data entry error'},
      {label:'Actual CBG Produced (kg)',arr:_psa('cbg_tot'),dates:_lbl,note:'Negative CBG — data entry error'},
      {label:'PSA Operating Hours',arr:_psa('psa_hrs'),dates:_lbl,note:'Negative hours — data entry error'},
     ].forEach(c=>(c.arr||[]).forEach((v,i)=>{if(v!=null&&v<0)anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v.toFixed(2),note:c.note,sev:'r'});}));
-    // PSA hours > 24
     (_psa('psa_hrs')||[]).forEach((v,i)=>{if(v!=null&&v>24)anomalies.push({label:'PSA Operating Hours',date:_lbl[i]||'—',value:v.toFixed(2),note:'Exceeds 24 hrs/day — impossible value',sev:'r'});});
-    // Actual > Ideal (capacity breach)
     const _actP=_exp('act_pur'),_idealP=_exp('ideal_pur'),_actC=_exp('act_cbg'),_idealC=_exp('ideal_cbg');
-    (_actP||[]).forEach((v,i)=>{if(v!=null&&_idealP[i]!=null&&v>_idealP[i]*1.05)anomalies.push({label:'Actual Purified > Ideal (m³)',date:_lblE[i]||'—',value:v.toFixed(0)+' > '+_idealP[i].toFixed(0),note:'Exceeds PSA design ceiling — verify meter reading',sev:'a'});});
-    (_actC||[]).forEach((v,i)=>{if(v!=null&&_idealC[i]!=null&&v>_idealC[i]*1.05)anomalies.push({label:'Actual CBG > Ideal (kg)',date:_lblE[i]||'—',value:v.toFixed(0)+' > '+_idealC[i].toFixed(0),note:'Exceeds design capacity — verify data',sev:'a'});});
-    // CH4 out of range (80–100%)
-    ch4Norm.forEach((v,i)=>{if(v!=null&&v>0&&(v<80||v>100))anomalies.push({label:'CH4 Purity (%)',date:_lbl[i]||'—',value:v.toFixed(2)+'%',note:v<80?'Below 80% — gas quality alert':'Above 100% — sensor/data error',sev:v<80?'r':'r'});});
-    // Missing critical data — iterate D.days to catch dates with no PSA row at all
+    (_actP||[]).forEach((v,i)=>{if(v!=null&&_idealP[i]!=null&&v>_idealP[i]*1.05)anomalies.push({label:'Actual Purified > Ideal',date:_lblE[i]||'—',value:v.toFixed(0)+'>'+_idealP[i].toFixed(0),note:'Exceeds PSA design ceiling — verify meter reading',sev:'a'});});
+    (_actC||[]).forEach((v,i)=>{if(v!=null&&_idealC[i]!=null&&v>_idealC[i]*1.05)anomalies.push({label:'Actual CBG > Ideal',date:_lblE[i]||'—',value:v.toFixed(0)+'>'+_idealC[i].toFixed(0),note:'Exceeds design capacity — verify data',sev:'a'});});
+    ch4Norm.forEach((v,i)=>{if(v!=null&&v>0&&(v<80||v>100))anomalies.push({label:'CH4 Purity',date:_lbl[i]||'—',value:v.toFixed(2)+'%',note:v<80?'Below 80% — gas quality alert':'Above 100% — sensor/data error',sev:'r'});});
     const _moFilter=mo==='ALL'?null:mo;
     Object.keys(D.days).filter(k=>_moFilter?D.days[k].mo===_moFilter:true).sort().forEach(k=>{
       const dp=D.days[k];
       if(dp.psa?.purified==null) anomalies.push({label:'Actual Purified Gas',date:k,value:'—',note:'No PSA purified gas data for this date',sev:'a'});
       if(dp.psa?.psa_hrs==null) anomalies.push({label:'PSA Operating Hours',date:k,value:'—',note:'No PSA runtime recorded for this date',sev:'a'});
     });
-
-    if(!anomalies.length){
-      anomEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px">
-        <span style="font-size:18px">✓</span>
-        <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
-        <div style="font-size:11px;color:var(--text3)">No anomalies detected in purification data for this period.</div></div>
-      </div>`;
-    } else {
-      const redA=anomalies.filter(a=>a.sev==='r'),ambA=anomalies.filter(a=>a.sev==='a');
-      const rows=anomalies.map(a=>`<tr>
-        <td style="font-weight:700;color:${a.sev==='r'?'#C62828':'#E65100'}">${a.label}</td>
-        <td style="font-variant-numeric:tabular-nums">${a.date}</td>
-        <td style="color:${a.sev==='r'?'#C62828':'#E65100'};font-weight:700;font-variant-numeric:tabular-nums">${a.value}</td>
-        <td style="font-size:10px;color:var(--text2)">${a.note}</td>
-        <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:${a.sev==='r'?'#C62828':'#E65100'};color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. BOBBY</span></td>
-      </tr>`).join('');
-      anomEl.innerHTML=`<div style="background:${redA.length?'#FFF3F3':'#FFF8F0'};border:1px solid ${redA.length?'#FFCDD2':'#FFE0B2'};border-radius:8px;padding:10px 14px;margin-bottom:8px;color:${redA.length?'#B71C1C':'#BF360C'};font-size:11px;font-weight:700">
-        ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} detected (${redA.length} critical, ${ambA.length} warnings) — verify with Mr. Bobby.
-      </div>
-      <table class="tbl"><thead><tr><th>Metric</th><th>Period</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
-      <tbody>${rows}</tbody></table>`;
-    }
+    anomEl.innerHTML=renderGroupedAnomalies(anomalies,'Mr. Bobby','s4m');
   }
 
 }
