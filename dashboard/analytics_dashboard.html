@@ -1503,7 +1503,7 @@ function renderSectionDay(sectionId){
     html+=grid([
       metricCard('Actual Purified Gas',fN(p.purified),'m³',purCls,purPct!=null?purPct+'% of ideal':'',true,purPct||0),
       metricCard('Actual CBG Produced',fN(p.act_cbg),'kg',cbgCls,cbgPct!=null?cbgPct+'% of ideal':'',true,cbgPct||0),
-      metricCard('CBG Dispatched',fN(p.dispatched),'kg','c','',true,p.dispatched&&p.act_cbg?Math.min(p.dispatched/p.act_cbg*100,100):0),
+      metricCard('Ideal CBG',fN(p.ideal_cbg),'kg','a','275 kg/hr × PSA hrs'),
       metricCard('PSA Eff D1 / D2',(d1r.psa_eff_pct!=null&&d2r.psa_eff_pct!=null)?d1r.psa_eff_pct+' / '+d2r.psa_eff_pct:null,'%','g'),
     ]);
   } else if(sectionId==='s5'){
