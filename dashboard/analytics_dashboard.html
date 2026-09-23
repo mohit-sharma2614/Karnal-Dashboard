@@ -1492,19 +1492,24 @@ function renderSectionDay(sectionId){
     const cbgPct=p.act_cbg&&p.ideal_cbg?Math.round(p.act_cbg/p.ideal_cbg*100):null;
     const purCls=purPct!=null?(purPct>=90?'g':purPct>=70?'a':'r'):'';
     const cbgCls=cbgPct!=null?(cbgPct>=90?'g':cbgPct>=70?'a':'r'):'';
+    const ch4v=p.ch4!=null?(p.ch4>1?+p.ch4.toFixed(2):+(p.ch4*100).toFixed(2)):null;
+    const ch4Pct=ch4v!=null?Math.min(ch4v,100):0;
+    const effArr=[d1r.psa_eff_pct,d2r.psa_eff_pct].filter(v=>v!=null);
+    const avgEff=effArr.length?+(effArr.reduce((a,b)=>a+b,0)/effArr.length).toFixed(1):null;
+    const effCls=avgEff!=null?(avgEff>=45?'g':avgEff>=35?'a':'r'):'';
     html+=groupHeader('PSA Unit Performance','Ideal vs actual gas processing');
     html+=grid([
-      metricCard('PSA Operating Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(2):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
       metricCard('Ideal Raw Suction',fN(p.ideal_raw),'m³','a','600 m³/hr × PSA hrs'),
       metricCard('Ideal Purified Gas',fN(p.ideal_pur),'m³','a','370 m³/hr × PSA hrs'),
-      metricCard('CH4 Purity',p.ch4!=null?p.ch4:null,'%','g','Gas quality',true,p.ch4||0),
+      metricCard('Actual Purified Gas',fN(p.purified),'m³',purCls,purPct!=null?purPct+'% of ideal':'',true,purPct||0),
+      metricCard('CH4 Purity',ch4v,'%','g','Gas quality',true,ch4Pct),
     ]);
     html+=groupHeader('CBG Output','Purified gas to compression');
     html+=grid([
-      metricCard('Actual Purified Gas',fN(p.purified),'m³',purCls,purPct!=null?purPct+'% of ideal':'',true,purPct||0),
-      metricCard('Actual CBG Produced',fN(p.act_cbg),'kg',cbgCls,cbgPct!=null?cbgPct+'% of ideal':'',true,cbgPct||0),
       metricCard('Ideal CBG',fN(p.ideal_cbg),'kg','a','275 kg/hr × PSA hrs'),
-      metricCard('PSA Eff D1 / D2',(d1r.psa_eff_pct!=null&&d2r.psa_eff_pct!=null)?d1r.psa_eff_pct+' / '+d2r.psa_eff_pct:null,'%','g'),
+      metricCard('Actual CBG Produced',fN(p.act_cbg),'kg',cbgCls,cbgPct!=null?cbgPct+'% of ideal':'',true,cbgPct||0),
+      metricCard('PSA Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(2):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
+      metricCard('Avg PSA Efficiency',avgEff,'%',effCls,'Design: 45.83%',true,avgEff||0),
     ]);
   } else if(sectionId==='s5'){
     const cbgPct=p.act_cbg&&p.ideal_cbg?Math.round(p.act_cbg/p.ideal_cbg*100):null;
