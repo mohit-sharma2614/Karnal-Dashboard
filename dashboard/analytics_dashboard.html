@@ -2567,7 +2567,7 @@ function renderS4(){
   const d2Exp=mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp');
   const actP=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   const psaH=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
-  const idealRaw=mo==='ALL'?mArr('ideal_raw'):psaH.map(h=>(h||0)*600);
+  const idealRaw=mo==='ALL'?mArr('ideal_raw'):dArr('exp','ideal_raw');
   const idealPur=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
   const idealCBG=mo==='ALL'?mArr('ideal_cbg'):dArr('exp','ideal_cbg');
   const actCBG=mo==='ALL'?mArr('act_cbg'):dArr('exp','act_cbg');
@@ -3942,7 +3942,7 @@ async function gFetch(path) {
 function setStatus(msg) { const el=document.getElementById('authStatus'); if(el) el.textContent=msg; }
 async function buildAnalyticsD() {
   setStatus('Fetching plant data (15–30 seconds)…');
-  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,fsR] = await Promise.all([
+  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,fsR,cbgExpR] = await Promise.all([
     gFetch("/worksheets('PSA%20Production')/range(address='A3:AC700')"),
     gFetch("/worksheets('D1')/range(address='A3:AZ700')"),
     gFetch("/worksheets('D2')/range(address='A3:AZ700')"),
@@ -3960,6 +3960,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
     gFetch("/worksheets('Feedstock%20Supply')/range(address='A3:AJ400')"),
+    gFetch("/worksheets('CBG%20Expected')/range(address='A4:X700')"),
   ]);
   const nv=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
   const toDate=v=>{if(!v)return null;const n=parseFloat(v);if(isNaN(n)||n<40000)return null;return new Date(Math.round((n-25569)*86400000));};
@@ -3967,7 +3968,7 @@ async function buildAnalyticsD() {
   const moKey=dt=>dt?MNAMES[dt.getMonth()]:null;
   const dayKey=dt=>dt?`${String(dt.getDate()).padStart(2,'0')}-${MNAMES[dt.getMonth()]}`:null;
   const getRows=(raw,dc)=>(raw?.values||[]).filter(r=>toDate(r[dc]));
-  const psa=getRows(psaR,0),d1=getRows(d1R,0),d2=getRows(d2R,0);
+  const psa=getRows(psaR,0),d1=getRows(d1R,0),d2=getRows(d2R,0),cbgExp=getRows(cbgExpR,0);
   const ph=getRows(phR,0),tmp_=getRows(tmpR,0),tsvs_=getRows(tsvsR,0),iapa_=getRows(iapaR,0);
   const rc=getRows(rcR,0),fb=getRows(fbR,0);
   const monthSet=new Set(); const yearMonthSet=new Set();
@@ -3990,7 +3991,7 @@ async function buildAnalyticsD() {
   M.psa_hrs=aggMonth(psa,gD,psaH); M.comp_hrs=aggMonth(psa,gD,r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;});
   M.ch4=aggMonth(psa,gD,22,'avg'); M.d1_bg=aggMonth(psa,gD,5); M.d2_bg=aggMonth(psa,gD,6);
   M.d1_cbg=aggMonth(psa,gD,10); M.d2_cbg=aggMonth(psa,gD,11); M.act_pur=aggMonth(psa,gD,9);
-  M.ideal_pur=M.psa_hrs.map(h=>(h||0)*370); M.ideal_cbg=aggMonth(d1,gD,38); M.exp_tot=aggMonth(d1,gD,10); M.d1_exp=M.exp_tot;
+  M.ideal_pur=aggMonth(cbgExp,gD,16); M.ideal_raw=aggMonth(cbgExp,gD,15); M.ideal_cbg=aggMonth(cbgExp,gD,17); M.exp_tot=aggMonth(cbgExp,gD,13); M.d1_exp=aggMonth(cbgExp,gD,6); M.d2_exp_exp=aggMonth(cbgExp,gD,12);
   M.d1_eff=aggMonth(d1,gD,50,'avg'); M.d2_eff=aggMonth(d2,gD,51,'avg');
   M.d1_olr=aggMonth(d1,gD,49,'avg'); M.d2_olr=aggMonth(d2,gD,50,'avg');
   M.d1_feed=aggMonth(d1,gD,24); M.d2_feed=aggMonth(d2,gD,24);
@@ -4017,7 +4018,7 @@ async function buildAnalyticsD() {
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
-  M.d2_exp=aggMonth(d2,gD,10); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
+  M.d2_exp=M.d2_exp_exp||aggMonth(cbgExp,gD,12); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
   M.d1_bg_est_exp=aggMonth(d1,gD,10); M.d1_bg_est_act=aggMonth(d1,gD,31);
   M.d2_bg_est_exp=aggMonth(d2,gD,10); M.d2_bg_est_act=aggMonth(d2,gD,31);
   M.d1_bg_total=aggMonth(d1,gD,34); M.d2_bg_total=aggMonth(d2,gD,34);
@@ -4049,19 +4050,10 @@ async function buildAnalyticsD() {
     cd_exp:1,pm_exp:2,csl_exp:4,gs_exp:6,sg_exp:5,cd_act:14,pm_act:15,csl_act:17,gs_act:22,sg_act:23});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
-  DD.exp=buildDA(d1,gD,{tot_exp:10,ideal_pur:32,ideal_cbg:38,d1_cd_bpp:42,d1_pm_bpp:43,d1_gs_bpp:44,d1_csl_bpp:45,d1_sg_bpp:46});
-  // Merge PSA data into DD.exp by day key (local DD.psa — global D is null at this point)
-  months.forEach(m=>{
-    const exp=DD.exp[m]; if(!exp) return;
-    const psaM=DD.psa[m]||{dates:[]};
-    const psaMap={};
-    (psaM.dates||[]).forEach((d,i)=>{psaMap[d]={pur:(psaM.purified||[])[i],cbg:(psaM.cbg_tot||[])[i]};});
-    exp.act_pur=(exp.dates||[]).map(d=>psaMap[d]?.pur||0);
-    exp.act_cbg=(exp.dates||[]).map(d=>psaMap[d]?.cbg||0);
-  });
-  // Merge D2 BPP into DD.exp daily arrays
-  const d2ExpDA=buildDA(d2,gD,{d2_cd_bpp:43,d2_pm_bpp:44,d2_gs_bpp:45,d2_csl_bpp:46,d2_sg_bpp:47,d2_exp:10});
-  months.forEach(m=>{if(DD.exp[m]&&d2ExpDA[m]){Object.assign(DD.exp[m],d2ExpDA[m]);}})
+  DD.exp=buildDA(cbgExp,gD,{tot_exp:13,d1_exp:6,d2_exp:12,ideal_raw:15,ideal_pur:16,ideal_cbg:17,act_pur:18,act_cbg:19,act_disp:20,
+    d1_pm_bpp:1,d1_cd_bpp:2,d1_csl_bpp:3,d1_gs_bpp:4,d1_sg_bpp:5,
+    d2_pm_bpp:7,d2_cd_bpp:8,d2_csl_bpp:9,d2_gs_bpp:10,d2_sg_bpp:11});
+  // DD.exp now built from CBG Expected sheet directly — no secondary merges needed
   DD.health=buildDA(ph,gD,{ph_d1:1,ph_d2:4});
   // Merge temp, ts/vs, ia/pa into DD.health by date alignment
   const tmpDA=buildDA(tmp_,gD,{tp_d1:1,tp_d2:4});
@@ -4074,7 +4066,7 @@ async function buildAnalyticsD() {
   });
   // D.days map
   setStatus('Building daily records…');
-  const mp={}; ['psa','d1','d2','ph','tm','fb','rc'].forEach(k=>mp[k]={});
+  const mp={}; ['psa','d1','d2','ph','tm','fb','rc','ce'].forEach(k=>mp[k]={});
   psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.psa[k]=r;});
   d1.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.d1[k]=r;});
   d2.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.d2[k]=r;});
@@ -4082,14 +4074,16 @@ async function buildAnalyticsD() {
   tmp_.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.tm[k]=r;});
   fb.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.fb[k]=r;});
   rc.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.rc[k]=r;});
+  cbgExp.forEach(r=>{const k=dayKey(toDate(r[0]));if(k)mp.ce[k]=r;});
   const days={};
   new Set([...Object.keys(mp.psa),...Object.keys(mp.d1),...Object.keys(mp.d2)]).forEach(k=>{
-    const p=mp.psa[k]||[],d1r=mp.d1[k]||[],d2r=mp.d2[k]||[],phr=mp.ph[k]||[],tmr=mp.tm[k]||[],fbr=mp.fb[k]||[],rcr=mp.rc[k]||[];
+    const p=mp.psa[k]||[],d1r=mp.d1[k]||[],d2r=mp.d2[k]||[],phr=mp.ph[k]||[],tmr=mp.tm[k]||[],fbr=mp.fb[k]||[],rcr=mp.rc[k]||[],cer=mp.ce[k]||[];
     const dt=toDate(p[0]||d1r[0]);if(!dt)return;
     const _psaHrs=psaH(p);
-    const _idealRaw=_psaHrs?Math.round(_psaHrs*600):null;
-    const _idealPur=_psaHrs?Math.round(_psaHrs*369.9):null;
-    const _idealCbg=_idealPur?Math.round(_idealPur*0.7434):null;
+    // Use CBG Expected sheet for ideal values; fall back to formula if sheet row missing
+    const _idealRaw=nv(cer[15])||(_psaHrs?Math.round(_psaHrs*600):null);
+    const _idealPur=nv(cer[16])||(_psaHrs?Math.round(_psaHrs*369.9):null);
+    const _idealCbg=nv(cer[17])||(_idealPur?Math.round(_idealPur*0.7434):null);
     const _rbgTot=nv(p[7]),_purified=nv(p[9]),_cbgTot=nv(p[12]);
     days[k]={mo:moKey(dt),dt:k,
       psa:{psa_hrs:_psaHrs?+_psaHrs.toFixed(3):_psaHrs,comp_hrs:nv(p[3]),rbg_d1:nv(p[5]),rbg_d2:nv(p[6]),rbg_tot:_rbgTot,
@@ -4112,9 +4106,9 @@ async function buildAnalyticsD() {
         cd_act:nv(d2r[14]),pm_act:nv(d2r[15]),csl_act:nv(d2r[17]),gs_act:nv(d2r[22]),sg_act:nv(d2r[23])},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
       rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
-      exp:{tot_exp:nv(d1r[10]),d1_exp:nv(d1r[10]),d2_exp:nv(d2r[10]),ideal_pur:nv(d1r[32]),ideal_cbg:nv(d1r[38]),act_pur:nv(p[9]),act_cbg:nv(p[12]),
-        d1_cd_bpp:nv(d1r[42]),d1_pm_bpp:nv(d1r[43]),d1_gs_bpp:nv(d1r[44]),d1_csl_bpp:nv(d1r[45]),d1_sg_bpp:nv(d1r[46]),
-        d2_cd_bpp:nv(d2r[43]),d2_pm_bpp:nv(d2r[44]),d2_gs_bpp:nv(d2r[45]),d2_csl_bpp:nv(d2r[46]),d2_sg_bpp:nv(d2r[47])},
+      exp:{tot_exp:nv(cer[13]),d1_exp:nv(cer[6]),d2_exp:nv(cer[12]),ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg,act_pur:nv(p[9]),act_cbg:nv(p[12]),
+        d1_pm_bpp:nv(cer[1]),d1_cd_bpp:nv(cer[2]),d1_csl_bpp:nv(cer[3]),d1_gs_bpp:nv(cer[4]),d1_sg_bpp:nv(cer[5]),
+        d2_pm_bpp:nv(cer[7]),d2_cd_bpp:nv(cer[8]),d2_csl_bpp:nv(cer[9]),d2_gs_bpp:nv(cer[10]),d2_sg_bpp:nv(cer[11])},
       health:{ph:{d1:nv(phr[1]),d2:nv(phr[4])},tp:{d1:nv(tmr[1]),d2:nv(tmr[4])},ia:{d1:null,d2:null},ts:{d1:null},vs:{d1:null}}
     };
   });
@@ -4132,7 +4126,7 @@ async function buildAnalyticsD() {
   months.forEach((m,i)=>{const c=M.cbg[i]||0,k=M.total_cost[i]||0;cost_per_kg[m]=c>0?+(k/c).toFixed(2):null;});
   const olr_trail={d1:d1.slice(-30).map(r=>nv(r[49])),d2:d2.slice(-30).map(r=>nv(r[50])),dates:d1.slice(-30).map(r=>dayKey(toDate(r[0])))};
   const psa_days={};
-  psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(!k)return;const m=moKey(toDate(r[0]));psa_days[k]={date:k,mo:m,psa_hrs:psaH(r),act_raw:nv(r[7]),act_pur:nv(r[9]),act_cbg:nv(r[12]),dispatched:nv(r[15]),veer:nv(r[16]),adinath:nv(r[17]),kfs:nv(r[18]),ksk:nv(r[19]),om:nv(r[20]),sps:nv(r[21]),ch4:nv(r[22]),cascade:nv(r[27]),storage:nv(r[28]),d1_eff:0,d2_eff:0};});
+  psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(!k)return;const m=moKey(toDate(r[0]));psa_days[k]={date:k,mo:m,psa_hrs:psaH(r),act_raw:nv(r[7]),act_pur:nv(r[9]),act_cbg:nv(r[12]),dispatched:nv(r[15]),veer:nv(r[16]),adinath:nv(r[17]),kfs:nv(r[18]),ksk:nv(r[19]),om:nv(r[20]),sps:nv(r[21]),ch4:nv(r[22]),cascade:nv(r[25]),storage:nv(r[27]),d1_eff:0,d2_eff:0};});
   // Process Cal sheet data — idx1=Date,4=TS%,5=VS%,6=TS(T),7=VS(T),9=Qty
   // Note: some sheets store VS% as decimal ratio (0.506) rather than pct (50.6).
   // Normalise by computing from Tonnes when available, otherwise multiply by 100 if <2.
