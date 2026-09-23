@@ -2756,6 +2756,7 @@ function setS4Dig(val){
 function renderS4(){
   if(renderSectionDay('s4')) return; else hideSectionDay('s4');
   const mo=curMonth;
+  {const pb=document.getElementById('s4_period');if(pb)pb.textContent=curDay!=='ALL'?curDay:mo==='ALL'?'All Months':mo;}
   const isD1=s4Dig==='d1', isD2=s4Dig==='d2';
 
   // ── Raw data arrays (all fetched for proportioning) ──────────
@@ -2971,6 +2972,7 @@ function renderS4(){
 function renderS5(){
   if(renderSectionDay('s5')) return; else hideSectionDay('s5');
   const mo=curMonth;
+  {const pb=document.getElementById('s5_period');if(pb)pb.textContent=curDay!=='ALL'?curDay:mo==='ALL'?'All Months':mo;}
   const cbg=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const disp=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
   const comp=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
@@ -3023,6 +3025,7 @@ function renderS5(){
 function renderS6(){
   if(renderSectionDay('s6')) return; else hideSectionDay('s6');
   const mo=curMonth;
+  {const pb=document.getElementById('s6_period');if(pb)pb.textContent=curDay!=='ALL'?curDay:mo==='ALL'?'All Months':mo;}
   const sfomR=mo==='ALL'?mArr('sfom_mn'):dArr('rev','sfom_rev');
   const lfomR=mo==='ALL'?mArr('lfom_mn'):dArr('rev','lfom_rev');
   const d1d=mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac');
@@ -3042,6 +3045,7 @@ function renderS6(){
 function renderS7(){
   if(renderSectionDay('s7')) return; else hideSectionDay('s7');
   const mo=curMonth;
+  {const pb=document.getElementById('s7_period');if(pb)pb.textContent=curDay!=='ALL'?curDay:mo==='ALL'?'All Months':mo;}
   const cbgR=mo==='ALL'?mArr('cbg_rev'):dArr('rev','cbg_rev');
   const disp=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
   const veer=mo==='ALL'?mArr('veer'):dArr('psa','veer');
@@ -3072,6 +3076,7 @@ function renderS7(){
 function renderS8(){
   if(renderSectionDay('s8')) return; else hideSectionDay('s8');
   const mo=curMonth; const idx=mo==='ALL'?-1:MONTHS.indexOf(mo);
+  {const pb=document.getElementById('s8_period');if(pb)pb.textContent=curDay!=='ALL'?curDay:mo==='ALL'?'All Months':mo;}
   const fin=D.finance;
 
   // ── Revenue arrays ──────────────────────────────────────────
