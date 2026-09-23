@@ -223,8 +223,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb" onclick="show('s2',this)">2 · Lab & Process</button>
       <button class="tb" onclick="show('s3',this)">3 · Production</button>
       <button class="tb" onclick="show('s4',this)">4 · Purification</button>
-      <button class="tb" onclick="show('si',this)">5 · Intelligence</button>
-      <button class="tb" onclick="show('s5',this)">6 · Compression</button>
+      <button class="tb" onclick="show('s5',this)">5 · Compression</button>
+      <button class="tb" onclick="show('si',this)">6 · Intelligence</button>
       <button class="tb" onclick="show('s6',this)">7 · Manure</button>
       <button class="tb" onclick="show('s7',this)">8 · Sales</button>
       <button class="tb" onclick="show('s8',this)">9 · Finance</button>
@@ -491,6 +491,27 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div><!-- /s4_main_content -->
 </div>
 
+<!-- ══ S5 COMPRESSION ══ -->
+<div id="s5" class="pg">
+  <div class="stitle">Compression & Filling — PBG to CBG <span class="resp">— Mr. Rajendra Kumar</span><span id="s5_period" class="mo-badge">All Months</span></div>
+  <div id="s5_main_content">
+  <div class="kg k4">
+    <div class="kc c"><div class="kl">YTD CBG Produced</div><div class="kv c" id="s5_cbg">—</div><div class="ks">kg</div></div>
+    <div class="kc g"><div class="kl">YTD Dispatched</div><div class="kv g" id="s5_disp">—</div><div class="ks">kg</div></div>
+    <div class="kc a"><div class="kl">Compressor Hours</div><div class="kv a" id="s5_comp">—</div><div class="ks">hrs</div></div>
+    <div class="kc"><div class="kl">Avg Utilization</div><div class="kv" id="s5_util">—</div><div class="ks">% of 24hrs/day</div></div>
+  </div>
+  <div class="cg c2">
+    <div class="cc"><div class="ct" id="ct_s5_cbg">CBG Produced vs Dispatched (kg)</div><div class="cw"><canvas id="c_s5_cbg"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s5_hrs">PSA vs Compressor Hours</div><div class="cw"><canvas id="c_s5_hrs"></canvas></div></div>
+  </div>
+  <div class="cg c2">
+    <div class="cc"><div class="ct" id="ct_s5_ideal">Ideal vs Actual CBG (kg)</div><div class="cw"><canvas id="c_s5_ideal"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s5_util">Compressor Utilization %</div><div class="cw"><canvas id="c_s5_util"></canvas></div></div>
+  </div>
+  </div><!-- /s5_main_content -->
+</div>
+
 <!-- ══ SI PLANT INTELLIGENCE ══ -->
 <div id="si" class="pg">
   <div class="stitle">Plant Intelligence — Production Gap & Root Cause Analysis
@@ -542,27 +563,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="ct">Action Recommendations</div>
     <div id="si_reco"></div>
   </div>
-</div>
-
-<!-- ══ S5 COMPRESSION ══ -->
-<div id="s5" class="pg">
-  <div class="stitle">Compression & Filling — PBG to CBG <span class="resp">— Mr. Rajendra Kumar</span><span id="s5_period" class="mo-badge">All Months</span></div>
-  <div id="s5_main_content">
-  <div class="kg k4">
-    <div class="kc c"><div class="kl">YTD CBG Produced</div><div class="kv c" id="s5_cbg">—</div><div class="ks">kg</div></div>
-    <div class="kc g"><div class="kl">YTD Dispatched</div><div class="kv g" id="s5_disp">—</div><div class="ks">kg</div></div>
-    <div class="kc a"><div class="kl">Compressor Hours</div><div class="kv a" id="s5_comp">—</div><div class="ks">hrs</div></div>
-    <div class="kc"><div class="kl">Avg Utilization</div><div class="kv" id="s5_util">—</div><div class="ks">% of 24hrs/day</div></div>
-  </div>
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s5_cbg">CBG Produced vs Dispatched (kg)</div><div class="cw"><canvas id="c_s5_cbg"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s5_hrs">PSA vs Compressor Hours</div><div class="cw"><canvas id="c_s5_hrs"></canvas></div></div>
-  </div>
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s5_ideal">Ideal vs Actual CBG (kg)</div><div class="cw"><canvas id="c_s5_ideal"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s5_util">Compressor Utilization %</div><div class="cw"><canvas id="c_s5_util"></canvas></div></div>
-  </div>
-  </div><!-- /s5_main_content -->
 </div>
 
 <!-- ══ S6 MANURE ══ -->
