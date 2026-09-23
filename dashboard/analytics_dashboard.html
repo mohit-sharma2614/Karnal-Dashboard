@@ -1499,10 +1499,6 @@ function renderSectionDay(sectionId){
   } else if(sectionId==='s3'){
     // s3 (Production) day view is handled by renderS3() directly — this branch is not called
   } else if(sectionId==='s4'){
-    const purPct=p.purified&&p.ideal_pur?Math.round(p.purified/p.ideal_pur*100):null;
-    const cbgPct=p.act_cbg&&p.ideal_cbg?Math.round(p.act_cbg/p.ideal_cbg*100):null;
-    const purCls=purPct!=null?(purPct>=90?'g':purPct>=70?'a':'r'):'';
-    const cbgCls=cbgPct!=null?(cbgPct>=90?'g':cbgPct>=70?'a':'r'):'';
     const ch4v=p.ch4!=null?(p.ch4>1?+p.ch4.toFixed(2):+(p.ch4*100).toFixed(2)):null;
     const ch4Pct=ch4v!=null?Math.min(ch4v,100):0;
     const effArr=[d1r.psa_eff_pct,d2r.psa_eff_pct].filter(v=>v!=null);
@@ -1510,14 +1506,20 @@ function renderSectionDay(sectionId){
     const effCls=avgEff!=null?(avgEff>=45?'g':avgEff>=35?'a':'r'):'';
 
     // ── Status bar (3 pills) ──────────────────────────────────────
-    const reqH=ex.tot_exp>0?ex.tot_exp/370:null;
+    // ex = rec.exp: tot_exp=cer[13], ideal_raw/pur/cbg from CBG Expected sheet, act_cbg=p[12]
+    const reqH=ex.tot_exp>0?ex.tot_exp/370:null; // hrs needed to purify all feedstock BPP gas
     const hrsGap=reqH!=null&&p.psa_hrs!=null?p.psa_hrs-reqH:null;
     const hrsGapPct=reqH>0?p.psa_hrs/reqH*100:null;
     const idealSuction=p.psa_hrs!=null?p.psa_hrs*600:null;
     const actualRbg=p.rbg_tot!=null?p.rbg_tot:(p.rbg_d1||0)+(p.rbg_d2||0);
     const sEff=idealSuction>0&&actualRbg>0?actualRbg/idealSuction*100:null;
-    const cbgTgt=ex.ideal_cbg; const actCBGD=ex.act_cbg||p.act_cbg;
+    const cbgTgt=ex.ideal_cbg||p.ideal_cbg; const actCBGD=ex.act_cbg||p.act_cbg||p.cbg_tot;
     const cbgGapPct=cbgTgt>0&&actCBGD!=null?actCBGD/cbgTgt*100:null;
+    const _idealPurD=ex.ideal_pur||p.ideal_pur; const _idealCbgD=cbgTgt;
+    const purPct=p.purified&&_idealPurD?Math.round(p.purified/_idealPurD*100):null;
+    const cbgPct=actCBGD&&_idealCbgD?Math.round(actCBGD/_idealCbgD*100):null;
+    const purCls=purPct!=null?(purPct>=90?'g':purPct>=70?'a':'r'):'';
+    const cbgCls=cbgPct!=null?(cbgPct>=90?'g':cbgPct>=70?'a':'r'):'';
     const clr=v=>v==null?'#888':v>=90?'#16a34a':v>=70?'#d97706':'#dc2626';
     const sbar=(label,val,note,c)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:10px 13px;border-left:4px solid ${c}">
       <div style="font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:3px">${label}</div>
@@ -1551,9 +1553,9 @@ function renderSectionDay(sectionId){
     html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);border-bottom:1.5px solid var(--bdr);padding-bottom:6px;margin:14px 0 10px">
       Production Loss Cascade <span style="font-size:9px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text3);margin-left:8px">Where exactly did we lose today?</span></div>`;
     html+=`<div style="overflow-x:auto;margin-bottom:14px"><div style="display:flex;align-items:stretch;min-width:600px">
-      ${stepBox(1,'CBG Target',fN(ex.tot_exp||cbgTgt),'m³','#2563eb',ok('CBG Expected sheet'),'border-radius:8px 0 0 8px;')}
+      ${stepBox(1,'Feed Expected Gas',fN(ex.tot_exp),'m³','#2563eb',ok('Feedstock BPP target'),'border-radius:8px 0 0 8px;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
-      ${stepBox(2,'Req. PSA Hrs',reqH!=null?reqH.toFixed(1):null,'hrs','#2563eb',ok('Target ÷ 370 m³/hr'),'border-left:none;')}
+      ${stepBox(2,'Req. PSA Hrs',reqH!=null?reqH.toFixed(1):null,'hrs','#2563eb',ok('Feed exp ÷ 370 m³/hr'),'border-left:none;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
       ${stepBox(3,'Actual PSA Hrs',p.psa_hrs!=null?p.psa_hrs.toFixed(2):null,'hrs',hrsClrD,hrsGap!=null?(hrsGap<0?gap('⚠ '+Math.abs(hrsGap).toFixed(2)+' hrs','#d97706'):gap('✓ +'+hrsGap.toFixed(2)+' hrs','#16a34a')):ok('—'),'border-left:none;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
@@ -1584,14 +1586,14 @@ function renderSectionDay(sectionId){
 
     html+=groupHeader('PSA Unit Performance','Ideal vs actual gas processing');
     html+=grid([
-      metricCard('Ideal Raw Suction',fN(p.ideal_raw||ex.ideal_raw),'m³','a','600 m³/hr × PSA hrs'),
-      metricCard('Ideal Purified Gas',fN(p.ideal_pur||ex.ideal_pur),'m³','a','370 m³/hr × PSA hrs'),
+      metricCard('Ideal Raw Suction',fN(ex.ideal_raw||p.ideal_raw),'m³','a','600 m³/hr × PSA hrs'),
+      metricCard('Ideal Purified Gas',fN(ex.ideal_pur||p.ideal_pur),'m³','a','370 m³/hr × PSA hrs'),
       metricCard('Actual Purified Gas',fN(p.purified),'m³',purCls,purPct!=null?purPct+'% of ideal':'',true,purPct||0),
       metricCard('CH4 Purity',ch4v,'%','g','Gas quality',true,ch4Pct),
     ]);
     html+=groupHeader('CBG Output','Purified gas to compression');
     html+=grid([
-      metricCard('Ideal CBG',fN(ex.ideal_cbg||p.ideal_cbg),'kg','a','275 kg/hr × PSA hrs'),
+      metricCard('Ideal CBG',fN(cbgTgt),'kg','a','275 kg/hr × PSA hrs'),
       metricCard('Actual CBG Produced',fN(actCBGD),'kg',cbgCls,cbgPct!=null?cbgPct+'% of ideal':'',true,cbgPct||0),
       metricCard('PSA Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(2):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
       metricCard('Avg PSA Efficiency',avgEff,'%',effCls,'Design: 45.83%',true,avgEff||0),
@@ -2703,7 +2705,7 @@ function renderS4(){
   const idealPur=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
   const idealCBG=mo==='ALL'?mArr('ideal_cbg'):dArr('exp','ideal_cbg');
   const actCBG=mo==='ALL'?mArr('act_cbg'):dArr('exp','act_cbg');
-  const rbgTot=mo==='ALL'?mArr('cbg'):dArr('psa','rbg_tot');
+  const rbgTot=mo==='ALL'?mArr('rbg_tot'):dArr('psa','rbg_tot');
   const d1FeedAct=mo==='ALL'?mArr('d1_feed'):dArr('d1','feed_act');
   const d1FeedExp=mo==='ALL'?null:dArr('d1','feed_exp');
   const d2FeedAct=mo==='ALL'?mArr('d2_feed'):dArr('d2','feed_act');
