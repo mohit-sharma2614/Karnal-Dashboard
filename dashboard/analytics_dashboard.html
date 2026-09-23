@@ -444,6 +444,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ S4 PURIFICATION ══ -->
 <div id="s4" class="pg">
   <div class="stitle">Purification — RBG to PBG <span class="resp">— Mr. Bobby</span><span id="s4_period" class="mo-badge">All Months</span></div>
+  <!-- D1/D2/Combined filter -->
+  <div style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+    <span style="font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text2)">View:</span>
+    <button id="s4db_combined" onclick="setS4Dig('combined')" style="font-size:11px;font-weight:700;padding:4px 14px;border-radius:6px;border:1.5px solid var(--acc);background:var(--acc);color:#fff;cursor:pointer;transition:all .15s">Combined</button>
+    <button id="s4db_d1" onclick="setS4Dig('d1')" style="font-size:11px;font-weight:700;padding:4px 14px;border-radius:6px;border:1.5px solid var(--bdr);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s">Digester 1</button>
+    <button id="s4db_d2" onclick="setS4Dig('d2')" style="font-size:11px;font-weight:700;padding:4px 14px;border-radius:6px;border:1.5px solid var(--bdr);background:var(--bg2);color:var(--text2);cursor:pointer;transition:all .15s">Digester 2</button>
+    <span id="s4_dig_note" style="font-size:10px;color:var(--text3)"></span>
+  </div>
   <div id="s4_main_content">
   <!-- Status bar -->
   <div id="s4_status_bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px"></div>
@@ -1054,7 +1062,7 @@ function rag(v,p){
   return{cls:'',lbl:'N/A'};
 }
 
-let curSection='ov', curDay='ALL';
+let curSection='ov', curDay='ALL', s4Dig='combined';
 const sectionRender={ov:renderOV,s1:renderS1,s2:renderS2,s3:renderS3,s4:renderS4,si:renderSI,s5:renderS5,s6:renderS6,s7:renderS7,s8:renderS8};
 
 function show(id,btn){
@@ -2724,23 +2732,60 @@ function renderGroupedAnomalies(anomalies, owner, pfx){
   return html;
 }
 
+function setS4Dig(val){
+  s4Dig=val;
+  ['combined','d1','d2'].forEach(v=>{
+    const b=document.getElementById('s4db_'+v);
+    if(!b)return;
+    const active=v===val;
+    b.style.background=active?'var(--acc)':'var(--bg2)';
+    b.style.color=active?'#fff':'var(--text2)';
+    b.style.borderColor=active?'var(--acc)':'var(--bdr)';
+  });
+  const noteEl=document.getElementById('s4_dig_note');
+  if(noteEl) noteEl.textContent=val==='combined'?'All PSA data (D1+D2 combined)':val==='d1'?'D1 expected gas · D1 RBG · D1 CBG · Ideal values proportioned by D1 share':'D2 expected gas · D2 RBG · D2 CBG · Ideal values proportioned by D2 share';
+  renderS4();
+}
+
 function renderS4(){
   if(renderSectionDay('s4')) return; else hideSectionDay('s4');
   const mo=curMonth;
-  const pur=mo==='ALL'?mArr('purified'):dArr('psa','purified');
+  const isD1=s4Dig==='d1', isD2=s4Dig==='d2';
+
+  // ── Raw data arrays (all fetched for proportioning) ──────────
+  const purAll=mo==='ALL'?mArr('purified'):dArr('psa','purified');
   const eff1=mo==='ALL'?mArr('d1_eff'):dArr('d1','psa_eff_pct');
   const eff2=mo==='ALL'?mArr('d2_eff'):dArr('d2','psa_eff_pct');
   const ch4=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
-  const expT=mo==='ALL'?mArr('exp_tot'):dArr('exp','tot_exp');
+  const expTot=mo==='ALL'?mArr('exp_tot'):dArr('exp','tot_exp'); // always total for proportioning
   const d1Exp=mo==='ALL'?mArr('d1_exp'):dArr('exp','d1_exp');
   const d2Exp=mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp');
-  const actP=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
+  const actPAll=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   const psaH=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
-  const idealRaw=mo==='ALL'?mArr('ideal_raw'):dArr('exp','ideal_raw');
-  const idealPur=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
-  const idealCBG=mo==='ALL'?mArr('ideal_cbg'):dArr('exp','ideal_cbg');
-  const actCBG=mo==='ALL'?mArr('act_cbg'):dArr('exp','act_cbg');
-  const rbgTot=mo==='ALL'?mArr('rbg_tot'):dArr('psa','rbg_tot');
+  const idealRawAll=mo==='ALL'?mArr('ideal_raw'):dArr('exp','ideal_raw');
+  const idealPurAll=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
+  const idealCBGAll=mo==='ALL'?mArr('ideal_cbg'):dArr('exp','ideal_cbg');
+  const actCBGAll=mo==='ALL'?mArr('act_cbg'):dArr('exp','act_cbg');
+  const rbgAll=mo==='ALL'?mArr('rbg_tot'):dArr('psa','rbg_tot');
+  const rbgD1=mo==='ALL'?mArr('d1_bg'):dArr('psa','rbg_d1');
+  const rbgD2=mo==='ALL'?mArr('d2_bg'):dArr('psa','rbg_d2');
+  const cbgD1=mo==='ALL'?mArr('d1_cbg'):dArr('psa','cbg_d1');
+  const cbgD2=mo==='ALL'?mArr('d2_cbg'):dArr('psa','cbg_d2');
+
+  // ── Apply digester filter ────────────────────────────────────
+  // share[i]: fraction of total expected attributed to chosen digester (for proportioning ideals)
+  const digExpRaw = isD1?d1Exp : isD2?d2Exp : expTot;
+  const share = (isD1||isD2) ? digExpRaw.map((e,i)=>{const t=expTot[i];return(t>0&&e!=null)?e/t:null;}) : null;
+  const prop = (arr)=>share ? arr.map((v,i)=>v!=null&&share[i]!=null?v*share[i]:null) : arr;
+
+  const expT = digExpRaw;
+  const rbgTot = isD1?rbgD1 : isD2?rbgD2 : rbgAll;
+  const actCBG = isD1?cbgD1 : isD2?cbgD2 : actCBGAll;
+  const pur = prop(purAll);
+  const actP = prop(actPAll);
+  const idealRaw = prop(idealRawAll);
+  const idealPur = prop(idealPurAll);
+  const idealCBG = prop(idealCBGAll);
   const d1FeedAct=mo==='ALL'?mArr('d1_feed'):dArr('d1','feed_act');
   const d1FeedExp=mo==='ALL'?null:dArr('d1','feed_exp');
   const d2FeedAct=mo==='ALL'?mArr('d2_feed'):dArr('d2','feed_act');
@@ -2753,7 +2798,10 @@ function renderS4(){
   const iaD2=mo==='ALL'?mArr('ia_d2'):healthDArr('ia_d2');
 
   // ── Paired KPI cards (Tasks 1,4,5) ──────────────────────────────────────────
-  const effs=eff1.filter(v=>v);
+  const effSrc=isD2?eff2:eff1; // D2 mode → use D2 eff; D1 or Combined → D1 eff (combined avg done below for combined)
+  const effSrc2=isD1?null:isD2?null:eff2; // second series for combined
+  const effAll=[...effSrc,...(effSrc2||[])].filter(v=>v!=null&&v>0);
+  const effs=isD1||isD2?effSrc.filter(v=>v!=null&&v>0):effAll;
   const avgEffV=(effs.length?effs.reduce((a,b)=>a+b,0)/effs.length:0);
   const ch4vArr=ch4.filter(v=>v);
   const acCh4=(ch4vArr.length?ch4vArr.reduce((a,b)=>a+b,0)/ch4vArr.length:0);
@@ -2779,13 +2827,14 @@ function renderS4(){
       <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">Operations</div>
       <div style="display:flex;flex-direction:column;gap:7px">
         <div><div style="font-size:9px;color:var(--text3)">PSA Hours</div><div style="font-size:16px;font-weight:800;color:var(--blue)">${fmtN(tHrs)}<span style="font-size:10px;color:var(--text2);margin-left:2px">hrs</span></div></div>
-        <div><div style="font-size:9px;color:var(--text3)">Avg PSA Efficiency</div><div style="font-size:14px;font-weight:700;color:${avgEffV>=45?'var(--green)':avgEffV>=35?'var(--amber)':'var(--red)'}">${avgEffV.toFixed(1)}<span style="font-size:10px;color:var(--text2);margin-left:2px">% · Design 45.83%</span></div></div>
+        <div><div style="font-size:9px;color:var(--text3)">${isD1?'D1 ':isD2?'D2 ':'Avg '}PSA Efficiency</div><div style="font-size:14px;font-weight:700;color:${avgEffV>=45?'var(--green)':avgEffV>=35?'var(--amber)':'var(--red)'}">${avgEffV.toFixed(1)}<span style="font-size:10px;color:var(--text2);margin-left:2px">% · Design 45.83%</span></div></div>
         <div><div style="font-size:9px;color:var(--text3)">Avg CH4 Purity</div><div style="font-size:14px;font-weight:700;color:${acCh4Pct>=90?'var(--green)':acCh4Pct>=80?'var(--amber)':'var(--red)'}">${acCh4Pct.toFixed(2)}<span style="font-size:10px;color:var(--text2);margin-left:2px">%</span></div></div>
       </div></div>`;
+    const digLbl=(isD1||isD2)?'est.':'';
     kpiPaired.innerHTML=
-      pCard('Raw Gas Suction','Ideal (600 m³/hr × hrs)',tIR>0?fmtN(tIR):null,'m³','Actual RBG Sucked',tRBG>0?fmtN(tRBG):null,'m³',pRaw)+
-      pCard('Purified Gas','Ideal (370 m³/hr × hrs)',tIP>0?fmtN(tIP):null,'m³','Actual Purified',tAP>0?fmtN(tAP):null,'m³',pPur)+
-      pCard('CBG Output','CBG Target (275 kg/hr × hrs)',tIC>0?fmtN(tIC):null,'kg','Actual CBG Produced',tAC>0?fmtN(tAC):null,'kg',pCBG)+
+      pCard('Raw Gas Suction',`Ideal${digLbl?' ('+s4Dig.toUpperCase()+' share)':' (600 m³/hr × hrs)'}`,tIR>0?fmtN(tIR):null,'m³','Actual RBG Sucked',tRBG>0?fmtN(tRBG):null,'m³',pRaw)+
+      pCard('Purified Gas',`Ideal${digLbl?' ('+s4Dig.toUpperCase()+' share)':' (370 m³/hr × hrs)'}`,tIP>0?fmtN(tIP):null,'m³','Actual Purified',tAP>0?fmtN(tAP):null,'m³',pPur)+
+      pCard('CBG Output',`CBG Target${digLbl?' ('+s4Dig.toUpperCase()+' share)':' (275 kg/hr × hrs)'}`,tIC>0?fmtN(tIC):null,'kg','Actual CBG Produced',tAC>0?fmtN(tAC):null,'kg',pCBG)+
       opsCard;
   }
 
@@ -2835,24 +2884,28 @@ function renderS4(){
 
   const lbl=mo==='ALL'?MONTHS:dDates('psa');
   const lblE=mo==='ALL'?MONTHS:dDates('exp');
+  const digTag=isD1?' — D1':isD2?' — D2':'';
+  // Update dynamic chart titles to reflect D1/D2 filter
+  ['raw','pur','cbg','eff'].forEach(k=>{const el=document.getElementById('ct_s4_'+k);if(el){const base=el.dataset.base||(el.dataset.base=el.textContent.replace(/ — D[12]$/,''));el.textContent=base+digTag;}});
 
   // 3-way comparison: Feedstock Expected vs PSA Ideal vs Actual
   line('c_s4_3way',lblE,[
     lDS('PSA Design Ceiling (hrs×370)',idealPur,C.grey),
-    lDS('Feedstock Expected (BPP rolling)',expT,C.blue),
-    lDS('Actual Purified',actP,C.green)
+    lDS(`Feedstock Expected${digTag}`,expT,C.blue),
+    lDS(`Actual Purified${digTag}`,actP,C.green)
   ]);
 
   // Ideal Raw (600 m³/hr) vs Actual Raw Biogas
-  line('c_s4_raw',lbl,[lDS('Ideal Raw (600×hrs)',idealRaw,C.amber),lDS('Actual RBG Total',rbgTot,C.cyan)]);
+  line('c_s4_raw',lbl,[lDS('Ideal Raw (600×hrs)',idealRaw,C.amber),lDS(`Actual RBG${digTag}`,rbgTot,C.cyan)]);
   // Ideal Purified (370 m³/hr) vs Actual Purified
-  line('c_s4_pur',lblE,[lDS('Ideal Purified (370×hrs)',idealPur,C.amber),lDS('Actual Purified',actP,C.green)]);
+  line('c_s4_pur',lblE,[lDS('Ideal Purified (370×hrs)',idealPur,C.amber),lDS(`Actual Purified${digTag}`,actP,C.green)]);
   // Ideal CBG (275 kg/hr) vs Actual CBG
-  line('c_s4_cbg',lblE,[lDS('Ideal CBG (275×hrs)',idealCBG,C.amber),lDS('Actual CBG',actCBG,C.green)]);
+  line('c_s4_cbg',lblE,[lDS('Ideal CBG (275×hrs)',idealCBG,C.amber),lDS(`Actual CBG${digTag}`,actCBG,C.green)]);
   // CH4
   bar('c_s4_ch4',lbl,[bDS('CH4 %',ch4.map(v=>v?v>1?v:v*100:0),C.green)]);
-  // PSA Efficiency
-  line('c_s4_eff',lbl,[lDS('D1 Efficiency %',eff1,C.blue),lDS('D2 Efficiency %',eff2,C.cyan)],{min:0,max:100});
+  // PSA Efficiency — show only relevant line in D1/D2 mode
+  const effDs=isD1?[lDS('D1 Efficiency %',eff1,C.blue)]:isD2?[lDS('D2 Efficiency %',eff2,C.cyan)]:[lDS('D1 Efficiency %',eff1,C.blue),lDS('D2 Efficiency %',eff2,C.cyan)];
+  line('c_s4_eff',lbl,effDs,{min:0,max:100});
   // BPP breakdown stacked bar
   const d1pm=mo==='ALL'?mArr('d1_pm_bpp'):dArr('exp','d1_pm_bpp');
   const d1cd=mo==='ALL'?mArr('d1_cd_bpp'):dArr('exp','d1_cd_bpp');
@@ -2871,12 +2924,11 @@ function renderS4(){
   });
   bar('c_s4_suc_eff',lbl,[bDS('Conversion Efficiency %',convEffArr,C.cyan)],false,{min:0,max:100,annotation:{value:61.67,label:'Design 61.67%'}});
 
-  bar('c_s4_bpp',lblE,[
-    bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),
-    bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan),
-    bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),
-    bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink)
-  ],true);
+  // BPP breakdown — filter to selected digester
+  const bppDs=isD1?[bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan)]:
+              isD2?[bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink)]:
+              [bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan),bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink)];
+  bar('c_s4_bpp',lblE,bppDs,true);
 
   // ── Anomaly Detection (grouped — Task 6) ─────────────────────
   const anomEl=document.getElementById('s4_anomaly');
@@ -2901,6 +2953,8 @@ function renderS4(){
       const dp=D.days[k];
       if(dp.psa?.purified==null) anomalies.push({label:'Actual Purified Gas',date:k,value:'—',note:'No PSA purified gas data for this date',sev:'a'});
       if(dp.psa?.psa_hrs==null) anomalies.push({label:'PSA Operating Hours',date:k,value:'—',note:'No PSA runtime recorded for this date',sev:'a'});
+      if(isD1&&dp.psa?.rbg_d1==null&&dp.psa?.psa_hrs!=null) anomalies.push({label:'D1 RBG Suction',date:k,value:'—',note:'No D1 individual RBG data for this date',sev:'a'});
+      if(isD2&&dp.psa?.rbg_d2==null&&dp.psa?.psa_hrs!=null) anomalies.push({label:'D2 RBG Suction',date:k,value:'—',note:'No D2 individual RBG data for this date',sev:'a'});
     });
     anomEl.innerHTML=renderGroupedAnomalies(anomalies,'Mr. Bobby','s4m');
   }
