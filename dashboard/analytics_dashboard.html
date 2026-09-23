@@ -495,19 +495,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div id="s5" class="pg">
   <div class="stitle">Compression & Filling — PBG to CBG <span class="resp">— Mr. Rajendra Kumar</span><span id="s5_period" class="mo-badge">All Months</span></div>
   <div id="s5_main_content">
-  <div class="kg k4">
-    <div class="kc c"><div class="kl">YTD CBG Produced</div><div class="kv c" id="s5_cbg">—</div><div class="ks">kg</div></div>
-    <div class="kc g"><div class="kl">YTD Dispatched</div><div class="kv g" id="s5_disp">—</div><div class="ks">kg</div></div>
-    <div class="kc a"><div class="kl">Compressor Hours</div><div class="kv a" id="s5_comp">—</div><div class="ks">hrs</div></div>
-    <div class="kc"><div class="kl">Avg Utilization</div><div class="kv" id="s5_util">—</div><div class="ks">% of 24hrs/day</div></div>
-  </div>
+  <!-- Status bar: 3 pills -->
+  <div id="s5_status_bar" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px"></div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s5_cbg">CBG Produced vs Dispatched (kg)</div><div class="cw"><canvas id="c_s5_cbg"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s5_hrs">PSA vs Compressor Hours</div><div class="cw"><canvas id="c_s5_hrs"></canvas></div></div>
-  </div>
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s5_ideal">Ideal vs Actual CBG (kg)</div><div class="cw"><canvas id="c_s5_ideal"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_s5_util">Compressor Utilization %</div><div class="cw"><canvas id="c_s5_util"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s5_cust">Customer-wise Dispatch (kg)</div><div class="cw t"><canvas id="c_s5_cust"></canvas></div></div>
   </div>
   </div><!-- /s5_main_content -->
 </div>
@@ -1628,18 +1620,37 @@ function renderSectionDay(sectionId){
     });
     html+=renderGroupedAnomalies(dayAnoms,'Mr. Bobby','s4d');
   } else if(sectionId==='s5'){
-    const cbgPct=p.act_cbg&&p.ideal_cbg?Math.round(p.act_cbg/p.ideal_cbg*100):null;
-    html+=groupHeader('Compression & Dispatch','CBG filling and delivery');
+    const dispRate=p.act_cbg&&p.dispatched!=null?+(p.dispatched/p.act_cbg*100).toFixed(1):null;
+    const compUtil=p.psa_hrs&&p.comp_hrs!=null?+(p.comp_hrs/p.psa_hrs*100).toFixed(1):null;
+    const inHand=(p.act_cbg||0)-(p.dispatched||0);
+    const drClr=dispRate!=null?(dispRate>=95?'g':dispRate>=80?'a':'r'):'';
+    const cuClr=compUtil!=null?(compUtil>=95?'g':compUtil>=80?'a':'r'):'';
+    html+=groupHeader('Compression Status','Key metrics for today\'s compression run');
     html+=grid([
-      metricCard('PSA Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(1):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
+      metricCard('Dispatch Rate',dispRate!=null?dispRate+'%':null,'',drClr,'Dispatched ÷ Produced',true,dispRate||0),
+      metricCard('Compressor Utilization',compUtil!=null?compUtil+'%':null,'',cuClr,'Comp hrs ÷ PSA hrs',true,compUtil||0),
+      metricCard('CBG Produced',fN(p.act_cbg),'kg','c','from PSA output'),
+      metricCard('CBG In Hand',fN(inHand),'kg',inHand>0?'a':'g','Produced − Dispatched'),
+    ]);
+    html+=groupHeader('PSA & Compressor Runtime','Hours logged today');
+    html+=grid([
+      metricCard('PSA Operating Hours',p.psa_hrs!=null?p.psa_hrs.toFixed(1):null,'hrs','b','',true,p.psa_hrs?p.psa_hrs/24*100:0),
       metricCard('Compressor Hours',p.comp_hrs!=null?p.comp_hrs.toFixed(1):null,'hrs','g','',true,p.comp_hrs?p.comp_hrs/24*100:0),
-      metricCard('CBG Produced',fN(p.act_cbg),'kg',cbgPct!=null?(cbgPct>=90?'g':cbgPct>=70?'a':'r'):'',cbgPct!=null?cbgPct+'% of ideal':'',true,cbgPct||0),
-      metricCard('CBG Dispatched',fN(p.dispatched),'kg','c','',true,p.dispatched&&p.act_cbg?Math.min(p.dispatched/p.act_cbg*100,100):0),
+      metricCard('CBG Dispatched',fN(p.dispatched),'kg','g','Total sent today'),
+      metricCard('Dispatch Gap',fN(inHand),'kg',inHand>500?'a':'g',inHand>0?'Unsold / cascade stock':'Fully dispatched'),
     ]);
     const customers=[['Veer',p.veer],['Adinath',p.adinath],['KFS',p.kfs],['KSK',p.ksk],['OM',p.om],['SPS',p.sps]].filter(([,v])=>v>0);
     if(customers.length){
-      html+=groupHeader('Customer-wise Dispatch','kg delivered per customer today');
-      html+=grid(customers.map(([nm,v])=>metricCard(nm,fN(v),'kg','b','',true,v&&p.dispatched?v/p.dispatched*100:0)),customers.length>=4?4:customers.length);
+      html+=groupHeader('Customer-wise Dispatch','kg and % share delivered today');
+      const totCust=customers.reduce((s,[,v])=>s+v,0);
+      html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr><th>Customer</th><th>Dispatched (kg)</th><th>Share %</th><th>Progress</th></tr></thead><tbody>
+        ${customers.map(([nm,v])=>{const pct=totCust>0?+(v/totCust*100).toFixed(1):0;
+          return`<tr><td style="font-weight:700">${nm}</td><td class="tc">${fmtN(v)}</td><td class="tc">${pct}%</td>
+            <td style="padding:4px 12px"><div style="background:var(--bg3);border-radius:4px;height:6px;overflow:hidden;min-width:80px">
+            <div style="width:${pct}%;height:6px;background:var(--cyan);border-radius:4px"></div></div></td></tr>`;}).join('')}
+        <tr style="font-weight:700"><td>TOTAL</td><td class="tg">${fmtN(totCust)}</td><td class="tg">100%</td><td></td></tr></tbody></table>`;
+    } else {
+      html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No customer dispatch data for this date.</div>`;
     }
   } else if(sectionId==='s6'){
     const totalSfom=(d1r.sfom||0)+(d2r.sfom||0);
@@ -2964,19 +2975,48 @@ function renderS5(){
   const disp=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
   const comp=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
   const psaH=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
+  const veer=mo==='ALL'?mArr('veer'):dArr('psa','veer');
+  const adi=mo==='ALL'?mArr('adinath'):dArr('psa','adinath');
+  const kfs=mo==='ALL'?mArr('kfs'):dArr('psa','kfs');
+  const ksk=mo==='ALL'?mArr('ksk'):dArr('psa','ksk');
+  const om=mo==='ALL'?mArr('om'):dArr('psa','om');
+  const sps=mo==='ALL'?mArr('sps'):dArr('psa','sps');
   const lbl=mo==='ALL'?MONTHS:dDates('psa');
-  document.getElementById('s5_cbg').textContent=fmtN(sumA(cbg));
-  document.getElementById('s5_disp').textContent=fmtN(sumA(disp));
-  document.getElementById('s5_comp').textContent=fmtN(sumA(comp));
-  const totalDays=mo==='ALL'?MONTHS.reduce((s,m)=>s+(MDAYS[m]||30),0):MDAYS[mo]||30;
-  const util=sumA(comp)>0?(sumA(comp)/(totalDays*24)*100).toFixed(1):0;
-  document.getElementById('s5_util').textContent=util+'%';
-  const dailyUtil=comp.map(h=>h?(h/24*100).toFixed(1):0);
-  const idealCBG=psaH.map(h=>(h||0)*275);
-  bar('c_s5_cbg',lbl,[bDS('CBG Produced',cbg,C.cyan),bDS('Dispatched',disp,C.green)]);
-  bar('c_s5_hrs',lbl,[bDS('PSA Hrs',psaH,C.blue),bDS('Comp Hrs',comp,C.amber)]);
-  line('c_s5_ideal',lbl,[lDS('Ideal CBG',idealCBG,C.amber),lDS('Actual CBG',cbg,C.green)]);
-  bar('c_s5_util',lbl,[bDS('Utilization %',dailyUtil,C.cyan)]);
+
+  const totCBG=sumA(cbg), totDisp=sumA(disp), totComp=sumA(comp), totPSA=sumA(psaH);
+  const dispRate=totCBG>0?(totDisp/totCBG*100).toFixed(1):null;
+  const compUtil=totPSA>0?(totComp/totPSA*100).toFixed(1):null;
+  const inHand=totCBG-totDisp;
+
+  const pill=(label,val,unit,sub,color,pct)=>{
+    const pBar=pct!=null?`<div style="margin-top:8px;background:var(--bg3);border-radius:4px;height:5px;overflow:hidden">
+      <div style="width:${Math.min(pct,100)}%;height:5px;background:${color};border-radius:4px"></div></div>`:'';
+    const subTxt=sub?`<div style="font-size:10px;color:var(--text3);margin-top:4px">${sub}</div>`:'';
+    return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${color};border-radius:8px;padding:14px 16px">
+      <div style="font-size:10px;font-weight:600;letter-spacing:.7px;color:var(--text2);text-transform:uppercase;margin-bottom:6px">${label}</div>
+      <div style="font-size:28px;font-weight:700;color:${color};line-height:1">${val!=null?val:'—'}<span style="font-size:13px;font-weight:500;color:var(--text2);margin-left:4px">${val!=null?unit:''}</span></div>
+      ${subTxt}${pBar}</div>`;
+  };
+
+  const dr=dispRate!=null?+dispRate:null;
+  const drClr=dr!=null?(dr>=95?'var(--green)':dr>=80?'var(--amber)':'var(--red)'):'var(--text3)';
+  const cu=compUtil!=null?+compUtil:null;
+  const cuClr=cu!=null?(cu>=95?'var(--green)':cu>=80?'var(--amber)':'var(--red)'):'var(--text3)';
+  const ihClr=inHand>0?'var(--amber)':'var(--green)';
+
+  document.getElementById('s5_status_bar').innerHTML=
+    pill('Dispatch Rate',dispRate,'%','Dispatched ÷ Produced — % of CBG reaching customers',drClr,dr)+
+    pill('Compressor Utilization',compUtil,'%','Comp Hours ÷ PSA Hours — compressor keeping pace',cuClr,cu)+
+    pill('CBG In Hand',fmtN(inHand),'kg','Produced − Dispatched (unsold stock)',ihClr,null);
+
+  const lProd=mo==='ALL'?MONTHS:dDates('psa');
+  bar('c_s5_cbg',lProd,[bDS('CBG Produced',cbg,C.cyan),bDS('Dispatched',disp,C.green)]);
+  bar('c_s5_cust',lbl,[bDS('Veer',veer,C.cyan),bDS('Adinath',adi,C.green),
+    bDS('KFS',kfs,C.amber),bDS('KSK',ksk,C.pink),bDS('OM',om,C.purple),bDS('SPS',sps,C.orange)],true);
+  if(document.getElementById('ct_s5_cbg'))
+    document.getElementById('ct_s5_cbg').textContent=mo==='ALL'?'CBG Produced vs Dispatched — Monthly (kg)':'CBG Produced vs Dispatched — Daily (kg)';
+  if(document.getElementById('ct_s5_cust'))
+    document.getElementById('ct_s5_cust').textContent=mo==='ALL'?'Customer-wise Dispatch — Monthly (kg)':'Customer-wise Dispatch — Daily (kg)';
 }
 
 // ═══ S6 MANURE ═══════════════════════════════════════════════
