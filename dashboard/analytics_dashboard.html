@@ -1527,8 +1527,12 @@ function renderSectionDay(sectionId){
     (_aP4||[]).forEach((v,i)=>{if(v!=null&&_iP4[i]!=null&&v>_iP4[i]*1.05)dayAnoms.push({label:'Actual Purified > Ideal',date:dDates('exp')[i]||'—',value:v.toFixed(0)+' > '+_iP4[i].toFixed(0),note:'Exceeds PSA design ceiling',sev:'a'});});
     (_aC4||[]).forEach((v,i)=>{if(v!=null&&_iC4[i]!=null&&v>_iC4[i]*1.05)dayAnoms.push({label:'Actual CBG > Ideal',date:dDates('exp')[i]||'—',value:v.toFixed(0)+' > '+_iC4[i].toFixed(0),note:'Exceeds design capacity',sev:'a'});});
     ch4n4.forEach((v,i)=>{if(v!=null&&v>0&&(v<80||v>100))dayAnoms.push({label:'CH4 Purity (%)',date:_lbl4[i]||'—',value:v.toFixed(2)+'%',note:v<80?'Below 80% — quality alert':'Above 100% — sensor error',sev:'r'});});
-    (_psa4('purified')||[]).forEach((v,i)=>{if(v==null)dayAnoms.push({label:'Actual Purified Gas',date:_lbl4[i]||'—',value:'—',note:'No data recorded',sev:'a'});});
-    (_psa4('psa_hrs')||[]).forEach((v,i)=>{if(v==null)dayAnoms.push({label:'PSA Operating Hours',date:_lbl4[i]||'—',value:'—',note:'No PSA runtime recorded',sev:'a'});});
+    // Missing data — use D.days to catch dates with no PSA row at all
+    Object.keys(D.days).filter(k=>D.days[k].mo===dayMo4).sort().forEach(k=>{
+      const dp=D.days[k];
+      if(dp.psa?.purified==null) dayAnoms.push({label:'Actual Purified Gas',date:k,value:'—',note:'No PSA purified gas data for this date',sev:'a'});
+      if(dp.psa?.psa_hrs==null) dayAnoms.push({label:'PSA Operating Hours',date:k,value:'—',note:'No PSA runtime recorded for this date',sev:'a'});
+    });
     if(!dayAnoms.length){
       html+=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px;margin-bottom:12px">
         <span style="font-size:18px">✓</span>
@@ -2699,9 +2703,13 @@ function renderS4(){
     (_actC||[]).forEach((v,i)=>{if(v!=null&&_idealC[i]!=null&&v>_idealC[i]*1.05)anomalies.push({label:'Actual CBG > Ideal (kg)',date:_lblE[i]||'—',value:v.toFixed(0)+' > '+_idealC[i].toFixed(0),note:'Exceeds design capacity — verify data',sev:'a'});});
     // CH4 out of range (80–100%)
     ch4Norm.forEach((v,i)=>{if(v!=null&&v>0&&(v<80||v>100))anomalies.push({label:'CH4 Purity (%)',date:_lbl[i]||'—',value:v.toFixed(2)+'%',note:v<80?'Below 80% — gas quality alert':'Above 100% — sensor/data error',sev:v<80?'r':'r'});});
-    // Missing critical data
-    (_psa('purified')||[]).forEach((v,i)=>{if(v==null)anomalies.push({label:'Actual Purified Gas',date:_lbl[i]||'—',value:'—',note:'No data recorded for this period',sev:'a'});});
-    (_psa('psa_hrs')||[]).forEach((v,i)=>{if(v==null)anomalies.push({label:'PSA Operating Hours',date:_lbl[i]||'—',value:'—',note:'No PSA runtime recorded',sev:'a'});});
+    // Missing critical data — iterate D.days to catch dates with no PSA row at all
+    const _moFilter=mo==='ALL'?null:mo;
+    Object.keys(D.days).filter(k=>_moFilter?D.days[k].mo===_moFilter:true).sort().forEach(k=>{
+      const dp=D.days[k];
+      if(dp.psa?.purified==null) anomalies.push({label:'Actual Purified Gas',date:k,value:'—',note:'No PSA purified gas data for this date',sev:'a'});
+      if(dp.psa?.psa_hrs==null) anomalies.push({label:'PSA Operating Hours',date:k,value:'—',note:'No PSA runtime recorded for this date',sev:'a'});
+    });
 
     if(!anomalies.length){
       anomEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px">
