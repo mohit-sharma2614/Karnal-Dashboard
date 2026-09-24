@@ -5239,7 +5239,10 @@ async function buildAnalyticsD() {
   const emiDataRows=emiVals.slice(1).filter(r=>r&&typeof r[0]==='number');
   M.emi=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+5];return s+(typeof v==='number'?v:0);},0);});
   const emi_rows=emiDataRows.map(r=>({type:r[1]||'',desc:r[2]||'',vals:months.map(m=>{const ci=MNAMES.indexOf(m);return ci>=0&&typeof r[ci+5]==='number'?r[ci+5]:0;})}));
-  M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
+  // Sales Detail: col0=Date, col2=Veer₹, col4=Adinath₹, col6=GAIL₹, col8=SPS₹
+  const salesRows=getRows(salesR,0);
+  M.veer_rev=aggMonth(salesRows,gD,2); M.adi_rev=aggMonth(salesRows,gD,4);
+  M.gail_rev=aggMonth(salesRows,gD,6); M.sps_rev=aggMonth(salesRows,gD,8);
   M.d2_exp=M.d2_exp_exp||aggMonth(cbgExp,gD,12); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
   M.d1_drain_exp=aggMonth(d1,gD,29); M.d2_drain_exp=aggMonth(d2,gD,29);
   M.d1_bg_est_exp=aggMonth(d1,gD,10); M.d1_bg_est_act=aggMonth(d1,gD,31);
