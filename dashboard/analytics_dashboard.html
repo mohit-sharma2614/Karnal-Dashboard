@@ -3559,7 +3559,7 @@ function renderS8(){
     {lbl:'Electricity',arr:elec,sub:false,cls:'ta'},
     {lbl:'Transport',arr:transM,sub:false,cls:''},
     {lbl:'Maintenance',arr:maintM,sub:false,cls:''},
-    {lbl:'Manpower',arr:null,sub:false,cls:''},
+    {lbl:'Manpower',arr:mp,sub:false,cls:''},
     {lbl:'EMI / Loan',arr:emi,sub:false,cls:''},
     {lbl:'Fuel',arr:null,sub:false,cls:''},
     {lbl:'Miscellaneous',arr:null,sub:false,cls:''},
@@ -5145,7 +5145,7 @@ async function gFetch(path) {
 function setStatus(msg) { const el=document.getElementById('authStatus'); if(el) el.textContent=msg; }
 async function buildAnalyticsD() {
   setStatus('Fetching plant data (15–30 seconds)…');
-  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,fsR,cbgExpR] = await Promise.all([
+  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,fsR,cbgExpR,mfcR,emiR] = await Promise.all([
     gFetch("/worksheets('PSA%20Production')/range(address='A3:AC700')"),
     gFetch("/worksheets('D1')/range(address='A3:AZ700')"),
     gFetch("/worksheets('D2')/range(address='A3:AZ700')"),
@@ -5164,6 +5164,8 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
     gFetch("/worksheets('Feedstock%20Supply')/range(address='A3:AJ400')"),
     gFetch("/worksheets('CBG%20Expected')/range(address='A4:X700')"),
+    gFetch("/worksheets('Monthly%20Fixed%20Costs')/range(address='A3:P10')"),
+    gFetch("/worksheets('EMI%20Tracker')/range(address='A3:R10')"),
   ]);
   const nv=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
   const toDate=v=>{if(!v)return null;const n=parseFloat(v);if(isNaN(n)||n<40000)return null;return new Date(Math.round((n-25569)*86400000));};
@@ -5228,7 +5230,16 @@ async function buildAnalyticsD() {
   M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
   M.ksk=aggMonth(psa,gD,19); M.om=aggMonth(psa,gD,20); M.sps=aggMonth(psa,gD,21);
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
-  M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
+  // Monthly Fixed Costs: row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols 3-14 = Jan-Dec
+  const mfcVals=mfcR?.values||[];
+  const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+3];return typeof v==='number'?v:0;};
+  M.manpower=months.map(m=>mfcGet(3,m));
+  // EMI Tracker: row0=header, rows1-4=individual EMIs; cols 5-16=Jan-Dec
+  const emiVals=emiR?.values||[];
+  const emiDataRows=emiVals.slice(1).filter(r=>r&&typeof r[0]==='number');
+  M.emi=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+5];return s+(typeof v==='number'?v:0);},0);});
+  const emi_rows=emiDataRows.map(r=>({type:r[1]||'',desc:r[2]||'',vals:months.map(m=>{const ci=MNAMES.indexOf(m);return ci>=0&&typeof r[ci+5]==='number'?r[ci+5]:0;})}));
+  M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
   M.d2_exp=M.d2_exp_exp||aggMonth(cbgExp,gD,12); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
   M.d1_drain_exp=aggMonth(d1,gD,29); M.d2_drain_exp=aggMonth(d2,gD,29);
   M.d1_bg_est_exp=aggMonth(d1,gD,10); M.d1_bg_est_act=aggMonth(d1,gD,31);
@@ -5242,7 +5253,7 @@ async function buildAnalyticsD() {
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
-  M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0));
+  M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0)+(M.manpower[i]||0)+(M.emi[i]||0));
   M.margin=M.total_rev.map((r,i)=>r>0?+((r-M.total_cost[i])/r*100).toFixed(1):null);
   // Daily arrays
   function buildDA(rows,getD,colMap){
@@ -5416,7 +5427,7 @@ async function buildAnalyticsD() {
     stock,latest_psa:{date:dayKey(latDt)||'—',psa_hrs:psaH(lastPsa),act_raw:nv(lastPsa[7]),act_pur:nv(lastPsa[9]),act_cbg:nv(lastPsa[12]),dispatched:nv(lastPsa[15]),ch4:nv(lastPsa[22]),cascade:nv(lastPsa[27]),storage:nv(lastPsa[28])},
     finance:{ytd_rev,ytd_cost,ytd_cbg_rev:M.cbg_rev.reduce((s,v)=>s+(v||0),0),ytd_manure:M.sfom_mn.reduce((s,v)=>s+(v||0),0)+M.lfom_mn.reduce((s,v)=>s+(v||0),0),
       ytd_feed_cost:M.feed_cost.reduce((s,v)=>s+(v||0),0),ytd_elec:M.elec.reduce((s,v)=>s+(v||0),0),
-      ytd_manpower:0,ytd_emi:0,emi_rows:[],cpk_monthly:cost_per_kg},
+      ytd_manpower:M.manpower.reduce((s,v)=>s+(v||0),0),ytd_emi:M.emi.reduce((s,v)=>s+(v||0),0),emi_rows,cpk_monthly:cost_per_kg},
     manure:{ytd_sfom_rev:M.sfom_mn.reduce((s,v)=>s+(v||0),0),ytd_lfom_rev:M.lfom_mn.reduce((s,v)=>s+(v||0),0)},
     targets:tgts,heatmap,olr_trail,cost_per_kg,cpk_monthly:cost_per_kg,
     dispatch:{ytd_veer:aggMonth(psa,gD,16).reduce((s,v)=>s+(v||0),0),ytd_adinath:aggMonth(psa,gD,17).reduce((s,v)=>s+(v||0),0),ytd_kfs:aggMonth(psa,gD,18).reduce((s,v)=>s+(v||0),0),ytd_ksk:aggMonth(psa,gD,19).reduce((s,v)=>s+(v||0),0),ytd_om:aggMonth(psa,gD,20).reduce((s,v)=>s+(v||0),0),ytd_sps:aggMonth(psa,gD,21).reduce((s,v)=>s+(v||0),0)},
