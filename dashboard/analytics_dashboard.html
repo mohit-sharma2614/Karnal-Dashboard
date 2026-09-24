@@ -161,20 +161,22 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .msc-bar-fill{height:6px;border-radius:3px;transition:width .4s}
 .msc-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;display:inline-block}
 /* FAULT CASCADE */
-.cascade{display:grid;grid-template-columns:1fr 32px 1fr 32px 1fr 32px 1fr;
-  align-items:center;gap:0;margin:12px 0}
-.stage{border-radius:12px;padding:16px;text-align:center;border:2px solid var(--bdr)}
-.stage.g{border-color:var(--green);background:var(--gbg)}
-.stage.a{border-color:var(--amber);background:var(--abg)}
-.stage.r{border-color:var(--red);background:var(--rbg)}
-.stage.grey{border-color:var(--bdr);background:var(--bg3)}
-.stage-icon{font-size:24px;margin-bottom:4px}
-.stage-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:8px}
-.stage-metric{font-size:15px;font-weight:700;margin-bottom:2px}
-.stage-label{font-size:9px;color:var(--text2);margin-bottom:6px}
-.stage-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:12px;display:inline-block}
-.stage-loss{font-size:10px;color:var(--text2);margin-top:6px}
-.cascade-arrow{text-align:center;font-size:20px;color:var(--text3)}
+.casc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--bdr);border-radius:8px;overflow:hidden;margin-bottom:16px}
+.casc-box{padding:14px 16px;border-right:1px solid var(--bdr)}
+.casc-box:last-child{border-right:none}
+.casc-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px}
+.casc-val{font-size:24px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;margin-bottom:8px}
+.casc-bar{height:4px;background:var(--bg3);border-radius:2px;margin-bottom:7px;overflow:hidden}
+.casc-bar-fill{height:4px;border-radius:2px;transition:width .4s}
+.casc-status{font-size:11px;font-weight:700;margin-bottom:3px}
+.casc-sub{font-size:10px;color:var(--text3)}
+/* Root cause table */
+.rct{width:100%;border-collapse:collapse;font-size:12px;margin-top:4px}
+.rct th{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);padding:7px 10px;border-bottom:2px solid var(--bdr);text-align:left}
+.rct th.r{text-align:right}
+.rct td{padding:8px 10px;border-bottom:1px solid var(--bdr2);vertical-align:middle;font-variant-numeric:tabular-nums}
+.rct td.r{text-align:right}
+.rct tr:hover td{background:var(--bg3)}
 /* HEATMAP */
 .hm-month{margin-bottom:16px}
 .hm-month-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
@@ -598,7 +600,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
   <!-- FAULT CASCADE (monthly or daily) -->
   <div class="cc" style="margin-bottom:14px" id="si_cascade_card">
-    <div class="ct" id="si_cascade_title">Fault Cascade Pipeline</div>
+    <div class="ct" id="si_cascade_title">Performance Cascade</div>
     <div id="si_cascade" style="margin-top:4px"></div>
   </div>
 
@@ -3357,66 +3359,47 @@ function stageBox(name,metric,label,status,cls,loss=''){
 function buildCascade(totExp,idealPur,actPur,actCBG,psaHrs,phD1,phD2,tpD1,tpD2,iaD1,iaD2,d1Feed,d2Feed,ch4,d1Eff,cbgTarget){
   const nv=v=>(!v||isNaN(v))?0:+v;
   const te=nv(totExp), ip=nv(idealPur), ap=nv(actPur);
-  const pct=(a,b)=>b>0?Math.round(a/b*100):0;
   const _cbgTgt=cbgTarget||TGT.cbg_month;
+  const pct=(a,b)=>b>0?Math.min(Math.round(a/b*100),100):0;
+  const fmtK=v=>v>=1000?(v/1000).toFixed(2).replace(/\.?0+$/,'')+'k':Math.round(v).toLocaleString();
+  const C1='#D97706',C2='#0EA5E9',C3='#16A34A',C4='#2563EB';
 
-  // Stage 1 — Feedstock
-  const feedPct = ip>0?pct(te,ip):100;
-  const feedCls = feedPct>=90?'g':feedPct>=70?'a':'r';
-  const feedStatus = feedPct>=90?'✓ Adequate':`${feedPct}% of PSA capacity`;
-  const feedLoss = feedPct<90?`Gap: ${Math.round(ip-te).toLocaleString()} m³ below PSA ceiling`:'';
+  // Feedstock
+  const feedPct=ip>0?pct(te,ip):100;
+  const feedStatusC=feedPct>=90?C3:C1;
+  const feedStatus=feedPct>=90?'✓ design purification rate':`${feedPct}% of PSA capacity`;
+  const feedSub=`BPP contribution · ${D.months?D.months.length+' months':'all months'}`;
 
-  // Stage 2 — Digester
-  let digCls='g', digStatus='✓ Healthy', digIssues=[];
-  const ph1=nv(phD1), ph2=nv(phD2), tp1=nv(tpD1), tp2=nv(tpD2);
-  const ia1=nv(iaD1), ia2=nv(iaD2);
-  if(ph1&&(ph1<6.8||ph1>7.5)) digIssues.push(`D1 pH ${ph1}`);
-  if(ph2&&(ph2<6.8||ph2>7.5)) digIssues.push(`D2 pH ${ph2}`);
-  if(ia1&&ia1>0.4) digIssues.push(`D1 IA/PA ${ia1}`);
-  if(ia2&&ia2>0.4) digIssues.push(`D2 IA/PA ${ia2}`);
-  if(tp1&&(tp1<35||tp1>40)) digIssues.push(`D1 Temp ${tp1}°C`);
-  if(digIssues.length>0){ digCls=digIssues.some(i=>i.includes('IA/PA'))?'r':'a'; digStatus='⚠ '+digIssues.join(' · '); }
+  // PSA Ideal
+  const totalPsaHrs=nv(psaHrs);
+  const idealPsaGas=totalPsaHrs*370;
+  const psaIdealPct=ip>0?pct(ip,ip):100;
 
-  // Stage 3 — PSA
-  const psaPct = te>0?pct(ap,te):pct(ap,ip);
-  const psaCls = psaPct>=90?'g':psaPct>=70?'a':'r';
-  const eff=nv(d1Eff); const ch4v=ch4?nv(ch4)>1?nv(ch4):nv(ch4)*100:0;
-  const psaStatus = psaPct>=90?'✓ Performing':`${psaPct}% of expected`;
-  const psaLoss = psaPct<90?`Loss: ${Math.round((te||ip)-ap).toLocaleString()} m³ in purification`:'';
+  // Actual Purified
+  const actPurPct=ip>0?pct(ap,ip):0;
+  const actPurC=actPurPct>=90?C3:actPurPct>=70?C1:'var(--red)';
+  const actPurStatus=actPurPct>=90?'✓ at design rate':`${actPurPct}% of PSA ideal`;
 
-  // Stage 4 — Output (target is scope-aware: passed in as cbgTarget)
-  const cbgPct = _cbgTgt>0?pct(nv(actCBG),_cbgTgt):0;
-  const outCls = cbgPct>=90?'g':cbgPct>=70?'a':'r';
+  // CBG Output
+  const cbgPct=_cbgTgt>0?pct(nv(actCBG),_cbgTgt):0;
+  const outC=cbgPct>=90?C3:cbgPct>=70?C1:'var(--red)';
+  const outStatus=cbgPct>=90?'✓ on target':`${cbgPct}% of target`;
 
-  // Find primary bottleneck
-  const gaps=[{stage:'Feedstock',gap:100-feedPct},{stage:'PSA Unit',gap:100-psaPct}];
-  if(digIssues.length>0) gaps.push({stage:'Digester',gap:digCls==='r'?40:20});
-  gaps.sort((a,b)=>b.gap-a.gap);
-  const primary=gaps[0].gap>10?gaps[0].stage:'None';
+  const box=(lbl,val,unit,barPct,barC,statusTxt,statusC,sub)=>`
+    <div class="casc-box">
+      <div class="casc-lbl">${lbl}</div>
+      <div class="casc-val" style="color:${barC}">${val} <span style="font-size:12px;font-weight:600;color:var(--text2)">${unit}</span></div>
+      <div class="casc-bar"><div class="casc-bar-fill" style="width:${barPct}%;background:${barC}"></div></div>
+      <div class="casc-status" style="color:${statusC}">${statusTxt}</div>
+      <div class="casc-sub">${sub}</div>
+    </div>`;
 
-  return `
-  <div style="font-size:12px;color:var(--text2);margin-bottom:16px;padding:10px 14px;
-    background:${primary==='None'?'var(--gbg)':'var(--rbg)'};border-radius:6px;
-    border-left:3px solid ${primary==='None'?'var(--green)':'var(--red)'}">
-    <b style="color:${primary==='None'?'var(--green)':'var(--red)'}">
-      ${primary==='None'?'No major fault detected — plant performing within acceptable range':
-        'Primary Bottleneck: '+primary}
-    </b>
-  </div>
-  <div class="cascade">
-    ${stageBox('Feedstock & BPP',te?Math.round(te).toLocaleString()+' m³':'—',
-      'Rolling BPP — Expected from feed',feedStatus,feedCls,feedLoss)}
-    <div class="cascade-arrow">→</div>
-    ${stageBox('Digester Health',ph1&&ph2?`D1: ${ph1}  /  D2: ${ph2}`:digIssues.length?digIssues[0]:'—',
-      'pH · Temperature · IA/PA Ratio',digStatus,digCls,digIssues.length>1?digIssues.slice(1).join('  ·  '):'')}
-    <div class="cascade-arrow">→</div>
-    ${stageBox('PSA Purification',ap?Math.round(ap).toLocaleString()+' m³':'—',
-      `Actual vs ${te?Math.round(te).toLocaleString():Math.round(ip).toLocaleString()} m³ expected`,psaStatus,psaCls,psaLoss)}
-    <div class="cascade-arrow">→</div>
-    ${stageBox('CBG Output',actCBG?Math.round(nv(actCBG)).toLocaleString()+' kg':'—',
-      `Target: ${_cbgTgt.toLocaleString()} kg`,
-      cbgPct>=90?'On Target':`${cbgPct}% of target`,outCls,
-      cbgPct<90?`Short by ${Math.round(_cbgTgt-nv(actCBG)).toLocaleString()} kg`:'')}</div>`;
+  return `<div class="casc-grid">
+    ${box('Total Feedstock Expected',te?fmtK(te):'—','m³',feedPct,C1,feedStatus,feedStatusC,feedSub)}
+    ${box('PSA Ideal (Hrs × 370)',ip?fmtK(ip):'—','m³',100,C2,'design purification rate',C2,totalPsaHrs?Math.round(totalPsaHrs).toLocaleString()+' total PSA hrs':'—')}
+    ${box('Actual Purified',ap?fmtK(ap):'—','m³',actPurPct,C3,actPurStatus,actPurC,'Purification efficiency')}
+    ${box('CBG Output',actCBG?fmtK(nv(actCBG)):'—','kg',cbgPct,C4,outStatus,outC,'Target: '+_cbgTgt.toLocaleString()+' kg')}
+  </div>`;
 }
 
 function buildRecommendations(issues){
@@ -3999,6 +3982,53 @@ function renderSI(){
   casc.innerHTML=buildCascade(d.totExp,d.idealPur,d.actPur,
     day!=='ALL'?d.cbg:(mo!=='ALL'?d.cbg:d.cbg),
     d.psaHrs,d.phD1,d.phD2,d.tpD1,d.tpD2,d.iaD1,d.iaD2,null,null,d.ch4,d.d1Eff,_cascTgt);
+
+  // Root Cause by Month table (only in ALL or month scope — not day)
+  if(day==='ALL'){
+    const cbgArr=D.M.cbg||[], tgt=TGT.cbg_month;
+    const cpkArr=D.M.cost_per_kg||[], psaArr=D.M.psa_hrs||[], pafArr=D.M.paf||[];
+    const dataMonths=MONTHS_LIST.filter((_,i)=>(cbgArr[i]||0)>0);
+    if(dataMonths.length>0){
+      const rcRows=dataMonths.map(m=>{
+        const i=MONTHS_LIST.indexOf(m);
+        const cbg=cbgArr[i]||0, ach=tgt>0?Math.round(cbg/tgt*100):0;
+        const cpk=(cpkArr[i]||0).toFixed?+(cpkArr[i]||0):0;
+        const psa=Math.round(psaArr[i]||0), paf=Math.round(pafArr[i]||0);
+        const achC=ach>=90?'var(--green)':ach>=70?'var(--amber)':'var(--red)';
+        const pafC=paf>=85?'var(--green)':paf>=70?'var(--amber)':'var(--red)';
+        const isSel=mo===m;
+        // get top issue for this month
+        const _gM=k=>(D.M[k]||[])[i]??null;
+        const moIssues=D.M.exp_tot?diagnose(_gM('exp_tot'),_gM('ideal_pur'),_gM('act_pur'),_gM('act_cbg'),_gM('ideal_cbg'),
+          _gM('ph_d1'),_gM('ph_d2'),_gM('tmp_d1'),_gM('tmp_d2'),_gM('ia_d1'),_gM('ia_d2'),null,null,null,null,
+          _gM('psa_hrs'),_gM('d1_eff'),_gM('d2_eff'),_gM('ch4'),'ALL'):[];
+        const top=moIssues[0]||{cat:'On Target',sev:'green'};
+        const tagBg=top.sev==='green'?'var(--gbg)':top.sev==='amber'?'var(--abg)':'var(--rbg)';
+        const tagC=top.sev==='green'?'var(--green)':top.sev==='amber'?'var(--amber)':'var(--red)';
+        const icon=top.sev==='green'?'✓':top.sev==='amber'?'⊖':'△';
+        return `<tr style="${isSel?'background:var(--bg3);font-weight:600':''}" onclick="setMonth('${m}',null)" style="cursor:pointer">
+          <td style="font-weight:700;cursor:pointer" onclick="setMonth('${m}',null)">${m} 2026${isSel?' ◀':''}</td>
+          <td class="r">${Math.round(cbg).toLocaleString()}</td>
+          <td class="r" style="font-weight:700;color:${achC}">${ach}%</td>
+          <td class="r">${cpk?'₹'+cpk.toFixed(1):'—'}</td>
+          <td class="r">${psa||'—'}</td>
+          <td class="r" style="color:${pafC}">${paf?paf+'%':'—'}</td>
+          <td><span style="background:${tagBg};color:${tagC};border-radius:10px;padding:2px 10px;font-size:10px;font-weight:700;white-space:nowrap">${icon} ${top.cat}</span></td>
+        </tr>`;
+      }).join('');
+      casc.innerHTML+=`
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Root Cause by Month</div>
+        <table class="rct">
+          <thead><tr>
+            <th>Month</th><th class="r">CBG (kg)</th><th class="r">Achievement</th>
+            <th class="r">Cost/kg</th><th class="r">PSA Hrs</th><th class="r">Plant Avail</th><th>Root Cause</th>
+          </tr></thead>
+          <tbody>${rcRows}</tbody>
+        </table>
+        <div style="font-size:10px;color:var(--text3);margin-top:8px">* Click any month row to drill down.</div>`;
+    }
+  }
+
   document.getElementById('si_reco').innerHTML=buildRecommendations(issues.filter(i=>i.sev!=='green'));
 }
 
