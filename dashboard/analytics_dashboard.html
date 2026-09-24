@@ -182,6 +182,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;
   color:rgba(255,255,255,.9);position:relative;transition:transform .1s}
 .hm-day:hover{transform:scale(1.3);z-index:10}
+.hm-day.hd-sel{outline:2px solid var(--acc);outline-offset:1px;transform:scale(1.15);z-index:5}
 .hm-day.g{background:var(--green)}.hm-day.a{background:var(--amber)}
 .hm-day.r{background:var(--red)}.hm-day.empty{background:var(--bg3);color:var(--text3)}
 /* RECO */
@@ -206,6 +207,42 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .footer{text-align:center;padding:16px;color:var(--text3);font-size:10px;border-top:1px solid var(--bdr);margin-top:16px}
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 ::-webkit-scrollbar-track{background:var(--bg)}
+/* ── SI Intelligence new components ─────────────────────────── */
+.si-fwd{display:flex;flex-wrap:wrap;gap:0;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:14px;overflow:hidden}
+.si-fwd-item{flex:1;min-width:160px;padding:14px 20px;border-right:1px solid var(--bdr)}
+.si-fwd-item:last-child{border-right:none}
+.si-fwd-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:4px}
+.si-fwd-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15;color:var(--text)}
+.si-fwd-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.si-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.si-split-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px}
+.si-split-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px}
+.si-dig-row{display:flex;align-items:center;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid var(--bdr2)}
+.si-dig-row:last-of-type{border-bottom:none}
+.si-signals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
+.si-sig{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px}
+.si-sig-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px}
+.si-sig-val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--text)}
+.si-sig-sub{font-size:10px;color:var(--text2);margin-top:4px}
+.si-inv{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.si-inv-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:12px}
+.si-inv-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.si-inv-name{width:92px;color:var(--text2);font-size:11px;font-weight:600;flex-shrink:0}
+.si-inv-bar-wrap{flex:1;height:8px;background:var(--bg3);border-radius:4px;overflow:hidden}
+.si-inv-bar-fill{height:8px;border-radius:4px;transition:width .4s}
+.si-inv-qty{width:100px;text-align:right;font-variant-numeric:tabular-nums;font-size:11px;font-weight:600;flex-shrink:0;color:var(--text)}
+.si-inv-days{width:52px;text-align:right;font-size:10px;color:var(--text3);flex-shrink:0}
+.si-day-panel{max-height:0;overflow:hidden;transition:max-height .35s ease;background:var(--bg3);border-radius:8px;margin-top:12px;border:1px solid transparent}
+.si-day-panel.open{max-height:700px;border-color:var(--bdr)}
+.si-day-panel-inner{padding:14px 16px}
+.si-dp-chips{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.si-dp-chip{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;text-align:center}
+.si-dp-chip-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px}
+.si-dp-chip-val{font-size:18px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:var(--text)}
+.si-dp-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.si-dp-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--text2)}
+.si-dp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:900px){.si-signals{grid-template-columns:repeat(2,1fr)}.si-split{grid-template-columns:1fr}.si-dp-chips{grid-template-columns:repeat(2,1fr)}.si-dp-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -511,21 +548,35 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <span id="si_period" class="mo-badge">All Months</span>
   </div>
 
+  <!-- FORWARD VIEW BANNER -->
+  <div class="si-fwd" id="si_forward"></div>
+
   <!-- HEADLINE KPIs -->
-  <div class="kg k4" id="si_kpis">
+  <div class="kg k6" id="si_kpis">
     <div class="kc" id="si_k1"><div class="kl">Months On Target</div><div class="kv" id="si_on_target">—</div><div class="ks">of 6 months ≥ 90%</div></div>
     <div class="kc" id="si_k2"><div class="kl">Overall Achievement</div><div class="kv" id="si_ach">—</div><div class="ks">vs 130,000 kg/month target</div></div>
     <div class="kc" id="si_k3"><div class="kl">Primary Bottleneck</div><div class="kv" id="si_bottleneck" style="font-size:14px">—</div><div class="ks" id="si_bottleneck_sub">across all months</div></div>
     <div class="kc" id="si_k4"><div class="kl">Cost per kg CBG</div><div class="kv" id="si_cpk">—</div><div class="ks">target ₹28/kg</div></div>
+    <div class="kc" id="si_k5"><div class="kl">Plant Availability</div><div class="kv" id="si_paf">—</div><div class="ks">PSA hrs / available hrs</div></div>
+    <div class="kc" id="si_k6"><div class="kl">Capacity Utilisation</div><div class="kv" id="si_caputil">—</div><div class="ks">actual vs 275 kg/hr design</div></div>
   </div>
 
   <!-- OLR ALERT BANNER -->
   <div id="si_olr_alert" style="display:none;background:var(--rbg);border:1px solid var(--red);border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--red)"></div>
 
+  <!-- D1 vs D2 SPLIT -->
+  <div class="si-split" id="si_d1d2_row"></div>
+
+  <!-- SIGNAL CARDS: Best Day · Streak · PAF · Cap Util -->
+  <div class="si-signals" id="si_signals_row"></div>
+
   <!-- MONTH SCORE CARDS -->
   <div id="si_month_cards" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px"></div>
 
-  <!-- CALENDAR HEATMAP -->
+  <!-- FEEDSTOCK INVENTORY -->
+  <div class="si-inv" id="si_feedstock_card"></div>
+
+  <!-- CALENDAR HEATMAP + DAY PANEL -->
   <div class="cc" style="margin-bottom:14px">
     <div class="ct">Daily Production Calendar — Achievement vs Target (130,000 kg/month)
       <span style="font-size:10px;font-weight:400;color:var(--text2);margin-left:10px">
@@ -536,6 +587,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       </span>
     </div>
     <div id="si_heatmap" style="overflow-x:auto;padding-top:8px"></div>
+    <div class="si-day-panel" id="si_day_panel"></div>
   </div>
 
   <!-- FAULT CASCADE (monthly or daily) -->
@@ -3410,13 +3462,15 @@ function renderHeatmap(){
       const cls=hmDay||_computed;
       const day=d.split('-')[0];
       const pct=cbg>0?Math.round(cbg/TGT.cbg_month*100):null;
-      html+=`<div class="hm-day ${cls}" title="${d}: ${cbg?Math.round(cbg).toLocaleString()+' kg':'-'} (${pct!=null?pct+'%':'no data'})"
-        onclick="setMonth('${mo}',null);setTimeout(()=>setDay('${d}',null),100)">${day}</div>`;
+      const selCls=curDay===d?' hd-sel':'';
+      html+=`<div class="hm-day ${cls}${selCls}" title="${d}: ${cbg?Math.round(cbg).toLocaleString()+' kg':'-'} (${pct!=null?pct+'%':'no data'})"
+        onclick="setMonth('${mo}',null);setTimeout(()=>setDay(curDay==='${d}'?'ALL':'${d}',null),50)">${day}</div>`;
     });
     html+='</div></div>';
   });
   html+='</div>';
   el.innerHTML=html;
+  renderSIDayPanel(curDay);
 }
 
 function renderMonthCards(selMonth){
@@ -3498,6 +3552,241 @@ function getSIData(mo, day){
     cbg:totalCBG,cpk:avgCpk,label:'ALL',scope:'all'};
 }
 
+// ── SI Intelligence helpers ───────────────────────────────────────
+const _DIMS={Apr:30,May:31,Jun:30,Jul:31,Aug:31,Sep:30,Oct:31,Nov:30,Dec:31,Jan:31,Feb:28,Mar:31};
+
+function calcPAF(mo){
+  if(mo==='ALL'){
+    const h=(D.M.psa_hrs||[]).reduce((a,b)=>a+(b||0),0);
+    const p=MONTHS_LIST.reduce((a,m)=>a+(_DIMS[m]||30),0)*24;
+    return p>0?Math.round(h/p*100):null;
+  }
+  const i=MONTHS_LIST.indexOf(mo); if(i<0)return null;
+  const h=(D.M.psa_hrs||[])[i]||0;
+  return Math.round(h/((_DIMS[mo]||30)*24)*100);
+}
+function calcCapUtil(mo){
+  const DS=275;
+  if(mo==='ALL'){
+    const cbg=(D.M.cbg||[]).reduce((a,b)=>a+(b||0),0);
+    const mx=(D.M.psa_hrs||[]).reduce((a,b)=>a+(b||0),0)*DS;
+    return mx>0?Math.round(cbg/mx*100):null;
+  }
+  const i=MONTHS_LIST.indexOf(mo); if(i<0)return null;
+  const cbg=(D.M.cbg||[])[i]||0, mx=((D.M.psa_hrs||[])[i]||0)*DS;
+  return mx>0?Math.round(cbg/mx*100):null;
+}
+function getBestDay(mo){
+  const entries=Object.entries(D.days||{})
+    .filter(([d,r])=>mo==='ALL'||(r.mo===mo))
+    .filter(([d,r])=>(r.psa?.cbg_tot||0)>0);
+  if(!entries.length)return null;
+  const best=entries.reduce((b,[k,v])=>(v.psa?.cbg_tot||0)>(b[1].psa?.cbg_tot||0)?[k,v]:b);
+  return{date:best[0],cbg:best[1].psa.cbg_tot,psa:best[1].psa.psa_hrs};
+}
+function calcStreak(){
+  const sorted=Object.keys(D.days||{})
+    .filter(d=>(D.days[d].psa?.cbg_tot||0)>0)
+    .sort((a,b)=>+a.split('-')[0]-+b.split('-')[0]);
+  let s=0;
+  for(let i=sorted.length-1;i>=0;i--){
+    if((D.days[sorted[i]].psa?.cbg_tot||0)>=TGT.cbg_month/30)s++;
+    else break;
+  }
+  return s;
+}
+function getProjection(mo){
+  const dim=_DIMS[mo]||30;
+  const data=Object.keys(D.days||{}).filter(d=>D.days[d].mo===mo&&(D.days[d].psa?.cbg_tot||0)>0);
+  const i=MONTHS_LIST.indexOf(mo);
+  const sofar=(D.M.cbg||[])[i]||0;
+  const elap=data.length;
+  const avg=elap>0?sofar/elap:0;
+  const rem=dim-elap;
+  return{projected:Math.round(avg*dim),needPerDay:rem>0?Math.round((TGT.cbg_month-sofar)/rem):0,remaining:rem,elapsed:elap,avgDaily:Math.round(avg)};
+}
+
+// ── New SI render functions ───────────────────────────────────────
+function renderSIForward(mo,day){
+  const el=document.getElementById('si_forward'); if(!el)return;
+  if(day!=='ALL'){el.style.display='none';return;}
+  el.style.display='flex';
+  const tgt=TGT.cbg_month;
+  const fmtL=v=>v!=null?(v/100000).toFixed(1):'—';
+  if(mo==='ALL'){
+    const ytd=(D.M.cbg||[]).reduce((a,b)=>a+(b||0),0);
+    const annTgt=tgt*MONTHS_LIST.length;
+    const ach=annTgt>0?Math.round(ytd/annTgt*100):0;
+    const proj=MONTHS_LIST.length>0?Math.round(ytd/MONTHS_LIST.length*12):0;
+    const ytdRev=((D.M.cbg_rev||[]).reduce((a,b)=>a+(b||0),0))+
+      ((D.M.sfom_mn||[]).reduce((a,b)=>a+(b||0),0))+
+      ((D.M.lfom_mn||[]).reduce((a,b)=>a+(b||0),0));
+    el.innerHTML=`
+      <div class="si-fwd-item"><div class="si-fwd-lbl">YTD Production</div><div class="si-fwd-val">${Math.round(ytd).toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${ach}% of ${annTgt.toLocaleString()} kg target</div></div>
+      <div class="si-fwd-item"><div class="si-fwd-lbl">Projected Year-End</div><div class="si-fwd-val" style="color:${proj>=annTgt?'var(--green)':'var(--amber)'}">${proj.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">at current ${MONTHS_LIST.length}-month rate</div></div>
+      <div class="si-fwd-item"><div class="si-fwd-lbl">YTD Revenue</div><div class="si-fwd-val">₹${fmtL(ytdRev)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">CBG + SFOM + LFOM</div></div>
+      <div class="si-fwd-item"><div class="si-fwd-lbl">Months Tracked</div><div class="si-fwd-val">${MONTHS_LIST.length}</div><div class="si-fwd-sub">${MONTHS_LIST[0]||''} – ${MONTHS_LIST[MONTHS_LIST.length-1]||''} 2026</div></div>`;
+  } else {
+    const i=MONTHS_LIST.indexOf(mo);
+    const isCurrent=i===MONTHS_LIST.length-1;
+    if(isCurrent){
+      const p=getProjection(mo);
+      const onTrack=p.projected>=tgt;
+      el.innerHTML=`
+        <div class="si-fwd-item"><div class="si-fwd-lbl">${mo} So Far</div><div class="si-fwd-val">${((D.M.cbg||[])[i]||0).toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${p.elapsed} days of data</div></div>
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Avg Daily Rate</div><div class="si-fwd-val">${p.avgDaily.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg/day</span></div><div class="si-fwd-sub">${onTrack?'On track':'Behind — need '+p.needPerDay.toLocaleString()+' kg/day'}</div></div>
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Projected Close</div><div class="si-fwd-val" style="color:${onTrack?'var(--green)':'var(--amber)'}">${p.projected.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${p.remaining} days remaining</div></div>
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Need Per Day</div><div class="si-fwd-val" style="color:${p.needPerDay>p.avgDaily?'var(--red)':'var(--green)'}">${p.needPerDay.toLocaleString()}</div><div class="si-fwd-sub">to hit ${tgt.toLocaleString()} kg target</div></div>`;
+    } else {
+      const cbg=(D.M.cbg||[])[i]||0;
+      const ach=tgt>0?Math.round(cbg/tgt*100):0;
+      const rev=((D.M.cbg_rev||[])[i]||0)+((D.M.sfom_mn||[])[i]||0)+((D.M.lfom_mn||[])[i]||0);
+      const cost=((D.M.total_cost||[])[i]||((D.M.feed_cost||[])[i]||0)+((D.M.transport||[])[i]||0)+((D.M.maint||[])[i]||0)+((D.M.elec||[])[i]||0));
+      const margin=rev>0?Math.round((rev-cost)/rev*100):0;
+      el.innerHTML=`
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Production</div><div class="si-fwd-val">${cbg.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${ach}% of ${tgt.toLocaleString()} kg target</div></div>
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Revenue</div><div class="si-fwd-val">₹${fmtL(rev)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">CBG + SFOM + LFOM</div></div>
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Total Cost</div><div class="si-fwd-val">₹${fmtL(cost)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">Feed + Transport + Maint + Elec</div></div>
+        <div class="si-fwd-item"><div class="si-fwd-lbl">Net Margin</div><div class="si-fwd-val" style="color:${rev>cost?'var(--green)':'var(--red)'}">₹${fmtL(rev-cost)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">${margin}% margin</div></div>`;
+    }
+  }
+}
+
+function renderSID1D2(mo,day){
+  const el=document.getElementById('si_d1d2_row'); if(!el)return;
+  if(day!=='ALL'){el.style.display='none';return;}
+  el.style.display='grid';
+  const fmt=v=>v!=null?Math.round(v).toLocaleString():'—';
+  const fF=v=>v!=null?v.toFixed(2):'—';
+  const phClr=v=>v&&(v<6.8||v>7.5)?'var(--red)':'var(--green)';
+  const iaClr=v=>v>0.4?'var(--red)':v>0.35?'var(--amber)':'var(--green)';
+  const makeCard=(dig,cbg,tot,ph,eff,ia,color)=>`<div class="si-split-card">
+    <div class="si-split-title">${dig} Digester — ${mo==='ALL'?'YTD':mo}</div>
+    <div class="si-dig-row"><span>CBG Produced</span><span style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(cbg)} kg <span style="font-size:10px;color:var(--text3)">(${tot>0?Math.round(cbg/tot*100):0}%)</span></span></div>
+    <div class="si-dig-row"><span>Avg pH</span><span style="font-weight:700;color:${ph?phClr(ph):'var(--text3)'}">${fF(ph)}</span></div>
+    <div class="si-dig-row"><span>Avg PSA Eff</span><span style="font-weight:700">${fF(eff)}%</span></div>
+    <div class="si-dig-row" style="border-bottom:none"><span>Avg IA/PA</span><span style="font-weight:700;color:${ia?iaClr(ia):'var(--text3)'}">${fF(ia)}</span></div>
+    <div style="margin-top:10px;height:5px;background:var(--bg3);border-radius:3px"><div style="height:5px;border-radius:3px;background:${color};width:${tot>0?Math.round(cbg/tot*100):0}%"></div></div>
+  </div>`;
+  if(mo==='ALL'){
+    const d1=((D.M.d1_cbg||[]).reduce((a,b)=>a+(b||0),0));
+    const d2=((D.M.d2_cbg||[]).reduce((a,b)=>a+(b||0),0));
+    const tot=d1+d2||1; const li=MONTHS_LIST.length-1;
+    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[li],(D.M.d1_eff||[])[li],(D.M.ia_d1||[])[li],'var(--acc)')+
+      makeCard('D2',d2,tot,(D.M.ph_d2||[])[li],(D.M.d2_eff||[])[li],(D.M.ia_d2||[])[li],'var(--green)');
+  } else {
+    const i=MONTHS_LIST.indexOf(mo);
+    const d1=(D.M.d1_cbg||[])[i]||0, d2=(D.M.d2_cbg||[])[i]||0, tot=d1+d2||1;
+    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[i],(D.M.d1_eff||[])[i],(D.M.ia_d1||[])[i],'var(--acc)')+
+      makeCard('D2',d2,tot,(D.M.ph_d2||[])[i],(D.M.d2_eff||[])[i],(D.M.ia_d2||[])[i],'var(--green)');
+  }
+}
+
+function renderSISignals(mo,day){
+  const el=document.getElementById('si_signals_row'); if(!el)return;
+  if(day!=='ALL'){el.style.display='none';return;}
+  el.style.display='grid';
+  const best=getBestDay(mo);
+  const streak=calcStreak();
+  const paf=calcPAF(mo);
+  const capUtil=calcCapUtil(mo);
+  const li=MONTHS_LIST.length-1;
+  const ch4=(D.M.ch4||[])[li];
+  const prev=(li>0?(D.M.ch4||[])[li-1]:null);
+  const ch4Arrow=prev&&ch4?(ch4>=prev?'<span style="color:var(--green)">▲</span>':'<span style="color:var(--red)">▼</span>'):'';
+  const dayTgt=Math.round(TGT.cbg_month/30);
+  el.innerHTML=`
+    <div class="si-sig">
+      <div class="si-sig-lbl">Best Day ${mo!=='ALL'?'— '+mo:'— YTD'}</div>
+      <div class="si-sig-val">${best?Math.round(best.cbg).toLocaleString():'—'}</div>
+      <div class="si-sig-sub">${best?best.date+(best.cbg>=dayTgt*1.1?' · Above target ✓':' · '+Math.round(best.cbg/dayTgt*100)+'% of daily target'):'No data'}</div>
+    </div>
+    <div class="si-sig">
+      <div class="si-sig-lbl">Green Streak</div>
+      <div class="si-sig-val" style="color:${streak>=7?'var(--green)':streak>=3?'var(--amber)':'var(--text2)'}">${streak} <span style="font-size:14px;font-weight:400;color:var(--text2)">days</span></div>
+      <div class="si-sig-sub">consecutive ≥ ${dayTgt.toLocaleString()} kg/day</div>
+    </div>
+    <div class="si-sig">
+      <div class="si-sig-lbl">Plant Availability</div>
+      <div class="si-sig-val" style="color:${paf>=85?'var(--green)':paf>=70?'var(--amber)':'var(--red)'}">${paf!=null?paf+'%':'—'}</div>
+      <div class="si-sig-sub">PSA hrs / available hrs · target ≥ 85%</div>
+    </div>
+    <div class="si-sig">
+      <div class="si-sig-lbl">CH4 Purity${ch4Arrow?` ${ch4Arrow} vs last month`:''}</div>
+      <div class="si-sig-val" style="color:${ch4>=91?'var(--green)':ch4>=88?'var(--amber)':'var(--red)'}">${ch4!=null?ch4.toFixed(1)+'%':'—'}</div>
+      <div class="si-sig-sub">latest month avg · CGD spec ≥ 91%</div>
+    </div>`;
+}
+
+function renderSIFeedstock(){
+  const el=document.getElementById('si_feedstock_card'); if(!el)return;
+  const s=D.stock||{};
+  const id=D.inv_days||{};
+  const REF=15;
+  const STOCKS=[
+    {nm:'Cow Dung', qty:s.cd||0, days:id.cd||0, unit:'MT'},
+    {nm:'Pressmud',  qty:s.pm||0, days:id.pm||0, unit:'MT'},
+    {nm:'Spent Grain',qty:s.sg||0,days:id.sg||0, unit:'MT'},
+    {nm:'CSL',        qty:s.csl||0,days:id.csl||0,unit:'KL'},
+    {nm:'Grain Syrup',qty:s.gs||0, days:id.gs||0, unit:'KL'},
+  ];
+  const clr=f=>f.days>=7?'var(--green)':f.days>=3?'var(--amber)':'var(--red)';
+  el.innerHTML=`<div class="si-inv-title">Feedstock Inventory <span style="font-weight:400;color:var(--text3)">as of ${s.date||'latest'} · ${REF}-day reference bar</span></div>
+    ${STOCKS.map(f=>`<div class="si-inv-row">
+      <span class="si-inv-name">${f.nm}</span>
+      <div class="si-inv-bar-wrap"><div class="si-inv-bar-fill" style="width:${Math.min(f.days/REF*100,100).toFixed(1)}%;background:${clr(f)}"></div></div>
+      <span class="si-inv-qty" style="color:${clr(f)}">${f.qty.toFixed(1)} <span style="font-size:10px;font-weight:400;color:var(--text3)">${f.unit}</span></span>
+      <span class="si-inv-days" style="color:${clr(f)}">${f.days.toFixed(1)}d</span>
+    </div>`).join('')}`;
+}
+
+function renderSIDayPanel(dateKey){
+  const el=document.getElementById('si_day_panel'); if(!el)return;
+  if(!dateKey||dateKey==='ALL'){el.className='si-day-panel';el.innerHTML='';return;}
+  const rec=D.days[dateKey]||{};
+  const p=rec.psa||{}, h=rec.health||{}, rv=rec.rev||{};
+  const ph1=h.ph?.d1, ph2=h.ph?.d2, tp1=h.tp?.d1, tp2=h.tp?.d2, ia1=h.ia?.d1, ia2=h.ia?.d2;
+  const phC=v=>v&&(v<6.8||v>7.5)?'var(--red)':v?'var(--green)':'var(--text3)';
+  const tpC=v=>v&&(v<35||v>40)?'var(--amber)':v?'var(--green)':'var(--text3)';
+  const iaC=v=>v&&v>0.4?'var(--red)':v&&v>0.35?'var(--amber)':v?'var(--green)':'var(--text3)';
+  const cbg=p.cbg_tot||0, dt=Math.round(TGT.cbg_month/30);
+  const dr=p.dispatched&&cbg?Math.round(p.dispatched/cbg*100):null;
+  const custs=[{n:'Veer',v:p.veer},{n:'Adinath',v:p.adinath},{n:'KFS Sonipat',v:p.kfs},{n:'KSK Sonipat',v:p.ksk},{n:'OM Filling',v:p.om},{n:'SPS Yamuna',v:p.sps}].filter(c=>c.v>0);
+  el.className='si-day-panel open';
+  el.innerHTML=`<div class="si-day-panel-inner">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+      <span style="font-size:13px;font-weight:700">${dateKey}</span>
+      <button onclick="setDay('ALL',null)" style="background:none;border:1px solid var(--bdr);color:var(--text2);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:11px">✕ Close</button>
+    </div>
+    <div class="si-dp-chips">
+      <div class="si-dp-chip"><div class="si-dp-chip-lbl">CBG</div><div class="si-dp-chip-val" style="color:${cbg>=dt?'var(--green)':cbg>=dt*.7?'var(--amber)':'var(--red)'}">${cbg>0?Math.round(cbg).toLocaleString():'—'}</div><div style="font-size:10px;color:var(--text3)">kg · target ${dt.toLocaleString()}</div></div>
+      <div class="si-dp-chip"><div class="si-dp-chip-lbl">PSA Hrs</div><div class="si-dp-chip-val" style="color:${(p.psa_hrs||0)>=22?'var(--green)':(p.psa_hrs||0)>=18?'var(--amber)':'var(--red)'}">${p.psa_hrs!=null?p.psa_hrs.toFixed(1):'—'}</div><div style="font-size:10px;color:var(--text3)">hrs · benchmark ≥ 22</div></div>
+      <div class="si-dp-chip"><div class="si-dp-chip-lbl">CH4 Purity</div><div class="si-dp-chip-val" style="color:${(p.ch4||0)>=91?'var(--green)':(p.ch4||0)>=88?'var(--amber)':'var(--red)'}">${p.ch4!=null?p.ch4.toFixed(1)+'%':'—'}</div><div style="font-size:10px;color:var(--text3)">CGD spec ≥ 91%</div></div>
+      <div class="si-dp-chip"><div class="si-dp-chip-lbl">Dispatch Rate</div><div class="si-dp-chip-val" style="color:${dr!=null&&dr>=90?'var(--green)':dr>=70?'var(--amber)':'var(--text2)'}">${dr!=null?dr+'%':'—'}</div><div style="font-size:10px;color:var(--text3)">${p.dispatched!=null?Math.round(p.dispatched).toLocaleString()+' kg dispatched':''}</div></div>
+    </div>
+    <div class="si-dp-pills">
+      ${ph1!=null?`<span class="si-dp-pill" style="color:${phC(ph1)}">D1 pH ${ph1.toFixed(2)}</span>`:''}
+      ${ph2!=null?`<span class="si-dp-pill" style="color:${phC(ph2)}">D2 pH ${ph2.toFixed(2)}</span>`:''}
+      ${tp1!=null?`<span class="si-dp-pill" style="color:${tpC(tp1)}">D1 ${tp1.toFixed(1)}°C</span>`:''}
+      ${tp2!=null?`<span class="si-dp-pill" style="color:${tpC(tp2)}">D2 ${tp2.toFixed(1)}°C</span>`:''}
+      ${ia1!=null?`<span class="si-dp-pill" style="color:${iaC(ia1)}">D1 IA/PA ${ia1.toFixed(2)}</span>`:''}
+      ${ia2!=null?`<span class="si-dp-pill" style="color:${iaC(ia2)}">D2 IA/PA ${ia2.toFixed(2)}</span>`:''}
+    </div>
+    <div class="si-dp-row">
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Customer Dispatch</div>
+        ${custs.length?custs.map(c=>`<div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--bdr2)"><span>${c.n}</span><span style="font-weight:600;font-variant-numeric:tabular-nums">${Math.round(c.v).toLocaleString()} kg</span></div>`).join(''):'<div style="color:var(--text3);font-size:11px">No dispatch data</div>'}
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px">
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Revenue (₹)</div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--bdr2)"><span>CBG Sales</span><span style="font-weight:600">${rv.cbg_rev>0?'₹'+Math.round(rv.cbg_rev).toLocaleString():'—'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--bdr2)"><span>SFOM</span><span style="font-weight:600">${rv.sfom_rev>0?'₹'+Math.round(rv.sfom_rev).toLocaleString():'—'}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0"><span>LFOM</span><span style="font-weight:600">${rv.lfom_rev>0?'₹'+Math.round(rv.lfom_rev).toLocaleString():'—'}</span></div>
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderSI(){
   const mo=curMonth, day=curDay;
   document.getElementById('si_period').textContent=day!=='ALL'?day:mo==='ALL'?'All Months':mo+' 2026';
@@ -3572,6 +3861,20 @@ function renderSI(){
     document.getElementById('si_bottleneck').style.color=top&&top.sev==='red'?'var(--red)':top&&top.sev==='amber'?'var(--amber)':'var(--green)';
     document.getElementById('si_cpk').textContent='—';
   }
+
+  // New Intelligence components
+  renderSIForward(mo,day);
+  renderSID1D2(mo,day);
+  renderSISignals(mo,day);
+  renderSIFeedstock();
+
+  // PAF and CapUtil chips (k5/k6)
+  const _paf=day==='ALL'?calcPAF(mo==='ALL'?'ALL':mo):null;
+  const _cu=day==='ALL'?calcCapUtil(mo==='ALL'?'ALL':mo):null;
+  const pafEl=document.getElementById('si_paf');
+  const cuEl=document.getElementById('si_caputil');
+  if(pafEl)pafEl.innerHTML=_paf!=null?`<span style="color:${_paf>=85?'var(--green)':_paf>=70?'var(--amber)':'var(--red)'}">${_paf}%</span>`:'—';
+  if(cuEl)cuEl.innerHTML=_cu!=null?`<span style="color:${_cu>=80?'var(--green)':_cu>=60?'var(--amber)':'var(--red)'}">${_cu}%</span>`:'—';
 
   // Month cards — show all months always (overview), highlight selected
   renderMonthCards(mo!=='ALL'?mo:null);
@@ -4369,6 +4672,11 @@ async function buildAnalyticsD() {
     rows.forEach(r=>{const dt=getD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const v=nv(typeof col==='function'?col(r):r[col]);if(v===null)return;a[mi]+=v;cnt[mi]++;});
     return type==='avg'?a.map((s,i)=>cnt[i]>0?s/cnt[i]:null):a;
   }
+  function aggMonthLast(rows,getD,col){
+    const a=months.map(()=>null);
+    rows.forEach(r=>{const dt=getD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const v=nv(r[col]);if(v!==null)a[mi]=v;});
+    return a;
+  }
   const gD=r=>toDate(r[0]);
   const psaH=r=>{const v=nv(r[1]);return v!==null&&v>0&&v<2?v*24:v;};
   setStatus('Computing monthly aggregates…');
@@ -4397,6 +4705,8 @@ async function buildAnalyticsD() {
   M.pm_feed=aggMonth(fb,gD,11); M.gs_feed=aggMonth(fb,gD,12); M.csl_feed=aggMonth(fb,gD,13); M.cd_feed=aggMonth(fb,gD,14); M.sg_feed=aggMonth(fb,gD,15);
   M.sg_cost=aggMonth(fb,gD,10);
   M.pm_bal=aggMonth(fb,gD,17); M.gs_bal=aggMonth(fb,gD,18); M.csl_bal=aggMonth(fb,gD,19); M.cd_bal=aggMonth(fb,gD,20); M.sg_bal=aggMonth(fb,gD,21);
+  M.pm_bal_last=aggMonthLast(fb,gD,17); M.gs_bal_last=aggMonthLast(fb,gD,18); M.csl_bal_last=aggMonthLast(fb,gD,19); M.cd_bal_last=aggMonthLast(fb,gD,20); M.sg_bal_last=aggMonthLast(fb,gD,21);
+  M.pm_feed_avg=aggMonth(fb,gD,11,'avg'); M.gs_feed_avg=aggMonth(fb,gD,12,'avg'); M.csl_feed_avg=aggMonth(fb,gD,13,'avg'); M.cd_feed_avg=aggMonth(fb,gD,14,'avg'); M.sg_feed_avg=aggMonth(fb,gD,15,'avg');
   M.pm_bpp=aggMonth(d1,gD,43); M.cd_bpp=aggMonth(d1,gD,42); M.gs_bpp=aggMonth(d1,gD,44); M.csl_bpp=aggMonth(d1,gD,45); M.sg_bpp=aggMonth(d1,gD,46);
   M.d2_pm_bpp=aggMonth(d2,gD,44); M.d2_cd_bpp=aggMonth(d2,gD,43); M.d2_gs_bpp=aggMonth(d2,gD,45); M.d2_csl_bpp=aggMonth(d2,gD,46); M.d2_sg_bpp=aggMonth(d2,gD,47); M.act_cbg=M.cbg;
   M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
