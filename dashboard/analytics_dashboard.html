@@ -314,6 +314,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="kc"><div class="kl">Feedstock Cost %</div><div class="kv" id="ov_fc_pct">—</div><div class="ks">of revenue · target ≤55%</div></div>
     <div class="kc"><div class="kl">Avg CH4 Purity</div><div class="kv" id="ov_ch4">—</div><div class="ks">target ≥ 90%</div></div>
   </div>
+  <div id="ov_main_content">
   <!-- Monthly Achievement Strip -->
   <div style="margin:12px 0 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)">Monthly CBG Achievement vs Target (1,30,000 kg)</div>
   <div id="ov_achieve" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
@@ -371,6 +372,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
   <div class="stitle">Digester Health — Latest</div>
   <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px"><div id="ov_health"></div></div>
+  </div><!-- /ov_main_content -->
 </div>
 
 <!-- ══ S1 FEEDSTOCK ══ -->
@@ -1203,7 +1205,9 @@ function setYear(yr,btn){
 function setMonth(mo,btn){
   curMonth=mo; curDay='ALL';
   document.querySelectorAll('#month_filter .mb').forEach(b=>b.classList.remove('on'));
-  if(btn) btn.classList.add('on'); else document.getElementById('mo_ALL')?.classList.add('on');
+  if(btn) btn.classList.add('on');
+  else{const mb=[...document.querySelectorAll('#month_filter .mb')].find(b=>b.textContent.trim()===mo);
+    if(mb)mb.classList.add('on');else document.getElementById('mo_ALL')?.classList.add('on');}
   const lbl=mo==='ALL'?'All Months':mo+' 2026';
   document.querySelectorAll('.mo-badge').forEach(b=>b.textContent=lbl);
   const wrap=document.getElementById('day_wrap');
@@ -1266,8 +1270,16 @@ function renderDayView(dateKey){
   }
   const customers=[['Veer',p.veer],['Adinath',p.adinath],['KFS',p.kfs],['KSK',p.ksk],['OM',p.om],['SPS',p.sps]]
     .filter(([,v])=>v>0).map(([nm,v])=>`${nm}: <b style="color:var(--cyan)">${v} kg</b>`).join(' · ');
-  let html=`<div style="font-size:12px;font-weight:700;color:var(--cyan);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--bdr)">
-    Day Summary — ${dateKey}</div>`;
+  let html=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:2px solid var(--acc)">
+    <div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--acc)">Day View</div>
+      <div style="font-size:20px;font-weight:800;color:var(--text1);line-height:1.2">${dateKey}</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${p.cbg_tot?`<div style="background:${p.cbg_pct>=90?'#16a34a':p.cbg_pct>=70?'#d97706':'#dc2626'};color:#fff;padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700">CBG ${fmtN(Math.round(p.cbg_tot))} kg · ${p.cbg_pct??'—'}%</div>`:''}
+      ${p.ch4?`<div style="background:var(--bg3);border:1px solid var(--bdr);padding:6px 12px;border-radius:6px;font-size:12px;font-weight:700;color:${p.ch4>=90?'var(--green)':p.ch4>=80?'var(--amber)':'var(--red)'}">CH4 ${p.ch4.toFixed(1)}%</div>`:''}
+    </div>
+  </div>`;
   // PSA Performance table
   if(p.psa_hrs){
     html+=`<div style="font-size:9px;color:var(--blue);font-weight:700;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px">PSA Performance</div>
@@ -1854,9 +1866,12 @@ function showDayPanel(sectionId){
   if(!panel){
     panel=document.createElement('div');
     panel.id=panelId;
-    panel.style.cssText='background:var(--bg2);border:1px solid var(--acc);border-radius:8px;padding:14px;margin-bottom:12px';
+    // OV gets a wider, more prominent day panel
+    const isOv=sectionId==='ov';
+    panel.style.cssText=isOv
+      ?'background:var(--bg2);border:1px solid var(--acc);border-top:3px solid var(--acc);border-radius:10px;padding:20px;margin-bottom:14px'
+      :'background:var(--bg2);border:1px solid var(--acc);border-radius:8px;padding:14px;margin-bottom:12px';
     const pg=document.getElementById(sectionId);
-    // insert after stitle (first child)
     const stitle=pg.querySelector('.stitle');
     if(stitle&&stitle.nextSibling) pg.insertBefore(panel,stitle.nextSibling);
     else pg.prepend(panel);
@@ -1869,6 +1884,12 @@ function showDayPanel(sectionId){
 // ═══ OVERVIEW ════════════════════════════════════════════════
 function renderOV(){
   showDayPanel('ov');
+  const mc=document.getElementById('ov_main_content');
+  if(curDay!=='ALL'){
+    if(mc) mc.style.display='none';
+    return;
+  }
+  if(mc) mc.style.display='';
   const mo=curMonth;
   // Update period badge
   const periodLbl=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
