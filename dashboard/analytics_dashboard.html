@@ -300,12 +300,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ OVERVIEW ══ -->
 <div id="ov" class="pg on">
   <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">Jan – Jun 2026</span></div>
+  <!-- Row A: Core financials -->
   <div class="kg k4">
-    <div class="kc c"><div class="kl">CBG Production</div><div class="kv c" id="ov_cbg">614,429 nm³</div><div class="ks" id="ov_cbg_s">YTD Jan–Jun 2026</div></div>
-    <div class="kc g"><div class="kl">Revenue</div><div class="kv g" id="ov_rev">₹448.5 L</div><div class="ks" id="ov_rev_s">CBG + Manure</div></div>
-    <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="ov_margin">47.2%</div><div class="ks">Revenue − Total Cost</div></div>
-    <div class="kc g"><div class="kl">Digester Health</div><div class="kv g" id="ov_ph">7.64 / 7.66</div><div class="ks">pH D1 / D2 · Latest</div></div>
+    <div class="kc c"><div class="kl">CBG Production</div><div class="kv c" id="ov_cbg">—</div><div class="ks" id="ov_cbg_s">YTD</div></div>
+    <div class="kc g"><div class="kl">Revenue</div><div class="kv g" id="ov_rev">—</div><div class="ks">CBG + Manure</div></div>
+    <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="ov_margin">—</div><div class="ks">Target: 45%</div></div>
+    <div class="kc"><div class="kl">Cost / kg CBG</div><div class="kv" id="ov_cpk">—</div><div class="ks">Target: ₹30/kg</div></div>
   </div>
+  <!-- Row B: Operational health -->
+  <div class="kg k4" style="margin-top:8px">
+    <div class="kc"><div class="kl">Plant Uptime</div><div class="kv" id="ov_uptime">—</div><div class="ks">Comp ÷ PSA hrs · ≥90%</div></div>
+    <div class="kc"><div class="kl">OLR D1 / D2</div><div class="kv" id="ov_olr">—</div><div class="ks">avg kg VS/m³/day · design 2.5</div></div>
+    <div class="kc"><div class="kl">Feedstock Cost %</div><div class="kv" id="ov_fc_pct">—</div><div class="ks">of revenue · target ≤55%</div></div>
+    <div class="kc"><div class="kl">Avg CH4 Purity</div><div class="kv" id="ov_ch4">—</div><div class="ks">target ≥ 90%</div></div>
+  </div>
+  <!-- Monthly Achievement Strip -->
+  <div style="margin:12px 0 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)">Monthly CBG Achievement vs Target (1,30,000 kg)</div>
+  <div id="ov_achieve" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
+  <!-- 3-Column Alert Strip -->
+  <div id="ov_alerts" style="margin-bottom:14px"></div>
   <!-- Row 1: CBG Produced vs Dispatched -->
   <div class="cg c2">
     <div class="cc">
@@ -1934,10 +1947,112 @@ function renderOV(){
   const purData = mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   bar('c_ov_d1d2',labels,[bDS('D1 Biogas (m³)',d1Data,C.blue),bDS('D2 Biogas (m³)',d2Data,C.teal)]);
   line('c_ov_exp',labels,[lDS('Expected Gas',expData,C.amber),lDS('Actual Purified',purData,C.green)]);
-  // Update pH KPI tile with latest values from real data
   const ph1=D.kpis.ph_d1, ph2=D.kpis.ph_d2;
-  const phEl=document.getElementById('ov_ph');
-  if(phEl) phEl.textContent=(ph1!=null?ph1.toFixed(2):'—')+' / '+(ph2!=null?ph2.toFixed(2):'—');
+  const idx2=MONTHS.indexOf(mo);
+
+  // ── Cost / kg CBG ──────────────────────────────────────────
+  const cpkMo=D.cpk_monthly||{};
+  const cpkVal=mo==='ALL'
+    ?(D.kpis.ytd_cbg>0?(D.finance.ytd_cost/D.kpis.ytd_cbg*1000):null)
+    :(cpkMo[mo]||null);
+  const cpkEl=document.getElementById('ov_cpk');
+  if(cpkEl){cpkEl.textContent=cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—';
+    cpkEl.style.color=cpkVal!=null?(cpkVal<=TGT.cost_kg?'var(--green)':cpkVal<=TGT.cost_kg*1.2?'var(--amber)':'var(--red)'):'';
+  }
+
+  // ── Plant Uptime % ─────────────────────────────────────────
+  const compArr=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
+  const psaArr =mo==='ALL'?mArr('psa_hrs') :dArr('psa','psa_hrs');
+  const totC=sumA(compArr),totP=sumA(psaArr);
+  const uptPct=totP>0?totC/totP*100:null;
+  const uptEl=document.getElementById('ov_uptime');
+  if(uptEl){uptEl.textContent=uptPct!=null?uptPct.toFixed(1)+'%':'—';
+    uptEl.style.color=uptPct!=null?(uptPct>=90?'var(--green)':uptPct>=70?'var(--amber)':'var(--red)'):'';
+  }
+
+  // ── OLR D1 / D2 (avg for period) ───────────────────────────
+  const olrD1a=mo==='ALL'?D.M.d1_olr:dArr('d1','olr');
+  const olrD2a=mo==='ALL'?D.M.d2_olr:dArr('d2','olr');
+  const av=(a)=>{const f=a.filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
+  const avgO1=av(olrD1a||[]),avgO2=av(olrD2a||[]);
+  const olrEl=document.getElementById('ov_olr');
+  if(olrEl){olrEl.textContent=(avgO1!=null?avgO1.toFixed(2):'—')+' / '+(avgO2!=null?avgO2.toFixed(2):'—');
+    const worst=Math.min(avgO1??99,avgO2??99);
+    olrEl.style.color=avgO1!=null?(worst>=2.0?'var(--green)':worst>=1.5?'var(--amber)':'var(--red)'):'';
+  }
+
+  // ── Feedstock Cost % of Revenue ─────────────────────────────
+  const fcPeriod=mo==='ALL'?sumA(D.M.feed_cost||[]):(idx2>=0?(D.M.feed_cost||[])[idx2]||0:0);
+  const revPeriod=mo==='ALL'?D.finance.ytd_rev:(idx2>=0?(D.M.total_rev||[])[idx2]||0:0);
+  const fcPct=revPeriod>0?fcPeriod/revPeriod*100:null;
+  const fcPctEl=document.getElementById('ov_fc_pct');
+  if(fcPctEl){fcPctEl.textContent=fcPct!=null?fcPct.toFixed(1)+'%':'—';
+    fcPctEl.style.color=fcPct!=null?(fcPct<=55?'var(--green)':fcPct<=65?'var(--amber)':'var(--red)'):'';
+  }
+
+  // ── CH4 Purity % ───────────────────────────────────────────
+  const ch4a=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
+  const ch4v=ch4a.filter(v=>v!=null&&v>0);
+  const avgCh4=ch4v.length?ch4v.reduce((a,b)=>a+b,0)/ch4v.length:null;
+  const ch4Pct=avgCh4!=null?(avgCh4>1?avgCh4:avgCh4*100):null;
+  const ch4El=document.getElementById('ov_ch4');
+  if(ch4El){ch4El.textContent=ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—';
+    ch4El.style.color=ch4Pct!=null?(ch4Pct>=90?'var(--green)':ch4Pct>=80?'var(--amber)':'var(--red)'):'';
+  }
+
+  // ── Monthly Achievement Strip ───────────────────────────────
+  const achEl=document.getElementById('ov_achieve');
+  if(achEl){
+    const cbgM2=D.M.cbg||[];
+    achEl.innerHTML=MONTHS.map((m,i)=>{
+      const v=cbgM2[i]||0;
+      const pct=v>0?Math.round(v/TGT.cbg_month*100):null;
+      const bg=pct==null?'var(--bg3)':pct>=90?'#16a34a':pct>=70?'#d97706':'#dc2626';
+      const dim=(mo!=='ALL'&&mo!==m)?'opacity:.45;':'';
+      return`<div style="flex:1;min-width:60px;text-align:center;background:${bg};color:${pct==null?'var(--text2)':'#fff'};border-radius:7px;padding:7px 4px;cursor:pointer;transition:opacity .2s;${dim}" onclick="setMonth('${m}')">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">${m}</div>
+        <div style="font-size:14px;font-weight:800;line-height:1.2">${pct!=null?pct+'%':'—'}</div>
+        <div style="font-size:9px;opacity:.85">${v>0?fmtN(Math.round(v/1000))+'k kg':'No data'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── 3-Column Alert Strip ────────────────────────────────────
+  const alertEl=document.getElementById('ov_alerts');
+  if(alertEl){
+    const cascade=D.latest_psa?.cascade!=null?D.latest_psa.cascade:D.latest_psa?.storage;
+    const latDate=D.kpis?.lat_date||'—';
+    const prodClr=cascade!=null&&cascade>5000?'var(--amber)':'var(--green)';
+    const mnureRev=mo==='ALL'?(D.finance.ytd_manure||0):(sumA(sfomRev)+sumA(lfomRev));
+    const mnurePct=revPeriod>0?mnureRev/revPeriod*100:null;
+    const fcClr=fcPct!=null?(fcPct<=55?'var(--green)':fcPct<=65?'var(--amber)':'var(--red)'):'var(--text3)';
+    const latO1=(D.M.d1_olr||[]).filter(v=>v!=null&&v>0).slice(-1)[0];
+    const latO2=(D.M.d2_olr||[]).filter(v=>v!=null&&v>0).slice(-1)[0];
+    const olrBad=(latO1!=null&&latO1<1.5)||(latO2!=null&&latO2<1.5);
+    const phBad=(ph1!=null&&(ph1<6.8||ph1>7.8))||(ph2!=null&&(ph2<6.8||ph2>7.8));
+    const digClr=(olrBad||phBad)?'var(--red)':'var(--green)';
+    const card=(clr,title,rows)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px;border-left:4px solid ${clr}">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:8px">${title}</div>
+      ${rows.map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px">
+        <span style="color:var(--text3)">${l}</span><b style="color:${c||'var(--text1)'}">${v}</b></div>`).join('')}</div>`;
+    alertEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      ${card(prodClr,'Production Alert',[
+        ['CBG in Storage',cascade!=null?fmtN(Math.round(cascade))+' kg':'—',prodClr],
+        ['Last data date',latDate,'var(--text1)'],
+        ['Dispatch Rate',totCBG>0?(totDisp/totCBG*100).toFixed(1)+'%':'—',totCBG>0&&totDisp/totCBG>=0.9?'var(--green)':'var(--amber)'],
+      ])}
+      ${card(fcClr,'Cost Watch',[
+        ['Feedstock % of Rev',fcPct!=null?fcPct.toFixed(1)+'%':'—',fcClr],
+        ['Manure Rev Share',mnurePct!=null?mnurePct.toFixed(1)+'%':'—',mnurePct!=null&&mnurePct>=15?'var(--green)':'var(--amber)'],
+        ['Cost / kg',cpkVal!=null?'₹'+cpkVal.toFixed(1):'—',cpkVal!=null&&cpkVal<=TGT.cost_kg?'var(--green)':'var(--red)'],
+      ])}
+      ${card(digClr,'Digester Alert',[
+        ['OLR D1 / D2 (latest)',`${latO1!=null?latO1.toFixed(2):'—'} / ${latO2!=null?latO2.toFixed(2):'—'}`,olrBad?'var(--red)':'var(--green)'],
+        ['pH D1 / D2 (latest)',`${ph1!=null?ph1.toFixed(2):'—'} / ${ph2!=null?ph2.toFixed(2):'—'}`,phBad?'var(--red)':'var(--green)'],
+        ['CH4 Purity',ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',ch4Pct!=null&&ch4Pct>=90?'var(--green)':'var(--amber)'],
+      ])}
+    </div>`;
+  }
   healthRows('ov_health');
 }
 
