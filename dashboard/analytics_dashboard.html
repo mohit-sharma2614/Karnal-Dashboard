@@ -731,7 +731,10 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <table class="tbl" id="s8_cust_tbl"></table>
   <div class="stitle">Expense Breakdown — All Items</div>
   <table class="tbl" id="s8_exp_tbl"></table>
-  <div class="stitle">Cost MoM Growth Rate</div>
+  <div class="cg c1">
+    <div class="cc"><div class="ct" id="ct_s8_cost_growth">Cost Contributors — Month-over-Month Growth Rate (%)</div><div class="cw"><canvas id="c_s8_cost_growth"></canvas></div></div>
+  </div>
+  <div class="stitle">Cost MoM Growth Rate — Per Contributor</div>
   <table class="tbl" id="s8_growth_tbl"></table>
   <div class="stitle">EMI / Loan Schedule</div>
   <table class="tbl" id="s8_emi_tbl"></table>
@@ -3452,22 +3455,89 @@ function renderS8(){
     `<thead><tr><th>Expense Item</th>${expMos.map(m=>`<th>${m}</th>`).join('')}<th>Total</th></tr></thead>
     <tbody>${expRows.join('')}${totRow}</tbody>`;
 
-  // ── Cost MoM Growth Rate Table ─────────────────────────────
-  const growthMos=mo==='ALL'?MONTHS:rowMonths;
-  const growthIdxs=mo==='ALL'?MONTHS.map((_,i)=>i):rowIdxs;
+  // ── Cost MoM Growth Rate — chart + table ──────────────────
+  const growthMos  = mo==='ALL'?MONTHS:rowMonths;
+  const growthIdxs = mo==='ALL'?MONTHS.map((_,i)=>i):rowIdxs;
+
+  // Helper: compute MoM % from full 12-element monthly array
+  const momPct=(arr)=>MONTHS.map((_,i)=>{
+    if(i===0) return null;
+    const cur=arr[i]||0, prv=arr[i-1]||0;
+    return prv>0?+((cur-prv)/prv*100).toFixed(1):null;
+  });
+  const fcG   = momPct(D.M.feed_cost||[]);
+  const pmG   = momPct(D.M.pm_cost||[]);
+  const gsG   = momPct(D.M.gs_cost||[]);
+  const cslG  = momPct(D.M.csl_cost||[]);
+  const cdG   = momPct(D.M.cd_cost||[]);
+  const transG= momPct(D.M.transport||[]);
+  const elecG = momPct(D.M.elec||[]);
+  const maintG= momPct(D.M.maint||[]);
+  const totG  = momPct(D.M.total_cost||[]);
+
+  // Chart title
+  const cgEl=document.getElementById('ct_s8_cost_growth');
+  if(cgEl) cgEl.textContent=mo==='ALL'?'Cost Contributors — Month-over-Month Growth Rate (%)':mo+' vs prev month — Cost Growth %';
+
+  if(charts['c_s8_cost_growth']) charts['c_s8_cost_growth'].destroy();
+  const ds=(lbl,data,clr,dash)=>({label:lbl,data,borderColor:clr,backgroundColor:a(clr,0.07),
+    borderWidth:dash?1.5:2,borderDash:dash||[],fill:false,tension:0.3,
+    pointRadius:3,pointBackgroundColor:clr,spanGaps:true});
+  charts['c_s8_cost_growth']=new Chart(document.getElementById('c_s8_cost_growth'),{type:'line',
+    data:{labels:MONTHS,datasets:[
+      ds('Total Cost',totG,C.red),
+      ds('Feedstock',fcG,C.orange),
+      ds('↳ Pressmud',pmG,C.blue,[4,3]),
+      ds('↳ Grain Syrup',gsG,C.cyan,[4,3]),
+      ds('↳ CSL',cslG,C.teal,[4,3]),
+      ds('↳ Cow Dung',cdG,C.green,[4,3]),
+      ds('Transport',transG,C.purple),
+      ds('Electricity',elecG,C.lime),
+      ds('Maintenance',maintG,C.amber),
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:true,position:'bottom'},
+        tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+(ctx.parsed.y!=null?(ctx.parsed.y>0?'▲':'▼')+Math.abs(ctx.parsed.y)+'%':'—')}}},
+      scales:{y:{title:{display:true,text:'MoM Change %'},
+        ticks:{callback:v=>(v>0?'+':'')+v+'%'},
+        grid:{color:(ctx)=>ctx.tick.value===0?'var(--bdr)':'transparent'},
+        suggestedMin:-30,suggestedMax:30},
+      x:{grid:{display:false}}}}});
+
+  // Per-contributor growth table (replaces total-only table)
+  const pctCell=(v)=>v!=null
+    ?`<span style="color:${v>0?'var(--red)':v<0?'var(--green)':'var(--text3)'}">${v>0?'▲':'▼'}${Math.abs(v).toFixed(1)}%</span>`
+    :'—';
   const growthRows=growthMos.map((m,ri)=>{
     const i=growthIdxs[ri];
-    const totCost=D.M.total_cost[i]||0;
-    const prev=ri>0?(D.M.total_cost[growthIdxs[ri-1]]||0):null;
-    const mom=prev!=null&&prev>0?((totCost-prev)/prev*100):null;
-    const momCell=mom!=null?`<span style="color:${mom>0?'var(--red)':mom<0?'var(--green)':'var(--text3)'}">${mom>0?'▲':'▼'}${Math.abs(mom).toFixed(1)}%</span>`:'—';
-    return`<tr><td>${m} 2026</td><td class="tr">${fmtL(totCost)}</td><td>${momCell}</td></tr>`;
+    const pi=i>0?i-1:null; // previous month index always i-1 in full array
+    const row=(arr)=>{const c=arr[i]||0,p=pi!=null?(arr[pi]||0):null;return p!=null&&p>0?+(((c-p)/p)*100).toFixed(1):null;};
+    return`<tr><td>${m} 2026</td>
+      <td class="tr">${fmtL(D.M.total_cost[i])}</td>
+      <td>${pctCell(totG[i])}</td>
+      <td>${fmtL((D.M.feed_cost||[])[i])}</td>
+      <td>${pctCell(fcG[i])}</td>
+      <td>${fmtL((D.M.pm_cost||[])[i])}</td><td>${pctCell(pmG[i])}</td>
+      <td>${fmtL((D.M.gs_cost||[])[i])}</td><td>${pctCell(gsG[i])}</td>
+      <td>${fmtL((D.M.transport||[])[i])}</td><td>${pctCell(transG[i])}</td>
+      <td>${fmtL((D.M.elec||[])[i])}</td><td>${pctCell(elecG[i])}</td>
+      </tr>`;
   });
   const growthYtd=growthIdxs.reduce((s,i)=>s+(D.M.total_cost[i]||0),0);
   document.getElementById('s8_growth_tbl').innerHTML=
-    `<thead><tr><th>Month</th><th>Total Cost (₹)</th><th>MoM Change</th></tr></thead>
+    `<thead><tr>
+      <th>Month</th>
+      <th>Total Cost</th><th>MoM</th>
+      <th>Feedstock</th><th>MoM</th>
+      <th>Pressmud</th><th>MoM</th>
+      <th>Grain Syrup</th><th>MoM</th>
+      <th>Transport</th><th>MoM</th>
+      <th>Electricity</th><th>MoM</th>
+    </tr></thead>
     <tbody>${growthRows.join('')}
-    <tr style="font-weight:700;border-top:2px solid var(--bdr)"><td>Total</td><td class="tr">${fmtL(growthYtd)}</td><td>—</td></tr>
+    <tr style="font-weight:700;border-top:2px solid var(--bdr)">
+      <td>YTD Total</td><td class="tr">${fmtL(growthYtd)}</td>
+      <td colspan="11">—</td></tr>
     </tbody>`;
 
   // ── EMI Table ──────────────────────────────────────────────
