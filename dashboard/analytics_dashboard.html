@@ -3802,11 +3802,11 @@ function renderSIDayPanel(dateKey){
         })()}
         <div style="margin-top:8px">
           <div style="font-size:8px;color:var(--text3)">D1 CBG</div>
-          <div style="font-size:13px;font-weight:700;color:var(--acc);font-family:'DM Mono',monospace">${(rec.psa?.d1_cbg||rec.d1?.cbg_tot||0)>0?Math.round(rec.psa?.d1_cbg||rec.d1?.cbg_tot||0).toLocaleString()+' kg':'—'}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--acc);font-family:'DM Mono',monospace">${(p.cbg_d1||0)>0?Math.round(p.cbg_d1).toLocaleString()+' kg':'—'}</div>
         </div>
         <div style="margin-top:5px">
           <div style="font-size:8px;color:var(--text3)">D2 CBG</div>
-          <div style="font-size:13px;font-weight:700;color:var(--amber);font-family:'DM Mono',monospace">${(rec.psa?.d2_cbg||rec.d2?.cbg_tot||0)>0?Math.round(rec.psa?.d2_cbg||rec.d2?.cbg_tot||0).toLocaleString()+' kg':'—'}</div>
+          <div style="font-size:13px;font-weight:700;color:var(--amber);font-family:'DM Mono',monospace">${(p.cbg_d2||0)>0?Math.round(p.cbg_d2).toLocaleString()+' kg':'—'}</div>
         </div>
       </div>
     </div>
