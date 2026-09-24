@@ -1951,8 +1951,9 @@ function renderOV(){
                    dArr('d1','sfom').map((v,i)=>((v||0)+(dArr('d2','sfom')[i]||0)));
   const lfomProd = mo==='ALL'?mArr('d1_lfom').map((v,i)=>((v||0)+(mArr('d2_lfom')[i]||0))):
                    dArr('d1','lfom').map((v,i)=>((v||0)+(dArr('d2','lfom')[i]||0)));
-  const sfomRev  = mo==='ALL'?mArr('sfom_mn') :dArr('rev','sfom_rev');
-  const lfomRev  = mo==='ALL'?mArr('lfom_mn') :dArr('rev','lfom_rev');
+  const _smIdx=MONTHS.indexOf(mo);
+  const sfomRev  = mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[_smIdx]||0];
+  const lfomRev  = mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[_smIdx]||0];
   document.getElementById('ov_sfom_prod').textContent = fmtN(sumA(sfomProd))+' m³';
   document.getElementById('ov_sfom_rev').textContent  = fmtL(sumA(sfomRev));
   document.getElementById('ov_lfom_prod').textContent = fmtN(sumA(lfomProd))+' m³';
@@ -3321,11 +3322,12 @@ function renderS6(){
   if(renderSectionDay('s6')) return; else hideSectionDay('s6');
   const mo=curMonth;
   {const pb=document.getElementById('s6_period');if(pb)pb.textContent=curDay!=='ALL'?curDay:mo==='ALL'?'All Months':mo;}
-  const lbl=mo==='ALL'?MONTHS:dDates('rev');
+  const lbl=mo==='ALL'?MONTHS:[mo];
   const lblD1=mo==='ALL'?MONTHS:dDates('d1');
 
-  const sfomR=mo==='ALL'?mArr('sfom_mn'):dArr('rev','sfom_rev');
-  const lfomR=mo==='ALL'?mArr('lfom_mn'):dArr('rev','lfom_rev');
+  const _s6idx=MONTHS.indexOf(mo);
+  const sfomR=mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[_s6idx]||0];
+  const lfomR=mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[_s6idx]||0];
   const d1d=mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac');
   const d2d=mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac');
   const d1dExp=mo==='ALL'?mArr('d1_drain_exp'):dArr('d1','drain_exp');
@@ -3388,8 +3390,9 @@ function renderS7(){
   const lblRev=mo==='ALL'?MONTHS:dDates('rev');
 
   const cbgR=mo==='ALL'?mArr('cbg_rev'):dArr('rev','cbg_rev');
-  const sfomR=mo==='ALL'?mArr('sfom_mn'):dArr('rev','sfom_rev');
-  const lfomR=mo==='ALL'?mArr('lfom_mn'):dArr('rev','lfom_rev');
+  const _s7idx=MONTHS.indexOf(mo);
+  const sfomR=mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[_s7idx]||0];
+  const lfomR=mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[_s7idx]||0];
   const cbgProd=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const disp=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
   const veer=mo==='ALL'?mArr('veer'):dArr('psa','veer');
@@ -3448,8 +3451,8 @@ function renderS8(){
 
   // ── Revenue arrays ─────────────────────────────────────────
   const cbgR  = mo==='ALL'?mArr('cbg_rev'):dArr('rev','cbg_rev');
-  const sfomR = mo==='ALL'?mArr('sfom_rev'):dArr('rev','sfom_rev');
-  const lfomR = mo==='ALL'?mArr('lfom_rev'):dArr('rev','lfom_rev');
+  const sfomR = mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[idx]||0];
+  const lfomR = mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[idx]||0];
   const veerR = mo==='ALL'?D.M.veer_rev:[D.M.veer_rev[idx]];
   const adiR  = mo==='ALL'?D.M.adi_rev:[D.M.adi_rev[idx]];
   const gailR = mo==='ALL'?D.M.gail_rev:[D.M.gail_rev[idx]];
@@ -5252,7 +5255,12 @@ async function buildAnalyticsD() {
   const _d1bg=aggMonth(d1,gD,32),_d2bg=aggMonth(d2,gD,32);
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
-  M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
+  M.cbg_rev=aggMonth(rc,gD,1);
+  // Manure Sales: col1=Date, col4=Type(SFOM/LFOM), col5=Amount(₹)
+  const gDMan=r=>toDate(r[1]);
+  const manAll=(manR?.values||[]).filter(r=>r&&toDate(r[1]));
+  M.sfom_mn=aggMonth(manAll.filter(r=>r[4]==='SFOM'),gDMan,5);
+  M.lfom_mn=aggMonth(manAll.filter(r=>r[4]==='LFOM'),gDMan,5);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
