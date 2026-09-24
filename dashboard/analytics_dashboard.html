@@ -125,7 +125,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* CHARTS */
 .cg{display:grid;gap:12px;margin-bottom:14px}
 .c1{grid-template-columns:1fr}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
-.cc{background:#fff;border:1px solid var(--bdr);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow)}
+.cc{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow)}
 .ct{font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px;letter-spacing:0}
 .cw{position:relative;height:230px}.cw.t{height:290px}.cw.s{height:170px}
 /* TABLE */
@@ -150,13 +150,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .mo-badge{display:inline-block;padding:3px 12px;background:var(--bg3);border:1px solid var(--acc);
   border-radius:12px;font-size:10px;color:var(--acc);font-weight:700;margin-left:8px}
 /* MONTH SCORE CARD */
-.msc{background:#fff;border:1px solid var(--bdr);border-radius:12px;padding:16px;
-  position:relative;overflow:hidden;box-shadow:var(--shadow);cursor:pointer;transition:transform .15s}
-.msc:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+.msc{background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:10px 12px;
+  min-width:70px;flex:1;position:relative;overflow:hidden;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.msc:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
 .msc.sel{box-shadow:0 0 0 2px var(--acc)}
 .msc.dimmed{opacity:.45;transform:none!important}
-.msc-top{font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px}
-.msc-pct{font-size:32px;font-weight:800;line-height:1;margin-bottom:6px}
+.msc-top{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.msc-pct{font-size:17px;font-weight:800;line-height:1;margin-bottom:4px}
 .msc-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-bottom:8px}
 .msc-bar-fill{height:6px;border-radius:3px;transition:width .4s}
 .msc-tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;display:inline-block}
@@ -179,7 +179,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .hm-month{margin-bottom:16px}
 .hm-month-label{font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
 .hm-grid{display:flex;gap:3px;flex-wrap:wrap;max-width:168px}
-.hm-day{width:22px;height:22px;border-radius:4px;cursor:pointer;
+.hm-day{width:18px;height:18px;border-radius:3px;cursor:pointer;
   display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:600;
   color:rgba(255,255,255,.9);position:relative;transition:transform .1s}
 .hm-day:hover{transform:scale(1.3);z-index:10}
@@ -210,9 +210,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 /* ── SI Intelligence new components ─────────────────────────── */
-.si-fwd{background:linear-gradient(135deg,#0A2340,#0D2E50);border:1px solid var(--acc2,var(--bdr));border-left:3px solid var(--acc);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
-@media(prefers-color-scheme:light){:root:not([data-theme="dark"]) .si-fwd{background:var(--bg2)}}
-:root[data-theme="light"] .si-fwd{background:var(--bg2)}
+.si-fwd{background:linear-gradient(135deg,#0A2340,#0D2E50);border:1px solid #0284C7;border-left:3px solid #0EA5E9;border-radius:8px;padding:11px 15px;margin-bottom:10px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}
+.si-fwd-lbl{color:#0EA5E9!important}
 .si-fwd-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--acc);margin-bottom:4px}
 .si-fwd-main{font-size:12px;color:var(--text);line-height:1.5}
 .si-fwd-main b{font-variant-numeric:tabular-nums}
@@ -228,7 +227,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .si-signals{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px}
 .si-sig{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px}
 .si-sig-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:6px}
-.si-sig-val{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;color:var(--text)}
+.si-sig-val{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.2;color:var(--text)}
 .si-sig-sub{font-size:10px;color:var(--text2);margin-top:4px}
 .si-inv{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px;margin-bottom:14px}
 .si-inv-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:12px}
@@ -577,7 +576,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="si-signals" id="si_signals_row"></div>
 
   <!-- MONTH SCORE CARDS -->
-  <div id="si_month_cards" style="display:grid;grid-template-columns:repeat(6,1fr);gap:12px;margin-bottom:16px"></div>
+  <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Navigate Months</div>
+  <div id="si_month_cards" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px"></div>
 
   <!-- FEEDSTOCK INVENTORY -->
   <div class="si-inv" id="si_feedstock_card"></div>
@@ -3455,8 +3455,11 @@ function buildRecommendations(issues){
 function renderHeatmap(){
   const el=document.getElementById('si_heatmap'); if(!el) return;
   const hm=D.heatmap||{};
-  let html='<div style="display:flex;gap:24px;flex-wrap:wrap">';
-  MONTHS_LIST.forEach(mo=>{
+  // Show only the 3 most recent months with data (matching mockup)
+  const allDataMonths=MONTHS_LIST.filter(mo=>Object.keys(D.days).some(d=>D.days[d].mo===mo));
+  const showMonths=allDataMonths.slice(-3);
+  let html='<div style="display:flex;gap:18px;flex-wrap:wrap">';
+  showMonths.forEach(mo=>{
     const days=Object.keys(D.days).filter(d=>D.days[d].mo===mo).sort((a,b)=>parseInt(a)-parseInt(b));
     if(!days.length) return;
     html+=`<div class="hm-month"><div class="hm-month-label">${mo}</div><div class="hm-grid">`;
@@ -3486,8 +3489,6 @@ function renderMonthCards(selMonth){
   const cpk=D.cost_per_kg||{};
   // Only show months that have data (cbg > 0) — match mockup which shows only data months
   const dataMonths=MONTHS_LIST.filter((mo,i)=>(cbgArr[i]||0)>0);
-  const cols=Math.min(dataMonths.length,6);
-  el.style.gridTemplateColumns=`repeat(${cols},1fr)`;
   el.innerHTML=dataMonths.map(mo=>{
     const i=MONTHS_LIST.indexOf(mo);
     const cbg=cbgArr[i]||0;
@@ -3507,7 +3508,7 @@ function renderMonthCards(selMonth){
     const isSel=selMonth===mo;
     const isDimmed=selMonth&&!isSel;
     return `<div class="msc${isSel?' sel':''}${isDimmed?' dimmed':''}" onclick="setMonth('${mo}',null)"
-      style="border-top:4px solid ${clsC}">
+      style="border-top:3px solid ${clsC}">
       <div class="msc-top">${mo} 2026</div>
       <div class="msc-pct" style="color:${clsC}">${cbg?pct+'%':'—'}</div>
       <div class="msc-bar"><div class="msc-bar-fill" style="width:${Math.min(pct,100)}%;background:${clsC}"></div></div>
