@@ -3471,7 +3471,7 @@ function renderS8(){
 
   // ── Totals ─────────────────────────────────────────────────
   const totR = mo==='ALL'?fin.ytd_rev:(sumA(cbgR)+sumA(sfomR)+sumA(lfomR));
-  const totC = mo==='ALL'?fin.ytd_cost:(sumA(fc)+sumA(elec)+sumA(mp)+sumA(emi));
+  const totC = mo==='ALL'?fin.ytd_cost:(sumA(fc)+sumA(trans)+sumA(maint_)+sumA(elec)+sumA(mp)+sumA(emi));
   const mg   = totR>0?((totR-totC)/totR*100).toFixed(1):0;
   const margins = mo==='ALL'?D.M.margin:[D.M.margin[idx]];
   const cpkMonthly=D.cpk_monthly||{};
@@ -5228,7 +5228,6 @@ async function buildAnalyticsD() {
   M.veer=aggMonth(psa,gD,16); M.adinath=aggMonth(psa,gD,17); M.kfs=aggMonth(psa,gD,18);
   M.ksk=aggMonth(psa,gD,19); M.om=aggMonth(psa,gD,20); M.sps=aggMonth(psa,gD,21);
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
-  M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   M.manpower=mkA(); M.emi=mkA(); M.veer_rev=mkA(); M.adi_rev=mkA(); M.gail_rev=mkA(); M.sps_rev=mkA();
   M.d2_exp=M.d2_exp_exp||aggMonth(cbgExp,gD,12); M.d1_drain=aggMonth(d1,gD,30); M.d2_drain=aggMonth(d2,gD,30);
   M.d1_drain_exp=aggMonth(d1,gD,29); M.d2_drain_exp=aggMonth(d2,gD,29);
@@ -5240,6 +5239,7 @@ async function buildAnalyticsD() {
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
   M.cbg_rev=aggMonth(rc,gD,1); M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
+  M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
   M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0));
