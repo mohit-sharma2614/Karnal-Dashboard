@@ -539,20 +539,23 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div id="s5" class="pg">
   <div class="stitle">Compressor &amp; Filling — PBG to CBG <span class="resp">— Mr. Rajendra Kumar</span><span id="s5_period" class="mo-badge">All Months</span></div>
   <div id="s5_main_content">
-  <div class="kg" style="grid-template-columns:repeat(3,1fr)">
+  <div class="kg k4">
     <div class="kc"><div class="kl">Compressor Hours</div><div class="kv" id="s5_comp_hrs">—</div><div class="ks">hrs running</div></div>
     <div class="kc"><div class="kl">PSA Hours</div><div class="kv" id="s5_psa_hrs">—</div><div class="ks">hrs running</div></div>
-    <div class="kc a"><div class="kl">Comp Utilization</div><div class="kv a" id="s5_comp_util">—</div><div class="ks">Comp ÷ PSA hrs</div></div>
+    <div class="kc a"><div class="kl">Comp Utilization</div><div class="kv" id="s5_comp_util">—</div><div class="ks">Comp ÷ PSA hrs</div></div>
+    <div class="kc"><div class="kl">Avg CH4 Purity</div><div class="kv" id="s5_ch4">—</div><div class="ks">target ≥ 90%</div></div>
   </div>
-  <div class="kg" style="grid-template-columns:repeat(3,1fr)">
+  <div class="kg k4">
     <div class="kc c"><div class="kl">Purified Gas</div><div class="kv c" id="s5_purified">—</div><div class="ks">m³</div></div>
     <div class="kc g"><div class="kl">CBG Produced</div><div class="kv g" id="s5_cbg_prod">—</div><div class="ks">kg</div></div>
+    <div class="kc"><div class="kl">PSA Efficiency</div><div class="kv" id="s5_psa_eff">—</div><div class="ks">actual ÷ ideal purified</div></div>
     <div class="kc"><div class="kl">CBG / Comp Hr</div><div class="kv" id="s5_cbg_per_hr">—</div><div class="ks">kg/hr efficiency</div></div>
   </div>
-  <div class="kg" style="grid-template-columns:repeat(3,1fr)">
+  <div class="kg k4">
     <div class="kc g"><div class="kl">Total Dispatched</div><div class="kv g" id="s5_dispatched">—</div><div class="ks">kg</div></div>
-    <div class="kc a"><div class="kl">CBG In Hand</div><div class="kv a" id="s5_in_hand">—</div><div class="ks">produced − dispatched</div></div>
+    <div class="kc a"><div class="kl">CBG In Hand</div><div class="kv" id="s5_in_hand">—</div><div class="ks">produced − dispatched</div></div>
     <div class="kc"><div class="kl">Dispatch Rate</div><div class="kv" id="s5_disp_rate">—</div><div class="ks">dispatched ÷ produced</div></div>
+    <div class="kc"><div class="kl">CBG in Storage</div><div class="kv" id="s5_storage">—</div><div class="ks">cascade (latest reading)</div></div>
   </div>
   <div class="cg c2">
     <div class="cc"><div class="ct" id="ct_s5_cbg">CBG Produced vs Dispatched (kg)</div><div class="cw"><canvas id="c_s5_cbg"></canvas></div></div>
@@ -3094,7 +3097,6 @@ function renderS5(){
   const comp=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
   const psaHrs=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
   const purified=mo==='ALL'?mArr('purified'):dArr('psa','purified');
-  const idealPur=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
   const veer=mo==='ALL'?mArr('veer'):dArr('psa','veer');
   const adi=mo==='ALL'?mArr('adinath'):dArr('psa','adinath');
   const kfs=mo==='ALL'?mArr('kfs'):dArr('psa','kfs');
@@ -3102,14 +3104,30 @@ function renderS5(){
   const om=mo==='ALL'?mArr('om'):dArr('psa','om');
   const sps=mo==='ALL'?mArr('sps'):dArr('psa','sps');
 
-  const totCBG=sumA(cbg),totDisp=sumA(disp),totComp=sumA(comp),totPSA=sumA(psaHrs),totPur=sumA(purified),totIdeal=sumA(idealPur);
+  // Use exp sheet for PSA efficiency (ideal + actual aligned on same dates)
+  const effLbl  = mo==='ALL'?MONTHS:dDates('exp');
+  const effIdeal= mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
+  const effAct  = mo==='ALL'?mArr('act_pur')  :dArr('exp','act_pur');
+
+  const totCBG=sumA(cbg),totDisp=sumA(disp),totComp=sumA(comp),totPSA=sumA(psaHrs),totPur=sumA(purified);
+  const totIdeal=sumA(effIdeal);
   const dispRate=totCBG>0?totDisp/totCBG*100:null;
   const compUtil=totPSA>0?totComp/totPSA*100:null;
   const cbgPerHr=totComp>0?totCBG/totComp:null;
-  const psaEff=totIdeal>0?totPur/totIdeal*100:null;
+  const psaEffPct=totIdeal>0?sumA(effAct)/totIdeal*100:null;
   const inHand=totCBG-totDisp;
   const f1=v=>v!=null?v.toFixed(1)+'%':'—';
   const clr=(v,g,a)=>v!=null?(v>=g?'var(--green)':v>=a?'var(--amber)':'var(--red)'):'var(--text3)';
+
+  // CH4 avg
+  const ch4Arr=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
+  const ch4Valid=ch4Arr.filter(v=>v!=null&&v>0);
+  const avgCh4Raw=ch4Valid.length?ch4Valid.reduce((a,b)=>a+b,0)/ch4Valid.length:null;
+  const avgCh4Pct=avgCh4Raw!=null?(avgCh4Raw>1?avgCh4Raw:avgCh4Raw*100):null;
+
+  // CBG in storage — latest non-null reading
+  const storageArr=mo==='ALL'?D.M.storage:dArr('psa','storage');
+  const latestStor=[...(storageArr||[])].reverse().find(v=>v!=null&&v>0);
 
   const sv=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
   sv('s5_comp_hrs',fmtN(Math.round(totComp)));
@@ -3119,23 +3137,28 @@ function renderS5(){
   sv('s5_cbg_per_hr',cbgPerHr!=null?cbgPerHr.toFixed(1)+' kg/hr':'—');
   sv('s5_dispatched',fmtN(Math.round(totDisp)));
   sv('s5_in_hand',fmtN(Math.round(inHand)));
+  sv('s5_storage',latestStor!=null?fmtN(Math.round(latestStor))+' kg':'—');
   const drEl=document.getElementById('s5_disp_rate');
   if(drEl){drEl.textContent=f1(dispRate);drEl.style.color=clr(dispRate,90,70);}
   const cuEl=document.getElementById('s5_comp_util');
   if(cuEl){cuEl.textContent=f1(compUtil);cuEl.style.color=clr(compUtil,90,70);}
+  const peEl=document.getElementById('s5_psa_eff');
+  if(peEl){peEl.textContent=f1(psaEffPct);peEl.style.color=clr(psaEffPct,90,70);}
+  const c4El=document.getElementById('s5_ch4');
+  if(c4El){c4El.textContent=avgCh4Pct!=null?avgCh4Pct.toFixed(1)+'%':'—';c4El.style.color=clr(avgCh4Pct,90,80);}
 
   // CBG produced vs dispatched bar
   if(document.getElementById('ct_s5_cbg'))
     document.getElementById('ct_s5_cbg').textContent=mo==='ALL'?'CBG Produced vs Dispatched — Monthly (kg)':'CBG Produced vs Dispatched — Daily (kg)';
   bar('c_s5_cbg',lbl,[bDS('CBG Produced',cbg,C.cyan),bDS('Dispatched',disp,C.green)]);
 
-  // PSA efficiency line
-  const effArr=lbl.map((_,i)=>{const ip=idealPur[i],ap=purified[i];return(ip&&ap)?+(ap/ip*100).toFixed(1):null;});
+  // PSA efficiency line — both ideal and actual from exp sheet (aligned dates)
+  const effArr=effLbl.map((_,i)=>{const ip=effIdeal[i],ap=effAct[i];return(ip&&ip>0&&ap!=null)?+(ap/ip*100).toFixed(1):null;});
   if(charts['c_s5_eff'])charts['c_s5_eff'].destroy();
   charts['c_s5_eff']=new Chart(document.getElementById('c_s5_eff'),{type:'line',
-    data:{labels:lbl,datasets:[
+    data:{labels:effLbl,datasets:[
       {label:'PSA Eff %',data:effArr,borderColor:C.cyan,backgroundColor:a(C.cyan,0.12),fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:C.cyan},
-      {label:'Target 90%',data:lbl.map(()=>90),borderColor:C.green,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
+      {label:'Target 90%',data:effLbl.map(()=>90),borderColor:C.green,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},
       scales:{y:{ticks:{callback:v=>v+'%'},suggestedMin:50,suggestedMax:100}}}});
 
