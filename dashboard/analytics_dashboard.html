@@ -210,12 +210,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 /* ── SI Intelligence new components ─────────────────────────── */
-.si-fwd{display:flex;flex-wrap:wrap;gap:0;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;margin-bottom:14px;overflow:hidden}
-.si-fwd-item{flex:1;min-width:160px;padding:14px 20px;border-right:1px solid var(--bdr)}
-.si-fwd-item:last-child{border-right:none}
-.si-fwd-lbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3);margin-bottom:4px}
-.si-fwd-val{font-size:22px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.15;color:var(--text)}
-.si-fwd-sub{font-size:11px;color:var(--text2);margin-top:3px}
+.si-fwd{background:var(--bg2);border:1px solid var(--acc2,var(--bdr));border-left:3px solid var(--acc);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.si-fwd-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--acc);margin-bottom:4px}
+.si-fwd-main{font-size:12px;color:var(--text);line-height:1.5}
+.si-fwd-main b{font-variant-numeric:tabular-nums}
+.si-fwd-sub{font-size:11px;color:var(--amber,#d97706);margin-top:3px}
+.si-fwd-r{text-align:right}
+.si-fwd-big{font-size:26px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1}
+.si-fwd-sm{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.4px;margin-top:3px}
 .si-split{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
 .si-split-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:14px 16px}
 .si-split-title{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:10px}
@@ -3613,76 +3615,111 @@ function getProjection(mo){
 // ── New SI render functions ───────────────────────────────────────
 function renderSIForward(mo,day){
   const el=document.getElementById('si_forward'); if(!el)return;
+  // Mockup: no forward view in day mode
   if(day!=='ALL'){el.style.display='none';return;}
-  el.style.display='flex';
+  el.style.display='grid';
   const tgt=TGT.cbg_month;
   const fmtL=v=>v!=null?(v/100000).toFixed(1):'—';
+  const pbar=(p,c)=>`<div style="background:var(--bg3);border-radius:2px;height:4px;overflow:hidden;margin:5px 0 3px"><div style="width:${Math.min(p,100)}%;height:4px;border-radius:2px;background:${c}"></div></div>`;
   if(mo==='ALL'){
     const ytd=(D.M.cbg||[]).reduce((a,b)=>a+(b||0),0);
     const annTgt=tgt*MONTHS_LIST.length;
     const ach=annTgt>0?Math.round(ytd/annTgt*100):0;
     const proj=MONTHS_LIST.length>0?Math.round(ytd/MONTHS_LIST.length*12):0;
-    const ytdRev=((D.M.cbg_rev||[]).reduce((a,b)=>a+(b||0),0))+
-      ((D.M.sfom_mn||[]).reduce((a,b)=>a+(b||0),0))+
-      ((D.M.lfom_mn||[]).reduce((a,b)=>a+(b||0),0));
+    const achC=ach>=90?'var(--green)':ach>=75?'var(--amber)':'var(--red)';
+    const cbgArr=D.M.cbg||[];
+    const best=MONTHS_LIST.reduce((b,m,i)=>cbgArr[i]>=(cbgArr[b]||0)?i:b,0);
+    const worst=MONTHS_LIST.reduce((w,m,i)=>cbgArr[i]<=(cbgArr[w]||Infinity)?i:w,0);
     el.innerHTML=`
-      <div class="si-fwd-item"><div class="si-fwd-lbl">YTD Production</div><div class="si-fwd-val">${Math.round(ytd).toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${ach}% of ${annTgt.toLocaleString()} kg target</div></div>
-      <div class="si-fwd-item"><div class="si-fwd-lbl">Projected Year-End</div><div class="si-fwd-val" style="color:${proj>=annTgt?'var(--green)':'var(--amber)'}">${proj.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">at current ${MONTHS_LIST.length}-month rate</div></div>
-      <div class="si-fwd-item"><div class="si-fwd-lbl">YTD Revenue</div><div class="si-fwd-val">₹${fmtL(ytdRev)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">CBG + SFOM + LFOM</div></div>
-      <div class="si-fwd-item"><div class="si-fwd-lbl">Months Tracked</div><div class="si-fwd-val">${MONTHS_LIST.length}</div><div class="si-fwd-sub">${MONTHS_LIST[0]||''} – ${MONTHS_LIST[MONTHS_LIST.length-1]||''} 2026</div></div>`;
+      <div>
+        <div class="si-fwd-lbl">↗ Year-to-Date Summary</div>
+        <div class="si-fwd-main">Total: <b>${Math.round(ytd/1000)}k kg</b> across ${MONTHS_LIST.length} months → projects <b>~${Math.round(proj/1000)}k kg</b> full-year</div>
+        <div class="si-fwd-sub">Best: ${MONTHS_LIST[best]||'—'} (${Math.round((cbgArr[best]||0)/tgt*100)}%) · Worst: ${MONTHS_LIST[worst]||'—'} (${Math.round((cbgArr[worst]||0)/tgt*100)}%)</div>
+      </div>
+      <div class="si-fwd-r">
+        <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">YTD Achievement</div>
+        <div class="si-fwd-big" style="color:${achC}">${ach}%</div>
+        <div class="si-fwd-sm">of ${Math.round(annTgt/1000)}k kg target</div>
+      </div>`;
   } else {
     const i=MONTHS_LIST.indexOf(mo);
     const isCurrent=i===MONTHS_LIST.length-1;
+    const cbg=(D.M.cbg||[])[i]||0;
+    const ach=tgt>0?Math.round(cbg/tgt*100):0;
+    const achC=ach>=90?'var(--green)':ach>=70?'var(--amber)':'var(--red)';
     if(isCurrent){
       const p=getProjection(mo);
       const onTrack=p.projected>=tgt;
       el.innerHTML=`
-        <div class="si-fwd-item"><div class="si-fwd-lbl">${mo} So Far</div><div class="si-fwd-val">${((D.M.cbg||[])[i]||0).toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${p.elapsed} days of data</div></div>
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Avg Daily Rate</div><div class="si-fwd-val">${p.avgDaily.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg/day</span></div><div class="si-fwd-sub">${onTrack?'On track':'Behind — need '+p.needPerDay.toLocaleString()+' kg/day'}</div></div>
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Projected Close</div><div class="si-fwd-val" style="color:${onTrack?'var(--green)':'var(--amber)'}">${p.projected.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${p.remaining} days remaining</div></div>
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Need Per Day</div><div class="si-fwd-val" style="color:${p.needPerDay>p.avgDaily?'var(--red)':'var(--green)'}">${p.needPerDay.toLocaleString()}</div><div class="si-fwd-sub">to hit ${tgt.toLocaleString()} kg target</div></div>`;
+        <div>
+          <div class="si-fwd-lbl">↗ ${mo} Projection</div>
+          <div class="si-fwd-main">${p.elapsed} days avg <b>${p.avgDaily.toLocaleString()} kg/day</b> → projected close: <b>${p.projected.toLocaleString()} kg</b></div>
+          <div class="si-fwd-sub">${onTrack?'On track for target':'Need '+p.needPerDay.toLocaleString()+' kg/day for remaining '+p.remaining+' days'}</div>
+        </div>
+        <div class="si-fwd-r">
+          <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Projected gap</div>
+          <div class="si-fwd-big" style="color:${onTrack?'var(--green)':'var(--amber)'}">${onTrack?'On Track':'Behind'}</div>
+          <div class="si-fwd-sm">${cbg.toLocaleString()} kg so far</div>
+        </div>`;
     } else {
-      const cbg=(D.M.cbg||[])[i]||0;
-      const ach=tgt>0?Math.round(cbg/tgt*100):0;
       const rev=((D.M.cbg_rev||[])[i]||0)+((D.M.sfom_mn||[])[i]||0)+((D.M.lfom_mn||[])[i]||0);
-      const cost=((D.M.total_cost||[])[i]||((D.M.feed_cost||[])[i]||0)+((D.M.transport||[])[i]||0)+((D.M.maint||[])[i]||0)+((D.M.elec||[])[i]||0));
-      const margin=rev>0?Math.round((rev-cost)/rev*100):0;
       el.innerHTML=`
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Production</div><div class="si-fwd-val">${cbg.toLocaleString()} <span style="font-size:13px;color:var(--text2)">kg</span></div><div class="si-fwd-sub">${ach}% of ${tgt.toLocaleString()} kg target</div></div>
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Revenue</div><div class="si-fwd-val">₹${fmtL(rev)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">CBG + SFOM + LFOM</div></div>
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Total Cost</div><div class="si-fwd-val">₹${fmtL(cost)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">Feed + Transport + Maint + Elec</div></div>
-        <div class="si-fwd-item"><div class="si-fwd-lbl">Net Margin</div><div class="si-fwd-val" style="color:${rev>cost?'var(--green)':'var(--red)'}">₹${fmtL(rev-cost)} <span style="font-size:13px;color:var(--text2)">L</span></div><div class="si-fwd-sub">${margin}% margin</div></div>`;
+        <div>
+          <div class="si-fwd-lbl">Month Closed</div>
+          <div class="si-fwd-main">${mo} 2026 closed at <b>${cbg.toLocaleString()} kg</b> — ${ach}% of ${tgt.toLocaleString()} kg target</div>
+          <div class="si-fwd-sub">${rev>0?'Revenue: ₹'+fmtL(rev)+' L (CBG + SFOM + LFOM)':''}</div>
+        </div>
+        <div class="si-fwd-r">
+          <div style="font-size:8px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px">Achievement</div>
+          <div class="si-fwd-big" style="color:${achC}">${ach}%</div>
+          <div class="si-fwd-sm">of ${tgt.toLocaleString()} kg</div>
+        </div>`;
     }
   }
 }
 
 function renderSID1D2(mo,day){
   const el=document.getElementById('si_d1d2_row'); if(!el)return;
-  if(day!=='ALL'){el.style.display='none';return;}
   el.style.display='grid';
   const fmt=v=>v!=null?Math.round(v).toLocaleString():'—';
   const fF=v=>v!=null?v.toFixed(2):'—';
   const phClr=v=>v&&(v<6.8||v>7.5)?'var(--red)':'var(--green)';
   const iaClr=v=>v>0.4?'var(--red)':v>0.35?'var(--amber)':'var(--green)';
-  const makeCard=(dig,cbg,tot,ph,eff,ia,color)=>`<div class="si-split-card">
-    <div class="si-split-title">${dig} Digester — ${mo==='ALL'?'YTD':mo}</div>
-    <div class="si-dig-row"><span>CBG Produced</span><span style="font-weight:700;font-variant-numeric:tabular-nums">${fmt(cbg)} kg <span style="font-size:10px;color:var(--text3)">(${tot>0?Math.round(cbg/tot*100):0}%)</span></span></div>
-    <div class="si-dig-row"><span>Avg pH</span><span style="font-weight:700;color:${ph?phClr(ph):'var(--text3)'}">${fF(ph)}</span></div>
-    <div class="si-dig-row"><span>Avg PSA Eff</span><span style="font-weight:700">${fF(eff)}%</span></div>
-    <div class="si-dig-row" style="border-bottom:none"><span>Avg IA/PA</span><span style="font-weight:700;color:${ia?iaClr(ia):'var(--text3)'}">${fF(ia)}</span></div>
-    <div style="margin-top:10px;height:5px;background:var(--bg3);border-radius:3px"><div style="height:5px;border-radius:3px;background:${color};width:${tot>0?Math.round(cbg/tot*100):0}%"></div></div>
-  </div>`;
-  if(mo==='ALL'){
+  const pbar=(p,c)=>`<div style="background:var(--bg3);border-radius:2px;height:3px;overflow:hidden;margin:5px 0 3px"><div style="width:${Math.min(p,100)}%;height:3px;border-radius:2px;background:${c}"></div></div>`;
+  // Mockup card style: border-top color, big val, bar, meta, tag
+  const makeCard=(dig,cbg,tot,ph,eff,ia,color,label)=>{
+    const pct=tot>0?Math.round(cbg/tot*100):0;
+    const phOk=ph==null||(ph>=6.8&&ph<=7.5);
+    const iaOk=ia==null||ia<=0.35;
+    const tag=!phOk?`<span style="background:var(--rbg);color:var(--red);border:1px solid var(--rbd);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:5px;display:inline-block">⚠ pH Out of Range</span>`
+      :!iaOk?`<span style="background:var(--abg);color:var(--amber);border:1px solid var(--abd);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:5px;display:inline-block">⚠ IA/PA Elevated</span>`
+      :`<span style="background:var(--gbg);color:var(--green);border:1px solid var(--gbd);font-size:8px;font-weight:700;padding:2px 6px;border-radius:3px;margin-top:5px;display:inline-block">✓ Normal</span>`;
+    return `<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:2px solid ${color};border-radius:7px;padding:10px 12px;position:relative">
+      <div style="font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:4px">${dig} — ${label}</div>
+      <div style="font-size:19px;font-weight:800;font-variant-numeric:tabular-nums;line-height:1;color:${color}">${fmt(cbg)} <span style="font-size:10px;color:var(--text2)">kg</span></div>
+      ${pbar(pct,color)}
+      <div style="font-size:9px;color:var(--text2)">${pct}% of output${ph!=null?' · pH '+fF(ph):''}${ia!=null?' · IA/PA '+fF(ia):''}</div>
+      ${tag}
+    </div>`;
+  };
+  if(day!=='ALL'){
+    // Day mode: use day record data
+    const rec=D.days[day]||{}, p=rec.psa||{}, h=rec.health||{};
+    const d1=p.cbg_d1||0, d2=p.cbg_d2||0, tot=d1+d2||1;
+    const ph1=h.ph?.d1, ph2=h.ph?.d2, ia1=h.ia?.d1, ia2=h.ia?.d2;
+    el.innerHTML=makeCard('D1',d1,tot,ph1,null,ia1,'var(--acc)',day)+
+      makeCard('D2',d2,tot,ph2,null,ia2,'var(--amber)',day);
+  } else if(mo==='ALL'){
     const d1=((D.M.d1_cbg||[]).reduce((a,b)=>a+(b||0),0));
     const d2=((D.M.d2_cbg||[]).reduce((a,b)=>a+(b||0),0));
     const tot=d1+d2||1; const li=MONTHS_LIST.length-1;
-    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[li],(D.M.d1_eff||[])[li],(D.M.ia_d1||[])[li],'var(--acc)')+
-      makeCard('D2',d2,tot,(D.M.ph_d2||[])[li],(D.M.d2_eff||[])[li],(D.M.ia_d2||[])[li],'var(--green)');
+    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[li],(D.M.d1_eff||[])[li],(D.M.ia_d1||[])[li],'var(--acc)','YTD')+
+      makeCard('D2',d2,tot,(D.M.ph_d2||[])[li],(D.M.d2_eff||[])[li],(D.M.ia_d2||[])[li],'var(--amber)','YTD');
   } else {
     const i=MONTHS_LIST.indexOf(mo);
     const d1=(D.M.d1_cbg||[])[i]||0, d2=(D.M.d2_cbg||[])[i]||0, tot=d1+d2||1;
-    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[i],(D.M.d1_eff||[])[i],(D.M.ia_d1||[])[i],'var(--acc)')+
-      makeCard('D2',d2,tot,(D.M.ph_d2||[])[i],(D.M.d2_eff||[])[i],(D.M.ia_d2||[])[i],'var(--green)');
+    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[i],(D.M.d1_eff||[])[i],(D.M.ia_d1||[])[i],'var(--acc)',mo)+
+      makeCard('D2',d2,tot,(D.M.ph_d2||[])[i],(D.M.d2_eff||[])[i],(D.M.ia_d2||[])[i],'var(--amber)',mo);
   }
 }
 
