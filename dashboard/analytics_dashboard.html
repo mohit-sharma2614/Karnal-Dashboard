@@ -3367,8 +3367,8 @@ function renderS6(){
       <th>D2 Expected</th><th>D2 Actual</th><th>D2 %</th></tr></thead>
       <tbody>
       ${mkRow('Drain (m³)',totD1D,totD2D,'m³',sumA(d1dExp),sumA(d2dExp))}
-      <tr><td><b>SFOM (MT)</b></td><td>—</td><td>${fmtN(totD1sfom.toFixed(1))}</td><td>—</td><td>—</td><td>${fmtN(totD2sfom.toFixed(1))}</td><td>—</td></tr>
-      <tr><td><b>LFOM (KL)</b></td><td>—</td><td>${fmtN(totD1lfom.toFixed(1))}</td><td>—</td><td>—</td><td>${fmtN(totD2lfom.toFixed(1))}</td><td>—</td></tr>
+      <tr><td><b>SFOM (MT)</b></td><td>—</td><td>${totD1sfom>0?totD1sfom.toFixed(1):'—'}</td><td>—</td><td>—</td><td>${totD2sfom>0?totD2sfom.toFixed(1):'—'}</td><td>—</td></tr>
+      <tr><td><b>LFOM (KL)</b></td><td>—</td><td>${totD1lfom>0?totD1lfom.toFixed(1):'—'}</td><td>—</td><td>—</td><td>${totD2lfom>0?totD2lfom.toFixed(1):'—'}</td><td>—</td></tr>
       </tbody>`;
   }
 
