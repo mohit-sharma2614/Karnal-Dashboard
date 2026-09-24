@@ -210,7 +210,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 ::-webkit-scrollbar{width:6px;height:6px}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
 ::-webkit-scrollbar-track{background:var(--bg)}
 /* ── SI Intelligence new components ─────────────────────────── */
-.si-fwd{background:var(--bg2);border:1px solid var(--acc2,var(--bdr));border-left:3px solid var(--acc);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+.si-fwd{background:linear-gradient(135deg,#0A2340,#0D2E50);border:1px solid var(--acc2,var(--bdr));border-left:3px solid var(--acc);border-radius:8px;padding:12px 16px;margin-bottom:14px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]) .si-fwd{background:var(--bg2)}}
+:root[data-theme="light"] .si-fwd{background:var(--bg2)}
 .si-fwd-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--acc);margin-bottom:4px}
 .si-fwd-main{font-size:12px;color:var(--text);line-height:1.5}
 .si-fwd-main b{font-variant-numeric:tabular-nums}
@@ -3931,7 +3933,12 @@ function renderSI(){
   renderSISignals(mo,day);
   renderSIFeedstock();
 
-  // PAF and CapUtil chips (k5/k6)
+  // PAF and CapUtil chips (k5/k6) — hidden in day mode to match mockup 4-chip layout
+  const k5El=document.getElementById('si_k5'), k6El=document.getElementById('si_k6');
+  if(k5El)k5El.style.display=day!=='ALL'?'none':'';
+  if(k6El)k6El.style.display=day!=='ALL'?'none':'';
+  const kpisEl=document.getElementById('si_kpis');
+  if(kpisEl)kpisEl.className=day!=='ALL'?'kg k4':'kg k6';
   const _paf=day==='ALL'?calcPAF(mo==='ALL'?'ALL':mo):null;
   const _cu=day==='ALL'?calcCapUtil(mo==='ALL'?'ALL':mo):null;
   const pafEl=document.getElementById('si_paf');
