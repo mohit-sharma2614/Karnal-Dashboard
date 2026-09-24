@@ -3455,9 +3455,7 @@ function buildRecommendations(issues){
 function renderHeatmap(){
   const el=document.getElementById('si_heatmap'); if(!el) return;
   const hm=D.heatmap||{};
-  // Show only the 3 most recent months with data (matching mockup)
-  const allDataMonths=MONTHS_LIST.filter(mo=>Object.keys(D.days).some(d=>D.days[d].mo===mo));
-  const showMonths=allDataMonths.slice(-3);
+  const showMonths=MONTHS_LIST.filter(mo=>Object.keys(D.days).some(d=>D.days[d].mo===mo));
   let html='<div style="display:flex;gap:18px;flex-wrap:wrap">';
   showMonths.forEach(mo=>{
     const days=Object.keys(D.days).filter(d=>D.days[d].mo===mo).sort((a,b)=>parseInt(a)-parseInt(b));
