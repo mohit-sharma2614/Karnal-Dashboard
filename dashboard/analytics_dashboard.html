@@ -3516,11 +3516,11 @@ function renderS8(){
       {label:'Target ₹28',data:lbl.map(()=>28),borderColor:C.green,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},
       scales:{y:{ticks:{callback:v=>'₹'+v},suggestedMin:0}}}});
-  // Cost structure pie — use period totals (not always YTD)
+  // Cost structure pie — all 6 cost components
   pie('c_s8_pie',
-    ['Feedstock','Transport','Maintenance','Electricity'],
-    [sumA(fc),sumA(trans),sumA(maint_),sumA(elec)],
-    [C.orange,C.teal,C.lime,C.blue]);
+    ['Feedstock','Electricity','Transport','Maintenance','Manpower','EMI / Loan'],
+    [sumA(fc),sumA(elec),sumA(trans),sumA(maint_),sumA(mp),sumA(emi)],
+    [C.orange,C.lime,C.teal,C.amber,C.purple,C.pink]);
   bar('c_s8_cust',lbl,[
     bDS('Veer Filling',veerR,C.green),bDS('Adinath Auto',adiR,C.blue),
     bDS('GAIL/LREVPL',gailR,C.teal),bDS('SPS Bio Chem',spsR,C.amber)
@@ -3564,30 +3564,40 @@ function renderS8(){
     {lbl:'Maintenance',arr:maintM,sub:false,cls:''},
     {lbl:'Manpower',arr:mp,sub:false,cls:''},
     {lbl:'EMI / Loan',arr:emi,sub:false,cls:''},
-    {lbl:'Fuel',arr:null,sub:false,cls:''},
-    {lbl:'Miscellaneous',arr:null,sub:false,cls:''},
-    {lbl:'Admin',arr:null,sub:false,cls:''},
   ];
   const expMos=mo==='ALL'?MONTHS:[mo];
   const expIdxs=mo==='ALL'?MONTHS.map((_,i)=>i):[0];
   const expTotCols=expMos.map(()=>0);
   const expRows=expItems.map(({lbl:elbl,arr,sub,cls})=>{
-    if(!arr){
-      return`<tr><td style="${sub?'padding-left:24px':''}">${elbl}</td>
-        <td colspan="${expMos.length+1}" style="text-align:center">${noData}</td></tr>`;
-    }
     const vals=expIdxs.map((i,ri)=>{const v=arr[i]||0;if(!sub)expTotCols[ri]+=v;return v;});
     const ytd=vals.reduce((s,v)=>s+v,0);
     return`<tr ${sub?'style="opacity:0.8"':''}><td style="${sub?'padding-left:24px;font-size:11px':''}">${elbl}</td>
       ${vals.map(v=>`<td class="${cls}">${v>0?fmtL(v):'—'}</td>`).join('')}
       <td style="font-weight:${sub?'400':'700'}">${ytd>0?fmtL(ytd):'—'}</td></tr>`;
   });
+  // Feedstock reconciliation: rc col4 total vs sum of fb sub-costs
+  const fsRecRows=expIdxs.map((i)=>{
+    const rcVal=fcM[i]||0;
+    const fbSum=(pmCost[i]||0)+(gsCost[i]||0)+(cslCost[i]||0)+(cdCost[i]||0)+(sgCost[i]||0);
+    return{rcVal,fbSum,diff:rcVal-fbSum};
+  });
+  const fsRecYtdRc=fsRecRows.reduce((s,r)=>s+r.rcVal,0);
+  const fsRecYtdFb=fsRecRows.reduce((s,r)=>s+r.fbSum,0);
+  const fsRecYtdDiff=fsRecYtdRc-fsRecYtdFb;
+  const diffCell=(d)=>Math.abs(d)<1?`<td style="color:var(--green);font-size:11px">✓ Match</td>`
+    :`<td style="color:var(--red);font-size:11px">Δ ${fmtL(d)}</td>`;
+  const fsRecRow=`<tr style="background:var(--bg2);font-size:11px;color:var(--text2)">
+    <td style="padding-left:24px;font-style:italic">↳ Reconciliation (rc − fb sum)</td>
+    ${fsRecRows.map(r=>diffCell(r.diff)).join('')}
+    ${diffCell(fsRecYtdDiff)}</tr>`;
   const totRow=`<tr style="font-weight:700;border-top:2px solid var(--bdr);background:var(--bg2)">
     <td>TOTAL COST</td>${expTotCols.map(v=>`<td class="tr">${fmtL(v)}</td>`).join('')}
     <td class="tr">${fmtL(expTotCols.reduce((s,v)=>s+v,0))}</td></tr>`;
+  // Insert reconciliation row after the 5 feedstock sub-rows (indices 1-5)
+  const expRowsWithRec=[...expRows.slice(0,6),fsRecRow,...expRows.slice(6)];
   document.getElementById('s8_exp_tbl').innerHTML=
     `<thead><tr><th>Expense Item</th>${expMos.map(m=>`<th>${m}</th>`).join('')}<th>Total</th></tr></thead>
-    <tbody>${expRows.join('')}${totRow}</tbody>`;
+    <tbody>${expRowsWithRec.join('')}${totRow}</tbody>`;
 
   // ── Cost MoM Growth Rate — chart + table ──────────────────
   const growthMos  = mo==='ALL'?MONTHS:rowMonths;
