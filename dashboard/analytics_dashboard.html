@@ -2502,7 +2502,7 @@ function renderS3(){
         </div>
         <div style="text-align:right">
           <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Expected</div>
-          <div style="font-size:28px;font-weight:800;color:rgba(255,255,255,.8)">0 kg</div>
+          <div style="font-size:28px;font-weight:800;color:rgba(255,255,255,.8)">${cbgTgt?fmtN(cbgTgt)+' kg':'—'}</div>
         </div>
         <div style="text-align:right">
           <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Actual</div>
@@ -2623,6 +2623,7 @@ function renderS3(){
   const moCbg=mo==='ALL'?sumArr(mArr('cbg')):sumArr((D.D.psa?.[mo]?.cbg_tot));
   const moD1Exp=mo==='ALL'?sumArr(mArr('d1_exp')):sumArr(D.D.exp?.[mo]?.tot_exp);
   const moD2Exp=mo==='ALL'?sumArr(mArr('d2_exp')):sumArr(D.D.exp?.[mo]?.d2_exp);
+  const moIdealCbg=mo==='ALL'?sumArr(mArr('ideal_cbg')):sumArr(D.D.exp?.[mo]?.ideal_cbg);
   const moD1Feed=mo==='ALL'?sumArr(mArr('d1_feed')):sumArr(D.D.d1?.[mo]?.feed_act);
   const moD2Feed=mo==='ALL'?sumArr(mArr('d2_feed')):sumArr(D.D.d2?.[mo]?.feed_act);
   const moD1Bg=mo==='ALL'?sumArr(mArr('d1_bg')):sumArr(D.D.d1?.[mo]?.bg_act);
@@ -2641,7 +2642,7 @@ function renderS3(){
       </div>
       <div style="text-align:right">
         <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Expected</div>
-        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.8)">0 kg</div>
+        <div style="font-size:26px;font-weight:800;color:rgba(255,255,255,.8)">${moIdealCbg?fmtN(moIdealCbg)+' kg':'—'}</div>
       </div>
       <div style="text-align:right">
         <div style="font-size:11px;color:rgba(255,255,255,.7)">Target CBG Actual</div>
