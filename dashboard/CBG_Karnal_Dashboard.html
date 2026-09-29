@@ -175,6 +175,11 @@ body{background:var(--bg);min-height:100vh;display:flex;flex-direction:column}
 .dt-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
 @media(max-width:640px){.dt-grid{grid-template-columns:1fr}}
 
+/* ── REMARKS ─────────────────────────────────────────────── */
+.rmk-wrap{border-radius:9px;overflow:hidden}
+.rmk-sheet{color:var(--text2);font-size:11px;font-weight:600;padding:7px 12px!important;width:30%;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.rmk-val{color:var(--text);font-size:12.5px;padding:7px 12px!important;font-style:italic}
+
 /* ── NO DATA ─────────────────────────────────────────────── */
 .no-data{color:var(--text3);font-size:12px;padding:24px;text-align:center;background:var(--surf);border:1px solid var(--bdr);border-radius:9px}
 
@@ -494,13 +499,17 @@ async function readRow(sheet, row, maxCol) {
 
 // Find latest row whose date (col A) is <= serial (for periodic/monthly sheets)
 async function findLatestRow(sheet, serial, startRow) {
-  const d = await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${startRow}:A200')`)
+  const d = await gGet(`/worksheets('${encodeURIComponent(sheet)}')/range(address='A${startRow}:A400')`)
   const rows = (d && d.values) || []
   let bestRow = null
   for (let i = 0; i < rows.length; i++) {
     const v = rows[i][0]
     if (v === null || v === undefined || v === '') break
-    if (typeof v === 'number' && v <= serial) bestRow = startRow + i
+    let vs = serial
+    if (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}/.test(v)) {
+      vs = toSerial(v.slice(0,10))
+    }
+    if ((typeof v === 'number' ? v : vs) <= serial) bestRow = startRow + i
   }
   return bestRow
 }
@@ -532,7 +541,7 @@ function initDateCascade(dateStr) {
   // Populate years: 2025 up to current year
   const yearSel = document.getElementById('selYear')
   yearSel.innerHTML = ''
-  for (let yr = 2025; yr <= todayParts[0]; yr++) {
+  for (let yr = 2026; yr <= todayParts[0]; yr++) {
     const opt = document.createElement('option')
     opt.value = yr; opt.textContent = yr
     if (yr === y) opt.selected = true
@@ -630,15 +639,15 @@ async function loadData() {
            subRaw, fixRaw, maintRaw, manureRaw, salesRaw,
            pmCalRaw, cdCalRaw, gsCalRaw, cslCalRaw, sgCalRaw] = await Promise.all([
       rowD1   ? readRow('D1',                    rowD1,  52) : Promise.resolve([]),
-      rowD2   ? readRow('D2',                    rowD2,  52) : Promise.resolve([]),
+      rowD2   ? readRow('D2',                    rowD2,  53) : Promise.resolve([]),
       rowPSA  ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
-      rowRC   ? readRow('Daily Revenue & Costs', rowRC,   8) : Promise.resolve([]),
-      rowFB   ? readRow('Feed & Balance',        rowFB,  22) : Promise.resolve([]),
-      rowFS   ? readRow('Feedstock Supply',      rowFS,  32) : Promise.resolve([]),
-      rowPH   ? readRow('Digester pH',           rowPH,   7) : Promise.resolve([]),
-      rowTMP  ? readRow('Digester Temp',         rowTMP,  7) : Promise.resolve([]),
-      rowTSVS ? readRow('Digester TS-VS',        rowTSVS,13) : Promise.resolve([]),
-      rowIAPA ? readRow('Digester IA-PA',        rowIAPA,18) : Promise.resolve([]),
+      rowRC   ? readRow('Daily Revenue & Costs', rowRC,  11) : Promise.resolve([]),
+      rowFB   ? readRow('Feed & Balance',        rowFB,  23) : Promise.resolve([]),
+      rowFS   ? readRow('Feedstock Supply',      rowFS,  33) : Promise.resolve([]),
+      rowPH   ? readRow('Digester pH',           rowPH,   8) : Promise.resolve([]),
+      rowTMP  ? readRow('Digester Temp',         rowTMP,  8) : Promise.resolve([]),
+      rowTSVS ? readRow('Digester TS-VS',        rowTSVS,14) : Promise.resolve([]),
+      rowIAPA ? readRow('Digester IA-PA',        rowIAPA,19) : Promise.resolve([]),
       gGet(`/worksheets('${encodeURIComponent('Submission Log')}')/range(address='A3:E202')`),
       gGet(`/worksheets('${encodeURIComponent('Monthly Fixed Costs')}')/range(address='A4:${colL(mCol)}8')`),
       gGet(`/worksheets('${encodeURIComponent('Maintenance')}')/range(address='A4:I300')`),
@@ -701,15 +710,15 @@ function countFields(sheet) {
   const entries = arr => (arr||[]).filter(r => r && r[1] && Math.round(n(r[1])) === serial).length
   switch (sheet) {
     case 'Digester 1':            return {inp: filled(d1),   tot: 52}
-    case 'Digester 2':            return {inp: filled(d2),   tot: 52}
+    case 'Digester 2':            return {inp: filled(d2),   tot: 53}
     case 'PSA Production':        return {inp: filled(psa),  tot: 29}
-    case 'Daily Revenue & Costs': return {inp: filled(rc),   tot: 8}
-    case 'Feed & Balance':        return {inp: filled(fb),   tot: fb.length||18}
-    case 'Feedstock Supply':      return {inp: filled(fs),   tot: 32}
-    case 'Digester pH':           return {inp: filled(ph),   tot: 7}
-    case 'Digester Temp':         return {inp: filled(tmp),  tot: 7}
-    case 'TS-VS Analysis':        return {inp: filled(tsvs), tot: 13}
-    case 'IA-PA':                 return {inp: filled(iapa), tot: 18}
+    case 'Daily Revenue & Costs': return {inp: filled(rc),   tot: 11}
+    case 'Feed & Balance':        return {inp: filled(fb),   tot: fb.length||23}
+    case 'Feedstock Supply':      return {inp: filled(fs),   tot: 33}
+    case 'Digester pH':           return {inp: filled(ph),   tot: 8}
+    case 'Digester Temp':         return {inp: filled(tmp),  tot: 8}
+    case 'TS-VS Analysis':        return {inp: filled(tsvs), tot: 14}
+    case 'IA-PA':                 return {inp: filled(iapa), tot: 19}
     case 'Monthly Fixed Costs': { const f=filled((fixedData||[]).flat()); return {inp:f,tot:f+(fixedData||[]).flat().filter(v=>v===null||v==='').length} }
     case 'Manure Sales':          return {inp: entries(manureData), tot: null, entryMode: true}
     case 'Sales Detail':          return {inp: (salesData||[]).filter(r=>r&&r[0]&&Math.round(n(r[0]))===serial).length, tot: null, entryMode: true}
@@ -1138,13 +1147,20 @@ function renderProduction() {
     return
   }
 
+  const prodRemarks = remarksBox([
+    {sheet:'D1',            val: d1[51]},
+    {sheet:'D2',            val: d2[52]},
+    {sheet:'PSA Production',val: psa[28]},
+  ])
+
   document.getElementById('tab-production').innerHTML =
     summary +
     `<div class="dt-grid">
       <div id="sec-d1-gas">${pendingBanner('Digester 1')}${d1tbl}</div>
       <div id="sec-d2-gas">${pendingBanner('Digester 2')}${d2tbl}</div>
     </div>` +
-    `<div id="sec-psa" style="margin-top:12px">${pendingBanner('PSA Production')}${psatbl}</div>`
+    `<div id="sec-psa" style="margin-top:12px">${pendingBanner('PSA Production')}${psatbl}</div>` +
+    prodRemarks
 }
 
 // ── FEEDSTOCK TAB ─────────────────────────────────────────
@@ -1228,8 +1244,9 @@ function renderFeedstock() {
   // Feedstock Supply — sum by category
   const fsPoultry = [1,2,3,4,5,6].reduce((s,i)=>s+n(fs[i]),0)
   const fsCowDung = [7,8,9].reduce((s,i)=>s+n(fs[i]),0)
-  const fsCSL     = [10,11,12,13].reduce((s,i)=>s+n(fs[i]),0)
-  const fsPM      = [14,...Array.from({length:17},(_, k)=>15+k)].reduce((s,i)=>s+n(fs[i]),0)
+  const fsCSL     = [10,12,13].reduce((s,i)=>s+n(fs[i]),0)
+  const fsGS      = n(fs[11])
+  const fsPM      = [14,...Array.from({length:16},(_, k)=>15+k)].reduce((s,i)=>s+n(fs[i]),0)
   const fsSG      = n(fs[31])
 
   const fsTbl = dataTable([
@@ -1237,6 +1254,7 @@ function renderFeedstock() {
     {label:'Poultry Wastewater', unit:'kg', val:fi(fsPoultry)},
     {label:'Cow Dung',           unit:'kg', val:fi(fsCowDung)},
     {label:'CSL',                unit:'kg', val:fi(fsCSL)},
+    {label:'Grain Syrup',        unit:'kg', val:fi(fsGS)},
     {label:'Pressmud',           unit:'kg', val:fi(fsPM)},
     {label:'Spent Grain',        unit:'kg', val:fi(fsSG)},
     {head:'Poultry Vendors (kg)'},
@@ -1263,6 +1281,11 @@ function renderFeedstock() {
     return
   }
 
+  const feedRemarks = remarksBox([
+    {sheet:'Feed & Balance',   val: fb[22]},
+    {sheet:'Feedstock Supply', val: fs[32]},
+  ])
+
   document.getElementById('tab-feedstock').innerHTML =
     hint +
     `<div id="sec-feedstock-main">${pendingBanner('Digester 1')}${expActTbl}</div>` +
@@ -1270,7 +1293,8 @@ function renderFeedstock() {
     `<div class="dt-grid" style="margin-top:12px">
       <div id="sec-fb">${pendingBanner('Feed & Balance')}${fbTbl}</div>
       <div id="sec-fs">${pendingBanner('Feedstock Supply')}${fsTbl}</div>
-    </div>`
+    </div>` +
+    feedRemarks
 }
 
 // ── FINANCE TAB ───────────────────────────────────────────
@@ -1280,7 +1304,8 @@ function renderFinance() {
   const cbgSale = n(rc[1]), sfom = n(rc[2]), lfom = n(rc[3])
   const totRev  = cbgSale + sfom + lfom
   const feed    = n(rc[4]), transp = n(rc[5]), maint = n(rc[6]), elec = n(rc[7])
-  const totCost = feed + transp + maint + elec
+  const manpowRC = n(rc[8]), emiRC = n(rc[9])
+  const totCost = feed + transp + maint + elec + manpowRC + emiRC
   // Net Margin: show '—' when RC sheet is pending (0% is misleading)
   const margin  = rcPend ? null : (totRev > 0 ? (totRev - totCost)/totRev*100 : 0)
   const mCls    = margin===null?'w':margin>=45?'g':margin>=30?'a':'r'
@@ -1309,6 +1334,8 @@ function renderFinance() {
     {label:'Transport',       unit:'₹', val:fmtR(transp)},
     {label:'Maintenance',     unit:'₹', val:fmtR(maint)},
     {label:'Electricity/Day', unit:'₹', val:fmtR(elec)},
+    {label:'Manpower Cost',   unit:'₹', val:fmtR(manpowRC)},
+    {label:'Loan EMI',        unit:'₹', val:fmtR(emiRC)},
     {label:'Total Cost',      unit:'₹', val:fmtR(totCost)},
   ])
 
@@ -1372,6 +1399,10 @@ function renderFinance() {
     return
   }
 
+  const finRemarks = remarksBox([
+    {sheet:'Daily Revenue & Costs', val: rc[10]},
+  ])
+
   document.getElementById('tab-finance').innerHTML =
     summary +
     `<div class="dt-grid">
@@ -1382,7 +1413,8 @@ function renderFinance() {
       <div id="sec-sales">${pendingBanner('Sales Detail')}${salesTbl}</div>
       <div id="sec-manure">${pendingBanner('Manure Sales')}${manureTbl}</div>
     </div>` +
-    `<div id="sec-maint" style="margin-top:12px">${pendingBanner('Maintenance')}${maintHtml}</div>`
+    `<div id="sec-maint" style="margin-top:12px">${pendingBanner('Maintenance')}${maintHtml}</div>` +
+    finRemarks
 }
 
 // ── DIGESTER HEALTH TAB ───────────────────────────────────
@@ -1491,8 +1523,6 @@ function renderHealth() {
       // Excel serial → JS date
       return new Date(Math.round((v-25569)*86400000)).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})
     }
-    const fixVS = v => (v !== null && v !== '' && n(v) < 2) ? n(v)*100 : v
-
     const withDate = data.filter(r => r && r[1])
     // Row for the selected date exactly
     const todayRow = withDate.find(r => Math.round(n(r[1])) === calSerial)
@@ -1505,7 +1535,7 @@ function renderHealth() {
       rows.push({label:'Sample Name', unit:'', val: todayRow[2] || '—'})
       rows.push({label:'Location',    unit:'', val: todayRow[3] || '—'})
       rows.push({label:'TS %',        unit:'%', val: fv(todayRow[4],2)})
-      rows.push({label:'VS %',        unit:'%', val: fv(fixVS(todayRow[5]),2)})
+      rows.push({label:'VS %',        unit:'%', val: fv(todayRow[5],2)})
       rows.push({label:'TS (Tonnes)', unit:'T', val: fv(todayRow[6],3)})
       rows.push({label:'VS (Tonnes)', unit:'T', val: fv(todayRow[7],3)})
       if (todayRow[9]) rows.push({label:'Quantity',   unit:'MT/KL', val: fv(todayRow[9],2)})
@@ -1516,7 +1546,7 @@ function renderHealth() {
     if (recent.length) {
       rows.push({head:`${name} — Last 3 Samples (up to selected date)`})
       recent.forEach(r => {
-        rows.push({label: fmtDate(r[1]), unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(fixVS(r[5]),2)}%  |  ${r[2]||''}`})
+        rows.push({label: fmtDate(r[1]), unit:'', val:`TS: ${fv(r[4],2)}%  VS: ${fv(r[5],2)}%  |  ${r[2]||''}`})
       })
     }
     if (!withDate.length) rows.push({label:'No data', unit:'', val:'—'})
@@ -1539,6 +1569,13 @@ function renderHealth() {
     return
   }
 
+  const healthRemarks = remarksBox([
+    {sheet:'Digester pH',   val: ph[7]},
+    {sheet:'Digester Temp', val: tmp[7]},
+    {sheet:'TS-VS',         val: tsvs[13]},
+    {sheet:'IA-PA',         val: iapa[18]},
+  ])
+
   document.getElementById('tab-health').innerHTML =
     warn +
     `<div class="dt-grid">
@@ -1559,7 +1596,22 @@ function renderHealth() {
       <div id="sec-cal-gs" style="margin-top:8px">${pendingBanner('Grain Syrup Cal')}${dataTable(calRows(calData.gs,'Grain Syrup'))}</div>
       <div id="sec-cal-csl" style="margin-top:8px">${pendingBanner('CSL Cal')}${dataTable(calRows(calData.csl,'CSL'))}</div>
       <div id="sec-cal-sg" style="margin-top:8px">${pendingBanner('Spent Grain Cal')}${dataTable(calRows(calData.sg,'Dry Spent Grain'))}</div>
-    </div>`
+    </div>` +
+    healthRemarks
+}
+
+// ── REMARKS BOX ───────────────────────────────────────────
+function remarksBox(items) {
+  const rows = items.filter(({val}) => val && String(val).trim())
+  if (!rows.length) return ''
+  const cells = rows.map(({sheet,val}) =>
+    `<tr><td class="rmk-sheet">${sheet}</td><td class="rmk-val">${String(val).replace(/</g,'&lt;')}</td></tr>`
+  ).join('')
+  return `<div class="rmk-wrap" style="margin-top:12px">
+    <table class="tbl"><tbody>
+      <tr><td colspan="2" class="dt-head">Remarks — <span style="font-weight:400;font-size:0.82em">${fmtDate(_curDate)}</span></td></tr>
+      ${cells}
+    </tbody></table></div>`
 }
 
 // ── KPI HELPER ────────────────────────────────────────────

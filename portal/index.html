@@ -202,6 +202,7 @@ const SHEETS = [
     {k:'bpp_d1',   l:'BPP D+1 contribution (m³)',   tp:'calc', fn:'bpp_d1'},
     {k:'bpp_d2',   l:'BPP D+2 contribution (m³)',   tp:'calc', fn:'bpp_d2'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 
 // ─── DIGESTER 2 ───────────────────────────────────────────
@@ -296,6 +297,7 @@ const SHEETS = [
     {k:'bpp_d1',   l:'BPP D+1 contribution (m³)',   tp:'calc', fn:'bpp_d1'},
     {k:'bpp_d2',   l:'BPP D+2 contribution (m³)',   tp:'calc', fn:'bpp_d2'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 
 // ─── PSA PRODUCTION ───────────────────────────────────────
@@ -357,6 +359,7 @@ const SHEETS = [
     {k:'d2_ph_6m',  l:'D2 pH @ 6M',    tp:'num'},
     {k:'d2_ph_sl',  l:'D2 pH @ SL',    tp:'num'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 // ─── TEMPERATURE ──────────────────────────────────────────
 // Separate sheet "Digester Temp"; data starts row 4
@@ -371,6 +374,7 @@ const SHEETS = [
     {k:'d2_tmp_6m', l:'D2 Temp @ 6M (°C)', tp:'num'},
     {k:'d2_tmp_sl', l:'D2 Temp @ SL (°C)', tp:'num'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 
 // ─── TS-VS ────────────────────────────────────────────────
@@ -386,6 +390,7 @@ const SHEETS = [
     {k:'d2_ts_6m',  l:'D2 TS% @ 6M', tp:'num'},{k:'d2_vs_6m',  l:'D2 VS% @ 6M', tp:'num'},
     {k:'d2_ts_sl',  l:'D2 TS% @ SL', tp:'num'},{k:'d2_vs_sl',  l:'D2 VS% @ SL', tp:'num'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 
 // ─── IA-PA ────────────────────────────────────────────────
@@ -462,6 +467,7 @@ const SHEETS = [
     {k:'gs_rcv',       l:'Grain Syrup (KL)',    tp:'num'},
     {k:'total_day',    l:'Total/Day (kg)',       tp:'calc', fn:'fs_total_day'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 
 // ─── FEED & BALANCE ───────────────────────────────────────
@@ -503,6 +509,7 @@ const SHEETS = [
     {k:'fb_cd_bal',  l:'CD Closing Balance (MT)',  tp:'calc', fn:'fb_cd_bal'},
     {k:'fb_sg_bal',  l:'SG Closing Balance (MT)',  tp:'calc', fn:'fb_sg_bal'},
   ]},
+  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
 
 // ─── CAL SHEETS ───────────────────────────────────────────
@@ -560,6 +567,7 @@ const SHEETS = [
     {k:'vs_pct', l:'VS%',                   tp:'num'},
     {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
     {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
 
@@ -572,6 +580,7 @@ const SHEETS = [
     {k:'qty_mt',  l:'Quantity (MT)',        tp:'num'},
     {k:'rate',    l:'Rate (₹/MT)',         tp:'num'},
     {k:'amount',  l:'Amount (₹)',          tp:'calc', fn:'manure_amount'},
+    {k:'remarks', l:'Remarks',            tp:'txt'},
   ]},
 ]},
 
@@ -587,7 +596,9 @@ const SHEETS = [
     {k:'gail_rate',   l:'GAIL — Rate (₹/kg)',       tp:'num'},
     {k:'sps_qty',     l:'SPS — Qty (kg)',           tp:'num'},
     {k:'sps_rate',    l:'SPS — Rate (₹/kg)',        tp:'num'},
-    {k:'tot_disp',    l:'Total Dispatched (kg)',    tp:'calc', fn:'sales_tot_disp'},
+    {k:'total_kg',    l:'Total Dispatched (kg)',    tp:'calc', fn:'sales_tot_disp'},
+    {k:'total_rs',    l:'Total Sale (₹)',           tp:'calc', fn:'sales_tot_rs'},
+    {k:'remarks',     l:'Remarks',                 tp:'txt'},
   ]},
 ]},
 
@@ -789,8 +800,9 @@ const FN = {
 
   // Manure: amount = qty_mt × rate (calc, written to col 6)
   manure_amount:(v) => n(v.qty_mt)*n(v.rate),
-  // Sales Detail: total dispatched across customers
+  // Sales Detail: total dispatched kg and total revenue
   sales_tot_disp:(v) => n(v.veer_qty)+n(v.adinath_qty)+n(v.gail_qty)+n(v.sps_qty),
+  sales_tot_rs:  (v) => n(v.veer_qty)*n(v.veer_rate)+n(v.adinath_qty)*n(v.adinath_rate)+n(v.gail_qty)*n(v.gail_rate)+n(v.sps_qty)*n(v.sps_rate),
 }
 
 function runCalcs(sheet, inp, ds){
@@ -917,6 +929,7 @@ const COLUMN_MAP = {
     sl_ht:49,
     // Calculated — written so historical data is self-contained
     cd_bpp:43, pm_bpp:44, gs_bpp:45, csl_bpp:46, sg_bpp:47, wv:48, olr:50, psa_eff:51,
+    remarks:52,
   },
   D2: {
     cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, total_feed_exp:8, fw_exp:9, rs_exp:10,
@@ -930,6 +943,7 @@ const COLUMN_MAP = {
     biogas_est2:39, cbg_exp:40, cbg_exp_slot:41, biogas_per_hr:42, psa_eff_hr:43,
     sl_ht:50,
     cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, sg_bpp:48, wv:49, olr:51, psa_eff:52,
+    remarks:53,
   },
   PSA: {
     // C9=Avg RBG Flow (auto formula), C15=Avg Flow (auto formula) — do NOT write
@@ -946,19 +960,21 @@ const COLUMN_MAP = {
   },
   // PHTEMP split into PH (Digester pH) and TEMP (Digester Temp) — same column layout
   PH: {
-    // D1: 3M=2, 6M=3, SL=4 | D2: 3M=5, 6M=6, SL=7
+    // D1: 3M=2, 6M=3, SL=4 | D2: 3M=5, 6M=6, SL=7 | Remarks=8
     d1_ph_3m:2, d1_ph_6m:3, d1_ph_sl:4,
     d2_ph_3m:5, d2_ph_6m:6, d2_ph_sl:7,
+    remarks:8,
   },
   TEMP: {
     d1_tmp_3m:2, d1_tmp_6m:3, d1_tmp_sl:4,
     d2_tmp_3m:5, d2_tmp_6m:6, d2_tmp_sl:7,
+    remarks:8,
   },
   TSVS: {
-    // D1: TS3M=2,VS3M=3,TS6M=4,VS6M=5,TSSL=6,VSSL=7 — keys match SHEETS field names
-    // D2: TS3M=8,VS3M=9,TS6M=10,VS6M=11,TSSL=12,VSSL=13
+    // D1: TS3M=2,VS3M=3,TS6M=4,VS6M=5,TSSL=6,VSSL=7 — D2: TS3M=8..VSSL=13 | Remarks=14
     d1_ts_3m:2, d1_vs_3m:3, d1_ts_6m:4, d1_vs_6m:5, d1_ts_sl:6, d1_vs_sl:7,
     d2_ts_3m:8, d2_vs_3m:9, d2_ts_6m:10,d2_vs_6m:11,d2_ts_sl:12,d2_vs_sl:13,
+    remarks:14,
   },
   IAPA: {
     // D1 Z1: PA=2,IA=3,TA=4,ratio=5 | D1 Z2: PA=6,IA=7,TA=8,ratio=9
@@ -980,6 +996,7 @@ const COLUMN_MAP = {
     pm_sahakumbri:27, pm_rathi:28, pm_devom:29, pm_vaibhav_ramala:30,
     pm_unn:31,
     carlsberg:32,
+    remarks:33,
   },
   FB: {
     pm_rcv:2,  gs_rcv:3,   csl_rcv:4,  cd_rcv:5,  sg_rcv:6,
@@ -987,23 +1004,30 @@ const COLUMN_MAP = {
     pm_fed:12, gs_fed:13,  csl_fed:14, cd_fed:15,  sg_fed:16,
     fb_tot_fed:17,
     fb_pm_bal:18, fb_gs_bal:19, fb_csl_bal:20, fb_cd_bal:21, fb_sg_bal:22,
+    remarks:23,
   },
   // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6, TS Tonnes=7(formula), VS Tonnes=8(formula), Remarks=9
   // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
   PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8 },           // no remarks/qty cols in Excel
+  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:11 },
   CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8 },           // no remarks/qty cols in Excel
+  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:11 },
   MANURE: {
-    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6, Month=7(auto from date)
+    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6, Month=7(auto from date), Remarks=8
     v_type:3, farmer:4, type:5, amount:6,
     // month col (7) is written automatically in save logic — not a form field
+    remarks:8,
+  },
+  REVCOST: {
+    // Date=1, CBG Sale=2(auto), SFOM=3, LFOM=4, Feedstock=5(auto), Transport=6, Maint=7(auto), Elec/day=8, Manpow=9, EMI=10, Remarks=11
+    transport_cost:6, elec_cost:8, remarks:11,
   },
   SALES: {
-    // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9
+    // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9; Total kg=10, Total Rs=11, Remarks=12
     veer_qty:2, veer_rate:3, adinath_qty:4, adinath_rate:5,
     gail_qty:6, gail_rate:7, sps_qty:8, sps_rate:9,
+    total_kg:10, total_rs:11, remarks:12,
   },
   MAINT: {
     // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8, Remarks=9
