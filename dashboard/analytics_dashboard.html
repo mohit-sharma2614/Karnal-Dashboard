@@ -5293,11 +5293,10 @@ async function buildAnalyticsD() {
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
   M.cbg_rev=aggMonth(rc,gD,1);
-  // Manure Sales: col1=Date, col4=Type(SFOM/LFOM), col5=Amount(₹)
-  const gDMan=r=>toDate(r[1]);
-  const manAll=(manR?.values||[]).filter(r=>r&&toDate(r[1]));
-  M.sfom_mn=aggMonth(manAll.filter(r=>r[4]==='SFOM'),gDMan,5);
-  M.lfom_mn=aggMonth(manAll.filter(r=>r[4]==='LFOM'),gDMan,5);
+  // SFOM/LFOM revenue: read from Daily Revenue & Costs cols C(idx2) and D(idx3)
+  // same sheet as CBG revenue — single source of truth, avoids Manure Sales duplicate rows
+  M.sfom_mn=aggMonth(rc,gD,2);
+  M.lfom_mn=aggMonth(rc,gD,3);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
