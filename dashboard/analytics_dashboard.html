@@ -1145,6 +1145,7 @@ function _biogasPredHtml(d1v, d2v, periodLabel){
           <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:var(--text3)">Est. Biogas (Exp. Feed)</td><td style="text-align:right;font-weight:600;color:${clr};font-variant-numeric:tabular-nums">${fN(v.bg_est_exp)} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
           <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:var(--text3)">Est. Biogas (Act. Feed)</td><td style="text-align:right;font-weight:600;color:${clr};font-variant-numeric:tabular-nums">${fN(v.bg_est_act)} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
           <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:var(--text2);font-weight:600">Actual Biogas (B+C)</td><td style="text-align:right;font-size:14px;font-weight:800;color:${clrE};font-variant-numeric:tabular-nums">${fN(v.bg_total)} <span style="font-size:10px;font-weight:400">m³</span></td></tr>
+          <tr style="border-bottom:1px solid var(--bdr)"><td style="padding:5px 0;color:#C62828">Gas Vent / Flare</td><td style="text-align:right;font-weight:600;color:#C62828;font-variant-numeric:tabular-nums">${v.bg_vent>0?fN(v.bg_vent):'—'} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
           <tr><td style="padding:5px 0;color:var(--text3)">Biogas to PSA</td><td style="text-align:right;font-weight:600;color:var(--text2);font-variant-numeric:tabular-nums">${fN(v.bg_act)} <span style="font-size:10px;color:var(--text3)">m³</span></td></tr>
         </table>
       </div>
@@ -1612,8 +1613,8 @@ function renderSectionDay(sectionId){
     // Section 3: Biogas Prediction
     html+=`<div style="display:flex;align-items:center;gap:10px;padding:10px 16px;border-radius:7px;margin:20px 0 14px;background:linear-gradient(120deg,#4527A0,#6A1B9A);font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#fff">
       📈 Biogas Prediction <span style="font-size:10px;font-weight:400;letter-spacing:0;opacity:.75;text-transform:none">Estimate vs actual for this day</span></div>`;
-    const predD1Day={bg_est_exp:d1r.bg_est_exp,bg_est_act:d1r.bg_est_act,bg_total:d1r.bg_total,bg_act:d1r.bg_act};
-    const predD2Day={bg_est_exp:d2r.bg_est_exp,bg_est_act:d2r.bg_est_act,bg_total:d2r.bg_total,bg_act:d2r.bg_act};
+    const predD1Day={bg_est_exp:d1r.bg_est_exp,bg_est_act:d1r.bg_est_act,bg_total:d1r.bg_total,bg_act:d1r.bg_act,bg_vent:d1r.bg_vent};
+    const predD2Day={bg_est_exp:d2r.bg_est_exp,bg_est_act:d2r.bg_est_act,bg_total:d2r.bg_total,bg_act:d2r.bg_act,bg_vent:d2r.bg_vent};
     html+=_biogasPredHtml(predD1Day,predD2Day,curDay);
   } else if(sectionId==='s3'){
     // s3 (Production) day view is handled by renderS3() directly — this branch is not called
@@ -2374,8 +2375,8 @@ function renderS2(){
   if(fqEl) fqEl.innerHTML=_feedQualityHtml(D.cal,bppData,bppPeriod);
   // ── Section 3: Biogas Prediction ──────────────────────────────────────
   const getSum=k=>mo==='ALL'?mArr(k).reduce((s,v)=>s+(v||0),0)||null:(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
-  const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg')};
-  const predD2={bg_est_exp:getSum('d2_bg_est_exp'),bg_est_act:getSum('d2_bg_est_act'),bg_total:getSum('d2_bg_total'),bg_act:getSum('d2_bg')};
+  const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg_psa'),bg_vent:getSum('d1_bg_vent')};
+  const predD2={bg_est_exp:getSum('d2_bg_est_exp'),bg_est_act:getSum('d2_bg_est_act'),bg_total:getSum('d2_bg_total'),bg_act:getSum('d2_bg_psa'),bg_vent:getSum('d2_bg_vent')};
   const predEl=document.getElementById('s2_pred_panel');
   if(predEl) predEl.innerHTML=_biogasPredHtml(predD1,predD2,mo==='ALL'?'YTD':mo);
   // BPP trend chart for month/year view
@@ -5261,6 +5262,9 @@ async function buildAnalyticsD() {
   M.d1_bg_est_exp=aggMonth(d1,gD,10); M.d1_bg_est_act=aggMonth(d1,gD,31);
   M.d2_bg_est_exp=aggMonth(d2,gD,10); M.d2_bg_est_act=aggMonth(d2,gD,31);
   M.d1_bg_total=aggMonth(d1,gD,34); M.d2_bg_total=aggMonth(d2,gD,34);
+  // col 32 = biogas to PSA (from D1/D2 sheet, consistent with day view); col 33 = vent/flare
+  M.d1_bg_psa=aggMonth(d1,gD,32); M.d2_bg_psa=aggMonth(d2,gD,32);
+  M.d1_bg_vent=aggMonth(d1,gD,33); M.d2_bg_vent=aggMonth(d2,gD,33);
   M.d1_sfom=aggMonth(d1,gD,12); M.d2_sfom=aggMonth(d2,gD,12); M.d1_lfom=aggMonth(d1,gD,13); M.d2_lfom=aggMonth(d2,gD,13);
   const _d1bg=aggMonth(d1,gD,32),_d2bg=aggMonth(d2,gD,32);
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
