@@ -3480,7 +3480,7 @@ function renderS8(){
   const cpkMonthly=D.cpk_monthly||{};
   const cpk_arr = mo==='ALL'?MONTHS.map(m=>cpkMonthly[m]||null):[cpkMonthly[mo]||null];
   const totalCBG = mo==='ALL'?D.kpis.ytd_cbg:sumA(dArr('psa','cbg_tot'));
-  const cpk = totalCBG>0?(totC/totalCBG*1000).toFixed(1):null;
+  const cpk = totalCBG>0?(totC/totalCBG).toFixed(1):null;
 
   const lbl     = mo==='ALL'?MONTHS:[mo];
   const lblRev  = mo==='ALL'?MONTHS:dDates('rev');
