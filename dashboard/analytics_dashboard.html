@@ -1048,8 +1048,7 @@ function _feedQualityHtml(calData, bppData, periodLabel){
       <div class="fq-row" style="margin-top:5px"><span class="fq-key">VS%</span><span class="fq-val" style="color:${vsClr}">${c.vs!=null?c.vs.toFixed(1)+'%':'—'}</span></div>
       <div class="fq-bar-wrap"><div class="fq-bar" style="width:${vsBar}%;background:${vsClr}"></div></div>
       ${c.qty!=null?`<div class="fq-row" style="margin-top:6px"><span class="fq-key">Qty</span><span class="fq-val" style="color:var(--text2)">${c.qty.toFixed(1)} ${f.unit}</span></div>`:''}
-      ${c.ts_t!=null?`<div class="fq-row"><span class="fq-key">TS (T)</span><span class="fq-val" style="color:var(--text2)">${c.ts_t.toFixed(2)}</span></div>`:''}
-      <div class="fq-date">Last test: ${c.date||'—'}</div>`
+      <div class="fq-date">${c.dateLabel||('Last test: '+(c.date||'—'))}</div>`
       :`<div style="color:var(--text3);font-size:11px;padding:12px 0">No lab data available</div>`}
     </div>`;
   });
@@ -2371,8 +2370,31 @@ function renderS2(){
     d2_pm_bpp:getMoBpp('d2_pm_bpp'),d2_cd_bpp:getMoBpp('d2_cd_bpp'),d2_gs_bpp:getMoBpp('d2_gs_bpp'),
     d2_csl_bpp:getMoBpp('d2_csl_bpp'),d2_sg_bpp:getMoBpp('d2_sg_bpp'),
   };
+  // Build cal view: latest for ALL, monthly average for specific month
+  const calView={};
+  ['pm','cd','gs','csl','sg'].forEach(key=>{
+    const base=D.cal[key]||{};
+    if(mo==='ALL'||!base.rows){calView[key]=base;return;}
+    const moRows=(base.rows||[]).filter(r=>{
+      if(!r.date)return false;
+      // r.date is 'YYYY-MM-DD' or 'DD-Mon' — match against mo name
+      const d=r.date; const mi=d.indexOf('-');
+      if(mi<0)return false;
+      // moKey from date string
+      const MMAP={Jan:'Jan',Feb:'Feb',Mar:'Mar',Apr:'Apr',May:'May',Jun:'Jun',Jul:'Jul',Aug:'Aug',Sep:'Sep',Oct:'Oct',Nov:'Nov',Dec:'Dec'};
+      // r.date format is dayKey → 'DD-Mon'
+      const parts=d.split('-'); const monStr=parts[1];
+      return monStr&&mo.startsWith(monStr);
+    });
+    if(!moRows.length){calView[key]={...base,hasData:false,ts:null,vs:null,qty:null,dateLabel:'No tests in '+mo};return;}
+    const avg=arr=>arr.filter(v=>v!=null).reduce((s,v)=>s+v,0)/(arr.filter(v=>v!=null).length||1);
+    const tsAvg=avg(moRows.map(r=>r.ts));
+    const vsAvg=avg(moRows.map(r=>r.vs));
+    calView[key]={...base,hasData:true,ts:tsAvg,vs:vsAvg,qty:null,
+      dateLabel:`Avg of ${moRows.length} test${moRows.length>1?'s':''} — ${mo}`};
+  });
   const fqEl=document.getElementById('s2_feed_quality');
-  if(fqEl) fqEl.innerHTML=_feedQualityHtml(D.cal,bppData,bppPeriod);
+  if(fqEl) fqEl.innerHTML=_feedQualityHtml(calView,bppData,bppPeriod);
   // ── Section 3: Biogas Prediction ──────────────────────────────────────
   const getSum=k=>mo==='ALL'?mArr(k).reduce((s,v)=>s+(v||0),0)||null:(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg_psa'),bg_vent:getSum('d1_bg_vent')};
