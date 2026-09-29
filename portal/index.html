@@ -513,7 +513,7 @@ const SHEETS = [
 ]},
 
 // ─── CAL SHEETS ───────────────────────────────────────────
-{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal.', hasDate:false, sections:[
+{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal.', hasDate:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -525,7 +525,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
-{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'Cow Dung Cal.', hasDate:false, sections:[
+{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'Cow Dung Cal.', hasDate:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -537,7 +537,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
-{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'Rice Grain Syrup Cal.', hasDate:false, sections:[
+{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'Rice Grain Syrup Cal.', hasDate:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -545,9 +545,10 @@ const SHEETS = [
     {k:'vs_pct', l:'VS%',                   tp:'num'},
     {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
     {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',              tp:'txt'},
   ]},
 ]},
-{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:false, sections:[
+{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -559,7 +560,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
-{id:'SGCAL',label:'Spent Grain Cal',group:'Lab / Cal',sheet:'Dry Spent Grain Cal', hasDate:false, sections:[
+{id:'SGCAL',label:'Spent Grain Cal',group:'Lab / Cal',sheet:'Dry Spent Grain Cal', hasDate:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -1221,9 +1222,9 @@ window.handleSave = async ()=>{
   if(!t){ toast('Sign in first',true); return }
   if(!cur){ toast('Select a sheet first',true); return }
 
-  // Cal/append sheets: PMCAL/GSCAL/CSLCAL/CDCAL have no date picker (hasDate:false), use today().
-  // MANURE and MAINT have a date picker but also use append mode (Sl.No in col 1, Date in col 2).
-  const isCalSheet   = ['PMCAL','GSCAL','CSLCAL','CDCAL'].includes(cur.id)
+  // Cal sheets all have hasDate:true now; isCalSheet marks them as append-mode (date→col B).
+  // MANURE and MAINT have a date picker and also use append mode (Sl.No in col 1, Date in col 2).
+  const isCalSheet   = ['PMCAL','GSCAL','CSLCAL','CDCAL','SGCAL'].includes(cur.id)
   const isAppendSheet = isCalSheet || ['MANURE','MAINT'].includes(cur.id)
   const ds = document.getElementById('dp')?.value || (isCalSheet ? today() : null)
   if(!ds||!isValidDate(ds)){ toast('Enter a valid date first',true); return }
