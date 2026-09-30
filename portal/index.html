@@ -100,7 +100,7 @@
 // ══════════════════════════════════════════════════════════
 // RATES
 // ══════════════════════════════════════════════════════════
-const PM_BPP = {1:95,2:95,3:95,4:95,5:85,6:70,7:70,8:70,9:50,10:50,11:95,12:95}
+const PM_BPP = {1:95,2:95,3:95,4:95,5:85,6:70,7:70,8:70,9:50,10:50,11:50,12:50}
 const DENSITY = {CSL:1.15, GS:1.30}
 const RADIUS  = 15
 const H = {winter:7.8, other:7.5}  // slurry height defaults
@@ -333,8 +333,9 @@ const SHEETS = [
     {k:'tot_disp',   l:'Total Dispatched (kg)',            tp:'calc', fn:'tot_disp'},
   ]},
   {t:'Cascade Pressure',f:[
-    {k:'casc1',     l:'Cascade Pressure 1 (bar)',      tp:'num'},
-    {k:'casc2',     l:'Cascade Pressure 2 (bar)',      tp:'num'},
+    {k:'casc1',       l:'Cascade Pressure 1 (bar)',   tp:'num'},
+    {k:'casc2',       l:'Cascade Pressure 2 (bar)',   tp:'num'},
+    {k:'cbg_storage', l:'CBG in Storage (kg)',        tp:'num'},
   ]},
   {t:'PSA Performance (display only — not saved)',f:[
     {k:'ideal_rbg', l:'Ideal Raw Biogas (m³)',   tp:'calc', fn:'ideal_rbg'},
@@ -589,14 +590,14 @@ const SHEETS = [
 // One summary row per day — qty & rate per customer written side by side
 {id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, dataStart:5, sections:[
   {t:'CBG Dispatch — Qty (kg) & Rate (₹/kg)',f:[
-    {k:'veer_qty',    l:'Veer Gas — Qty (kg)',     tp:'num'},
-    {k:'veer_rate',   l:'Veer Gas — Rate (₹/kg)',  tp:'num'},
-    {k:'adinath_qty', l:'Adinath — Qty (kg)',      tp:'num'},
-    {k:'adinath_rate',l:'Adinath — Rate (₹/kg)',   tp:'num'},
-    {k:'gail_qty',    l:'GAIL — Qty (kg)',          tp:'num'},
-    {k:'gail_rate',   l:'GAIL — Rate (₹/kg)',       tp:'num'},
-    {k:'sps_qty',     l:'SPS — Qty (kg)',           tp:'num'},
-    {k:'sps_rate',    l:'SPS — Rate (₹/kg)',        tp:'num'},
+    {k:'veer_qty',    l:'Veer Gas — Qty (kg)',          tp:'num'},
+    {k:'veer_rate',   l:'Veer Gas — Total Revenue (₹)', tp:'num'},
+    {k:'adinath_qty', l:'Adinath — Qty (kg)',           tp:'num'},
+    {k:'adinath_rate',l:'Adinath — Total Revenue (₹)',  tp:'num'},
+    {k:'gail_qty',    l:'GAIL — Qty (kg)',               tp:'num'},
+    {k:'gail_rate',   l:'GAIL — Total Revenue (₹)',      tp:'num'},
+    {k:'sps_qty',     l:'SPS — Qty (kg)',                tp:'num'},
+    {k:'sps_rate',    l:'SPS — Total Revenue (₹)',       tp:'num'},
     {k:'total_kg',    l:'Total Dispatched (kg)',    tp:'calc', fn:'sales_tot_disp'},
     {k:'total_rs',    l:'Total Sale (₹)',           tp:'calc', fn:'sales_tot_rs'},
     {k:'remarks',     l:'Remarks',                 tp:'txt'},
@@ -803,7 +804,8 @@ const FN = {
   manure_amount:(v) => n(v.qty_mt)*n(v.rate),
   // Sales Detail: total dispatched kg and total revenue
   sales_tot_disp:(v) => n(v.veer_qty)+n(v.adinath_qty)+n(v.gail_qty)+n(v.sps_qty),
-  sales_tot_rs:  (v) => n(v.veer_qty)*n(v.veer_rate)+n(v.adinath_qty)*n(v.adinath_rate)+n(v.gail_qty)*n(v.gail_rate)+n(v.sps_qty)*n(v.sps_rate),
+  // veer_rate/adinath_rate/gail_rate/sps_rate are TOTAL Rs per customer, not rate/kg
+  sales_tot_rs:  (v) => n(v.veer_rate)+n(v.adinath_rate)+n(v.gail_rate)+n(v.sps_rate),
 }
 
 function runCalcs(sheet, inp, ds){
@@ -1020,10 +1022,6 @@ const COLUMN_MAP = {
     // month col (7) is written automatically in save logic — not a form field
     remarks:8,
   },
-  REVCOST: {
-    // Date=1, CBG Sale=2(auto), SFOM=3, LFOM=4, Feedstock=5(auto), Transport=6, Maint=7(auto), Elec/day=8, Manpow=9, EMI=10, Remarks=11
-    transport_cost:6, elec_cost:8, remarks:11,
-  },
   SALES: {
     // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9; Total kg=10, Total Rs=11, Remarks=12
     veer_qty:2, veer_rate:3, adinath_qty:4, adinath_rate:5,
@@ -1035,8 +1033,8 @@ const COLUMN_MAP = {
     unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8, remarks:9,
   },
   REVCOST: {
-    // transport_cost key matches SHEETS field key (renamed from 'transport')
-    cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7, elec_cost:8,
+    // Date=1, CBG Sale=2(auto), SFOM=3, LFOM=4, Feedstock=5(auto), Transport=6, Maint=7(auto), Elec/day=8, Manpow=9, EMI=10, Remarks=11
+    cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7, elec_cost:8, remarks:11,
   },
   // FIXED and EMI use month columns, not daily date rows — handled separately
 }
