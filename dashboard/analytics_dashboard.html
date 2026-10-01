@@ -305,7 +305,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="kc c"><div class="kl">CBG Production</div><div class="kv c" id="ov_cbg">—</div><div class="ks" id="ov_cbg_s">YTD</div></div>
     <div class="kc g"><div class="kl">Revenue</div><div class="kv g" id="ov_rev">—</div><div class="ks">CBG + Manure</div></div>
     <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="ov_margin">—</div><div class="ks">Target: 45%</div></div>
-    <div class="kc"><div class="kl">Cost / kg CBG</div><div class="kv" id="ov_cpk">—</div><div class="ks">Target: ₹30/kg</div></div>
+    <div class="kc"><div class="kl">Cost / kg CBG</div><div class="kv" id="ov_cpk">—</div><div class="ks">Target: ₹75/kg</div></div>
   </div>
   <!-- Row B: Operational health -->
   <div class="kg" style="grid-template-columns:repeat(3,1fr);margin-top:8px">
@@ -5552,7 +5552,7 @@ async function buildAnalyticsD() {
       return{name:v.n,total,byMonth};
     }).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
   }
-  const tgts={cbg_month:130000,cbg_total:months.length*130000,cost_kg:30};
+  const tgts={cbg_month:130000,cbg_total:months.length*130000,cost_kg:75};
   const ts=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   return {
     meta:{plant:'LREKPL — 5.4 TPD CBG Plant, Karnal',updated:ts,period:months.length>0?months[0]+' – '+months[months.length-1]+' '+(latDt?latDt.getFullYear():2026):'—'},
