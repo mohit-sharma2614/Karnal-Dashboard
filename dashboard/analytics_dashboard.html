@@ -2618,6 +2618,8 @@ function renderS3(){
 
   // ── Month / All view ──────────────────────────────────────
   chartsWrap.style.display='';
+  // Restore any chart card containers hidden by the generic day-panel handler
+  chartsWrap.querySelectorAll('.cc').forEach(c=>c.style.display='');
   // Blue summary banner (month totals)
   const sumArr=arr=>(arr||[]).reduce((s,v)=>s+(v||0),0);
   const moCbg=mo==='ALL'?sumArr(mArr('cbg')):sumArr((D.D.psa?.[mo]?.cbg_tot));
