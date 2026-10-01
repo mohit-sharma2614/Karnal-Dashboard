@@ -1981,7 +1981,7 @@ function renderOV(){
   }
   // On returning to ALL/monthly view, restore hidden elements
   const sdOv2=document.getElementById('sd_ov'); if(sdOv2) sdOv2.style.display='none'; // keep hidden (month view uses ov_main_content)
-  const achEl2=document.getElementById('ov_achieve'); if(achEl2) achEl2.style.display='';
+  const achEl2=document.getElementById('ov_achieve'); if(achEl2) achEl2.style.display='flex';
   const alertEl2=document.getElementById('ov_alerts'); if(alertEl2) alertEl2.style.display='';
   const dayGrid2=document.getElementById('ov_day_grid'); if(dayGrid2) dayGrid2.innerHTML='';
   if(mc) mc.style.display='';
