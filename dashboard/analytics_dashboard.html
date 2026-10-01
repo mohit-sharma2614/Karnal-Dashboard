@@ -1885,9 +1885,102 @@ function renderOV(){
   showDayPanel('ov');
   const mc=document.getElementById('ov_main_content');
   if(curDay!=='ALL'){
-    if(mc) mc.style.display='none';
+    // ── Overview day view: same KPI card layout, populated from D.days[curDay] ──
+    const rec=D.days[curDay]||{};
+    const f=rec.feed||{},p=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},ex=rec.exp||{},h=rec.health||{};
+    const fN=v=>v!=null&&v!==0?fmtN(v):null;
+
+    // Period badge
+    document.getElementById('ov_period').textContent=curDay+' 2026';
+    const cbgSubEl=document.getElementById('ov_cbg_s'); if(cbgSubEl) cbgSubEl.textContent='Day total';
+
+    // Row A: CBG, Revenue, Margin, Cost/kg
+    const dayCbg=p.cbg_tot||null;
+    const dayRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
+    const dayCost=rv.total_cost||null;
+    const dayMargin=(dayRev&&dayCost&&dayRev>0)?((dayRev-dayCost)/dayRev*100).toFixed(1):null;
+    const dayCpk=(dayCost&&dayCbg&&dayCbg>0)?(dayCost/dayCbg*1000).toFixed(1):null;
+
+    const cbgEl=document.getElementById('ov_cbg');
+    if(cbgEl) cbgEl.textContent=(dayCbg!=null?fmtN(dayCbg)+' nm³':'—');
+    const revEl=document.getElementById('ov_rev');
+    if(revEl) revEl.textContent=(dayRev!=null?fmtL(dayRev):'—');
+    const mrEl=document.getElementById('ov_margin');
+    if(mrEl){ mrEl.textContent=(dayMargin!=null?dayMargin+'%':'—');
+      mrEl.style.color=dayMargin!=null?(+dayMargin>=40?'var(--green)':+dayMargin>=20?'var(--amber)':'var(--red)'):''; }
+    const cpkEl=document.getElementById('ov_cpk');
+    if(cpkEl){ cpkEl.textContent=(dayCpk!=null?'₹'+dayCpk+'/kg':'—');
+      cpkEl.style.color=dayCpk!=null?(+dayCpk<=TGT.cost_kg?'var(--green)':+dayCpk<=TGT.cost_kg*1.2?'var(--amber)':'var(--red)'):''; }
+
+    // Row B: Uptime, OLR, CH4
+    const compH=p.comp_hrs||null, psaH=p.psa_hrs||null;
+    const dayUpt=(psaH&&compH&&psaH>0)?(compH/psaH*100).toFixed(1):null;
+    const uptEl=document.getElementById('ov_uptime');
+    if(uptEl){ uptEl.textContent=(dayUpt!=null?dayUpt+'%':'—');
+      uptEl.style.color=dayUpt!=null?(+dayUpt>=90?'var(--green)':+dayUpt>=70?'var(--amber)':'var(--red)'):''; }
+    const olrEl=document.getElementById('ov_olr');
+    if(olrEl){ olrEl.textContent=((d1r.olr!=null?d1r.olr.toFixed(2):'—')+' / '+(d2r.olr!=null?d2r.olr.toFixed(2):'—'));
+      const worst=Math.min(d1r.olr??99,d2r.olr??99);
+      olrEl.style.color=(d1r.olr||d2r.olr)?(worst>=2.0?'var(--green)':worst>=1.5?'var(--amber)':'var(--red)'):''; }
+    const ch4v=p.ch4!=null?(p.ch4>1?p.ch4:p.ch4*100):null;
+    const ch4El=document.getElementById('ov_ch4');
+    if(ch4El){ ch4El.textContent=(ch4v!=null?ch4v.toFixed(1)+'%':'—');
+      ch4El.style.color=ch4v!=null?(ch4v>=90?'var(--green)':ch4v>=80?'var(--amber)':'var(--red)'):''; }
+
+    // Day-specific main content: hide charts, show summary cards
+    if(mc){
+      mc.style.display='';
+      mc.querySelectorAll('canvas').forEach(c=>{
+        if(charts[c.id]){try{charts[c.id].destroy();}catch(e){}charts[c.id]=null;}
+        const cc=c.closest('.cc'); if(cc) cc.style.display='none';
+      });
+      const achEl=document.getElementById('ov_achieve'); if(achEl) achEl.style.display='none';
+      const alertEl=document.getElementById('ov_alerts'); if(alertEl) alertEl.style.display='none';
+
+      // Inject day summary grid into mc
+      let dayGrid=document.getElementById('ov_day_grid');
+      if(!dayGrid){ dayGrid=document.createElement('div'); dayGrid.id='ov_day_grid'; mc.prepend(dayGrid); }
+      const cl=(v,good,warn)=>v==null?'':v>=good?'var(--green)':v>=warn?'var(--amber)':'var(--red)';
+      const card=(lbl,val,unit,color)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${color||'var(--acc)'};border-radius:8px;padding:14px 16px">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.7px;color:var(--text2);text-transform:uppercase;margin-bottom:6px">${lbl}</div>
+        <div style="font-size:22px;font-weight:700;color:${color||'var(--acc)'};line-height:1">${val??'—'}<span style="font-size:12px;font-weight:500;color:var(--text2);margin-left:4px">${val!=null?unit:''}</span></div>
+      </div>`;
+      const g2=cards=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px">${cards.join('')}</div>`;
+      const pmFd=f.pm_feed,cdFd=f.cd_feed,cslFd=f.csl_feed,gsFd=f.gs_feed;
+      const d1bg=d1r.bg_act,d2bg=d2r.bg_act,sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
+      dayGrid.innerHTML=
+        `<div style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bdr)">Production</div>`+
+        g2([
+          card('CBG Produced',fN(dayCbg),'nm³',cl(dayCbg,TGT.cbg_month/30*0.9,TGT.cbg_month/30*0.7)||'var(--blue)'),
+          card('CBG Dispatched',fN(p.dispatched),'kg','var(--teal)'),
+          card('D1 Biogas',fN(d1bg),'m³','var(--indigo)'),
+          card('D2 Biogas',fN(d2bg),'m³','var(--purple)'),
+          card('Exp Gas',fN(ex.tot_exp),'m³','var(--text3)'),
+          card('Purified',fN(ex.act_pur),'m³',cl(ex.act_pur,ex.tot_exp*.9,ex.tot_exp*.7)||'var(--cyan)'),
+        ])+
+        `<div style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bdr)">Feedstock</div>`+
+        g2([
+          card('Pressmud',fN(pmFd),'MT','var(--blue)'),
+          card('Cow Dung',fN(cdFd),'MT','var(--teal)'),
+          card('CSL',fN(cslFd),'KL','var(--indigo)'),
+          card('Grain Syrup',fN(gsFd),'KL','var(--cyan)'),
+        ])+
+        `<div style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bdr)">By-products & Revenue</div>`+
+        g2([
+          card('SFOM',fN(sfom),'m³','var(--amber)'),
+          card('LFOM',fN(lfom),'m³','var(--amber)'),
+          card('CBG Revenue',rv.cbg_rev!=null?fmtL(rv.cbg_rev):null,'','var(--green)'),
+          card('SFOM Revenue',rv.sfom_rev!=null?fmtL(rv.sfom_rev):null,'','var(--green)'),
+          card('LFOM Revenue',rv.lfom_rev!=null?fmtL(rv.lfom_rev):null,'','var(--green)'),
+          card('Total Cost',dayCost!=null?fmtL(dayCost):null,'','var(--red)'),
+        ]);
+    }
     return;
   }
+  // On returning to ALL/monthly view, restore hidden elements
+  const achEl2=document.getElementById('ov_achieve'); if(achEl2) achEl2.style.display='';
+  const alertEl2=document.getElementById('ov_alerts'); if(alertEl2) alertEl2.style.display='';
+  const dayGrid2=document.getElementById('ov_day_grid'); if(dayGrid2) dayGrid2.innerHTML='';
   if(mc) mc.style.display='';
   const mo=curMonth;
   // Update period badge
