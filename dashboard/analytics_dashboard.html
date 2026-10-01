@@ -2070,7 +2070,7 @@ function renderOV(){
   // ── Cost / kg CBG ──────────────────────────────────────────
   const cpkMo=D.cpk_monthly||{};
   const cpkVal=mo==='ALL'
-    ?(D.kpis.ytd_cbg>0?(D.finance.ytd_cost/D.kpis.ytd_cbg*1000):null)
+    ?(D.kpis.ytd_cbg>0?(D.finance.ytd_cost/D.kpis.ytd_cbg):null)
     :(cpkMo[mo]||null);
   const cpkEl=document.getElementById('ov_cpk');
   if(cpkEl){cpkEl.textContent=cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—';
