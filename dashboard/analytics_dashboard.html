@@ -2450,6 +2450,13 @@ function renderS2(){
 
 // ═══ S3 PRODUCTION ════════════════════════════════════════════
 function renderS3(){
+  try{ _renderS3(); }catch(e){
+    const cw=document.getElementById('s3_charts_wrap');
+    if(cw){cw.style.display='';cw.innerHTML=`<div style="background:#fff3e0;border:1px solid #f57c00;border-radius:8px;padding:14px 16px;font-size:12px;color:#e65100;font-family:monospace"><b>S3 Render Error:</b> ${e.message}<br><small>${e.stack||''}</small></div>`;}
+    console.error('renderS3',e);
+  }
+}
+function _renderS3(){
   const dayPanel=document.getElementById('s3_day_panel');
   const chartsWrap=document.getElementById('s3_charts_wrap');
   const mo=curMonth;
