@@ -2657,6 +2657,8 @@ function renderS3(){
     </div>
   </div>`;
   const lbl=mo==='ALL'?MONTHS:dDates('d1');
+  // Debug: show data availability
+  {const dbg=document.getElementById('s3_debug')||(()=>{const d=document.createElement('div');d.id='s3_debug';d.style.cssText='font-size:11px;color:var(--text2);background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:8px 12px;margin-bottom:10px;font-family:monospace';chartsWrap.prepend(d);return d;})();const d1fa=dArr('d1','feed_act');dbg.textContent=`DEBUG — mo:${mo} | lbl.length:${lbl.length} | D1 feed_act.length:${d1fa.length} | D1 bg_act.length:${dArr('d1','bg_act').length} | D.D.d1 keys:${Object.keys(D.D.d1||{}).join(',')}`;}
   // Feeding
   const d1FeedExp=mo==='ALL'?sumMo('d1','feed_exp'):dArr('d1','feed_exp');
   const d2FeedExp=mo==='ALL'?sumMo('d2','feed_exp'):dArr('d2','feed_exp');
