@@ -5372,7 +5372,7 @@ async function buildAnalyticsD() {
   // Monthly Fixed Costs: row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols 3-14 = Jan-Dec
   const mfcVals=mfcR?.values||[];
   const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+3];return typeof v==='number'?v:0;};
-  M.manpower=months.map(m=>mfcGet(3,m));
+  M.manpower=aggMonth(rc,gD,8); // RC col9 — actual manpower entered daily
   // EMI Tracker: row0=header, rows1-4=individual EMIs; cols 5-16=Jan-Dec
   const emiVals=emiR?.values||[];
   const emiDataRows=emiVals.slice(1).filter(r=>r&&typeof r[0]==='number');
