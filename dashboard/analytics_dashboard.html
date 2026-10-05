@@ -1901,7 +1901,7 @@ function renderOV(){
     const dayRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
     const dayCost=rv.total_cost||null;
     const dayMargin=(dayRev&&dayCost&&dayRev>0)?((dayRev-dayCost)/dayRev*100).toFixed(1):null;
-    const dayCpk=(dayCost&&dayCbg&&dayCbg>0)?(dayCost/dayCbg*1000).toFixed(1):null;
+    const dayCpk=(dayCost&&dayCbg&&dayCbg>0)?(dayCost/dayCbg).toFixed(1):null;
 
     const cbgEl=document.getElementById('ov_cbg');
     if(cbgEl) cbgEl.textContent=(dayCbg!=null?fmtN(dayCbg)+' nm³':'—');
