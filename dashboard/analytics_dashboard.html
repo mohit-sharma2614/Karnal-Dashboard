@@ -5478,7 +5478,7 @@ async function buildAnalyticsD() {
         cd_exp:nv(d2r[1]),pm_exp:nv(d2r[2]),csl_exp:nv(d2r[4]),gs_exp:nv(d2r[6]),sg_exp:nv(d2r[5]),
         cd_act:nv(d2r[14]),pm_act:nv(d2r[15]),csl_act:nv(d2r[17]),gs_act:nv(d2r[22]),sg_act:nv(d2r[23])},
       feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
-      rev:{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)},
+      rev:(()=>{const _mo=moKey(dt),_mi=months.indexOf(_mo),_d=MDAYS[_mo]||30,_mp=(_mi>=0?M.manpower[_mi]||0:0)/_d,_emi=(_mi>=0?M.emi[_mi]||0:0)/_d;return{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),manpower_daily:_mp,emi_daily:_emi,total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)+_mp+_emi};})(),
       exp:{tot_exp:nv(cer[13]),d1_exp:nv(cer[6]),d2_exp:nv(cer[12]),ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg,act_pur:nv(p[9]),act_cbg:nv(p[12]),
         d1_pm_bpp:nv(cer[1]),d1_cd_bpp:nv(cer[2]),d1_csl_bpp:nv(cer[3]),d1_gs_bpp:nv(cer[4]),d1_sg_bpp:nv(cer[5]),
         d2_pm_bpp:nv(cer[7]),d2_cd_bpp:nv(cer[8]),d2_csl_bpp:nv(cer[9]),d2_gs_bpp:nv(cer[10]),d2_sg_bpp:nv(cer[11])},
