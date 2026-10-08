@@ -2240,18 +2240,15 @@ function renderOVSectionGrid(){
   const stlbl={g:'Good',a:'Caution',r:'Alert'};
   sgrid.innerHTML=secDefs.map(s=>{
     const kpis=s.kpis();const st=s.st();
-    return`<div class="ov-sc" style="border-top-color:${s.clr}" onclick="(function(){const b=document.querySelector('[data-sec=${s.id}]');if(b)show('${s.id}',b);else{document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.getElementById('${s.id}').classList.add('on');curSection='${s.id}';try{sectionRender['${s.id}']&&sectionRender['${s.id}']();}catch(e){console.error(e);}}})()">`
-      <div class="ov-sc-hdr">
-        <div class="ov-sc-icon" style="background:${s.clr}">${s.num}</div>
-        <div style="flex:1;min-width:0">
-          <div class="ov-sc-nm">${s.nm}</div>
-          <div class="ov-sc-person">${s.person}</div>
-        </div>
-        <div class="ov-sc-status ${st}">${stlbl[st]}</div>
-      </div>
-      <div class="ov-sc-kpis">${kpis.map(k=>`<div class="ov-kv-row"><span class="ov-kv-l">${k.l}</span><span class="ov-kv-v ${k.c}">${k.v}</span></div>`).join('')}</div>
-      <div class="ov-sc-explore">Explore ${s.nm} <span>→</span></div>
-    </div>`;
+    return `<div class="ov-sc" style="border-top-color:${s.clr}" onclick="(function(){const b=document.querySelector('[data-sec=${s.id}]');if(b)show('${s.id}',b);else{document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.getElementById('${s.id}').classList.add('on');curSection='${s.id}';try{sectionRender['${s.id}']&&sectionRender['${s.id}']();}catch(e){console.error(e);}}})()" >`
+      + `<div class="ov-sc-hdr">`
+      + `<div class="ov-sc-icon" style="background:${s.clr}">${s.num}</div>`
+      + `<div style="flex:1;min-width:0"><div class="ov-sc-nm">${s.nm}</div><div class="ov-sc-person">${s.person}</div></div>`
+      + `<div class="ov-sc-status ${st}">${stlbl[st]}</div>`
+      + `</div>`
+      + `<div class="ov-sc-kpis">${kpis.map(k=>`<div class="ov-kv-row"><span class="ov-kv-l">${k.l}</span><span class="ov-kv-v ${k.c}">${k.v}</span></div>`).join('')}</div>`
+      + `<div class="ov-sc-explore">Explore ${s.nm} <span>&#8594;</span></div>`
+      + `</div>`;
   }).join('');
 }
 
