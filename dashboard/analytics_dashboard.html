@@ -270,6 +270,77 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .si-dp-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--text2)}
 .si-dp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:900px){.si-signals{grid-template-columns:repeat(2,1fr)}.si-split{grid-template-columns:1fr}.si-dp-chips{grid-template-columns:repeat(2,1fr)}.si-dp-row{grid-template-columns:1fr}}
+/* ── Overview V9 Premium ─────────────────────────────────── */
+.ov-hero{display:grid;grid-template-columns:260px 1fr;gap:12px;margin-bottom:12px;align-items:stretch}
+.ov-hc{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ov-hc-top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
+.ov-ring-wrap{position:relative;width:72px;height:72px;flex-shrink:0}
+.ov-ring-wrap svg{width:72px;height:72px}
+.ov-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ov-ring-num{font-size:19px;font-weight:800;line-height:1;color:var(--text)}
+.ov-ring-den{font-size:8px;color:var(--text3);font-weight:700;letter-spacing:.3px}
+.ov-hc-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
+.ov-hc-status{font-size:11px;font-weight:700}
+.ov-hc-period{font-size:9px;color:var(--text3);margin-top:1px}
+.ov-hcc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.ov-hcc{padding:5px 7px;background:var(--bg3);border-radius:5px}
+.ov-hcc-l{font-size:8px;color:var(--text3);font-weight:600;letter-spacing:.2px;margin-bottom:1px}
+.ov-hcc-v{font-size:11px;font-weight:800;color:var(--text)}
+.ov-hcc-bar{height:3px;background:var(--bdr);border-radius:2px;margin-top:3px}
+.ov-hcc-fill{height:3px;border-radius:2px}
+.ov-kpi-panel{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ov-kpi{padding:11px 13px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);position:relative;min-height:60px}
+.ov-kpi:nth-child(4n){border-right:none}
+.ov-kpi:nth-child(n+5){border-bottom:none}
+.ov-kpi-bar{position:absolute;top:0;left:0;right:0;height:3px}
+.ov-kpi-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:3px}
+.ov-kpi-val{font-size:14px;font-weight:800;letter-spacing:-.3px;line-height:1;margin-bottom:1px;color:var(--text);font-variant-numeric:tabular-nums}
+.ov-kpi-val.g{color:var(--green)}.ov-kpi-val.a{color:var(--amber)}.ov-kpi-val.r{color:var(--red)}
+.ov-kpi-sub{font-size:8.5px;color:var(--text3)}
+.ov-kpi-dlt{font-size:8.5px;font-weight:600;margin-top:2px}
+.ov-kpi-dlt.g{color:var(--green)}.ov-kpi-dlt.a{color:var(--amber)}.ov-kpi-dlt.r{color:var(--red)}
+.ov-strip-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ov-strip-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.ov-strip-ttl{font-size:11px;font-weight:700;color:var(--text)}
+.ov-strip-meta{font-size:9px;color:var(--text3)}
+.ov-atiles{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
+.ov-atm{flex:1;min-width:48px;text-align:center;border-radius:7px;padding:7px 3px;cursor:pointer;transition:opacity .15s}
+.ov-atm-m{font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:1px}
+.ov-atm-p{font-size:14px;font-weight:800;line-height:1}
+.ov-atm-k{font-size:8px;margin-top:1px;opacity:.85}
+.ov-hl-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ov-hlc{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ov-hl-tag{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:999px;background:var(--bg3);color:var(--text3);white-space:nowrap;flex-shrink:0;margin-top:1px}
+.ov-hl-ttl{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
+.ov-hl-body{font-size:11px;color:var(--text2);line-height:1.5}
+.ov-sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.ov-sc{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ov-sc-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid var(--bdr)}
+.ov-sc-hl{display:flex;gap:9px;align-items:center}
+.ov-sc-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
+.ov-sc-nm{font-size:11px;font-weight:700;color:var(--text);line-height:1.2}
+.ov-sc-ps{font-size:8.5px;color:var(--text3)}
+.ov-sc-body{padding:10px 13px}
+.ov-mg{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:9px}
+.ov-mc{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:6px 9px}
+.ov-mc-l{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text3);margin-bottom:1px}
+.ov-mc-v{font-size:12px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.ov-mc-v.g{color:var(--green)}.ov-mc-v.a{color:var(--amber)}.ov-mc-v.r{color:var(--red)}
+.ov-ch-box{position:relative;height:80px;margin-bottom:2px}
+.ov-ch-box canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
+.ov-sc-foot{border-top:1px solid var(--bdr);padding:8px 13px}
+.ov-exp-btn{width:100%;background:none;border:1px solid var(--bdr);border-radius:7px;padding:6px 11px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s;font-family:inherit;color:inherit}
+.ov-exp-btn:hover{border-color:var(--blue);background:var(--bg3)}
+.ov-eb-l{text-align:left}
+.ov-eb-t{font-size:10px;font-weight:600;color:var(--text)}
+.ov-eb-h{font-size:8.5px;color:var(--text3)}
+.ov-eb-a{font-size:13px;color:var(--text3);transition:transform .2s}
+.ov-exp-btn:hover .ov-eb-a{transform:translateX(3px)}
+.ov-status{font-size:8.5px;font-weight:700;padding:2px 7px;border-radius:999px}
+.ov-status.ok{background:var(--gbg);color:var(--green)}
+.ov-status.warn{background:var(--abg);color:var(--amber)}
+.ov-status.alert{background:var(--rbg);color:var(--red)}
+@media(max-width:900px){.ov-hero{grid-template-columns:1fr}.ov-sgrid{grid-template-columns:1fr}.ov-hl-row{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -317,81 +388,70 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   </div>
 </nav>
 
-<!-- ══ OVERVIEW ══ -->
+<!-- ══ OVERVIEW V9 ══ -->
 <div id="ov" class="pg on">
-  <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">Jan – Jun 2026</span></div>
-  <!-- Row A: Core financials -->
-  <div class="kg k4">
-    <div class="kc c"><div class="kl">CBG Production</div><div class="kv c" id="ov_cbg">—</div><div class="ks" id="ov_cbg_s">YTD</div></div>
-    <div class="kc g"><div class="kl">Revenue</div><div class="kv g" id="ov_rev">—</div><div class="ks">CBG + Manure</div></div>
-    <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="ov_margin">—</div><div class="ks">Target: 45%</div></div>
-    <div class="kc"><div class="kl">Cost / kg CBG</div><div class="kv" id="ov_cpk">—</div><div class="ks">Target: ₹75/kg</div></div>
-  </div>
-  <!-- Row B: Operational health -->
-  <div class="kg" style="grid-template-columns:repeat(3,1fr);margin-top:8px">
-    <div class="kc"><div class="kl">Plant Uptime</div><div class="kv" id="ov_uptime">—</div><div class="ks">Comp ÷ PSA hrs · ≥90%</div></div>
-    <div class="kc"><div class="kl">OLR D1 / D2</div><div class="kv" id="ov_olr">—</div><div class="ks">avg kg VS/m³/day · design 2.5</div></div>
-    <div class="kc"><div class="kl">Avg CH4 Purity</div><div class="kv" id="ov_ch4">—</div><div class="ks">target ≥ 90%</div></div>
-  </div>
-  <div id="ov_main_content">
-  <!-- Monthly Achievement Strip -->
-  <div style="margin:12px 0 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)">Monthly CBG Achievement vs Target (1,30,000 kg)</div>
-  <div id="ov_achieve" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
-  <!-- 3-Column Alert Strip -->
-  <div id="ov_alerts" style="margin-bottom:14px"></div>
-  <!-- Row 1: CBG Produced vs Dispatched -->
-  <div class="cg c2">
-    <div class="cc">
-      <div class="ct" id="ct_ov_cbg">CBG Produced vs Dispatched (kg)</div>
-      <div style="display:flex;gap:24px;margin-bottom:10px">
-        <div><div class="kl">Total Produced</div><div style="font-size:16px;font-weight:700;color:var(--blue)" id="ov_cbg_tot">—</div></div>
-        <div><div class="kl">Total Dispatched</div><div style="font-size:16px;font-weight:700;color:var(--green)" id="ov_disp_tot">—</div></div>
-        <div><div class="kl">Dispatch Rate</div><div style="font-size:16px;font-weight:700;color:var(--teal)" id="ov_disp_pct">—</div></div>
+  <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">All Months</span></div>
+  <!-- Hero Row: Health Score Ring + 8-KPI Panel -->
+  <div class="ov-hero">
+    <div class="ov-hc">
+      <div class="ov-hc-top">
+        <div class="ov-ring-wrap">
+          <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="36" cy="36" r="31" stroke="#e8edf2" stroke-width="7"/>
+            <circle id="ov_hs_arc" cx="36" cy="36" r="31" stroke="#1b8a4a" stroke-width="7"
+              stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8"
+              transform="rotate(-90 36 36)" style="transition:stroke-dashoffset .6s ease"/>
+          </svg>
+          <div class="ov-ring-inner">
+            <div class="ov-ring-num" id="ov_hs_num">—</div>
+            <div class="ov-ring-den">/100</div>
+          </div>
+        </div>
+        <div>
+          <div class="ov-hc-title">Plant Health Score</div>
+          <div class="ov-hc-status" id="ov_hs_status">—</div>
+          <div class="ov-hc-period" id="ov_hs_period">—</div>
+        </div>
       </div>
-      <div class="cw"><canvas id="c_ov_cbg"></canvas></div>
+      <div class="ov-hcc-row" id="ov_hs_comps"></div>
     </div>
-    <div class="cc"><div class="ct" id="ct_ov_rev">Revenue vs Cost (₹)</div><div class="cw"><canvas id="c_ov_rev"></canvas></div></div>
-  </div>
-  <!-- Row 2: Feedstock Utilization -->
-  <div class="cg c1">
-    <div class="cc">
-      <div class="ct">Feedstock Utilization — Monthly Fed (MT / KL)</div>
-      <div style="display:flex;gap:24px;margin-bottom:10px;flex-wrap:wrap">
-        <div><div class="kl">Pressmud Fed</div><div style="font-size:16px;font-weight:700;color:var(--blue)" id="ov_pm_fed">—</div><div class="ks">MT</div></div>
-        <div><div class="kl">Cow Dung Fed</div><div style="font-size:16px;font-weight:700;color:var(--teal)" id="ov_cd_fed">—</div><div class="ks">MT</div></div>
-        <div><div class="kl">CSL Fed</div><div style="font-size:16px;font-weight:700;color:var(--indigo,#283593)" id="ov_csl_fed">—</div><div class="ks">KL</div></div>
-        <div><div class="kl">Grain Syrup Fed</div><div style="font-size:16px;font-weight:700;color:var(--cyan)" id="ov_gs_fed">—</div><div class="ks">KL</div></div>
-      </div>
-      <div class="cw"><canvas id="c_ov_feed"></canvas></div>
+    <div class="ov-kpi-panel">
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k1_bar"></div><div class="ov-kpi-lbl" id="ov_k1_lbl"></div><div class="ov-kpi-val" id="ov_k1_val">—</div><div class="ov-kpi-sub" id="ov_k1_sub"></div><div class="ov-kpi-dlt" id="ov_k1_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k2_bar"></div><div class="ov-kpi-lbl" id="ov_k2_lbl"></div><div class="ov-kpi-val" id="ov_k2_val">—</div><div class="ov-kpi-sub" id="ov_k2_sub"></div><div class="ov-kpi-dlt" id="ov_k2_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k3_bar"></div><div class="ov-kpi-lbl" id="ov_k3_lbl"></div><div class="ov-kpi-val" id="ov_k3_val">—</div><div class="ov-kpi-sub" id="ov_k3_sub"></div><div class="ov-kpi-dlt" id="ov_k3_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k4_bar"></div><div class="ov-kpi-lbl" id="ov_k4_lbl"></div><div class="ov-kpi-val" id="ov_k4_val">—</div><div class="ov-kpi-sub" id="ov_k4_sub"></div><div class="ov-kpi-dlt" id="ov_k4_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k5_bar"></div><div class="ov-kpi-lbl" id="ov_k5_lbl"></div><div class="ov-kpi-val" id="ov_k5_val">—</div><div class="ov-kpi-sub" id="ov_k5_sub"></div><div class="ov-kpi-dlt" id="ov_k5_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k6_bar"></div><div class="ov-kpi-lbl" id="ov_k6_lbl"></div><div class="ov-kpi-val" id="ov_k6_val">—</div><div class="ov-kpi-sub" id="ov_k6_sub"></div><div class="ov-kpi-dlt" id="ov_k6_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k7_bar"></div><div class="ov-kpi-lbl" id="ov_k7_lbl"></div><div class="ov-kpi-val" id="ov_k7_val">—</div><div class="ov-kpi-sub" id="ov_k7_sub"></div><div class="ov-kpi-dlt" id="ov_k7_dlt" style="display:none"></div></div>
+      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k8_bar"></div><div class="ov-kpi-lbl" id="ov_k8_lbl"></div><div class="ov-kpi-val" id="ov_k8_val">—</div><div class="ov-kpi-sub" id="ov_k8_sub"></div><div class="ov-kpi-dlt" id="ov_k8_dlt" style="display:none"></div></div>
     </div>
   </div>
-  <!-- Row 3: SFOM & LFOM Produced vs Sold -->
-  <div class="cg c2">
-    <div class="cc">
-      <div class="ct">SFOM — Produced vs Sold (m³)</div>
-      <div style="display:flex;gap:24px;margin-bottom:10px">
-        <div><div class="kl">Total Produced</div><div style="font-size:16px;font-weight:700;color:var(--blue)" id="ov_sfom_prod">—</div></div>
-        <div><div class="kl">Total Sold (Revenue)</div><div style="font-size:16px;font-weight:700;color:var(--green)" id="ov_sfom_rev">—</div></div>
+  <!-- Monthly/YTD content -->
+  <div id="ov_mo_wrap">
+    <!-- Achievement Strip -->
+    <div class="ov-strip-card">
+      <div class="ov-strip-hdr">
+        <div class="ov-strip-ttl">Monthly CBG Achievement vs Excel Target (1,30,000 kg)</div>
+        <div class="ov-strip-meta" id="ov_strip_meta"></div>
       </div>
-      <div class="cw"><canvas id="c_ov_sfom"></canvas></div>
+      <div class="ov-atiles" id="ov_strip_tiles"></div>
     </div>
-    <div class="cc">
-      <div class="ct">LFOM — Produced vs Sold (m³)</div>
-      <div style="display:flex;gap:24px;margin-bottom:10px">
-        <div><div class="kl">Total Produced</div><div style="font-size:16px;font-weight:700;color:var(--blue)" id="ov_lfom_prod">—</div></div>
-        <div><div class="kl">Total Sold (Revenue)</div><div style="font-size:16px;font-weight:700;color:var(--green)" id="ov_lfom_rev">—</div></div>
+    <!-- Best / Worst Highlights -->
+    <div class="ov-hl-row">
+      <div class="ov-hlc">
+        <div class="ov-hl-tag" id="ov_hl1_tag">Best Month</div>
+        <div><div class="ov-hl-ttl" id="ov_hl1_ttl">—</div><div class="ov-hl-body" id="ov_hl1_body">—</div></div>
       </div>
-      <div class="cw"><canvas id="c_ov_lfom"></canvas></div>
+      <div class="ov-hlc">
+        <div class="ov-hl-tag" id="ov_hl2_tag">Worst Month</div>
+        <div><div class="ov-hl-ttl" id="ov_hl2_ttl">—</div><div class="ov-hl-body" id="ov_hl2_body">—</div></div>
+      </div>
     </div>
+    <!-- 8-Section Performance Grid -->
+    <div class="ov-sgrid" id="ov_sgrid"></div>
   </div>
-  <!-- Row 4: D1/D2 Biogas + PSA -->
-  <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_ov_d1d2">D1 vs D2 — Raw Biogas (m³)</div><div class="cw"><canvas id="c_ov_d1d2"></canvas></div></div>
-    <div class="cc"><div class="ct" id="ct_ov_exp">Expected vs Actual Purified Gas (m³)</div><div class="cw"><canvas id="c_ov_exp"></canvas></div></div>
-  </div>
-  <div class="stitle">Digester Health — Latest</div>
-  <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px"><div id="ov_health"></div></div>
-  </div><!-- /ov_main_content -->
+  <!-- Day View content -->
+  <div id="ov_day_wrap" style="display:none"></div>
 </div>
 
 <!-- ══ S1 FEEDSTOCK ══ -->
@@ -1903,293 +1963,278 @@ function showDayPanel(sectionId){
   if(curDay==='ALL') panel.style.display='none';
 }
 
-// ═══ OVERVIEW ════════════════════════════════════════════════
+// ═══ OVERVIEW V9 ════════════════════════════════════════════
+function _goTab(id){show(id,Array.from(document.querySelectorAll('.tb')).find(b=>(b.getAttribute('onclick')||'').includes("'"+id+"'")));}
+
+function _fillOVKpis(kpis){
+  kpis.forEach((k,i)=>{
+    const n=i+1;
+    const bE=document.getElementById('ov_k'+n+'_bar');if(bE)bE.style.background=k.bar||'var(--blue)';
+    const lE=document.getElementById('ov_k'+n+'_lbl');if(lE)lE.textContent=k.l||'';
+    const vE=document.getElementById('ov_k'+n+'_val');if(vE){vE.textContent=k.v||'—';vE.className='ov-kpi-val'+(k.dc?' '+k.dc:'');}
+    const sE=document.getElementById('ov_k'+n+'_sub');if(sE)sE.textContent=k.s||'';
+    const dE=document.getElementById('ov_k'+n+'_dlt');if(dE){if(k.d){dE.textContent=k.d;dE.className='ov-kpi-dlt'+(k.dc?' '+k.dc:'');dE.style.display='';}else dE.style.display='none';}
+  });
+}
+
+function _fillOVHealthRing(hscore,period,comps){
+  const hclr=hscore>=80?'#1b8a4a':hscore>=65?'#c67c00':'#c62828';
+  const hst=hscore>=80?'Good':hscore>=65?'Caution':'Alert';
+  const circ=194.8;
+  const arc=document.getElementById('ov_hs_arc');
+  if(arc){arc.style.strokeDashoffset=(circ-circ*Math.min(100,hscore)/100).toFixed(1);arc.style.stroke=hclr;}
+  const n=document.getElementById('ov_hs_num');if(n)n.textContent=hscore||'—';
+  const s=document.getElementById('ov_hs_status');if(s){s.textContent=hst;s.style.color=hclr;}
+  const pd=document.getElementById('ov_hs_period');if(pd)pd.textContent=period||'';
+  const cc=document.getElementById('ov_hs_comps');
+  if(cc&&comps){cc.innerHTML=comps.map(c=>{
+    const clr=c.ok===1?'#1b8a4a':c.ok===-1?'#c62828':'#c67c00';
+    const pct=Math.min(100,c.v!=null?c.v:0);
+    return`<div class="ov-hcc"><div class="ov-hcc-l">${c.l}</div><div class="ov-hcc-v" style="color:${clr}">${c.v!=null?Math.round(c.v)+'%':'—'}</div><div class="ov-hcc-bar"><div class="ov-hcc-fill" style="width:${pct}%;background:${clr}"></div></div></div>`;
+  }).join('');}
+}
+
+function _renderOVSections(mo){
+  const sg=document.getElementById('ov_sgrid');if(!sg)return;
+  ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id=>{const k='ov_ch_'+id;if(charts[k]){try{charts[k].destroy();}catch(e){}charts[k]=null;}});
+  const av=a=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
+  const lbls=mo==='ALL'?MONTHS:dDates('psa');
+  const cbgD=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
+  const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
+  const pmF=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
+  const cdF=mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed');
+  const cslF=mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
+  const gsF=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
+  const d1bg=mo==='ALL'?mArr('d1_bg'):dArr('d1','bg_act');
+  const d2bg=mo==='ALL'?mArr('d2_bg'):dArr('d2','bg_act');
+  const expD=mo==='ALL'?mArr('exp_tot'):dArr('exp','tot_exp');
+  const purD=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
+  const compH=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
+  const psaH=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
+  const olrD1=mo==='ALL'?(D.M.d1_olr||[]):dArr('d1','olr');
+  const olrD2=mo==='ALL'?(D.M.d2_olr||[]):dArr('d2','olr');
+  const ch4D=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
+  const sfomD=(mo==='ALL'?mArr('d1_sfom'):dArr('d1','sfom')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_sfom'):dArr('d2','sfom'))[i]||0));
+  const lfomD=(mo==='ALL'?mArr('d1_lfom'):dArr('d1','lfom')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_lfom'):dArr('d2','lfom'))[i]||0));
+  const revD=mo==='ALL'?mArr('total_rev'):dArr('rev','cbg_rev');
+  const costD=mo==='ALL'?mArr('total_cost'):[];
+  const sfRevD=mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[MONTHS.indexOf(mo)]||0];
+  const lfRevD=mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[MONTHS.indexOf(mo)]||0];
+  const tCBG=sumA(cbgD),tDisp=sumA(dispD),tPH=sumA(psaH),tCH=sumA(compH);
+  const tD1=sumA(d1bg),tD2=sumA(d2bg),tPur=sumA(purD),tExp=sumA(expD);
+  const tSfom=sumA(sfomD),tLfom=sumA(lfomD),tRev=sumA(revD),tCost=sumA(costD);
+  const drPct=tCBG>0?tDisp/tCBG*100:null;
+  const uptP=tPH>0?tCH/tPH*100:null;
+  const ch4V=av(ch4D);const ch4P=ch4V!=null?(ch4V>1?ch4V:ch4V*100):null;
+  const purEff=tExp>0?tPur/tExp*100:null;
+  const avgO1=av(olrD1),avgO2=av(olrD2);
+  const mrg=tRev>0?(tRev-tCost)/tRev*100:null;
+  const cpkMoV=D.cpk_monthly||{};
+  const cpkV=mo==='ALL'?(D.kpis.ytd_cbg>0?D.finance.ytd_cost/D.kpis.ytd_cbg:null):(cpkMoV[mo]||null);
+  const sOk=(v,g,w)=>v==null?'warn':v>=g?'ok':v>=w?'warn':'alert';
+  const fmtMT=v=>fmtN(Math.round(v))+' MT';const fmtM3=v=>fmtN(Math.round(v))+' m³';
+  const SECS=[
+    {id:'s1',tab:'s1',ico:'#1565C0',lbl:'S1',name:'Feedstock',person:'Mr. Vivek Kumar',st:sOk(sumA(pmF)+sumA(cdF)>0?100:null,80,50),
+     mx:[{l:'Pressmud Fed',v:fmtMT(sumA(pmF))},{l:'Cow Dung Fed',v:fmtMT(sumA(cdF))},{l:'CSL Fed',v:fmtN(Math.round(sumA(cslF)))+' KL'},{l:'GS Fed',v:fmtN(Math.round(sumA(gsF)))+' KL'}],
+     ch:()=>bar('ov_ch_s1',mo==='ALL'?MONTHS:dDates('feed'),[bDS('PM (MT)',pmF,C.blue),bDS('CD (MT)',cdF,C.teal)],true),
+     hint:'Feed rates & procurement'},
+    {id:'s2',tab:'s2',ico:'#00695c',lbl:'S2',name:'Lab & Process',person:'Dr. Shikha / Mr. Jatin',st:sOk(avgO1,2.0,1.5),
+     mx:[{l:'OLR D1 (avg)',v:avgO1!=null?avgO1.toFixed(2):'—',vc:avgO1>=2.5?'g':avgO1>=1.5?'a':'r'},{l:'OLR D2 (avg)',v:avgO2!=null?avgO2.toFixed(2):'—',vc:avgO2>=2.5?'g':avgO2>=1.5?'a':'r'},{l:'pH D1 (latest)',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—'},{l:'pH D2 (latest)',v:D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'}],
+     ch:()=>line('ov_ch_s2',mo==='ALL'?MONTHS:dDates('d1'),[lDS('OLR D1',olrD1,C.blue),lDS('OLR D2',olrD2,C.teal)]),
+     hint:'Digester health & process'},
+    {id:'s3',tab:'s3',ico:'#283593',lbl:'S3',name:'Production',person:'Mr. Sohan Lal',st:sOk(tD1+tD2>0?100:null,80,50),
+     mx:[{l:'D1 Biogas',v:fmtM3(tD1)},{l:'D2 Biogas',v:fmtM3(tD2)},{l:'Expected Gas',v:fmtM3(tExp)},{l:'Purified',v:fmtM3(tPur),vc:purEff>=90?'g':purEff>=75?'a':'r'}],
+     ch:()=>bar('ov_ch_s3',lbls,[bDS('D1 (m³)',d1bg,C.blue),bDS('D2 (m³)',d2bg,C.teal)]),
+     hint:'Raw biogas generation'},
+    {id:'s4',tab:'s4',ico:'#1b5e20',lbl:'S4',name:'Purification',person:'Mr. Bobby',st:sOk(ch4P,90,80),
+     mx:[{l:'CBG Produced',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Eff.',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4% (avg)',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hrs',v:fmtN(Math.round(tPH))}],
+     ch:()=>line('ov_ch_s4',lbls,[lDS('CBG (kg)',cbgD,C.green),lDS('Expected (m³)',expD,C.amber)]),
+     hint:'CBG purity & efficiency'},
+    {id:'s5',tab:'s5',ico:'#4a148c',lbl:'S5',name:'Compressor',person:'Mr. Rajendra Kumar',st:sOk(drPct,95,80),
+     mx:[{l:'CBG Dispatched',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'Comp. Hrs',v:fmtN(Math.round(tCH))},{l:'Uptime',v:uptP!=null?uptP.toFixed(1)+'%':'—',vc:uptP>=90?'g':uptP>=70?'a':'r'}],
+     ch:()=>bar('ov_ch_s5',lbls,[bDS('Produced (kg)',cbgD,C.blue),bDS('Dispatched (kg)',dispD,C.green)]),
+     hint:'Cascade & dispatch'},
+    {id:'s6',tab:'s6',ico:'#e65100',lbl:'S6',name:'Manure',person:'Mr. Vivek Kumar',st:sOk(tSfom+tLfom>0?100:null,80,50),
+     mx:[{l:'SFOM Produced',v:fmtM3(tSfom)},{l:'LFOM Produced',v:fmtM3(tLfom)},{l:'SFOM Revenue',v:fmtL(sumA(sfRevD))},{l:'LFOM Revenue',v:fmtL(sumA(lfRevD))}],
+     ch:()=>bar('ov_ch_s6',mo==='ALL'?MONTHS:dDates('d1'),[bDS('SFOM (m³)',sfomD,C.amber),bDS('LFOM (m³)',lfomD,C.teal)]),
+     hint:'Drain production & sales'},
+    {id:'s7',tab:'s7',ico:'#1b8a4a',lbl:'S7',name:'Sales',person:'Mr. Vivek Kumar',st:sOk(tRev>0?100:null,80,50),
+     mx:[{l:'Total Revenue',v:fmtL(tRev)},{l:'CBG Dispatched',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'CBG Produced',v:fmtN(Math.round(tCBG))+' kg'}],
+     ch:()=>mo==='ALL'?bar('ov_ch_s7',MONTHS,[bDS('Revenue (₹)',revD,C.green),bDS('Cost (₹)',costD,C.red)]):line('ov_ch_s7',dDates('rev'),[lDS('CBG Rev (₹)',revD,C.green,true)]),
+     hint:'CBG & manure revenue'},
+    {id:'s8',tab:'s8',ico:'#c62828',lbl:'S8',name:'Finance',person:'Management',st:sOk(mrg,40,25),
+     mx:[{l:'Total Revenue',v:fmtL(tRev)},{l:'Total Cost',v:fmtL(tCost)},{l:'Net Margin',v:mrg!=null?mrg.toFixed(1)+'%':'—',vc:mrg>=40?'g':mrg>=25?'a':'r'},{l:'Cost / kg',v:cpkV!=null?'₹'+cpkV.toFixed(1)+'/kg':'—',vc:cpkV!=null&&cpkV<=TGT.cost_kg?'g':'r'}],
+     ch:()=>mo==='ALL'?bar('ov_ch_s8',MONTHS,[bDS('Revenue (₹)',revD,C.green),bDS('Cost (₹)',costD,C.red)]):line('ov_ch_s8',MONTHS,(D.M.margin||[]).length?[lDS('Margin %',D.M.margin,C.green,true)]:[]),
+     hint:'P&L and cost per kg'},
+  ];
+  const stLbl={ok:'Good',warn:'Caution',alert:'Alert'};
+  sg.innerHTML=SECS.map(s=>`<div class="ov-sc">
+    <div class="ov-sc-hdr">
+      <div class="ov-sc-hl">
+        <div class="ov-sc-ico" style="background:${s.ico}">${s.lbl}</div>
+        <div><div class="ov-sc-nm">${s.name}</div><div class="ov-sc-ps">${s.person}</div></div>
+      </div>
+      <div class="ov-status ${s.st}">${stLbl[s.st]}</div>
+    </div>
+    <div class="ov-sc-body">
+      <div class="ov-mg">${s.mx.map(m=>`<div class="ov-mc"><div class="ov-mc-l">${m.l}</div><div class="ov-mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}</div>
+      <div class="ov-ch-box"><canvas id="ov_ch_${s.id}"></canvas></div>
+    </div>
+    <div class="ov-sc-foot">
+      <button class="ov-exp-btn" onclick="_goTab('${s.tab}')">
+        <div class="ov-eb-l"><div class="ov-eb-t">Explore ${s.name}</div><div class="ov-eb-h">${s.hint}</div></div>
+        <div class="ov-eb-a">→</div>
+      </button>
+    </div>
+  </div>`).join('');
+  setTimeout(()=>{SECS.forEach(s=>{try{s.ch();}catch(e){}});},80);
+}
+
 function renderOV(){
   showDayPanel('ov');
-  const mc=document.getElementById('ov_main_content');
-  if(curDay!=='ALL'){
-    // Hide generic day panel — Overview uses its own KPI-card day layout
-    const sdOv=document.getElementById('sd_ov'); if(sdOv) sdOv.style.display='none';
-    // ── Overview day view: same KPI card layout, populated from D.days[curDay] ──
-    const rec=D.days[curDay]||{};
-    const f=rec.feed||{},p=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},ex=rec.exp||{},h=rec.health||{};
-    const fN=v=>v!=null&&v!==0?fmtN(v):null;
+  const mo=curMonth,da=curDay,isDa=da!=='ALL';
+  const av=a=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
+  // Period badge
+  document.getElementById('ov_period').textContent=isDa?da+' 2026':mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
 
-    // Period badge
-    document.getElementById('ov_period').textContent=curDay+' 2026';
-    const cbgSubEl=document.getElementById('ov_cbg_s'); if(cbgSubEl) cbgSubEl.textContent='Day total';
-
-    // Row A: CBG, Revenue, Margin, Cost/kg
-    const dayCbg=p.cbg_tot||null;
-    const dayRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
-    const dayCost=rv.total_cost||null;
-    const dayMargin=(dayRev&&dayCost&&dayRev>0)?((dayRev-dayCost)/dayRev*100).toFixed(1):null;
-    const dayCpk=(dayCost&&dayCbg&&dayCbg>0)?(dayCost/dayCbg).toFixed(1):null;
-
-    const cbgEl=document.getElementById('ov_cbg');
-    if(cbgEl) cbgEl.textContent=(dayCbg!=null?fmtN(dayCbg)+' nm³':'—');
-    const revEl=document.getElementById('ov_rev');
-    if(revEl) revEl.textContent=(dayRev!=null?fmtL(dayRev):'—');
-    const mrEl=document.getElementById('ov_margin');
-    if(mrEl){ mrEl.textContent=(dayMargin!=null?dayMargin+'%':'—');
-      mrEl.style.color=dayMargin!=null?(+dayMargin>=40?'var(--green)':+dayMargin>=20?'var(--amber)':'var(--red)'):''; }
-    const cpkEl=document.getElementById('ov_cpk');
-    if(cpkEl){ cpkEl.textContent=(dayCpk!=null?'₹'+dayCpk+'/kg':'—');
-      cpkEl.style.color=dayCpk!=null?(+dayCpk<=TGT.cost_kg?'var(--green)':+dayCpk<=TGT.cost_kg*1.2?'var(--amber)':'var(--red)'):''; }
-
-    // Row B: Uptime, OLR, CH4
-    const compH=p.comp_hrs||null, psaH=p.psa_hrs||null;
-    const dayUpt=(psaH&&compH&&psaH>0)?(compH/psaH*100).toFixed(1):null;
-    const uptEl=document.getElementById('ov_uptime');
-    if(uptEl){ uptEl.textContent=(dayUpt!=null?dayUpt+'%':'—');
-      uptEl.style.color=dayUpt!=null?(+dayUpt>=90?'var(--green)':+dayUpt>=70?'var(--amber)':'var(--red)'):''; }
-    const olrEl=document.getElementById('ov_olr');
-    if(olrEl){ olrEl.textContent=((d1r.olr!=null?d1r.olr.toFixed(2):'—')+' / '+(d2r.olr!=null?d2r.olr.toFixed(2):'—'));
-      const worst=Math.min(d1r.olr??99,d2r.olr??99);
-      olrEl.style.color=(d1r.olr||d2r.olr)?(worst>=2.0?'var(--green)':worst>=1.5?'var(--amber)':'var(--red)'):''; }
-    const ch4v=p.ch4!=null?(p.ch4>1?p.ch4:p.ch4*100):null;
-    const ch4El=document.getElementById('ov_ch4');
-    if(ch4El){ ch4El.textContent=(ch4v!=null?ch4v.toFixed(1)+'%':'—');
-      ch4El.style.color=ch4v!=null?(ch4v>=90?'var(--green)':ch4v>=80?'var(--amber)':'var(--red)'):''; }
-
-    // Day-specific main content: hide charts, show summary cards
-    if(mc){
-      mc.style.display='';
-      mc.querySelectorAll('canvas').forEach(c=>{
-        if(charts[c.id]){try{charts[c.id].destroy();}catch(e){}charts[c.id]=null;}
-        const cc=c.closest('.cc'); if(cc) cc.style.display='none';
-      });
-      const achEl=document.getElementById('ov_achieve'); if(achEl) achEl.style.display='none';
-      const alertEl=document.getElementById('ov_alerts'); if(alertEl) alertEl.style.display='none';
-
-      // Inject day summary grid into mc
-      let dayGrid=document.getElementById('ov_day_grid');
-      if(!dayGrid){ dayGrid=document.createElement('div'); dayGrid.id='ov_day_grid'; mc.prepend(dayGrid); }
-      const cl=(v,good,warn)=>v==null?'':v>=good?'var(--green)':v>=warn?'var(--amber)':'var(--red)';
-      const card=(lbl,val,unit,color)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${color||'var(--acc)'};border-radius:8px;padding:14px 16px">
-        <div style="font-size:10px;font-weight:600;letter-spacing:.7px;color:var(--text2);text-transform:uppercase;margin-bottom:6px">${lbl}</div>
-        <div style="font-size:22px;font-weight:700;color:${color||'var(--acc)'};line-height:1">${val??'—'}<span style="font-size:12px;font-weight:500;color:var(--text2);margin-left:4px">${val!=null?unit:''}</span></div>
-      </div>`;
-      const g2=cards=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px">${cards.join('')}</div>`;
-      const pmFd=f.pm_feed,cdFd=f.cd_feed,cslFd=f.csl_feed,gsFd=f.gs_feed;
-      const d1bg=d1r.bg_act,d2bg=d2r.bg_act,sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
-      dayGrid.innerHTML=
-        `<div style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bdr)">Production</div>`+
-        g2([
-          card('CBG Produced',fN(dayCbg),'nm³',cl(dayCbg,TGT.cbg_month/30*0.9,TGT.cbg_month/30*0.7)||'var(--blue)'),
-          card('CBG Dispatched',fN(p.dispatched),'kg','var(--teal)'),
-          card('D1 Biogas',fN(d1bg),'m³','var(--indigo)'),
-          card('D2 Biogas',fN(d2bg),'m³','var(--purple)'),
-          card('Exp Gas',fN(ex.tot_exp),'m³','var(--text3)'),
-          card('Purified',fN(ex.act_pur),'m³',cl(ex.act_pur,ex.tot_exp*.9,ex.tot_exp*.7)||'var(--cyan)'),
-        ])+
-        `<div style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bdr)">Feedstock</div>`+
-        g2([
-          card('Pressmud',fN(pmFd),'MT','var(--blue)'),
-          card('Cow Dung',fN(cdFd),'MT','var(--teal)'),
-          card('CSL',fN(cslFd),'KL','var(--indigo)'),
-          card('Grain Syrup',fN(gsFd),'KL','var(--cyan)'),
-        ])+
-        `<div style="font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--bdr)">By-products & Revenue</div>`+
-        g2([
-          card('SFOM',fN(sfom),'m³','var(--amber)'),
-          card('LFOM',fN(lfom),'m³','var(--amber)'),
-          card('CBG Revenue',rv.cbg_rev!=null?fmtL(rv.cbg_rev):null,'','var(--green)'),
-          card('SFOM Revenue',rv.sfom_rev!=null?fmtL(rv.sfom_rev):null,'','var(--green)'),
-          card('LFOM Revenue',rv.lfom_rev!=null?fmtL(rv.lfom_rev):null,'','var(--green)'),
-          card('Total Cost',dayCost!=null?fmtL(dayCost):null,'','var(--red)'),
-        ]);
+  // ── DAY VIEW ───────────────────────────────────────────────
+  if(isDa){
+    const sdOv=document.getElementById('sd_ov');if(sdOv)sdOv.style.display='none';
+    const mw=document.getElementById('ov_mo_wrap');if(mw)mw.style.display='none';
+    const dw=document.getElementById('ov_day_wrap');if(dw)dw.style.display='';
+    const rec=D.days[da]||{};
+    const dp=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},f=rec.feed||{},ex=rec.exp||{};
+    const dCBG=dp.cbg_tot||null,dDisp=dp.dispatched||null;
+    const dRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
+    const dCost=rv.total_cost||null;
+    const dMgn=dRev&&dCost&&dRev>0?(dRev-dCost)/dRev*100:null;
+    const dCpk=dCost&&dCBG&&dCBG>0?dCost/dCBG:null;
+    const dCH4v=dp.ch4!=null?(dp.ch4>1?dp.ch4:dp.ch4*100):null;
+    const dUpt=dp.comp_hrs&&dp.psa_hrs&&dp.psa_hrs>0?dp.comp_hrs/dp.psa_hrs*100:null;
+    const dDay=TGT.cbg_month/30;
+    const dAch=dCBG&&dDay>0?dCBG/dDay*100:null;
+    // Health score for day
+    const dc=[{l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},{l:'Dispatch',v:dDisp&&dCBG&&dCBG>0?dDisp/dCBG*100:null,ok:0},{l:'PSA',v:dUpt,ok:dUpt>=90?1:dUpt>=70?0:-1},{l:'Margin',v:dMgn,ok:dMgn>=40?1:dMgn>=25?0:-1},{l:'CH4',v:dCH4v,ok:dCH4v>=90?1:dCH4v>=80?0:-1},{l:'OLR',v:d1r.olr!=null?Math.min(100,d1r.olr/4.5*100):null,ok:d1r.olr>=2?1:d1r.olr>=1.5?0:-1}];
+    const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.30,.15,.25,.20,.05,.05][i])*100,0));
+    _fillOVHealthRing(dHS,da+' 2026',dc);
+    _fillOVKpis([
+      {bar:'#1565C0',l:'Target CBG — Day',v:fmtN(Math.round(dDay))+' kg',s:'Daily capacity'},
+      {bar:'#1b8a4a',l:'CBG Produced',v:dCBG!=null?fmtN(Math.round(dCBG))+' kg':'—',s:da+' 2026',d:dAch!=null?Math.round(dAch)+'% of target':null,dc:dAch>=90?'g':dAch>=75?'a':'r'},
+      {bar:'#1b8a4a',l:'Total Revenue',v:dRev?fmtL(dRev):'—',s:'CBG + Manure'},
+      {bar:'#c67c00',l:'Net Margin',v:dMgn!=null?dMgn.toFixed(1)+'%':'—',s:'Target: 40%+',dc:dMgn>=40?'g':dMgn>=25?'a':'r'},
+      {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
+      {bar:'#c67c00',l:'Plant Uptime',v:dUpt!=null?dUpt.toFixed(1)+'%':'—',s:'Comp÷PSA hrs',dc:dUpt>=90?'g':dUpt>=70?'a':'r'},
+      {bar:'#1b8a4a',l:'CH4 Purity',v:dCH4v!=null?dCH4v.toFixed(1)+'%':'—',s:'Target: ≥90%',dc:dCH4v>=90?'g':dCH4v>=80?'a':'r'},
+      {bar:'#1565C0',l:'OLR D1 / D2',v:(d1r.olr!=null?d1r.olr.toFixed(2):'—')+' / '+(d2r.olr!=null?d2r.olr.toFixed(2):'—'),s:'kg VS/m³/d'},
+    ]);
+    // Day detail cards
+    const dw2=document.getElementById('ov_day_wrap');
+    if(dw2){
+      const fN=v=>v!=null&&v!==0?fmtN(v):null;
+      const cl=(v,g,w)=>v==null?'var(--blue)':v>=g?'var(--green)':v>=w?'var(--amber)':'var(--red)';
+      const card=(lbl,val,unit,color)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${color};border-radius:8px;padding:12px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:var(--text3);text-transform:uppercase;margin-bottom:5px">${lbl}</div><div style="font-size:19px;font-weight:700;color:${color};line-height:1">${val??'—'}<span style="font-size:11px;font-weight:500;color:var(--text3);margin-left:3px">${val!=null?unit:''}</span></div></div>`;
+      const g2=c=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px">${c.join('')}</div>`;
+      const sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
+      dw2.innerHTML=
+        `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bdr)">Production</div>`+
+        g2([card('CBG Produced',fN(dCBG),'kg',cl(dCBG,dDay*.9,dDay*.7)),card('CBG Dispatched',fN(dDisp),'kg','var(--teal)'),card('D1 Biogas',fN(d1r.bg_act),'m³','var(--blue)'),card('D2 Biogas',fN(d2r.bg_act),'m³','var(--purple)'),card('Expected Gas',fN(ex.tot_exp),'m³','var(--text3)'),card('Purified',fN(ex.act_pur),'m³',cl(ex.act_pur,ex.tot_exp*.9,ex.tot_exp*.7))])+
+        `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bdr)">Feedstock</div>`+
+        g2([card('Pressmud',fN(f.pm_feed),'MT','var(--blue)'),card('Cow Dung',fN(f.cd_feed),'MT','var(--teal)'),card('CSL',fN(f.csl_feed),'KL','var(--blue)'),card('Grain Syrup',fN(f.gs_feed),'KL','var(--cyan)')])+
+        `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bdr)">By-products & Revenue</div>`+
+        g2([card('SFOM',fN(sfom),'m³','var(--amber)'),card('LFOM',fN(lfom),'m³','var(--amber)'),card('CBG Revenue',rv.cbg_rev!=null?fmtL(rv.cbg_rev):null,'','var(--green)'),card('SFOM Revenue',rv.sfom_rev!=null?fmtL(rv.sfom_rev):null,'','var(--green)'),card('LFOM Revenue',rv.lfom_rev!=null?fmtL(rv.lfom_rev):null,'','var(--green)'),card('Total Cost',dCost!=null?fmtL(dCost):null,'','var(--red)')]);
     }
     return;
   }
-  // On returning to ALL/monthly view, restore hidden elements
-  const sdOv2=document.getElementById('sd_ov'); if(sdOv2) sdOv2.style.display='none'; // keep hidden (month view uses ov_main_content)
-  const achEl2=document.getElementById('ov_achieve'); if(achEl2) achEl2.style.display='flex';
-  const alertEl2=document.getElementById('ov_alerts'); if(alertEl2) alertEl2.style.display='';
-  const dayGrid2=document.getElementById('ov_day_grid'); if(dayGrid2) dayGrid2.innerHTML='';
-  if(mc) mc.style.display='';
-  const mo=curMonth;
-  // Update period badge
-  const periodLbl=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
-  document.getElementById('ov_period').textContent=periodLbl;
-  document.getElementById('ov_cbg_s').textContent=mo==='ALL'?'YTD '+periodLbl:mo+' 2026 total';
-  let cbg,rev,cost,margin;
-  const cbgArr=D.M.cbg||[];
-  if(mo==='ALL'){
-    cbg=sumA(cbgArr); rev=D.finance.ytd_rev; cost=D.finance.ytd_cost;
-    margin=rev>0?((rev-cost)/rev*100).toFixed(1):0;
-    const achPct=Math.round(cbg/TGT.cbg_total*100);
-    document.getElementById('ov_cbg').innerHTML=fmtN(cbg)+' nm³ '+tgtBadge(cbg,TGT.cbg_total);
-    document.getElementById('ov_rev').textContent=fmtL(rev);
-    document.getElementById('ov_margin').textContent=margin+'%';
-  } else {
-    const idx=MONTHS.indexOf(mo); const prev=idx>0?cbgArr[idx-1]:null;
-    cbg=sumA(dArr('psa','cbg_tot')); rev=D.M.total_rev[idx]; cost=D.M.total_cost[idx];
-    margin=D.M.margin[idx];
-    document.getElementById('ov_cbg').innerHTML=fmtN(cbg)+' nm³ '+tgtBadge(cbg,TGT.cbg_month)+momArrow(cbg,prev);
-    document.getElementById('ov_rev').innerHTML=fmtL(rev)+momArrow(rev,idx>0?D.M.total_rev[idx-1]:null);
-    document.getElementById('ov_margin').innerHTML=margin+'%'+momArrow(+margin,idx>0?D.M.margin[idx-1]:null);
-  }
-  const labels   = mo==='ALL'?MONTHS:dDates('psa');
-  const lblFeed  = mo==='ALL'?MONTHS:dDates('feed');
-  const lblManure= mo==='ALL'?MONTHS:dDates('d1');
 
-  // ── CBG produced vs dispatched
-  const cbgData  = mo==='ALL'?mArr('cbg')       :dArr('psa','cbg_tot');
-  const dispData = mo==='ALL'?mArr('dispatched') :dArr('psa','dispatched');
-  const totCBG   = sumA(cbgData), totDisp=sumA(dispData);
-  document.getElementById('ov_cbg_tot').textContent  = fmtN(totCBG)+' kg';
-  document.getElementById('ov_disp_tot').textContent = fmtN(totDisp)+' kg';
-  document.getElementById('ov_disp_pct').textContent = totCBG>0?(totDisp/totCBG*100).toFixed(1)+'%':'—';
-  bar('c_ov_cbg',labels,[bDS('Produced (kg)',cbgData,C.blue),bDS('Dispatched (kg)',dispData,C.green)]);
+  // ── MONTHLY / YTD VIEW ─────────────────────────────────────
+  const sdOv2=document.getElementById('sd_ov');if(sdOv2)sdOv2.style.display='none';
+  const mw2=document.getElementById('ov_mo_wrap');if(mw2)mw2.style.display='';
+  const dw3=document.getElementById('ov_day_wrap');if(dw3)dw3.style.display='none';
 
-  // ── Revenue vs Cost
-  const revData  = mo==='ALL'?mArr('total_rev'):dArr('rev','cbg_rev');
-  const costData = mo==='ALL'?mArr('total_cost'):[];
-  if(mo==='ALL') bar('c_ov_rev',labels,[bDS('Revenue',revData,C.green),bDS('Cost',costData,C.red)]);
-  else line('c_ov_rev',labels,[lDS('CBG Revenue (₹)',revData,C.green,true)]);
-
-  // ── Feedstock utilization
-  const pmFeed  = mo==='ALL'?mArr('pm_feed') :dArr('feed','pm_feed');
-  const cdFeed  = mo==='ALL'?mArr('cd_feed') :dArr('feed','cd_feed');
-  const cslFeed = mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
-  const gsFeed  = mo==='ALL'?mArr('gs_feed') :dArr('feed','gs_feed');
-  document.getElementById('ov_pm_fed').textContent  = fmtN(sumA(pmFeed));
-  document.getElementById('ov_cd_fed').textContent  = fmtN(sumA(cdFeed));
-  document.getElementById('ov_csl_fed').textContent = fmtN(sumA(cslFeed));
-  document.getElementById('ov_gs_fed').textContent  = fmtN(sumA(gsFeed));
-  bar('c_ov_feed',lblFeed,[
-    bDS('Pressmud (MT)',pmFeed,C.blue),
-    bDS('Cow Dung (MT)',cdFeed,C.teal),
-    bDS('CSL (KL)',cslFeed,C.indigo),
-    bDS('Grain Syrup (KL)',gsFeed,C.cyan)
-  ],true);
-
-  // ── SFOM & LFOM produced vs sold
-  const sfomProd = mo==='ALL'?mArr('d1_sfom').map((v,i)=>((v||0)+(mArr('d2_sfom')[i]||0))):
-                   dArr('d1','sfom').map((v,i)=>((v||0)+(dArr('d2','sfom')[i]||0)));
-  const lfomProd = mo==='ALL'?mArr('d1_lfom').map((v,i)=>((v||0)+(mArr('d2_lfom')[i]||0))):
-                   dArr('d1','lfom').map((v,i)=>((v||0)+(dArr('d2','lfom')[i]||0)));
-  const _smIdx=MONTHS.indexOf(mo);
-  const sfomRev  = mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[_smIdx]||0];
-  const lfomRev  = mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[_smIdx]||0];
-  document.getElementById('ov_sfom_prod').textContent = fmtN(sumA(sfomProd))+' m³';
-  document.getElementById('ov_sfom_rev').textContent  = fmtL(sumA(sfomRev));
-  document.getElementById('ov_lfom_prod').textContent = fmtN(sumA(lfomProd))+' m³';
-  document.getElementById('ov_lfom_rev').textContent  = fmtL(sumA(lfomRev));
-  bar('c_ov_sfom',lblManure,[bDS('SFOM Produced (m³)',sfomProd,C.blue),bDS('SFOM Revenue (₹)',sfomRev,C.green)]);
-  bar('c_ov_lfom',lblManure,[bDS('LFOM Produced (m³)',lfomProd,C.amber),bDS('LFOM Revenue (₹)',lfomRev,C.green)]);
-
-  // ── D1/D2 Biogas + PSA
-  const d1Data  = mo==='ALL'?mArr('d1_bg') :dArr('d1','bg_act');
-  const d2Data  = mo==='ALL'?mArr('d2_bg') :dArr('d2','bg_act');
-  const expData = mo==='ALL'?mArr('exp_tot'):dArr('exp','tot_exp');
-  const purData = mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
-  bar('c_ov_d1d2',labels,[bDS('D1 Biogas (m³)',d1Data,C.blue),bDS('D2 Biogas (m³)',d2Data,C.teal)]);
-  line('c_ov_exp',labels,[lDS('Expected Gas',expData,C.amber),lDS('Actual Purified',purData,C.green)]);
-  const ph1=D.kpis.ph_d1, ph2=D.kpis.ph_d2;
-  const idx2=MONTHS.indexOf(mo);
-
-  // ── Cost / kg CBG ──────────────────────────────────────────
-  const cpkMo=D.cpk_monthly||{};
-  const cpkVal=mo==='ALL'
-    ?(D.kpis.ytd_cbg>0?(D.finance.ytd_cost/D.kpis.ytd_cbg):null)
-    :(cpkMo[mo]||null);
-  const cpkEl=document.getElementById('ov_cpk');
-  if(cpkEl){cpkEl.textContent=cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—';
-    cpkEl.style.color=cpkVal!=null?(cpkVal<=TGT.cost_kg?'var(--green)':cpkVal<=TGT.cost_kg*1.2?'var(--amber)':'var(--red)'):'';
-  }
-
-  // ── Plant Uptime % ─────────────────────────────────────────
-  const compArr=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
-  const psaArr =mo==='ALL'?mArr('psa_hrs') :dArr('psa','psa_hrs');
-  const totC=sumA(compArr),totP=sumA(psaArr);
-  const uptPct=totP>0?totC/totP*100:null;
-  const uptEl=document.getElementById('ov_uptime');
-  if(uptEl){uptEl.textContent=uptPct!=null?uptPct.toFixed(1)+'%':'—';
-    uptEl.style.color=uptPct!=null?(uptPct>=90?'var(--green)':uptPct>=70?'var(--amber)':'var(--red)'):'';
-  }
-
-  // ── OLR D1 / D2 (avg for period) ───────────────────────────
-  const olrD1a=mo==='ALL'?D.M.d1_olr:dArr('d1','olr');
-  const olrD2a=mo==='ALL'?D.M.d2_olr:dArr('d2','olr');
-  const av=(a)=>{const f=a.filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
-  const avgO1=av(olrD1a||[]),avgO2=av(olrD2a||[]);
-  const olrEl=document.getElementById('ov_olr');
-  if(olrEl){olrEl.textContent=(avgO1!=null?avgO1.toFixed(2):'—')+' / '+(avgO2!=null?avgO2.toFixed(2):'—');
-    const worst=Math.min(avgO1??99,avgO2??99);
-    olrEl.style.color=avgO1!=null?(worst>=2.0?'var(--green)':worst>=1.5?'var(--amber)':'var(--red)'):'';
-  }
-
-  // ── Feedstock Cost % (for alert strip only) ─────────────────
-  const fcPeriod=mo==='ALL'?sumA(D.M.feed_cost||[]):(idx2>=0?(D.M.feed_cost||[])[idx2]||0:0);
-  const revPeriod=mo==='ALL'?D.finance.ytd_rev:(idx2>=0?(D.M.total_rev||[])[idx2]||0:0);
-  const fcPct=revPeriod>0?fcPeriod/revPeriod*100:null;
-
-  // ── CH4 Purity % ───────────────────────────────────────────
+  const cbgD=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
+  const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
+  const compA=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
+  const psaA=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
   const ch4a=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
-  const ch4v=ch4a.filter(v=>v!=null&&v>0);
-  const avgCh4=ch4v.length?ch4v.reduce((a,b)=>a+b,0)/ch4v.length:null;
-  const ch4Pct=avgCh4!=null?(avgCh4>1?avgCh4:avgCh4*100):null;
-  const ch4El=document.getElementById('ov_ch4');
-  if(ch4El){ch4El.textContent=ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—';
-    ch4El.style.color=ch4Pct!=null?(ch4Pct>=90?'var(--green)':ch4Pct>=80?'var(--amber)':'var(--red)'):'';
-  }
+  const olrD1a=mo==='ALL'?(D.M.d1_olr||[]):dArr('d1','olr');
+  const olrD2a=mo==='ALL'?(D.M.d2_olr||[]):dArr('d2','olr');
+  const tCBG=sumA(cbgD),tDisp=sumA(dispD),tPH=sumA(psaA),tCH=sumA(compA);
+  const totalRev=mo==='ALL'?D.finance.ytd_rev:(D.M.total_rev?.[MONTHS.indexOf(mo)]||0);
+  const totalCost=mo==='ALL'?D.finance.ytd_cost:(D.M.total_cost?.[MONTHS.indexOf(mo)]||0);
+  const tgtCBG=mo==='ALL'?TGT.cbg_total:TGT.cbg_month;
+  const achPct=tgtCBG>0?tCBG/tgtCBG*100:null;
+  const uptPct=tPH>0?tCH/tPH*100:null;
+  const marginPct=totalRev>0?(totalRev-totalCost)/totalRev*100:null;
+  const drPct=tCBG>0?tDisp/tCBG*100:null;
+  const ch4VV=av(ch4a);const ch4Pct=ch4VV!=null?(ch4VV>1?ch4VV:ch4VV*100):null;
+  const avgO1=av(olrD1a),avgO2=av(olrD2a);
+  const cpkMo=D.cpk_monthly||{};
+  const cpkVal=mo==='ALL'?(D.kpis.ytd_cbg>0?D.finance.ytd_cost/D.kpis.ytd_cbg:null):(cpkMo[mo]||null);
 
-  // ── Monthly Achievement Strip ───────────────────────────────
-  const achEl=document.getElementById('ov_achieve');
-  if(achEl){
-    const cbgM2=D.M.cbg||[];
-    achEl.innerHTML=MONTHS.map((m,i)=>{
-      const v=cbgM2[i]||0;
-      const pct=v>0?Math.round(v/TGT.cbg_month*100):null;
-      const bg=pct==null?'var(--bg3)':pct>=90?'#16a34a':pct>=70?'#d97706':'#dc2626';
-      const dim=(mo!=='ALL'&&mo!==m)?'opacity:.45;':'';
-      return`<div style="flex:1;min-width:60px;text-align:center;background:${bg};color:${pct==null?'var(--text2)':'#fff'};border-radius:7px;padding:7px 4px;cursor:pointer;transition:opacity .2s;${dim}" onclick="setMonth('${m}')">
-        <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">${m}</div>
-        <div style="font-size:14px;font-weight:800;line-height:1.2">${pct!=null?pct+'%':'—'}</div>
-        <div style="font-size:9px;opacity:.85">${v>0?fmtN(Math.round(v/1000))+'k kg':'No data'}</div>
+  // Health ring
+  const hComps=[
+    {l:'CBG',v:achPct,ok:achPct>=90?1:achPct>=75?0:-1},
+    {l:'Dispatch',v:drPct,ok:drPct>=95?1:drPct>=80?0:-1},
+    {l:'PSA Eff',v:uptPct,ok:uptPct>=90?1:uptPct>=70?0:-1},
+    {l:'Margin',v:marginPct,ok:marginPct>=40?1:marginPct>=25?0:-1},
+    {l:'CH4 %',v:ch4Pct,ok:ch4Pct>=90?1:ch4Pct>=80?0:-1},
+    {l:'OLR D1',v:avgO1!=null?Math.min(100,avgO1/4.5*100):null,ok:avgO1>=2?1:avgO1>=1.5?0:-1},
+  ];
+  const wts=[.30,.15,.25,.20,.05,.05];
+  const hs=Math.round(hComps.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*wts[i]*100,0));
+  const hPeriod=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
+  _fillOVHealthRing(hs,hPeriod,hComps);
+
+  // KPI panel
+  const k2pct=tgtCBG>0?Math.round(tCBG/tgtCBG*100):null;
+  _fillOVKpis([
+    {bar:'#1565C0',l:'Target CBG — Capacity',v:fmtN(tgtCBG)+' kg',s:mo==='ALL'?'Full-year design capacity':mo+' capacity target'},
+    {bar:'#1b8a4a',l:'Actual CBG Produced',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'YTD total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of target':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
+    {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM'},
+    {bar:'#c67c00',l:'Net Margin',v:marginPct!=null?marginPct.toFixed(1)+'%':'—',s:'Target: 40%+',d:marginPct>=40?'On target':'▼ Below 40%',dc:marginPct>=40?'g':marginPct>=25?'a':'r'},
+    {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
+    {bar:'#c67c00',l:'Plant Uptime',v:uptPct!=null?uptPct.toFixed(1)+'%':'—',s:'Comp ÷ PSA hrs · ≥90%',d:uptPct>=90?'On target':'▼ Below 90%',dc:uptPct>=90?'g':uptPct>=70?'a':'r'},
+    {bar:'#1b8a4a',l:'CH4 Purity (Avg)',v:ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',s:'Target: ≥90%',dc:ch4Pct>=90?'g':ch4Pct>=80?'a':'r'},
+    {bar:'#1565C0',l:'OLR D1 / D2',v:(avgO1!=null?avgO1.toFixed(2):'—')+' / '+(avgO2!=null?avgO2.toFixed(2):'—'),s:'kg VS/m³/d · design 2.5'},
+  ]);
+
+  // Strip
+  const cbgMAll=D.M.cbg||[];
+  const posM=cbgMAll.map((v,i)=>({v,i})).filter(x=>x.v>0);
+  const bestIdx=posM.length?posM.reduce((b,x)=>x.v>b.v?x:b,posM[0]).i:0;
+  const worstIdx=posM.length?posM.reduce((w,x)=>x.v<w.v?x:w,posM[0]).i:0;
+  const avgAch=posM.length?Math.round(posM.reduce((s,x)=>s+x.v/TGT.cbg_month*100,0)/posM.length):0;
+  const smEl=document.getElementById('ov_strip_meta');
+  if(smEl)smEl.textContent=posM.length?`YTD Avg: ${avgAch}% · Best: ${MONTHS[bestIdx]??'—'} · Worst: ${MONTHS[worstIdx]??'—'}`:'';
+  const stEl=document.getElementById('ov_strip_tiles');
+  if(stEl){
+    const allM=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    stEl.innerHTML=allM.map(m=>{
+      const idx=MONTHS.indexOf(m),v=idx>=0?cbgMAll[idx]||0:null;
+      const p=v!=null&&v>0?Math.round(v/TGT.cbg_month*100):null;
+      const bg=p==null?'var(--bg3)':p>=95?'#166534':p>=85?'#16a34a':p>=75?'#d97706':p>=65?'#c2410c':'#dc2626';
+      const sel=(mo!=='ALL'&&mo===m)?';outline:2px solid var(--blue);outline-offset:1px':'';
+      return`<div class="ov-atm" style="background:${bg};color:${p==null?'var(--text3)':'#fff'}${sel}" onclick="setMonth('${m}')">
+        <div class="ov-atm-m">${m}</div>
+        <div class="ov-atm-p">${p!=null?p+'%':'—'}</div>
+        <div class="ov-atm-k">${v&&v>0?Math.round(v/1000)+'k':''}</div>
       </div>`;
     }).join('');
   }
 
-  // ── 3-Column Alert Strip ────────────────────────────────────
-  const alertEl=document.getElementById('ov_alerts');
-  if(alertEl){
-    const cascade=D.latest_psa?.cascade!=null?D.latest_psa.cascade:D.latest_psa?.storage;
-    const latDate=D.kpis?.lat_date||'—';
-    const prodClr=cascade!=null&&cascade>5000?'var(--amber)':'var(--green)';
-    const mnureRev=mo==='ALL'?(D.finance.ytd_manure||0):(sumA(sfomRev)+sumA(lfomRev));
-    const mnurePct=revPeriod>0?mnureRev/revPeriod*100:null;
-    const fcClr=fcPct!=null?(fcPct<=55?'var(--green)':fcPct<=65?'var(--amber)':'var(--red)'):'var(--text3)';
-    const latO1=(D.M.d1_olr||[]).filter(v=>v!=null&&v>0).slice(-1)[0];
-    const latO2=(D.M.d2_olr||[]).filter(v=>v!=null&&v>0).slice(-1)[0];
-    const olrBad=(latO1!=null&&latO1<1.5)||(latO2!=null&&latO2<1.5);
-    const phBad=(ph1!=null&&(ph1<6.8||ph1>7.8))||(ph2!=null&&(ph2<6.8||ph2>7.8));
-    const digClr=(olrBad||phBad)?'var(--red)':'var(--green)';
-    const card=(clr,title,rows)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 14px;border-left:4px solid ${clr}">
-      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);margin-bottom:8px">${title}</div>
-      ${rows.map(([l,v,c])=>`<div style="display:flex;justify-content:space-between;margin-bottom:4px;font-size:11px">
-        <span style="color:var(--text3)">${l}</span><b style="color:${c||'var(--text1)'}">${v}</b></div>`).join('')}</div>`;
-    alertEl.innerHTML=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-      ${card(prodClr,'Production Alert',[
-        ['CBG in Storage',cascade!=null?fmtN(Math.round(cascade))+' kg':'—',prodClr],
-        ['Last data date',latDate,'var(--text1)'],
-        ['Dispatch Rate',totCBG>0?(totDisp/totCBG*100).toFixed(1)+'%':'—',totCBG>0&&totDisp/totCBG>=0.9?'var(--green)':'var(--amber)'],
-      ])}
-      ${card(fcClr,'Cost Watch',[
-        ['Feedstock % of Rev',fcPct!=null?fcPct.toFixed(1)+'%':'—',fcClr],
-        ['Manure Rev Share',mnurePct!=null?mnurePct.toFixed(1)+'%':'—',mnurePct!=null&&mnurePct>=15?'var(--green)':'var(--amber)'],
-        ['Cost / kg',cpkVal!=null?'₹'+cpkVal.toFixed(1):'—',cpkVal!=null&&cpkVal<=TGT.cost_kg?'var(--green)':'var(--red)'],
-      ])}
-      ${card(digClr,'Digester Alert',[
-        ['OLR D1 / D2 (latest)',`${latO1!=null?latO1.toFixed(2):'—'} / ${latO2!=null?latO2.toFixed(2):'—'}`,olrBad?'var(--red)':'var(--green)'],
-        ['pH D1 / D2 (latest)',`${ph1!=null?ph1.toFixed(2):'—'} / ${ph2!=null?ph2.toFixed(2):'—'}`,phBad?'var(--red)':'var(--green)'],
-        ['CH4 Purity',ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',ch4Pct!=null&&ch4Pct>=90?'var(--green)':'var(--amber)'],
-      ])}
-    </div>`;
-  }
-  healthRows('ov_health');
+  // Highlights
+  const bv=cbgMAll[bestIdx]||0,wv=cbgMAll[worstIdx]||0;
+  const bp=bv>0?Math.round(bv/TGT.cbg_month*100):0,wp=wv>0?Math.round(wv/TGT.cbg_month*100):0;
+  [{tag:'Best Month',ttl:(MONTHS[bestIdx]??'—')+' 2026',body:`CBG ${fmtN(Math.round(bv))} kg · Achievement <b>${bp}%</b>`,id:1},
+   {tag:'Worst Month',ttl:(MONTHS[worstIdx]??'—')+' 2026',body:`CBG ${fmtN(Math.round(wv))} kg · Achievement <b>${wp}%</b>`,id:2}
+  ].forEach(h=>{
+    const t=document.getElementById('ov_hl'+h.id+'_tag');if(t)t.textContent=h.tag;
+    const tt=document.getElementById('ov_hl'+h.id+'_ttl');if(tt)tt.textContent=h.ttl;
+    const b=document.getElementById('ov_hl'+h.id+'_body');if(b)b.innerHTML=h.body;
+  });
+
+  // Section grid
+  _renderOVSections(mo);
 }
 
 // ═══ S1 FEEDSTOCK ════════════════════════════════════════════
