@@ -5717,9 +5717,8 @@ async function initDashboard() {
     // Update period labels
     const period=D.months.length>0?D.months[0]+' – '+D.months[D.months.length-1]+' 2026':'All Months';
     document.querySelectorAll('.mo-badge').forEach(b=>b.textContent='All Months');
-    document.getElementById('ov_cbg_s').textContent='YTD '+period;
     // Clear hardcoded KPI placeholder values
-    ['ov_cbg','ov_rev','ov_margin','ov_ph'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
+    ['ov_ph'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
     ['s8_rev_kpi','s8_cost_kpi','s8_margin_kpi'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent='—';});
     // Update footer with real period
     document.querySelector('.footer').innerHTML=`LREKPL — 5.4 TPD CBG Plant Karnal &nbsp;|&nbsp; ${period} &nbsp;|&nbsp; Data: CBG_Karnal_D1_D2_2026.xlsx`;
