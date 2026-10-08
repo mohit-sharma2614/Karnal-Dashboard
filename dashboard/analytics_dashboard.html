@@ -127,7 +127,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .c1{grid-template-columns:1fr}.c2{grid-template-columns:1fr 1fr}.c3{grid-template-columns:1fr 1fr 1fr}
 .cc{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:18px 20px;box-shadow:var(--shadow)}
 .ct{font-size:12px;font-weight:600;color:var(--text);margin-bottom:12px;letter-spacing:0}
-.cw{position:relative;height:270px}.cw.t{height:340px}.cw.s{height:170px}
+.cw{position:relative;height:230px}.cw.t{height:290px}.cw.s{height:170px}
 /* TABLE */
 .tbl{width:100%;border-collapse:collapse;font-size:12px}
 .tbl th{background:var(--bg3);color:var(--acc);padding:8px 10px;text-align:center;
@@ -250,113 +250,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .si-dp-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--text2)}
 .si-dp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:900px){.si-signals{grid-template-columns:repeat(2,1fr)}.si-split{grid-template-columns:1fr}.si-dp-chips{grid-template-columns:repeat(2,1fr)}.si-dp-row{grid-template-columns:1fr}}
-
-/* ══ VERSION 8 OVERVIEW — Premium Design System ══ */
-/* Seasonal Watch Banners */
-.sw-banner{display:flex;gap:12px;align-items:flex-start;border-radius:10px;padding:12px 14px;border:1px solid transparent;margin-bottom:8px}
-.sw-banner.winter{background:linear-gradient(135deg,#eff6ff,#dbeafe);border-color:#bfdbfe}
-.sw-banner.feedstock{background:linear-gradient(135deg,#fff7ed,#ffedd5);border-color:#fed7aa}
-.sw-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sw-banner.winter .sw-icon{background:#dbeafe}
-.sw-banner.feedstock .sw-icon{background:#ffedd5}
-.sw-icon svg{width:18px;height:18px;flex-shrink:0}
-.sw-body{flex:1}
-.sw-top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
-.sw-ttl{font-size:12px;font-weight:700;letter-spacing:-.1px}
-.sw-banner.winter .sw-ttl{color:#1e40af}
-.sw-banner.feedstock .sw-ttl{color:#c2410c}
-.sw-chip{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;padding:2px 7px;border-radius:10px;background:rgba(255,255,255,.7)}
-.sw-banner.winter .sw-chip{color:#1e40af;border:1px solid #93c5fd}
-.sw-banner.feedstock .sw-chip{color:#c2410c;border:1px solid #fdba74}
-.sw-txt{font-size:11px;color:#4b5563;line-height:1.5;margin-bottom:8px}
-.sw-metrics{display:flex;gap:8px;flex-wrap:wrap}
-.sw-m{background:rgba(255,255,255,.65);border-radius:6px;padding:5px 8px;min-width:80px}
-.sw-ml{font-size:9px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:#6b7280;margin-bottom:2px}
-.sw-mv{font-size:12px;font-weight:800;letter-spacing:-.2px}
-.sw-mv.ok{color:var(--green)}.sw-mv.warn{color:var(--amber)}.sw-mv.alert{color:var(--red)}
-
-/* Hero Row */
-.hero-row{display:grid;grid-template-columns:260px 1fr;gap:12px;margin-bottom:12px}
-@media(max-width:900px){.hero-row{grid-template-columns:1fr}}
-.health-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px}
-.hc-top{display:flex;gap:14px;align-items:center;margin-bottom:12px}
-.hc-ring-wrap{position:relative;width:76px;height:76px;flex-shrink:0}
-.hc-ring-wrap svg{width:76px;height:76px}
-.hc-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0}
-.hc-num{font-size:20px;font-weight:800;line-height:1;color:var(--text)}
-.hc-den{font-size:9px;color:var(--text3)}
-.hc-label{font-size:9px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text2);margin-bottom:2px}
-.hc-status{font-size:14px;font-weight:800;line-height:1}
-.hc-period{font-size:9px;color:var(--text3);margin-top:4px}
-.hc-sparkline{margin-bottom:8px}
-.hs-spk-label{font-size:9px;color:var(--text3);margin-bottom:2px;font-weight:600;letter-spacing:.4px}
-.hc-comps-row{display:flex;flex-direction:column;gap:4px}
-.hcc{display:grid;grid-template-columns:80px 28px 1fr;gap:4px;align-items:center}
-.hcc-l{font-size:9px;color:var(--text3)}
-.hcc-v{font-size:9px;font-weight:700;text-align:right}
-.hcc-bar{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
-.hcc-fill{height:100%;border-radius:2px;transition:width .5s}
-
-/* KPI Panel */
-.kpi-panel{display:grid;grid-template-columns:repeat(4,1fr);background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden}
-.kpi{padding:12px 14px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);position:relative;overflow:hidden}
-.kpi-bar{position:absolute;top:0;left:0;right:0;height:3px}
-.kpi-label{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px}
-.kpi-value{font-size:15px;font-weight:800;line-height:1;margin-bottom:2px}
-.kpi-value.blue{color:var(--blue)}.kpi-value.green{color:var(--green)}.kpi-value.amber{color:var(--amber)}.kpi-value.red{color:var(--red)}
-.kpi-sub{font-size:9px;color:var(--text3);margin-bottom:3px}
-.kpi-delta{font-size:9px;font-weight:700;margin-bottom:3px}
-.kpi-delta.up{color:var(--green)}.kpi-delta.wa{color:var(--amber)}.kpi-delta.dn{color:var(--red)}
-.kpi-pb{height:3px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:2px}
-.kpi-pb-fill{height:100%;border-radius:2px;transition:width .6s}
-@media(max-width:900px){.kpi-panel{grid-template-columns:repeat(2,1fr)}}
-
-/* Highlights */
-.hl-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:12px}
-.hlc{display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px 14px}
-.hl-tag{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--text3);white-space:nowrap;min-width:60px}
-.hl-ttl{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
-.hl-body{font-size:10px;color:var(--text2);line-height:1.5}
-
-/* Achievement Strip */
-.strip-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:14px;margin-bottom:12px}
-.strip-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.strip-title{font-size:11px;font-weight:700;color:var(--text)}
-.strip-meta{font-size:10px;color:var(--text3)}
-.atiles{display:flex;gap:6px;flex-wrap:wrap}
-.atm{flex:1;min-width:52px;max-width:72px;text-align:center;border-radius:8px;padding:7px 4px;cursor:pointer;transition:opacity .2s,transform .1s;border:2px solid transparent}
-.atm:hover{transform:translateY(-1px)}
-.atm-m{font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;margin-bottom:2px}
-.atm-p{font-size:14px;font-weight:800;line-height:1.1}
-.atm-k{font-size:9px;opacity:.8;margin-top:2px}
-.atm.fut{background:var(--bg3);color:var(--text3)}
-/* Achievement color tiers */
-.atm.cv1{background:#16a34a;color:#fff}.atm.cv2{background:#22c55e;color:#fff}
-.atm.cv3{background:#d97706;color:#fff}.atm.cv4{background:#f97316;color:#fff}
-.atm.cv5{background:#dc2626;color:#fff}.atm.cv6{background:#7f1d1d;color:#fff}
-.atm.sel{outline:3px solid var(--blue);outline-offset:2px}
-
-/* Section Performance Grid (Overview cards) */
-.ov-sgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}
-@media(max-width:1100px){.ov-sgrid{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:600px){.ov-sgrid{grid-template-columns:1fr}}
-.ov-sc{background:var(--bg2);border:1px solid var(--bdr);border-radius:10px;padding:12px;border-top:3px solid var(--acc);cursor:pointer;transition:box-shadow .15s,transform .1s}
-.ov-sc:hover{box-shadow:0 4px 16px rgba(0,0,0,.1);transform:translateY(-1px)}
-.ov-sc-hdr{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.ov-sc-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#fff;flex-shrink:0}
-.ov-sc-nm{font-size:11px;font-weight:700;color:var(--text)}
-.ov-sc-person{font-size:9px;color:var(--text3);margin-top:1px}
-.ov-sc-status{font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap}
-.ov-sc-status.g{background:#dcfce7;color:#15803d}
-.ov-sc-status.a{background:#fef3c7;color:#b45309}
-.ov-sc-status.r{background:#fee2e2;color:#be1c3c}
-.ov-sc-kpis{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-.ov-kv-row{display:flex;justify-content:space-between;align-items:center;font-size:10px}
-.ov-kv-l{color:var(--text3)}
-.ov-kv-v{font-weight:700;color:var(--text)}
-.ov-kv-v.g{color:var(--green)}.ov-kv-v.a{color:var(--amber)}.ov-kv-v.r{color:var(--red)}
-.ov-sc-explore{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--bdr);font-size:10px;font-weight:600;color:var(--text2);cursor:pointer;transition:background .15s}
-.ov-sc-explore:hover{background:var(--bg2)}
 </style>
 </head>
 <body>
@@ -406,69 +299,26 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ OVERVIEW ══ -->
 <div id="ov" class="pg on">
-  <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">Jan – Sep 2026</span></div>
-
-  <!-- Seasonal Watch Banners -->
-  <div id="ov_sw_banner"></div>
-
-  <!-- Hero Row: Health Score + 8 KPIs -->
-  <div class="hero-row">
-    <div class="health-card">
-      <div class="hc-top">
-        <div class="hc-ring-wrap">
-          <svg viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="38" cy="38" r="31" stroke="var(--bdr)" stroke-width="7"/>
-            <circle id="ov_hs_arc" cx="38" cy="38" r="31" stroke="var(--blue)" stroke-width="7" stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="52.6" transform="rotate(-90 38 38)" style="transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1),stroke .4s"/>
-          </svg>
-          <div class="hc-ring-inner">
-            <div class="hc-num" id="ov_hs_num">—</div>
-            <div class="hc-den">/100</div>
-          </div>
-        </div>
-        <div>
-          <div class="hc-label">Plant Health</div>
-          <div class="hc-status" id="ov_hs_status" style="color:var(--amber)">—</div>
-          <div class="hc-period" id="ov_hs_period">YTD</div>
-        </div>
-      </div>
-      <div class="hc-sparkline">
-        <div class="hs-spk-label">Monthly CBG Achievement %</div>
-        <div id="ov_hs_spk"></div>
-      </div>
-      <div class="hc-comps-row" id="ov_hs_comps"></div>
-    </div>
-    <div class="kpi-panel">
-      <div class="kpi"><div class="kpi-bar" style="background:var(--blue)"></div><div class="kpi-label">Target CBG — Capacity</div><div class="kpi-value blue" id="ov_k1v">—</div><div class="kpi-sub" id="ov_k1s">5.4 TPD × days YTD</div></div>
-      <div class="kpi"><div class="kpi-bar" style="background:var(--blue)"></div><div class="kpi-label">Target CBG — Excel</div><div class="kpi-value blue" id="ov_k2v">—</div><div class="kpi-sub" id="ov_k2s">CBG Expected sheet YTD</div></div>
-      <div class="kpi"><div class="kpi-bar" style="background:var(--amber)"></div><div class="kpi-label">Actual CBG Produced</div><div class="kpi-value" id="ov_cbg">—</div><div class="kpi-sub" id="ov_cbg_s">YTD</div><div class="kpi-delta" id="ov_k3d">—</div><div class="kpi-pb"><div class="kpi-pb-fill" id="ov_k3pbf"></div></div></div>
-      <div class="kpi" style="border-right:none"><div class="kpi-bar" style="background:var(--green)"></div><div class="kpi-label">Total Revenue</div><div class="kpi-value green" id="ov_rev">—</div><div class="kpi-sub">CBG + SFOM + LFOM</div></div>
-      <div class="kpi" style="border-bottom:none"><div class="kpi-bar" style="background:var(--amber)"></div><div class="kpi-label">Net Margin</div><div class="kpi-value" id="ov_margin">—</div><div class="kpi-sub">Target: 45%</div><div class="kpi-delta" id="ov_k5d">—</div></div>
-      <div class="kpi" style="border-bottom:none"><div class="kpi-bar" style="background:var(--green)"></div><div class="kpi-label">Cost / kg CBG</div><div class="kpi-value" id="ov_cpk">—</div><div class="kpi-sub">Target: ≤₹75/kg</div><div class="kpi-delta" id="ov_k6d">—</div></div>
-      <div class="kpi" style="border-bottom:none"><div class="kpi-bar" style="background:var(--amber)"></div><div class="kpi-label">Plant Uptime</div><div class="kpi-value" id="ov_uptime">—</div><div class="kpi-sub">Comp ÷ PSA hrs · ≥90%</div></div>
-      <div class="kpi" style="border-bottom:none"><div class="kpi-bar" style="background:var(--amber)"></div><div class="kpi-label">OLR D1 / D2</div><div class="kpi-value" id="ov_olr">—</div><div class="kpi-sub">avg kg VS/m³/day</div></div>
-      <div class="kpi" style="border-right:none;border-bottom:none"><div class="kpi-bar" style="background:var(--green)"></div><div class="kpi-label">Avg CH4 Purity</div><div class="kpi-value" id="ov_ch4">—</div><div class="kpi-sub">Target ≥ 90%</div></div>
-    </div>
+  <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">Jan – Jun 2026</span></div>
+  <!-- Row A: Core financials -->
+  <div class="kg k4">
+    <div class="kc c"><div class="kl">CBG Production</div><div class="kv c" id="ov_cbg">—</div><div class="ks" id="ov_cbg_s">YTD</div></div>
+    <div class="kc g"><div class="kl">Revenue</div><div class="kv g" id="ov_rev">—</div><div class="ks">CBG + Manure</div></div>
+    <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="ov_margin">—</div><div class="ks">Target: 45%</div></div>
+    <div class="kc"><div class="kl">Cost / kg CBG</div><div class="kv" id="ov_cpk">—</div><div class="ks">Target: ₹75/kg</div></div>
   </div>
-
-  <!-- Best / Worst Highlights -->
-  <div class="hl-row" id="ov_hl_row">
-    <div class="hlc"><div class="hl-tag" id="ov_hl1l">Best Month</div><div><div class="hl-ttl" id="ov_hl1t">—</div><div class="hl-body" id="ov_hl1m">—</div></div></div>
-    <div class="hlc"><div class="hl-tag" id="ov_hl2l">Worst Month</div><div><div class="hl-ttl" id="ov_hl2t">—</div><div class="hl-body" id="ov_hl2m">—</div></div></div>
+  <!-- Row B: Operational health -->
+  <div class="kg" style="grid-template-columns:repeat(3,1fr);margin-top:8px">
+    <div class="kc"><div class="kl">Plant Uptime</div><div class="kv" id="ov_uptime">—</div><div class="ks">Comp ÷ PSA hrs · ≥90%</div></div>
+    <div class="kc"><div class="kl">OLR D1 / D2</div><div class="kv" id="ov_olr">—</div><div class="ks">avg kg VS/m³/day · design 2.5</div></div>
+    <div class="kc"><div class="kl">Avg CH4 Purity</div><div class="kv" id="ov_ch4">—</div><div class="ks">target ≥ 90%</div></div>
   </div>
-
-  <!-- Achievement Strip -->
-  <div class="strip-card">
-    <div class="strip-hdr">
-      <div class="strip-title">Monthly CBG Achievement vs Excel Target</div>
-      <div class="strip-meta" id="ov_strip_meta"></div>
-    </div>
-    <div id="ov_achieve" class="atiles"></div>
-  </div>
-
+  <div id="ov_main_content">
+  <!-- Monthly Achievement Strip -->
+  <div style="margin:12px 0 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)">Monthly CBG Achievement vs Target (1,30,000 kg)</div>
+  <div id="ov_achieve" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
   <!-- 3-Column Alert Strip -->
   <div id="ov_alerts" style="margin-bottom:14px"></div>
-
-  <div id="ov_main_content">
   <!-- Row 1: CBG Produced vs Dispatched -->
   <div class="cg c2">
     <div class="cc">
@@ -522,10 +372,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="stitle">Digester Health — Latest</div>
   <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px"><div id="ov_health"></div></div>
   </div><!-- /ov_main_content -->
-
-  <!-- Section Performance Grid -->
-  <div class="stitle" style="margin-top:16px">Section Performance</div>
-  <div class="ov-sgrid" id="ov_sgrid"></div>
 </div>
 
 <!-- ══ S1 FEEDSTOCK ══ -->
@@ -745,10 +591,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <span id="si_period" class="mo-badge">All Months</span>
   </div>
 
-  <!-- MONTHLY ACHIEVEMENT STRIP — before Best/Worst summary -->
-  <div style="margin:0 0 4px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--text3)">Monthly CBG Achievement vs Target (1,30,000 kg)</div>
-  <div id="si_achieve_strip" style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap"></div>
-
   <!-- FORWARD VIEW BANNER -->
   <div class="si-fwd" id="si_forward"></div>
 
@@ -770,9 +612,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
   <!-- SIGNAL CARDS: Best Day · Streak · PAF · Cap Util -->
   <div class="si-signals" id="si_signals_row"></div>
-
-  <!-- SEASONAL WATCH CARDS -->
-  <div id="si_watch_cards" style="margin-bottom:14px"></div>
 
   <!-- MONTH SCORE CARDS -->
   <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:8px">Navigate Months</div>
@@ -1156,39 +995,12 @@ function _labTableHtml(tv, periodNote){
       ${labRow('Interm. Alkalinity (IA)','< 1500 mg/L',tv.ia_ind_d1,ragIaInd(tv.ia_ind_d1),iaIndBar(tv.ia_ind_d1,ragIaInd(tv.ia_ind_d1)),tv.ia_ind_d2,ragIaInd(tv.ia_ind_d2),iaIndBar(tv.ia_ind_d2,ragIaInd(tv.ia_ind_d2)),0)}
       ${labRow('Total Alkalinity (TA)','mg/L',tv.ta_d1,'',taBar(tv.ta_d1,''),tv.ta_d2,'',taBar(tv.ta_d2,''),0)}
       ${grpHdr('C — Digester TS / VS',tsNote,'#00695C')}
-      ${(()=>{
-        // Paired cell: TS% D1 + VS% D1 in one column, TS% D2 + VS% D2 in other column
-        const pairedCell=(ts,vs,tsR,vsR,tsBar_,vsBar_)=>{
-          if(ts==null&&vs==null) return`<td style="padding:10px 14px;text-align:right;color:var(--text3);font-size:13px">—</td>`;
-          const tsCol=cv[tsR]||'var(--text2)', vsCol=cv[vsR]||'var(--text2)';
-          const tsBg=cbg[tsR]||'', vsBg=cbg[vsR]||'';
-          const tsBadge=tsR?`<span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:${tsCol};background:${tsBg};border:1px solid ${tsCol}33;padding:1px 5px;border-radius:3px;margin-left:4px">${lbl[tsR]||''}</span>`:'';
-          const vsBadge=vsR?`<span style="font-size:9px;font-weight:700;letter-spacing:.5px;color:${vsCol};background:${vsBg};border:1px solid ${vsCol}33;padding:1px 5px;border-radius:3px;margin-left:4px">${lbl[vsR]||''}</span>`:'';
-          return`<td style="padding:8px 14px;text-align:right;background:${tsBg||vsBg}">
-            <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:2px">
-              <span style="font-size:10px;color:var(--text3);margin-right:5px">TS%</span>
-              <span style="font-size:15px;font-weight:700;color:${tsCol};font-variant-numeric:tabular-nums">${ts!=null?(+ts).toFixed(1):'—'}</span>${tsBadge}
-            </div>${ts!=null?tsBar_:''}
-            <div style="display:flex;align-items:center;justify-content:flex-end;margin-top:5px;margin-bottom:2px">
-              <span style="font-size:10px;color:var(--text3);margin-right:5px">VS%</span>
-              <span style="font-size:15px;font-weight:700;color:${vsCol};font-variant-numeric:tabular-nums">${vs!=null?(+vs).toFixed(1):'—'}</span>${vsBadge}
-            </div>${vs!=null?vsBar_:''}
-          </td>`;
-        };
-        const pairedRow=(label,range,tsD1,vsD1,tsD2,vsD2)=>{
-          const tsR1=ragTs(tsD1),vsR1=ragVs(vsD1),tsR2=ragTs(tsD2),vsR2=ragVs(vsD2);
-          return`<tr style="border-bottom:1px solid var(--bdr)">
-            <td style="padding:10px 14px;font-size:11.5px;font-weight:600;color:var(--text);white-space:nowrap">${label}</td>
-            <td style="padding:6px 8px;font-size:10px;color:var(--text3);white-space:nowrap;vertical-align:top;padding-top:12px">TS: 5–10%<br>VS: &gt;55%</td>
-            ${pairedCell(tsD1,vsD1,tsR1,vsR1,tsBar(tsD1,tsR1),vsBar(vsD1,vsR1))}
-            <td style="width:1px;background:var(--bdr);padding:0"></td>
-            ${pairedCell(tsD2,vsD2,tsR2,vsR2,tsBar(tsD2,tsR2),vsBar(vsD2,vsR2))}
-          </tr>`;
-        };
-        return pairedRow('3M Sample',null,tv.ts_d1,tv.vs_d1,tv.ts_d2,tv.vs_d2)
-          +pairedRow('6M Sample',null,tv.ts_d1_6m,tv.vs_d1_6m,tv.ts_d2_6m,tv.vs_d2_6m)
-          +pairedRow('Sludge Line',null,tv.ts_d1_sl,tv.vs_d1_sl,tv.ts_d2_sl,tv.vs_d2_sl);
-      })()}
+      ${labRow('TS% — 3M','5 – 10%',tv.ts_d1,ragTs(tv.ts_d1),tsBar(tv.ts_d1,ragTs(tv.ts_d1)),tv.ts_d2,ragTs(tv.ts_d2),tsBar(tv.ts_d2,ragTs(tv.ts_d2)),1)}
+      ${labRow('VS% — 3M','> 55%',tv.vs_d1,ragVs(tv.vs_d1),vsBar(tv.vs_d1,ragVs(tv.vs_d1)),tv.vs_d2,ragVs(tv.vs_d2),vsBar(tv.vs_d2,ragVs(tv.vs_d2)),1)}
+      ${labRow('TS% — 6M','5 – 10%',tv.ts_d1_6m,ragTs(tv.ts_d1_6m),tsBar(tv.ts_d1_6m,ragTs(tv.ts_d1_6m)),tv.ts_d2_6m,ragTs(tv.ts_d2_6m),tsBar(tv.ts_d2_6m,ragTs(tv.ts_d2_6m)),1)}
+      ${labRow('VS% — 6M','> 55%',tv.vs_d1_6m,ragVs(tv.vs_d1_6m),vsBar(tv.vs_d1_6m,ragVs(tv.vs_d1_6m)),tv.vs_d2_6m,ragVs(tv.vs_d2_6m),vsBar(tv.vs_d2_6m,ragVs(tv.vs_d2_6m)),1)}
+      ${labRow('TS% — Sludge Line','5 – 10%',tv.ts_d1_sl,ragTs(tv.ts_d1_sl),tsBar(tv.ts_d1_sl,ragTs(tv.ts_d1_sl)),tv.ts_d2_sl,ragTs(tv.ts_d2_sl),tsBar(tv.ts_d2_sl,ragTs(tv.ts_d2_sl)),1)}
+      ${labRow('VS% — Sludge Line','> 55%',tv.vs_d1_sl,ragVs(tv.vs_d1_sl),vsBar(tv.vs_d1_sl,ragVs(tv.vs_d1_sl)),tv.vs_d2_sl,ragVs(tv.vs_d2_sl),vsBar(tv.vs_d2_sl,ragVs(tv.vs_d2_sl)),1)}
     </tbody>
   </table></div>`;
 }
@@ -2069,192 +1881,6 @@ function showDayPanel(sectionId){
 }
 
 // ═══ OVERVIEW ════════════════════════════════════════════════
-
-/* SVG icons for seasonal watch banners */
-const OV_SVG={
-  winter:`<svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="9" y1="1" x2="9" y2="17" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/><line x1="1" y1="9" x2="17" y2="9" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/><line x1="3.1" y1="3.1" x2="14.9" y2="14.9" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/><line x1="14.9" y1="3.1" x2="3.1" y2="14.9" stroke="#1e40af" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="9" r="2" fill="#1e40af"/></svg>`,
-  feedstock:`<svg viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9 16V7" stroke="#c2410c" stroke-width="1.5" stroke-linecap="round"/><path d="M9 7C9 7 5 5 3 2c3 0 5.5 1.5 6 5z" fill="#c2410c" opacity=".8"/><path d="M9 10C9 10 13 8 15 5c-3 0-5.5 1.5-6 5z" fill="#c2410c" opacity=".5"/></svg>`,
-};
-
-function renderOVSeasonalBanner(){
-  const wrap=document.getElementById('ov_sw_banner'); if(!wrap) return;
-  const mo=new Date().getMonth()+1; // current month number
-  const wins=[];
-  if(mo>=10||mo<=3) wins.push({cls:'winter',icon:OV_SVG.winter,title:'Winter Watch — Oct to Mar',chip:'Active Now',
-    text:'Digester temperature drops seasonally. Maintain D1/D2 above 33°C and monitor drain achievement — cold slurry viscosity reduces daily drain flow.',
-    metrics:[
-      {l:'Temp D1',v:(D.kpis?.temp_d1??'—')+(D.kpis?.temp_d1!=null?'°C':''),s:D.kpis?.temp_d1!=null?(D.kpis.temp_d1>=33?'ok':D.kpis.temp_d1>=32?'warn':'alert'):'ok'},
-      {l:'Temp D2',v:(D.kpis?.temp_d2??'—')+(D.kpis?.temp_d2!=null?'°C':''),s:D.kpis?.temp_d2!=null?(D.kpis.temp_d2>=33?'ok':D.kpis.temp_d2>=32?'warn':'alert'):'ok'},
-      {l:'Target Temp',v:'33–35°C',s:'ok'},
-    ]});
-  if(mo>=4&&mo<=10) wins.push({cls:'feedstock',icon:OV_SVG.feedstock,title:'Feedstock Potential Watch — Apr to Oct',chip:'Sep–Oct Critical',
-    text:'Biogas yield per MT of feed is historically lowest in Sep–Oct. Monitor biogas potential and OLR closely.',
-    metrics:[
-      {l:'OLR D1 (latest)',v:(D.kpis?.olr_d1?.toFixed(2)??'—'),s:D.kpis?.olr_d1!=null?(D.kpis.olr_d1>=2.0?'ok':D.kpis.olr_d1>=1.5?'warn':'alert'):'ok'},
-      {l:'OLR D2 (latest)',v:(D.kpis?.olr_d2?.toFixed(2)??'—'),s:D.kpis?.olr_d2!=null?(D.kpis.olr_d2>=2.0?'ok':D.kpis.olr_d2>=1.5?'warn':'alert'):'ok'},
-      {l:'Design Basis',v:'70 m³/MT',s:'ok'},
-    ]});
-  if(!wins.length){wrap.innerHTML='';return;}
-  wrap.innerHTML=wins.map(w=>`
-    <div class="sw-banner ${w.cls}">
-      <div class="sw-icon">${w.icon}</div>
-      <div class="sw-body">
-        <div class="sw-top"><div class="sw-ttl">${w.title}</div><div class="sw-chip">${w.chip}</div></div>
-        <div class="sw-txt">${w.text}</div>
-        <div class="sw-metrics">${w.metrics.map(m=>`<div class="sw-m"><div class="sw-ml">${m.l}</div><div class="sw-mv ${m.s}">${m.v}</div></div>`).join('')}</div>
-      </div>
-    </div>`).join('');
-}
-
-function achClsOV(p){return p>=95?'cv1':p>=85?'cv2':p>=75?'cv3':p>=65?'cv4':p>=50?'cv5':'cv6';}
-
-function spkSVGOV(vals,color,W,H){
-  W=W||200;H=H||38;
-  const p=5,n=vals.length;if(!n)return'';
-  const mn=Math.min(...vals)*.96,mx=Math.max(...vals)*1.04+.001;
-  const x=i=>p+i*(W-2*p)/(n-1);
-  const y=v=>H-p-(v-mn)/(mx-mn)*(H-2*p);
-  const pts=vals.map((v,i)=>`${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-  const uid='ovs'+Math.random().toString(36).slice(2,6);
-  let s=`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:${H}px;display:block;overflow:visible">`;
-  s+=`<defs><linearGradient id="${uid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".18"/><stop offset="100%" stop-color="${color}" stop-opacity=".02"/></linearGradient></defs>`;
-  s+=`<polygon points="${pts} ${x(n-1).toFixed(1)},${H-p} ${x(0).toFixed(1)},${H-p}" fill="url(#${uid})"/>`;
-  s+=`<polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
-  const lv=vals[n-1],avg=vals.reduce((a,b)=>a+b,0)/n;
-  s+=`<circle cx="${x(n-1).toFixed(1)}" cy="${y(lv).toFixed(1)}" r="4.5" fill="${color}" stroke="white" stroke-width="2"/>`;
-  return s+'</svg>';
-}
-
-function renderOVHealthScore(){
-  const cbgArr=D.M.cbg||[];
-  const tgtMonthly=TGT.cbg_month||130000;
-  const achPcts=cbgArr.map(v=>v>0?Math.round(v/tgtMonthly*100):null).filter(v=>v!=null);
-  if(!achPcts.length) return;
-  const avg=Math.round(achPcts.reduce((s,v)=>s+v,0)/achPcts.length);
-  const circ=194.8,offs=circ-(circ*avg/100);
-  const col=avg>=90?'var(--green)':avg>=75?'var(--amber)':'var(--red)';
-  const st=avg>=90?'Good':avg>=75?'Caution':'Alert';
-  const arc=document.getElementById('ov_hs_arc');
-  if(arc){arc.style.strokeDashoffset=offs;arc.style.stroke=col;}
-  const numEl=document.getElementById('ov_hs_num');if(numEl) numEl.textContent=avg;
-  const stEl=document.getElementById('ov_hs_status');if(stEl){stEl.textContent=st;stEl.style.color=col;}
-  const perEl=document.getElementById('ov_hs_period');
-  if(perEl) perEl.textContent=(MONTHS.length>0?'YTD · '+MONTHS[0]+'–'+MONTHS[MONTHS.length-1]+' 2026':'YTD');
-  const spkEl=document.getElementById('ov_hs_spk');
-  if(spkEl) spkEl.innerHTML=spkSVGOV(achPcts,col,180,36);
-  // Components
-  const compEl=document.getElementById('ov_hs_comps');
-  if(!compEl) return;
-  const compArr=D.M.comp_hrs||[], psaArr=D.M.psa_hrs||[];
-  const totC=sumA(compArr),totP=sumA(psaArr);
-  const uptPct=totP>0?Math.round(totC/totP*100):null;
-  const avgCh4v=(D.M.ch4||[]).filter(v=>v!=null&&v>0);
-  const ch4Pct=avgCh4v.length?Math.round(avgCh4v.reduce((a,b)=>a+b,0)/avgCh4v.length*(avgCh4v[0]>1?1:100)):null;
-  const avgDispArr=D.M.dispatched||[],avgCbgArr=D.M.cbg||[];
-  const totCBG=sumA(avgCbgArr),totDisp=sumA(avgDispArr);
-  const dispPct=totCBG>0?Math.round(totDisp/totCBG*100):null;
-  const comps=[
-    {l:'CBG Achiev',v:avg,ok:avg>=85?1:avg>=70?0:-1},
-    {l:'Dispatch',v:dispPct,ok:dispPct!=null?(dispPct>=95?1:dispPct>=85?0:-1):0},
-    {l:'PSA/Uptime',v:uptPct,ok:uptPct!=null?(uptPct>=90?1:uptPct>=70?0:-1):0},
-    {l:'CH4 Purity',v:ch4Pct,ok:ch4Pct!=null?(ch4Pct>=90?1:ch4Pct>=80?0:-1):0},
-  ];
-  compEl.innerHTML=comps.map(c=>{
-    const clr=c.ok===1?'var(--green)':c.ok===-1?'var(--red)':'var(--amber)';
-    return`<div class="hcc"><div class="hcc-l">${c.l}</div><div class="hcc-v" style="color:${clr}">${c.v!=null?c.v+'%':'—'}</div><div class="hcc-bar"><div class="hcc-fill" style="width:${c.v||0}%;background:${clr}"></div></div></div>`;
-  }).join('');
-}
-
-function renderOVSectionGrid(){
-  const sgrid=document.getElementById('ov_sgrid');if(!sgrid)return;
-  const mo=curMonth;
-  const vk=mo==='ALL'?'ytd':'mo';
-  const secDefs=[
-    {id:'s1',num:'S1',nm:'Feedstock',person:'Mr. Vivek Kumar',clr:'var(--green)',
-     kpis:()=>{
-       const pmF=mo==='ALL'?sumA(D.M.pm_feed||[]):(D.M.pm_feed||[])[MONTHS.indexOf(mo)]||0;
-       const cdF=mo==='ALL'?sumA(D.M.cd_feed||[]):(D.M.cd_feed||[])[MONTHS.indexOf(mo)]||0;
-       return [{l:'Pressmud Fed',v:fmtN(pmF)+' MT',c:''},{l:'Cow Dung Fed',v:fmtN(cdF)+' MT',c:''}];
-     },st:()=>'g'},
-    {id:'s2',num:'S2',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin',clr:'var(--blue)',
-     kpis:()=>{
-       const av=(a)=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
-       const o1=av(D.M.d1_olr),o2=av(D.M.d2_olr);
-       return [{l:'OLR D1 avg',v:o1!=null?o1.toFixed(2):'—',c:o1!=null?(o1>=2.0?'g':o1>=1.5?'a':'r'):''},
-               {l:'OLR D2 avg',v:o2!=null?o2.toFixed(2):'—',c:o2!=null?(o2>=2.0?'g':o2>=1.5?'a':'r'):''}];
-     },st:()=>{const a=D.kpis;if(!a)return'g';const bad=(a.ph_d1!=null&&(a.ph_d1<6.8||a.ph_d1>7.8));return bad?'a':'g';}},
-    {id:'s3',num:'S3',nm:'Production',person:'Sohan Lal',clr:'var(--teal)',
-     kpis:()=>{
-       const d1=mo==='ALL'?sumA(D.M.d1_bg||[]):(D.M.d1_bg||[])[MONTHS.indexOf(mo)]||0;
-       const d2=mo==='ALL'?sumA(D.M.d2_bg||[]):(D.M.d2_bg||[])[MONTHS.indexOf(mo)]||0;
-       return [{l:'D1 Biogas',v:fmtN(d1)+' m³',c:''},{l:'D2 Biogas',v:fmtN(d2)+' m³',c:''}];
-     },st:()=>'g'},
-    {id:'s4',num:'S4',nm:'Purification',person:'Mr. Bobby',clr:'var(--purple)',
-     kpis:()=>{
-       const cbgArr2=mo==='ALL'?D.M.cbg:(dArr('psa','cbg_tot'));
-       const cbg=sumA(cbgArr2||[]);
-       const ch4v2=(D.M.ch4||[]).filter(v=>v!=null&&v>0);
-       const ch4=ch4v2.length?ch4v2.reduce((a,b)=>a+b,0)/ch4v2.length*(ch4v2[0]>1?1:100):null;
-       return [{l:'CBG Produced',v:fmtN(cbg)+' kg',c:''},{l:'CH4 Purity',v:ch4!=null?ch4.toFixed(1)+'%':'—',c:ch4!=null?(ch4>=90?'g':ch4>=80?'a':'r'):''}];
-     },st:()=>{
-       const c2=D.M.comp_hrs||[],p2=D.M.psa_hrs||[];
-       const tC=sumA(c2),tP=sumA(p2);const u=tP>0?tC/tP*100:null;
-       return u!=null?(u>=90?'g':u>=70?'a':'r'):'g';
-     }},
-    {id:'s5',num:'S5',nm:'Compressor',person:'Mr. Rajendra',clr:'var(--teal2,#0e9488)',
-     kpis:()=>{
-       const cbg2=mo==='ALL'?sumA(D.M.cbg||[]):0;
-       const disp2=mo==='ALL'?sumA(D.M.dispatched||[]):0;
-       const rate=cbg2>0?Math.round(disp2/cbg2*100):null;
-       return [{l:'Dispatched',v:fmtN(disp2)+' kg',c:''},{l:'Dispatch Rate',v:rate!=null?rate+'%':'—',c:rate!=null?(rate>=95?'g':rate>=85?'a':'r'):''}];
-     },st:()=>'g'},
-    {id:'s6',num:'S6',nm:'Manure',person:'Mr. Vivek Kumar',clr:'var(--lime,#65a30d)',
-     kpis:()=>{
-       const sfom=mo==='ALL'?sumA((D.M.d1_sfom||[]).map((v,i)=>(v||0)+(D.M.d2_sfom||[])[i]||0)):0;
-       const lfom=mo==='ALL'?sumA((D.M.d1_lfom||[]).map((v,i)=>(v||0)+(D.M.d2_lfom||[])[i]||0)):0;
-       return [{l:'SFOM',v:fmtN(sfom)+' m³',c:''},{l:'LFOM',v:fmtN(lfom)+' m³',c:''}];
-     },st:()=>'g'},
-    {id:'s7',num:'S7',nm:'Sales',person:'Mr. Vivek Kumar',clr:'var(--amber)',
-     kpis:()=>{
-       const rev2=mo==='ALL'?D.finance.ytd_rev:0;
-       return [{l:'Total Revenue',v:fmtL(rev2),c:'g'},{l:'CBG Dispatched',v:fmtN(sumA(D.M.dispatched||[]))+' kg',c:''}];
-     },st:()=>'g'},
-    {id:'s8',num:'S8',nm:'Finance',person:'Management',clr:'var(--rose,#e11d48)',
-     kpis:()=>{
-       const idx2=MONTHS.indexOf(mo);
-       const margin2=mo==='ALL'
-         ?(D.finance.ytd_rev>0?((D.finance.ytd_rev-D.finance.ytd_cost)/D.finance.ytd_rev*100).toFixed(1):null)
-         :(idx2>=0?(D.M.margin||[])[idx2]||null:null);
-       const cpk2=D.kpis?.cost_kg||null;
-       return [{l:'Net Margin',v:margin2!=null?margin2+'%':'—',c:margin2!=null?(+margin2>=40?'g':+margin2>=25?'a':'r'):''},
-               {l:'Cost / kg',v:cpk2!=null?'₹'+cpk2.toFixed(1):D.kpis?.ytd_cbg>0?'₹'+(D.finance.ytd_cost/D.kpis.ytd_cbg).toFixed(1):'—',c:'g'}];
-     },st:()=>{
-       const idx3=MONTHS.indexOf(mo);
-       const m2=mo==='ALL'
-         ?(D.finance.ytd_rev>0?((D.finance.ytd_rev-D.finance.ytd_cost)/D.finance.ytd_rev*100):null)
-         :(idx3>=0?(D.M.margin||[])[idx3]||null:null);
-       return m2!=null?(m2>=40?'g':m2>=25?'a':'r'):'a';
-     }},
-  ];
-  const nav_section={s1:'s1',s2:'s2',s3:'s3',s4:'s4',s5:'s5',s6:'s6',s7:'s7',s8:'s8'};
-  const stlbl={g:'Good',a:'Caution',r:'Alert'};
-  sgrid.innerHTML=secDefs.map(s=>{
-    const kpis=s.kpis();const st=s.st();
-    return`<div class="ov-sc" style="border-top-color:${s.clr}" onclick="(function(){const b=document.querySelector('[data-sec=${s.id}]');if(b)show('${s.id}',b);else{document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.getElementById('${s.id}').classList.add('on');curSection='${s.id}';try{sectionRender['${s.id}']&&sectionRender['${s.id}']();}catch(e){console.error(e);}}})()">`
-      <div class="ov-sc-hdr">
-        <div class="ov-sc-icon" style="background:${s.clr}">${s.num}</div>
-        <div style="flex:1;min-width:0">
-          <div class="ov-sc-nm">${s.nm}</div>
-          <div class="ov-sc-person">${s.person}</div>
-        </div>
-        <div class="ov-sc-status ${st}">${stlbl[st]}</div>
-      </div>
-      <div class="ov-sc-kpis">${kpis.map(k=>`<div class="ov-kv-row"><span class="ov-kv-l">${k.l}</span><span class="ov-kv-v ${k.c}">${k.v}</span></div>`).join('')}</div>
-      <div class="ov-sc-explore">Explore ${s.nm} <span>→</span></div>
-    </div>`;
-  }).join('');
-}
-
 function renderOV(){
   showDayPanel('ov');
   const mc=document.getElementById('ov_main_content');
@@ -2310,11 +1936,8 @@ function renderOV(){
         if(charts[c.id]){try{charts[c.id].destroy();}catch(e){}charts[c.id]=null;}
         const cc=c.closest('.cc'); if(cc) cc.style.display='none';
       });
-      const achEl=document.getElementById('ov_achieve'); if(achEl) achEl.closest('.strip-card').style.display='none';
+      const achEl=document.getElementById('ov_achieve'); if(achEl) achEl.style.display='none';
       const alertEl=document.getElementById('ov_alerts'); if(alertEl) alertEl.style.display='none';
-      const hlRowD=document.getElementById('ov_hl_row'); if(hlRowD) hlRowD.style.display='none';
-      const sgridD=document.getElementById('ov_sgrid'); if(sgridD) sgridD.style.display='none';
-      const swBannerD=document.getElementById('ov_sw_banner'); if(swBannerD) swBannerD.style.display='none';
 
       // Inject day summary grid into mc
       let dayGrid=document.getElementById('ov_day_grid');
@@ -2357,74 +1980,32 @@ function renderOV(){
     return;
   }
   // On returning to ALL/monthly view, restore hidden elements
-  const sdOv2=document.getElementById('sd_ov'); if(sdOv2) sdOv2.style.display='none';
-  const achEl2=document.getElementById('ov_achieve'); if(achEl2){const sc=achEl2.closest('.strip-card');if(sc)sc.style.display='';achEl2.style.display='flex';}
+  const sdOv2=document.getElementById('sd_ov'); if(sdOv2) sdOv2.style.display='none'; // keep hidden (month view uses ov_main_content)
+  const achEl2=document.getElementById('ov_achieve'); if(achEl2) achEl2.style.display='flex';
   const alertEl2=document.getElementById('ov_alerts'); if(alertEl2) alertEl2.style.display='';
   const dayGrid2=document.getElementById('ov_day_grid'); if(dayGrid2) dayGrid2.innerHTML='';
   if(mc) mc.style.display='';
-  const hlRow=document.getElementById('ov_hl_row'); if(hlRow) hlRow.style.display='';
-  const sgridR=document.getElementById('ov_sgrid'); if(sgridR) sgridR.style.display='';
-  const swBannerR=document.getElementById('ov_sw_banner'); if(swBannerR) swBannerR.style.display='';
   const mo=curMonth;
   // Update period badge
   const periodLbl=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
   document.getElementById('ov_period').textContent=periodLbl;
   document.getElementById('ov_cbg_s').textContent=mo==='ALL'?'YTD '+periodLbl:mo+' 2026 total';
-
-  // Seasonal banners
-  renderOVSeasonalBanner();
-
-  // Health score ring
-  if(mo==='ALL') renderOVHealthScore();
-
   let cbg,rev,cost,margin;
   const cbgArr=D.M.cbg||[];
-  const idx=MONTHS.indexOf(mo);
   if(mo==='ALL'){
     cbg=sumA(cbgArr); rev=D.finance.ytd_rev; cost=D.finance.ytd_cost;
     margin=rev>0?((rev-cost)/rev*100).toFixed(1):0;
-    // Capacity target: 5.4 TPD × days YTD
-    const dayCount=MONTHS.length*30;
-    const capTgt=Math.round(5400*dayCount);
-    const excelTgt=TGT.cbg_total||0;
-    const k1v=document.getElementById('ov_k1v'); if(k1v) k1v.textContent=fmtN(capTgt)+' kg';
-    const k1s=document.getElementById('ov_k1s'); if(k1s) k1s.textContent=`5.4 TPD × ${dayCount} days YTD`;
-    const k2v=document.getElementById('ov_k2v'); if(k2v) k2v.textContent=fmtN(excelTgt)+' kg';
-    const k2s=document.getElementById('ov_k2s'); if(k2s) k2s.textContent='CBG Expected sheet YTD';
-    const achPct2=excelTgt>0?Math.round(cbg/excelTgt*100):null;
-    document.getElementById('ov_cbg').innerHTML=fmtN(cbg)+' kg';
+    const achPct=Math.round(cbg/TGT.cbg_total*100);
+    document.getElementById('ov_cbg').innerHTML=fmtN(cbg)+' nm³ '+tgtBadge(cbg,TGT.cbg_total);
     document.getElementById('ov_rev').textContent=fmtL(rev);
     document.getElementById('ov_margin').textContent=margin+'%';
-    const k3dEl=document.getElementById('ov_k3d'); if(k3dEl){k3dEl.textContent=achPct2!=null?achPct2+'% of Excel target':'—';k3dEl.className='kpi-delta '+(achPct2!=null?(achPct2>=90?'up':'wa'):'');}
-    const pbf=document.getElementById('ov_k3pbf'); if(pbf){pbf.style.width=(achPct2||0)+'%';pbf.style.background=achPct2!=null?(achPct2>=90?'var(--green)':achPct2>=70?'var(--amber)':'var(--red)'):'var(--bg3)';}
-    const k5dEl=document.getElementById('ov_k5d'); if(k5dEl){const md=+margin;k5dEl.textContent=md>=45?'On target':`▼ ${(45-md).toFixed(1)}% below target`;k5dEl.className='kpi-delta '+(md>=45?'up':md>=35?'wa':'dn');}
-    // Color KPI values
-    const cbgEl2=document.getElementById('ov_cbg');if(cbgEl2) cbgEl2.className='kpi-value '+(achPct2!=null?(achPct2>=90?'green':achPct2>=70?'amber':'red'):'amber');
-    const mrEl2=document.getElementById('ov_margin');if(mrEl2) mrEl2.className='kpi-value '+(+margin>=40?'green':+margin>=25?'amber':'red');
-    // Best/worst months
-    if(cbgArr.length>0){
-      const bi=cbgArr.indexOf(Math.max(...cbgArr.filter(v=>v>0)));
-      const wi=cbgArr.indexOf(Math.min(...cbgArr.filter(v=>v>0)));
-      if(bi>=0){
-        const bm=MONTHS[bi];const bv=cbgArr[bi];const bpct=TGT.cbg_month>0?Math.round(bv/TGT.cbg_month*100):null;
-        const hl1t=document.getElementById('ov_hl1t');if(hl1t)hl1t.textContent=bm+' 2026';
-        const hl1m=document.getElementById('ov_hl1m');if(hl1m)hl1m.innerHTML=`CBG ${fmtN(bv)} kg · Achievement <strong>${bpct!=null?bpct+'%':'—'}</strong>`;
-      }
-      if(wi>=0){
-        const wm=MONTHS[wi];const wv=cbgArr[wi];const wpct=TGT.cbg_month>0?Math.round(wv/TGT.cbg_month*100):null;
-        const hl2t=document.getElementById('ov_hl2t');if(hl2t)hl2t.textContent=wm+' 2026';
-        const hl2m=document.getElementById('ov_hl2m');if(hl2m)hl2m.innerHTML=`CBG ${fmtN(wv)} kg · Achievement <strong>${wpct!=null?wpct+'%':'—'}</strong>`;
-      }
-    }
   } else {
-    const prev=idx>0?cbgArr[idx-1]:null;
+    const idx=MONTHS.indexOf(mo); const prev=idx>0?cbgArr[idx-1]:null;
     cbg=sumA(dArr('psa','cbg_tot')); rev=D.M.total_rev[idx]; cost=D.M.total_cost[idx];
     margin=D.M.margin[idx];
-    document.getElementById('ov_cbg').innerHTML=fmtN(cbg)+' kg '+tgtBadge(cbg,TGT.cbg_month)+momArrow(cbg,prev);
+    document.getElementById('ov_cbg').innerHTML=fmtN(cbg)+' nm³ '+tgtBadge(cbg,TGT.cbg_month)+momArrow(cbg,prev);
     document.getElementById('ov_rev').innerHTML=fmtL(rev)+momArrow(rev,idx>0?D.M.total_rev[idx-1]:null);
-    document.getElementById('ov_margin').innerHTML=(margin||0)+'%'+momArrow(+(margin||0),idx>0?D.M.margin[idx-1]:null);
-    // Hide highlights in month view
-    if(hlRow) hlRow.style.display='none';
+    document.getElementById('ov_margin').innerHTML=margin+'%'+momArrow(+margin,idx>0?D.M.margin[idx-1]:null);
   }
   const labels   = mo==='ALL'?MONTHS:dDates('psa');
   const lblFeed  = mo==='ALL'?MONTHS:dDates('feed');
@@ -2532,28 +2113,19 @@ function renderOV(){
     ch4El.style.color=ch4Pct!=null?(ch4Pct>=90?'var(--green)':ch4Pct>=80?'var(--amber)':'var(--red)'):'';
   }
 
-  // ── Monthly Achievement Strip (Version 8 atm tiles) ────────
+  // ── Monthly Achievement Strip ───────────────────────────────
   const achEl=document.getElementById('ov_achieve');
   if(achEl){
     const cbgM2=D.M.cbg||[];
-    const achPcts2=cbgM2.map(v=>v>0?Math.round(v/TGT.cbg_month*100):null);
-    const validPcts=achPcts2.filter(v=>v!=null);
-    const avgP=validPcts.length?Math.round(validPcts.reduce((s,v)=>s+v,0)/validPcts.length):null;
-    const bi2=achPcts2.reduce((a,v,i)=>v!=null&&v>(achPcts2[a]??-1)?i:a,0);
-    const wi2=achPcts2.reduce((a,v,i)=>v!=null&&v<(achPcts2[a]??999)?i:a,0);
-    const smEl=document.getElementById('ov_strip_meta');
-    if(smEl) smEl.textContent=avgP!=null?`YTD Avg: ${avgP}% · Best: ${MONTHS[bi2]||'—'} ${achPcts2[bi2]||'—'}% · Worst: ${MONTHS[wi2]||'—'} ${achPcts2[wi2]||'—'}%`:'';
-    const ALL_MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    achEl.innerHTML=ALL_MONTHS.map(m=>{
-      const i=MONTHS.indexOf(m);
-      if(i<0) return`<div class="atm fut"><div class="atm-m">${m}</div><div class="atm-p">—</div></div>`;
-      const v=cbgM2[i]||0,pct=achPcts2[i];
-      const sel=(mo!=='ALL'&&mo===m)?' sel':'';
-      const dim=(mo!=='ALL'&&mo!==m)?'opacity:.45':'';
-      return`<div class="atm ${pct!=null?achClsOV(pct):'fut'}${sel}" style="${dim}" onclick="setMonth('${m}')">
-        <div class="atm-m">${m}</div>
-        <div class="atm-p">${pct!=null?pct+'%':'—'}</div>
-        <div class="atm-k">${v>0?Math.round(v/1000)+'T':''}</div>
+    achEl.innerHTML=MONTHS.map((m,i)=>{
+      const v=cbgM2[i]||0;
+      const pct=v>0?Math.round(v/TGT.cbg_month*100):null;
+      const bg=pct==null?'var(--bg3)':pct>=90?'#16a34a':pct>=70?'#d97706':'#dc2626';
+      const dim=(mo!=='ALL'&&mo!==m)?'opacity:.45;':'';
+      return`<div style="flex:1;min-width:60px;text-align:center;background:${bg};color:${pct==null?'var(--text2)':'#fff'};border-radius:7px;padding:7px 4px;cursor:pointer;transition:opacity .2s;${dim}" onclick="setMonth('${m}')">
+        <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">${m}</div>
+        <div style="font-size:14px;font-weight:800;line-height:1.2">${pct!=null?pct+'%':'—'}</div>
+        <div style="font-size:9px;opacity:.85">${v>0?fmtN(Math.round(v/1000))+'k kg':'No data'}</div>
       </div>`;
     }).join('');
   }
@@ -2594,9 +2166,6 @@ function renderOV(){
       ])}
     </div>`;
   }
-  // ── Section Performance Grid ───────────────────────────────
-  renderOVSectionGrid();
-
   healthRows('ov_health');
 }
 
@@ -2645,57 +2214,31 @@ function renderS1(){
   };
   const procEl=document.getElementById('s1_procurement');
   if(procEl){
-    // Unified 6-column procurement table: Name | Procured | Fed | Stock | Procured Cost | Feed Cost
-    const stockKeys={pm:'pm',gs:'gs',csl:'csl',cd:'cd',sg:'sg'};
-    const fedKeys={pm:'pm_feed',gs:'gs_feed',csl:'csl_feed',cd:'cd_feed',sg:'sg_feed'};
-    const costRates={pm:90,gs:220,csl:270,cd:45,sg:80}; // ₹/MT or ₹/KL approx
-    const catKeys={pm:'pm',gs:'gs',csl:'csl',cd:'cd',sg:'sg'};
-    const unified6Rows=procRows.map(r=>{
-      const ck=catKeys[r.k.replace('_in','')]||r.k.replace('_in','');
-      const procured=getIn(r.k);
-      const fed=sumA(mo==='ALL'?mArr(fedKeys[ck]):dArr('feed',fedKeys[ck]));
-      const stock=(D.stock||{})[ck]||0;
-      const rate=costRates[ck]||0;
-      const procCost=procured>0&&rate>0?procured*rate:null;
-      const feedCost=fed>0&&rate>0?fed*rate:null;
-      const fmtQty=v=>v>0?v.toFixed(1)+' '+r.u:'—';
-      const fmtCost=v=>v!=null&&v>0?'₹'+fmtN(Math.round(v)):'—';
+    // Procurement summary table + vendor breakdown side by side
+    const procSummary=procRows.map(r=>{
+      const v=getIn(r.k);
       return`<tr>
-        <td style="font-weight:800;color:${r.clr}">${r.nm}</td>
-        <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right;color:var(--blue)">${fmtQty(procured)}</td>
-        <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right;color:var(--teal)">${fmtQty(fed)}</td>
-        <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right;color:${stock<10?'var(--red)':stock<50?'var(--amber)':'var(--green)'}">${stock.toFixed(1)} ${r.u}</td>
-        <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right;color:var(--amber)">${fmtCost(procCost)}</td>
-        <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right;color:var(--orange,#E65100)">${fmtCost(feedCost)}</td>
+        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+        <td style="font-variant-numeric:tabular-nums;font-weight:700">${v>0?fmtN(v)+' '+r.u:'—'}</td>
       </tr>`;
     }).join('');
-    // Totals row
-    let totProc=0,totFed=0,totProcCost=0,totFeedCost=0;
-    procRows.forEach(r=>{
-      const ck=catKeys[r.k.replace('_in','')]||r.k.replace('_in','');
-      const p=getIn(r.k), f=sumA(mo==='ALL'?mArr(fedKeys[ck]):dArr('feed',fedKeys[ck]));
-      totProc+=p; totFed+=f;
-      totProcCost+=p*(costRates[ck]||0); totFeedCost+=f*(costRates[ck]||0);
-    });
-    procEl.innerHTML=`<table class="tbl"><thead><tr>
-      <th>Feedstock</th>
-      <th style="text-align:right;color:var(--blue)">Procured</th>
-      <th style="text-align:right;color:var(--teal)">Fed</th>
-      <th style="text-align:right">Stock</th>
-      <th style="text-align:right;color:var(--amber)">Procured Cost</th>
-      <th style="text-align:right;color:var(--orange,#E65100)">Feed Cost</th>
-    </tr></thead>
-    <tbody>${unified6Rows}
-    <tr style="border-top:2px solid var(--bdr);font-weight:800">
-      <td>TOTAL</td>
-      <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--blue)">${totProc>0?fmtN(totProc.toFixed(0)):' —'}</td>
-      <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--teal)">${totFed>0?fmtN(totFed.toFixed(0)):' —'}</td>
-      <td></td>
-      <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--amber)">${totProcCost>0?'₹'+fmtN(Math.round(totProcCost)):' —'}</td>
-      <td style="text-align:right;font-variant-numeric:tabular-nums;color:var(--orange,#E65100)">${totFeedCost>0?'₹'+fmtN(Math.round(totFeedCost)):' —'}</td>
-    </tr>
-    </tbody></table>
-    <div style="margin-top:6px;font-size:9px;color:var(--text3)">* Costs are estimates based on standard rates (PM ₹90, CD ₹45, CSL ₹270, GS ₹220, SG ₹80 per MT/KL). Actual costs may vary by vendor and season.</div>`;
+    // vendor blocks per feedstock (PM has most vendors)
+    const vCats=[{nm:'Pressmud',k:'pm',u:'MT'},{nm:'Cow Dung',k:'cd',u:'MT'},{nm:'CSL',k:'csl',u:'KL'},{nm:'Grain Syrup',k:'gs',u:'—'},{nm:'Spent Grain',k:'sg',u:'MT'}];
+    const vendorBlocks=vCats.map(c=>`
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid var(--bdr)">${c.nm}${c.k==='gs'?' <span style="font-weight:400;font-style:italic;text-transform:none">(direct procurement)</span>':''}</div>
+        ${c.k==='gs'?'<span style="font-size:10px;color:var(--text3)">Vendor tracking not available in supply sheet</span>':vendorForPeriod(c.k)}
+      </div>`).join('');
+    procEl.innerHTML=`<div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start">
+      <div>
+        <table class="tbl"><thead><tr><th>Feedstock</th><th>Received</th></tr></thead>
+        <tbody>${procSummary}</tbody></table>
+      </div>
+      <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px;max-height:320px;overflow-y:auto">
+        <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:10px">VENDOR-WISE SUPPLY</div>
+        ${vendorBlocks}
+      </div>
+    </div>`;
   }
 
   // ── 2. Feedstock Fed — D1/D2 split table ─────────────────────
@@ -4608,82 +4151,6 @@ function getProjection(mo){
 }
 
 // ── New SI render functions ───────────────────────────────────────
-function renderSIAchieveStrip(){
-  const el=document.getElementById('si_achieve_strip'); if(!el) return;
-  const cbgM=D.M.cbg||[];
-  el.innerHTML=MONTHS.map((m,i)=>{
-    const v=cbgM[i]||0;
-    const pct=v>0?Math.round(v/TGT.cbg_month*100):null;
-    const bg=pct==null?'var(--bg3)':pct>=90?'#16a34a':pct>=70?'#d97706':'#dc2626';
-    const dim=(curMonth!=='ALL'&&curMonth!==m)?'opacity:.45;':'';
-    return`<div style="flex:1;min-width:60px;text-align:center;background:${bg};color:${pct==null?'var(--text2)':'#fff'};border-radius:7px;padding:7px 4px;cursor:pointer;transition:opacity .2s;${dim}" onclick="setMonth('${m}')">
-      <div style="font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase">${m}</div>
-      <div style="font-size:14px;font-weight:800;line-height:1.2">${pct!=null?pct+'%':'—'}</div>
-      <div style="font-size:9px;opacity:.85">${v>0?fmtN(Math.round(v/1000))+'k kg':'No data'}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderSIWatchCards(){
-  const el=document.getElementById('si_watch_cards'); if(!el) return;
-  // Determine active season from current month list
-  const lastMo=MONTHS_LIST[MONTHS_LIST.length-1]||'';
-  const WINTER_MONTHS=['Oct','Nov','Dec','Jan','Feb','Mar'];
-  const FEED_MONTHS=['Apr','May','Jun','Jul','Aug','Sep','Oct'];
-  const isWinter=WINTER_MONTHS.includes(lastMo);
-  const isFeedSeason=FEED_MONTHS.includes(lastMo);
-
-  const watchCard=(icon,title,subtitle,bullets,borderClr,bgClr)=>`
-    <div style="background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid ${borderClr};border-radius:8px;padding:14px 16px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <span style="font-size:18px">${icon}</span>
-        <div>
-          <div style="font-size:11px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:${borderClr}">${title}</div>
-          <div style="font-size:10px;color:var(--text3);margin-top:1px">${subtitle}</div>
-        </div>
-      </div>
-      ${bullets.map(([lbl,val,c])=>`<div style="display:flex;justify-content:space-between;margin-bottom:3px;font-size:11px;border-bottom:1px solid var(--bdr);padding-bottom:3px">
-        <span style="color:var(--text3)">${lbl}</span>
-        <b style="color:${c||'var(--text1)'}">${val}</b>
-      </div>`).join('')}
-    </div>`;
-
-  const cbgM=D.M.cbg||[];
-  const winterIdxs=MONTHS.reduce((acc,m,i)=>WINTER_MONTHS.includes(m)?[...acc,i]:acc,[]);
-  const feedIdxs=MONTHS.reduce((acc,m,i)=>FEED_MONTHS.includes(m)?[...acc,i]:acc,[]);
-  const avg=(arr,idxs)=>{const f=idxs.map(i=>arr[i]).filter(v=>v>0);return f.length?f.reduce((a,b)=>a+b,0)/f.length:null;};
-  const winterAvg=avg(cbgM,winterIdxs);
-  const feedAvg=avg(cbgM,feedIdxs);
-
-  const ch4Arr=D.M.ch4||[];
-  const latCh4=ch4Arr.filter(v=>v>0).slice(-1)[0];
-  const olrD1=D.M.d1_olr||[], olrD2=D.M.d2_olr||[];
-  const latOlr1=olrD1.filter(v=>v>0).slice(-1)[0], latOlr2=olrD2.filter(v=>v>0).slice(-1)[0];
-
-  const pmStock=D.stock?.pm||0;
-  const cdStock=D.stock?.cd||0;
-
-  const winterActive=isWinter?'ACTIVE NOW':'Oct – Mar';
-  const feedActive=isFeedSeason?'ACTIVE NOW':'Apr – Oct';
-  const winterBdr=isWinter?'#1565C0':'var(--bdr)';
-  const feedBdr=isFeedSeason?'#2E7D32':'var(--bdr)';
-
-  el.innerHTML=`<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-    ${watchCard('❄️','Winter Watch — Oct to Mar',winterActive,[
-      ['Season Status',winterActive,isWinter?'var(--blue)':'var(--text2)'],
-      ['CH4 Purity (latest)',latCh4!=null?latCh4.toFixed(1)+'%':'—',latCh4>=90?'var(--green)':latCh4>=85?'var(--amber)':'var(--red)'],
-      ['Avg CBG (winter months)',winterAvg!=null?fmtN(Math.round(winterAvg))+' kg':'—',winterAvg&&winterAvg>=TGT.cbg_month*0.9?'var(--green)':'var(--amber)'],
-      ['OLR D1 / D2 (latest)',`${latOlr1!=null?latOlr1.toFixed(2):'—'} / ${latOlr2!=null?latOlr2.toFixed(2):'—'}`,(latOlr1<2||latOlr2<2)?'var(--amber)':'var(--green)'],
-    ],winterBdr,'var(--bg2)')}
-    ${watchCard('🌱','Feedstock Potential Watch — Apr to Oct',feedActive,[
-      ['Season Status',feedActive,isFeedSeason?'var(--green)':'var(--text2)'],
-      ['Pressmud Stock',pmStock.toFixed(0)+' MT',pmStock>=500?'var(--green)':pmStock>=200?'var(--amber)':'var(--red)'],
-      ['Cow Dung Stock',cdStock.toFixed(0)+' MT',cdStock>=40?'var(--green)':cdStock>=15?'var(--amber)':'var(--red)'],
-      ['Avg CBG (feed season months)',feedAvg!=null?fmtN(Math.round(feedAvg))+' kg':'—',feedAvg&&feedAvg>=TGT.cbg_month*0.9?'var(--green)':'var(--amber)'],
-    ],feedBdr,'var(--bg2)')}
-  </div>`;
-}
-
 function renderSIForward(mo,day){
   const el=document.getElementById('si_forward'); if(!el)return;
   // Mockup: no forward view in day mode
@@ -4997,11 +4464,9 @@ function renderSI(){
   }
 
   // New Intelligence components
-  renderSIAchieveStrip();
   renderSIForward(mo,day);
   renderSID1D2(mo,day);
   renderSISignals(mo,day);
-  renderSIWatchCards();
   renderSIFeedstock();
 
   // PAF and CapUtil chips (k5/k6) — hidden in day mode to match mockup 4-chip layout
