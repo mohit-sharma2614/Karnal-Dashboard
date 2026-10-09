@@ -2139,6 +2139,46 @@ function _renderOVSections(mo){
     {id:'s1',tab:'s1',clr:'#0d7d5f',num:'S1',nm:'Feedstock Procurement',person:'Mr. Vivek Kumar',swFlag:'feedstock',
      st:sOk(sumA(pmF)+sumA(cdF)>0?100:null,80,50),
      stat:[{l:'Supply '+(sumA(pmF)>0?'OK':'Low'),c:sumA(pmF)>0?'g':'a'},{l:'Stock '+(D.stock&&D.stock.pm>0?'OK':'Low'),c:D.stock&&D.stock.pm>0?'g':'a'}],
+     useFsTbl:true,
+     fsTbl:(()=>{
+       const getIn=k=>sumA(mo==='ALL'?mArr(k):dArr('feed',k));
+       const getFed=k=>sumA(mo==='ALL'?mArr(k):dArr('feed',k));
+       const st=D.stock||{};
+       const fmtN2=v=>v!=null&&v>0?fmtN(Math.round(v)):'—';
+       const fmtL2=v=>v!=null&&v>0?fmtL(v):'—';
+       const rows=[
+         {nm:'Pressmud (PM)',in:getIn('pm_in'),fed:sumA(pmF),stk:st.pm||null,procC:sumA(mo==='ALL'?mArr('pm_proc_cost'):dArr('feed','pm_proc_cost')),fedC:sumA(mo==='ALL'?mArr('pm_feed_cost'):dArr('feed','pm_feed_cost'))},
+         {nm:'Cow Dung (CD)',in:getIn('cd_in'),fed:sumA(cdF),stk:st.cd||null,procC:sumA(mo==='ALL'?mArr('cd_proc_cost'):dArr('feed','cd_proc_cost')),fedC:sumA(mo==='ALL'?mArr('cd_feed_cost'):dArr('feed','cd_feed_cost'))},
+         {nm:'Grain Syrup (GS)',in:getIn('gs_in'),fed:sumA(gsF),stk:st.gs||null,procC:sumA(mo==='ALL'?mArr('gs_proc_cost'):dArr('feed','gs_proc_cost')),fedC:sumA(mo==='ALL'?mArr('gs_feed_cost'):dArr('feed','gs_feed_cost'))},
+         {nm:'CSL',in:getIn('csl_in'),fed:sumA(cslF),stk:st.csl||null,procC:sumA(mo==='ALL'?mArr('csl_proc_cost'):dArr('feed','csl_proc_cost')),fedC:sumA(mo==='ALL'?mArr('csl_feed_cost'):dArr('feed','csl_feed_cost'))},
+         {nm:'Spent Grain (SG)',in:getIn('sg_in'),fed:sumA(mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed')),stk:st.sg||null,procC:sumA(mo==='ALL'?mArr('sg_proc_cost'):dArr('feed','sg_proc_cost')),fedC:sumA(mo==='ALL'?mArr('sg_feed_cost'):dArr('feed','sg_feed_cost'))},
+       ];
+       const totIn=rows.reduce((s,r)=>s+(r.in||0),0);
+       const totFed=rows.reduce((s,r)=>s+(r.fed||0),0);
+       const totStk=rows.reduce((s,r)=>s+(r.stk||0),0);
+       const totPC=rows.reduce((s,r)=>s+(r.procC||0),0);
+       const totFC=rows.reduce((s,r)=>s+(r.fedC||0),0);
+       const th='<th style="padding:5px 8px;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
+       const td=(v,bold,clr)=>`<td style="padding:5px 8px;font-size:12px;${bold?'font-weight:700;':''}${clr?'color:'+clr+';':''}white-space:nowrap">${v}</td>`;
+       const hdr=`<tr>${th}FEEDSTOCK</th>${th}PROCURED (MT)</th>${th}FED (MT)</th>${th}STOCK (MT)</th>${th}PROC COST</th>${th}FEED COST</th></tr>`;
+       const rowsHtml=rows.map(r=>`<tr style="border-bottom:1px solid var(--bdr)">
+         ${td('<b style="color:#0d7d5f">'+r.nm+'</b>',false)}
+         ${td(fmtN2(r.in))}
+         ${td(fmtN2(r.fed))}
+         ${td(r.stk>0?'<span style="color:#0e7490;font-weight:600">'+fmtN2(r.stk)+'</span>':'—')}
+         ${td(fmtL2(r.procC))}
+         ${td(fmtL2(r.fedC))}
+       </tr>`).join('');
+       const totRow=`<tr style="border-top:2px solid var(--bdr);background:var(--bg3)">
+         ${td('<b>Total</b>',true)}
+         ${td('<b>'+fmtN2(totIn)+'</b>',true)}
+         ${td('<b>'+fmtN2(totFed)+'</b>',true)}
+         ${td('<b>'+fmtN2(totStk)+'</b>',true)}
+         ${td('<b>'+fmtL2(totPC)+'</b>',true)}
+         ${td('<b>'+fmtL2(totFC)+'</b>',true)}
+       </tr>`;
+       return`<div style="overflow-x:auto;margin-bottom:8px"><table style="width:100%;border-collapse:collapse"><thead>${hdr}</thead><tbody>${rowsHtml}${totRow}</tbody></table></div>`;
+     })(),
      mx:[{l:'Pressmud Fed',v:fmtMT(sumA(pmF))},{l:'Cow Dung Fed',v:fmtMT(sumA(cdF))},{l:'CSL Fed',v:fmtN(Math.round(sumA(cslF)))+' KL'},{l:'GS Fed',v:fmtN(Math.round(sumA(gsF)))+' KL'},{l:'Feed Cost',v:fmtL(sumA(mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost')))}],
      cl:'Monthly Procured vs Fed (MT)',
      ch:()=>bar('ov_ch_s1',mo==='ALL'?MONTHS:dDates('feed'),[bDS('Procured',mo==='ALL'?mArr('pm_in').map((v,i)=>(v||0)+(mArr('cd_in')[i]||0)+(mArr('gs_in')[i]||0)+(mArr('csl_in')[i]||0)):dArr('feed','pm_in').map((v,i)=>(v||0)+(dArr('feed','cd_in')[i]||0)),C.blue),bDS('Fed',pmF.map((v,i)=>(v||0)+(cdF[i]||0)),C.green)],true),
@@ -2200,7 +2240,7 @@ function _renderOVSections(mo){
     if(s.swFlag==='winter'&&actWin){swClass=' sw-flag sw-winter';swMicro='<span class="sw-micro sw-winter">Winter Watch</span>';}
     else if(s.swFlag==='feedstock'&&actFeed){swClass=' sw-flag sw-feedstock';swMicro='<span class="sw-micro sw-feedstock">Feedstock Watch</span>';}
     const statRow=`<div class="sc-stat">${s.stat.map(st=>`<div class="sc-stat-i"><span class="sdot ${st.c}"></span>${st.l}</div>`).join('')}</div>`;
-    const mxHtml=`<div class="mg">${s.mx.map(m=>`<div><div class="mc-l">${m.l}</div><div class="mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}</div>`;
+    const mxHtml=s.useFsTbl?s.fsTbl:`<div class="mg">${s.mx.map(m=>`<div><div class="mc-l">${m.l}</div><div class="mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}</div>`;
     return`<div class="sc${swClass}">
       <div class="sc-hdr">
         <div class="sc-hdr-l">
