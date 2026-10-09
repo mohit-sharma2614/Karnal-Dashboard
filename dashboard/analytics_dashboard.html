@@ -2233,7 +2233,8 @@ function _renderOVSections(mo){
 }
 
 function renderOV(){
-  showDayPanel('ov');
+  // Hide old day panel if present
+  const dpOv=document.getElementById('dp_ov');if(dpOv)dpOv.style.display='none';
   const mo=curMonth,da=curDay,isDa=da!=='ALL';
   const av=a=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
   // Period badge
@@ -2241,9 +2242,12 @@ function renderOV(){
 
   // ── DAY VIEW ───────────────────────────────────────────────
   if(isDa){
-    const sdOv=document.getElementById('sd_ov');if(sdOv)sdOv.style.display='none';
-    const mw=document.getElementById('ov_mo_wrap');if(mw)mw.style.display='none';
-    const dw=document.getElementById('ov_day_wrap');if(dw)dw.style.display='';
+    const mw=document.getElementById('ov_mo_wrap');if(mw)mw.style.display='';
+    const dw=document.getElementById('ov_day_wrap');if(dw)dw.style.display='none';
+    // Hide strip and highlights in day view, show only section grid
+    const stripEl=document.querySelector('#ov_mo_wrap .strip-card');if(stripEl)stripEl.style.display='none';
+    const hlEl=document.querySelector('#ov_mo_wrap .hl-row');if(hlEl)hlEl.style.display='none';
+    const slEl=document.querySelector('#ov_mo_wrap .ov-slabel');if(slEl)slEl.style.display='';
     const rec=D.days[da]||{};
     const dp=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},f=rec.feed||{},ex=rec.exp||{};
     const dCBG=dp.cbg_tot||null,dDisp=dp.dispatched||null;
@@ -2255,7 +2259,6 @@ function renderOV(){
     const dUpt=dp.comp_hrs&&dp.psa_hrs&&dp.psa_hrs>0?dp.comp_hrs/dp.psa_hrs*100:null;
     const dDay=TGT.cbg_month/30;
     const dAch=dCBG&&dDay>0?dCBG/dDay*100:null;
-    // Health score for day
     const dc=[{l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},{l:'Dispatch',v:dDisp&&dCBG&&dCBG>0?dDisp/dCBG*100:null,ok:0},{l:'PSA',v:dUpt,ok:dUpt>=90?1:dUpt>=70?0:-1},{l:'Margin',v:dMgn,ok:dMgn>=40?1:dMgn>=25?0:-1},{l:'CH4',v:dCH4v,ok:dCH4v>=90?1:dCH4v>=80?0:-1},{l:'OLR',v:d1r.olr!=null?Math.min(100,d1r.olr/4.5*100):null,ok:d1r.olr>=2?1:d1r.olr>=1.5?0:-1}];
     const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.30,.15,.25,.20,.05,.05][i])*100,0));
     _fillOVHealthRing(dHS,da+' 2026',dc,null);
@@ -2269,22 +2272,8 @@ function renderOV(){
       {bar:'#1b8a4a',l:'CH4 Purity',v:dCH4v!=null?dCH4v.toFixed(1)+'%':'—',s:'Target: ≥90%',dc:dCH4v>=90?'g':dCH4v>=80?'a':'r'},
       {bar:'#1565C0',l:'OLR D1 / D2',v:(d1r.olr!=null?d1r.olr.toFixed(2):'—')+' / '+(d2r.olr!=null?d2r.olr.toFixed(2):'—'),s:'kg VS/m³/d'},
     ]);
-    // Day detail cards
-    const dw2=document.getElementById('ov_day_wrap');
-    if(dw2){
-      const fN=v=>v!=null&&v!==0?fmtN(v):null;
-      const cl=(v,g,w)=>v==null?'var(--blue)':v>=g?'var(--green)':v>=w?'var(--amber)':'var(--red)';
-      const card=(lbl,val,unit,color)=>`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${color};border-radius:8px;padding:12px 14px"><div style="font-size:9px;font-weight:700;letter-spacing:.6px;color:var(--text3);text-transform:uppercase;margin-bottom:5px">${lbl}</div><div style="font-size:19px;font-weight:700;color:${color};line-height:1">${val??'—'}<span style="font-size:11px;font-weight:500;color:var(--text3);margin-left:3px">${val!=null?unit:''}</span></div></div>`;
-      const g2=c=>`<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:14px">${c.join('')}</div>`;
-      const sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
-      dw2.innerHTML=
-        `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bdr)">Production</div>`+
-        g2([card('CBG Produced',fN(dCBG),'kg',cl(dCBG,dDay*.9,dDay*.7)),card('CBG Dispatched',fN(dDisp),'kg','var(--teal)'),card('D1 Biogas',fN(d1r.bg_act),'m³','var(--blue)'),card('D2 Biogas',fN(d2r.bg_act),'m³','var(--purple)'),card('Expected Gas',fN(ex.tot_exp),'m³','var(--text3)'),card('Purified',fN(ex.act_pur),'m³',cl(ex.act_pur,ex.tot_exp*.9,ex.tot_exp*.7))])+
-        `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bdr)">Feedstock</div>`+
-        g2([card('Pressmud',fN(f.pm_feed),'MT','var(--blue)'),card('Cow Dung',fN(f.cd_feed),'MT','var(--teal)'),card('CSL',fN(f.csl_feed),'KL','var(--blue)'),card('Grain Syrup',fN(f.gs_feed),'KL','var(--cyan)')])+
-        `<div style="font-size:10px;font-weight:700;letter-spacing:.7px;color:var(--blue);text-transform:uppercase;margin:8px 0 10px;padding-bottom:5px;border-bottom:2px solid var(--bdr)">By-products & Revenue</div>`+
-        g2([card('SFOM',fN(sfom),'m³','var(--amber)'),card('LFOM',fN(lfom),'m³','var(--amber)'),card('CBG Revenue',rv.cbg_rev!=null?fmtL(rv.cbg_rev):null,'','var(--green)'),card('SFOM Revenue',rv.sfom_rev!=null?fmtL(rv.sfom_rev):null,'','var(--green)'),card('LFOM Revenue',rv.lfom_rev!=null?fmtL(rv.lfom_rev):null,'','var(--green)'),card('Total Cost',dCost!=null?fmtL(dCost):null,'','var(--red)')]);
-    }
+    // Render section cards with daily data
+    _renderOVSectionsDa(da,rec);
     return;
   }
 
@@ -2292,6 +2281,9 @@ function renderOV(){
   const sdOv2=document.getElementById('sd_ov');if(sdOv2)sdOv2.style.display='none';
   const mw2=document.getElementById('ov_mo_wrap');if(mw2)mw2.style.display='';
   const dw3=document.getElementById('ov_day_wrap');if(dw3)dw3.style.display='none';
+  // Restore strip and highlights (may have been hidden in day view)
+  const stripEl2=document.querySelector('#ov_mo_wrap .strip-card');if(stripEl2)stripEl2.style.display='';
+  const hlEl2=document.querySelector('#ov_mo_wrap .hl-row');if(hlEl2)hlEl2.style.display='';
 
   const cbgD=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
@@ -2379,6 +2371,180 @@ function renderOV(){
 
   // Section grid
   _renderOVSections(mo);
+}
+
+// ═══ OVERVIEW DAY VIEW — section cards with D1/D2 tables + sparklines ════
+function _renderOVSectionsDa(da,rec){
+  const sg=document.getElementById('ov_sgrid');if(!sg)return;
+  const dp=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},f=rec.feed||{},ex=rec.exp||{};
+  const fmtV=v=>v!=null&&v!==''?String(v):'—';
+  const fmtKg=v=>v!=null?fmtN(Math.round(v))+' kg':'—';
+  const fmtMT=v=>v!=null?v.toFixed(1)+' MT':'—';
+  const fmtKL=v=>v!=null?v.toFixed(1)+' KL':'—';
+  const fmtM3=v=>v!=null?fmtN(Math.round(v))+' m³':'—';
+  const fmtPct=v=>v!=null?v.toFixed(1)+'%':'—';
+  const clr=(v,g,w)=>v==null?'var(--text2)':v>=g?'#16a34a':v>=w?'#d97706':'#dc2626';
+
+  // Build last-7-days sparkline from monthly arrays (approximate)
+  const spk7=(arr)=>{if(!arr||!arr.length)return[];const a=arr.filter(v=>v!=null);return a.slice(-7);};
+
+  // Row builder for D1/D2 comparison table
+  const tblRow=(p,d1,d2,e1,e2,d1r_flag,d2r_flag)=>{
+    const d1c=d1r_flag?'color:#dc2626':'';const d2c=d2r_flag?'color:#dc2626':'';
+    return`<tr style="border-bottom:1px solid var(--bdr)">
+      <td style="padding:4px 6px;font-size:11px;color:var(--text3);white-space:nowrap">${p}</td>
+      <td style="padding:4px 6px;font-size:12px;font-weight:600;${d1c}">${fmtV(d1)}</td>
+      ${d2!==undefined?`<td style="padding:4px 6px;font-size:12px;font-weight:600;${d2c}">${fmtV(d2)}</td>`:''}
+      ${e1!==undefined?`<td style="padding:4px 6px;font-size:11px;color:var(--text3)">${fmtV(e1)}</td>`:''}
+      ${e2!==undefined?`<td style="padding:4px 6px;font-size:11px;color:var(--text3)">${fmtV(e2)}</td>`:''}
+    </tr>`;
+  };
+  const tblHdr=(cols)=>`<tr style="border-bottom:2px solid var(--bdr)">${cols.map(c=>`<th style="padding:4px 6px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left">${c}</th>`).join('')}</tr>`;
+  const tbl=(hdr,rows)=>`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead>${tblHdr(hdr)}</thead><tbody>${rows.join('')}</tbody></table></div>`;
+
+  // Spark mini-chart (inline SVG bar)
+  const sparkSVG=(vals,color)=>{
+    if(!vals||vals.length<2)return'';
+    const mx=Math.max(...vals,1);
+    const bars=vals.map((v,i)=>{const h=Math.round((v/mx)*28)||2;const x=i*12+2;return`<rect x="${x}" y="${30-h}" width="9" height="${h}" rx="2" fill="${color}" opacity=".8"/>`;}).join('');
+    return`<svg width="${vals.length*12+4}" height="32" viewBox="0 0 ${vals.length*12+4} 32" style="margin-top:6px">${bars}</svg>`;
+  };
+
+  // Card builder
+  const card=(sec,content,sparkVals,sparkColor,sparkLabel)=>{
+    const spk=sparkVals&&sparkVals.length>1?`<div style="margin-top:4px"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">${sparkLabel||''}</div>${sparkSVG(sparkVals,sparkColor||'var(--blue)')}</div>`:'';
+    return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${sec.clr};border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:6px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div style="font-size:11px;font-weight:700;color:${sec.clr};letter-spacing:.3px">${sec.nm}</div>
+          <div style="font-size:10px;color:var(--text3)">${sec.person}</div>
+        </div>
+        <div style="font-size:9px;color:var(--text3)">${da} 2026</div>
+      </div>
+      ${content}${spk}
+    </div>`;
+  };
+
+  // Computed day values
+  const dCBG=dp.cbg_tot,dDisp=dp.dispatched;
+  const dCH4v=dp.ch4!=null?(dp.ch4>1?dp.ch4:dp.ch4*100):null;
+  const dPsaHrs=dp.psa_hrs,dCompHrs=dp.comp_hrs;
+  const dPsaEff=dCBG&&ex.tot_exp>0?dCBG/ex.tot_exp*100:null;
+  const dDR=dCBG&&dDisp?dDisp/dCBG*100:null;
+  const sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
+  const drainD1=d1r.drain_act,drainD2=d2r.drain_act;
+  const drainTot=(drainD1||0)+(drainD2||0);
+  const drainExp=(ex.d1_drain_exp||0)+(ex.d2_drain_exp||0);
+  const drainAch=drainTot&&drainExp>0?drainTot/drainExp*100:null;
+  const dRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
+  const dCost=rv.total_cost||null;
+  const dMgn=dRev&&dCost&&dRev>0?(dRev-dCost)/dRev*100:null;
+  const dCpk=dCost&&dCBG&&dCBG>0?dCost/dCBG:null;
+  const dStk=rv.cbg_stock!=null?fmtKg(rv.cbg_stock):'—';
+
+  // S1 Feedstock
+  const s1={id:'s1',clr:'#0d7d5f',nm:'Feedstock Procurement',person:'Mr. Vivek Kumar'};
+  const s1rows=tbl(['Feedstock','Fed Today','Procured'],[
+    tblRow('Pressmud',fmtMT(f.pm_feed),undefined,fmtMT(f.pm_in)),
+    tblRow('Cow Dung',fmtMT(f.cd_feed),undefined,fmtMT(f.cd_in)),
+    tblRow('CSL',fmtKL(f.csl_feed),undefined,fmtKL(f.csl_in)),
+    tblRow('Grain Syrup',fmtKL(f.gs_feed),undefined,fmtKL(f.gs_in)),
+  ]);
+  const s1spk=spk7(D.M.pm_feed);
+
+  // S2 Lab & Process
+  const s2={id:'s2',clr:'#1a56db',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin'};
+  const d1Temp=d1r.temp_c,d2Temp=d2r.temp_c;
+  const s2rows=tbl(['Parameter','D1','D2'],[
+    tblRow('OLR (kg VS/m³/d)',d1r.olr!=null?d1r.olr.toFixed(2):'—',d2r.olr!=null?d2r.olr.toFixed(2):'—'),
+    tblRow('pH',d1r.ph!=null?d1r.ph.toFixed(2):'—',d2r.ph!=null?d2r.ph.toFixed(2):'—'),
+    tblRow('IA/PA',d1r.ia!=null?d1r.ia.toFixed(2):'—',d2r.ia!=null?d2r.ia.toFixed(2):'—'),
+    tblRow('TS %',d1r.ts!=null?fmtPct(d1r.ts):'—',d2r.ts!=null?fmtPct(d2r.ts):'—'),
+    tblRow('VS %',d1r.vs!=null?fmtPct(d1r.vs):'—',d2r.vs!=null?fmtPct(d2r.vs):'—'),
+    tblRow('Temp (°C)',d1Temp!=null?d1Temp.toFixed(1):'—',d2Temp!=null?d2Temp.toFixed(1)+'⚠':'—',undefined,undefined,false,d2Temp!=null&&d2Temp<35),
+  ]);
+  const s2spk=spk7(D.M.d1_temp);
+
+  // S3 Production
+  const s3={id:'s3',clr:'#0e7490',nm:'Production',person:'Mr. Sohan Lal'};
+  const d1bg=d1r.bg_act,d2bg=d2r.bg_act;
+  const d1bgExp=ex.d1_bg_exp,d2bgExp=ex.d2_bg_exp;
+  const d1ach=d1bg&&d1bgExp>0?fmtPct(d1bg/d1bgExp*100):null;
+  const d2ach=d2bg&&d2bgExp>0?fmtPct(d2bg/d2bgExp*100):null;
+  const vent=dp.vent||0;
+  const s3rows=tbl(['Parameter','D1','D2'],[
+    tblRow('Biogas (m³)',fmtM3(d1bg),fmtM3(d2bg),fmtM3(d1bgExp),fmtM3(d2bgExp)),
+    tblRow('Achievement',d1ach||'—',d2ach||'—'),
+    tblRow('Vent/Flare',fmtM3(vent),undefined,undefined,undefined,vent>0,false),
+  ]);
+  const s3spk=spk7(D.M.cbg);
+
+  // S4 Purification
+  const s4={id:'s4',clr:'#6d28d9',nm:'Purification',person:'Mr. Bobby'};
+  const psaEffPct=dPsaEff!=null?fmtPct(dPsaEff):null;
+  const s4rows=tbl(['Parameter','Actual','Target'],[
+    tblRow('CBG Produced',fmtKg(dCBG),undefined,fmtKg(ex.cbg_target)),
+    tblRow('PSA Efficiency',psaEffPct||'—',undefined,'≥90%',undefined,dPsaEff!=null&&dPsaEff<75),
+    tblRow('CH4 Purity',dCH4v!=null?fmtPct(dCH4v):'—',undefined,'≥90%'),
+    tblRow('PSA Hours',dPsaHrs!=null?dPsaHrs.toFixed(1)+' hrs':'—'),
+  ]);
+  const s4spk=spk7(D.M.cbg);
+
+  // S5 Compressor & Dispatch
+  const s5={id:'s5',clr:'#0e7490',nm:'Compressor',person:'Mr. Rajendra Kumar'};
+  const s5rows=tbl(['Parameter','Actual','Target'],[
+    tblRow('Produced (kg)',fmtKg(dCBG)),
+    tblRow('Dispatched (kg)',fmtKg(dDisp)),
+    tblRow('Dispatch Rate',dDR!=null?fmtPct(dDR):'—',undefined,'≥95%',undefined,dDR!=null&&dDR<80),
+    tblRow('Closing Stock',dStk),
+  ]);
+  const s5spk=spk7(D.M.dispatched);
+
+  // S6 Manure
+  const s6={id:'s6',clr:'#3f6212',nm:'Manure',person:'Mr. Vivek Kumar'};
+  const drFeed=f.pm_feed&&drainTot?drainTot/(f.pm_feed*1000)*100:null;
+  const s6rows=tbl(['Parameter','D1','D2'],[
+    tblRow('Drain Actual (m³)',fmtM3(drainD1),fmtM3(drainD2),fmtM3(ex.d1_drain_exp),fmtM3(ex.d2_drain_exp)),
+    tblRow('Achievement',drainAch!=null?fmtPct(drainAch):'—',undefined,undefined,undefined,drainAch!=null&&drainAch<80),
+    tblRow('SFOM (MT)',fmtMT(d1r.sfom),fmtMT(d2r.sfom)),
+    tblRow('LFOM (KL)',fmtKL(d1r.lfom),fmtKL(d2r.lfom)),
+    tblRow('Drain % Feed',drFeed!=null?fmtPct(drFeed):'—'),
+  ]);
+  const s6spk=spk7(D.M.d1_drain);
+
+  // S7 Sales
+  const s7={id:'s7',clr:'#b45309',nm:'Sales',person:'Mr. Vivek Kumar'};
+  const realprice=dDisp&&rv.cbg_rev?'₹'+(rv.cbg_rev/dDisp*1000).toFixed(1)+'/kg':'—';
+  const s7rows=tbl(['Parameter','Actual'],[
+    tblRow('CBG Dispatched',fmtKg(dDisp)),
+    tblRow('CBG Invoiced',rv.cbg_qty!=null?fmtKg(rv.cbg_qty):'—'),
+    tblRow('CBG Revenue',rv.cbg_rev!=null?'₹'+fmtN(Math.round(rv.cbg_rev)):'—'),
+    tblRow('Realized Price',realprice),
+    tblRow('Cylinder Stock',dStk),
+  ]);
+  const s7spk=spk7(D.M.dispatched);
+
+  // S8 Finance
+  const s8={id:'s8',clr:'#9f1239',nm:'Finance',person:'Management'};
+  const s8rows=tbl(['Parameter','Actual','Target'],[
+    tblRow('Est Revenue',dRev?'₹'+fmtN(Math.round(dRev)):'—'),
+    tblRow('Est Cost',dCost?'₹'+fmtN(Math.round(dCost)):'—'),
+    tblRow('Est Margin',dMgn!=null?fmtPct(dMgn):'—',undefined,'45%',undefined,dMgn!=null&&dMgn<25),
+    tblRow('Cost/kg CBG',dCpk!=null?'₹'+dCpk.toFixed(1):'—',undefined,'≤₹75'),
+  ]);
+  const s8spk=spk7(D.M.margin||[]);
+
+  const SECS_DA=[
+    {sec:s1,content:s1rows,spk:s1spk,spkClr:'#0d7d5f',spkLbl:'7-day Feed Utilization'},
+    {sec:s2,content:s2rows,spk:s2spk,spkClr:'#d97706',spkLbl:'7-day Digester Temp D1 (°C)'},
+    {sec:s3,content:s3rows,spk:s3spk,spkClr:'#0e7490',spkLbl:'7-day Biogas (m³)'},
+    {sec:s4,content:s4rows,spk:s4spk,spkClr:'#6d28d9',spkLbl:'7-day PSA Efficiency %'},
+    {sec:s5,content:s5rows,spk:s5spk,spkClr:'#0e7490',spkLbl:'7-day Dispatch Rate'},
+    {sec:s6,content:s6rows,spk:s6spk,spkClr:'#3f6212',spkLbl:'7-day Drain Achievement %'},
+    {sec:s7,content:s7rows,spk:s7spk,spkClr:'#b45309',spkLbl:'7-day Dispatch Rate'},
+    {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Net Margin %'},
+  ];
+  sg.innerHTML=SECS_DA.map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
 }
 
 // ═══ S1 FEEDSTOCK ════════════════════════════════════════════
