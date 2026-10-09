@@ -270,78 +270,115 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .si-dp-pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid var(--bdr);background:var(--bg2);color:var(--text2)}
 .si-dp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 @media(max-width:900px){.si-signals{grid-template-columns:repeat(2,1fr)}.si-split{grid-template-columns:1fr}.si-dp-chips{grid-template-columns:repeat(2,1fr)}.si-dp-row{grid-template-columns:1fr}}
-/* ── Overview V9 Premium ─────────────────────────────────── */
-.ov-hero{display:grid;grid-template-columns:260px 1fr;gap:12px;margin-bottom:12px;align-items:stretch}
-.ov-hc{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.ov-hc-top{display:flex;gap:12px;align-items:center;margin-bottom:10px}
-.ov-ring-wrap{position:relative;width:72px;height:72px;flex-shrink:0}
-.ov-ring-wrap svg{width:72px;height:72px}
-.ov-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-.ov-ring-num{font-size:19px;font-weight:800;line-height:1;color:var(--text)}
-.ov-ring-den{font-size:8px;color:var(--text3);font-weight:700;letter-spacing:.3px}
-.ov-hc-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
-.ov-hc-status{font-size:11px;font-weight:700}
-.ov-hc-period{font-size:9px;color:var(--text3);margin-top:1px}
-.ov-hcc-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
-.ov-hcc{padding:5px 7px;background:var(--bg3);border-radius:5px}
-.ov-hcc-l{font-size:8px;color:var(--text3);font-weight:600;letter-spacing:.2px;margin-bottom:1px}
-.ov-hcc-v{font-size:11px;font-weight:800;color:var(--text)}
-.ov-hcc-bar{height:3px;background:var(--bdr);border-radius:2px;margin-top:3px}
-.ov-hcc-fill{height:3px;border-radius:2px}
-.ov-kpi-panel{display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.ov-kpi{padding:11px 13px;border-right:1px solid var(--bdr);border-bottom:1px solid var(--bdr);position:relative;min-height:60px}
-.ov-kpi:nth-child(4n){border-right:none}
-.ov-kpi:nth-child(n+5){border-bottom:none}
-.ov-kpi-bar{position:absolute;top:0;left:0;right:0;height:3px}
-.ov-kpi-lbl{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:3px}
-.ov-kpi-val{font-size:14px;font-weight:800;letter-spacing:-.3px;line-height:1;margin-bottom:1px;color:var(--text);font-variant-numeric:tabular-nums}
-.ov-kpi-val.g{color:var(--green)}.ov-kpi-val.a{color:var(--amber)}.ov-kpi-val.r{color:var(--red)}
-.ov-kpi-sub{font-size:8.5px;color:var(--text3)}
-.ov-kpi-dlt{font-size:8.5px;font-weight:600;margin-top:2px}
-.ov-kpi-dlt.g{color:var(--green)}.ov-kpi-dlt.a{color:var(--amber)}.ov-kpi-dlt.r{color:var(--red)}
-.ov-strip-card{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.ov-strip-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.ov-strip-ttl{font-size:11px;font-weight:700;color:var(--text)}
-.ov-strip-meta{font-size:9px;color:var(--text3)}
-.ov-atiles{display:flex;gap:5px;overflow-x:auto;padding-bottom:2px}
-.ov-atm{flex:1;min-width:48px;text-align:center;border-radius:7px;padding:7px 3px;cursor:pointer;transition:opacity .15s}
-.ov-atm-m{font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;margin-bottom:1px}
-.ov-atm-p{font-size:14px;font-weight:800;line-height:1}
-.ov-atm-k{font-size:8px;margin-top:1px;opacity:.85}
-.ov-hl-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.ov-hlc{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.ov-hl-tag{font-size:8.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:2px 8px;border-radius:999px;background:var(--bg3);color:var(--text3);white-space:nowrap;flex-shrink:0;margin-top:1px}
-.ov-hl-ttl{font-size:13px;font-weight:800;color:var(--text);margin-bottom:2px}
-.ov-hl-body{font-size:11px;color:var(--text2);line-height:1.5}
-.ov-sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.ov-sc{background:var(--bg2);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
-.ov-sc-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 13px;border-bottom:1px solid var(--bdr)}
-.ov-sc-hl{display:flex;gap:9px;align-items:center}
-.ov-sc-ico{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:#fff;flex-shrink:0}
-.ov-sc-nm{font-size:11px;font-weight:700;color:var(--text);line-height:1.2}
-.ov-sc-ps{font-size:8.5px;color:var(--text3)}
-.ov-sc-body{padding:10px 13px}
-.ov-mg{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:9px}
-.ov-mc{background:var(--bg3);border:1px solid var(--bdr);border-radius:6px;padding:6px 9px}
-.ov-mc-l{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--text3);margin-bottom:1px}
-.ov-mc-v{font-size:12px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
-.ov-mc-v.g{color:var(--green)}.ov-mc-v.a{color:var(--amber)}.ov-mc-v.r{color:var(--red)}
-.ov-ch-box{position:relative;height:80px;margin-bottom:2px}
-.ov-ch-box canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
-.ov-sc-foot{border-top:1px solid var(--bdr);padding:8px 13px}
-.ov-exp-btn{width:100%;background:none;border:1px solid var(--bdr);border-radius:7px;padding:6px 11px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;transition:all .2s;font-family:inherit;color:inherit}
-.ov-exp-btn:hover{border-color:var(--blue);background:var(--bg3)}
-.ov-eb-l{text-align:left}
-.ov-eb-t{font-size:10px;font-weight:600;color:var(--text)}
-.ov-eb-h{font-size:8.5px;color:var(--text3)}
-.ov-eb-a{font-size:13px;color:var(--text3);transition:transform .2s}
-.ov-exp-btn:hover .ov-eb-a{transform:translateX(3px)}
-.ov-status{font-size:8.5px;font-weight:700;padding:2px 7px;border-radius:999px}
-.ov-status.ok{background:var(--gbg);color:var(--green)}
-.ov-status.warn{background:var(--abg);color:var(--amber)}
-.ov-status.alert{background:var(--rbg);color:var(--red)}
-@media(max-width:900px){.ov-hero{grid-template-columns:1fr}.ov-sgrid{grid-template-columns:1fr}.ov-hl-row{grid-template-columns:1fr}}
+/* ── Overview V9 — Full Premium (artifact-exact, scoped to #ov) ── */
+#ov{--ink:#0a0f1e;--ink2:#1e2d45;--ink3:#3d5068;--ink4:#6b7f96;--ink5:#9aadbe;--ink6:#c8d5e0;--ink7:#e8f0f5;--ink8:#f4f7f9;--ov-white:#ffffff;--ov-blue:#1a56db;--ov-blue-dk:#1240a8;--ov-blue-lt:#eff4ff;--ov-blue-glow:rgba(26,86,219,.15);--ov-green:#0d7d5f;--ov-green-lt:#ecfdf5;--ov-green-md:#10b981;--ov-amber:#b45309;--ov-amber-lt:#fffbeb;--ov-amber-md:#f59e0b;--ov-red:#be1c3c;--ov-red-lt:#fff0f3;--ov-red-md:#f43f5e;--ov-purple:#6d28d9;--ov-r4:4px;--ov-r8:8px;--ov-r12:12px;--ov-r-full:9999px;--ov-sh:0 1px 2px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.08);--ov-sh-md:0 4px 6px -1px rgba(0,0,0,.06),0 2px 4px -1px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.04);--ov-sh-lg:0 10px 25px -3px rgba(0,0,0,.08),0 4px 6px -2px rgba(0,0,0,.04),0 0 0 1px rgba(0,0,0,.04);font-family:'Inter',system-ui,-apple-system,sans-serif;font-variant-numeric:tabular-nums}
+/* HERO ROW */
+#ov .hero-row{display:grid;grid-template-columns:260px 1fr;gap:0;background:var(--ink7);border:1px solid var(--ink7);border-radius:var(--ov-r12);overflow:hidden;box-shadow:var(--ov-sh-md);margin-bottom:10px}
+#ov .health-card{background:var(--ov-white);padding:20px 22px;border-right:1px solid var(--ink7);display:flex;flex-direction:column;gap:14px}
+#ov .hc-top{display:flex;align-items:flex-start;gap:14px}
+#ov .hc-ring-wrap{position:relative;width:76px;height:76px;flex-shrink:0}
+#ov .hc-ring-wrap svg{position:absolute;inset:0;width:76px;height:76px}
+#ov .hc-ring-inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1}
+#ov .hc-num{font-size:24px;font-weight:800;color:var(--ink);letter-spacing:-1px}
+#ov .hc-den{font-size:9px;color:var(--ink5);font-weight:500;margin-top:1px}
+#ov .hc-label{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:var(--ink5);margin-bottom:5px}
+#ov .hc-status{font-size:16px;font-weight:800;letter-spacing:-.4px;margin-bottom:5px}
+#ov .hc-period{font-size:10px;color:var(--ink4);margin-top:5px}
+#ov .hc-sparkline{border-top:1px solid var(--ink7);padding-top:12px}
+#ov .hs-spk-label{font-size:9px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--ink5);margin-bottom:6px}
+#ov .hc-comps-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-top:1px solid var(--ink7);padding-top:12px}
+#ov .hcc{background:var(--ink8);border:1px solid var(--ink7);border-radius:var(--ov-r8);padding:7px 8px}
+#ov .hcc-l{font-size:8px;font-weight:600;letter-spacing:.3px;text-transform:uppercase;color:var(--ink5);margin-bottom:3px}
+#ov .hcc-v{font-size:13px;font-weight:800;letter-spacing:-.3px}
+#ov .hcc-bar{margin-top:4px;height:2px;background:var(--ink7);border-radius:1px;overflow:hidden}
+#ov .hcc-fill{height:100%;border-radius:1px}
+/* KPI PANEL */
+#ov .kpi-panel{background:var(--ov-white);display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+#ov .kpi{padding:18px 18px 16px;border-right:1px solid var(--ink7);border-bottom:1px solid var(--ink7);position:relative;transition:background .12s}
+#ov .kpi:hover{background:var(--ink8)}
+#ov .kpi:nth-child(4n){border-right:none}
+#ov .kpi:nth-child(n+5){border-bottom:none}
+#ov .kpi-bar{position:absolute;top:0;left:0;right:0;height:3px}
+#ov .kpi-label{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--ink4);margin-bottom:8px}
+#ov .kpi-value{font-size:22px;font-weight:800;letter-spacing:-.6px;line-height:1;color:var(--ink)}
+#ov .kpi-value.blue{color:var(--ov-blue)}
+#ov .kpi-value.green{color:var(--ov-green)}
+#ov .kpi-value.amber{color:var(--ov-amber)}
+#ov .kpi-value.red{color:var(--ov-red)}
+#ov .kpi-sub{font-size:10px;color:var(--ink5);margin-top:4px;line-height:1.4}
+#ov .kpi-delta{font-size:10px;font-weight:700;margin-top:6px}
+#ov .kpi-delta.up{color:var(--ov-green)}
+#ov .kpi-delta.dn{color:var(--ov-red)}
+#ov .kpi-delta.wa{color:var(--ov-amber)}
+#ov .kpi-pb{margin-top:8px;height:3px;background:var(--ink7);border-radius:2px;overflow:hidden}
+#ov .kpi-pb-fill{height:100%;border-radius:2px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+/* STRIP */
+#ov .strip-card{background:var(--ov-white);border:1px solid var(--ink7);border-radius:var(--ov-r12);box-shadow:var(--ov-sh);padding:16px 20px;margin-bottom:10px}
+#ov .strip-hdr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+#ov .strip-title{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+#ov .strip-meta{font-size:10px;color:var(--ink4)}
+#ov .atiles{display:flex;gap:3px;overflow-x:auto;padding-bottom:2px}
+#ov .atm{flex:none;text-align:center;padding:7px 7px 6px;border-radius:var(--ov-r8);cursor:pointer;border:1.5px solid transparent;transition:all .12s;min-width:52px}
+#ov .atm:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.12)}
+#ov .atm-m{font-size:9px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;opacity:.9;margin-bottom:3px}
+#ov .atm-p{font-size:15px;font-weight:800;line-height:1;letter-spacing:-.4px}
+#ov .atm-k{font-size:9px;opacity:.7;margin-top:2px}
+#ov .cv1{background:#065f46;color:#fff}#ov .cv2{background:#059669;color:#fff}#ov .cv3{background:#34d399;color:#064e3b}
+#ov .cv4{background:#fcd34d;color:#78350f}#ov .cv5{background:#f97316;color:#fff}#ov .cv6{background:#dc2626;color:#fff}
+/* HIGHLIGHTS */
+#ov .hl-row{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--ink7);border:1px solid var(--ink7);border-radius:var(--ov-r12);overflow:hidden;box-shadow:var(--ov-sh);margin-bottom:10px}
+#ov .hlc{background:var(--ov-white);padding:14px 18px;display:flex;align-items:flex-start;gap:10px}
+#ov .hlc:first-child{border-right:1px solid var(--ink7)}
+#ov .hl-tag{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:1px solid var(--ink6);border-radius:var(--ov-r4);padding:2px 6px;color:var(--ink4);white-space:nowrap;flex-shrink:0;margin-top:2px}
+#ov .hl-ttl{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px}
+#ov .hl-body{font-size:11px;color:var(--ink3);line-height:1.5}
+/* SECTION GRID */
+#ov .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+#ov .sc{background:var(--ov-white);border:1px solid var(--ink7);border-radius:var(--ov-r12);box-shadow:var(--ov-sh);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s}
+#ov .sc:hover{box-shadow:var(--ov-sh-lg);transform:translateY(-1px)}
+#ov .sc-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--ink7);background:var(--ov-white);gap:8px;flex-wrap:wrap}
+#ov .sc-hdr-l{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+#ov .sc-icon{width:30px;height:30px;border-radius:var(--ov-r8);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+#ov .sc-name{font-size:12px;font-weight:700;color:var(--ink);letter-spacing:-.2px}
+#ov .sc-person{font-size:10px;color:var(--ink5);font-weight:400}
+#ov .sc-hdr-r{display:flex;flex-direction:column;align-items:flex-end;gap:3px}
+#ov .sc-status{font-size:9px;font-weight:700;padding:2px 8px;border-radius:var(--ov-r-full)}
+#ov .sc-status.ok{background:var(--ov-green-lt);color:var(--ov-green)}
+#ov .sc-status.warn{background:var(--ov-amber-lt);color:var(--ov-amber)}
+#ov .sc-status.alert{background:var(--ov-red-lt);color:var(--ov-red)}
+/* SECTION BODY */
+#ov .sc-body{padding:14px 16px;flex:1;display:flex;flex-direction:column}
+#ov .mg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:12px}
+#ov .mc-l{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ink5);margin-bottom:3px}
+#ov .mc-v{font-size:17px;font-weight:800;letter-spacing:-.4px;color:var(--ink);line-height:1.1}
+#ov .mc-v.g{color:var(--ov-green)}#ov .mc-v.r{color:var(--ov-red)}#ov .mc-v.a{color:var(--ov-amber)}#ov .mc-v.b{color:var(--ov-blue)}
+/* CHART */
+#ov .ch-box{position:relative;height:120px}
+#ov .ch-box canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
+/* EXPLORE BUTTON */
+#ov .sc-foot{border-top:1px solid var(--ink7);padding:10px 16px;background:var(--ink8)}
+#ov .explore-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 12px;border-radius:var(--ov-r8);border:1px solid var(--ink7);background:var(--ov-white);color:var(--ov-blue);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-align:left;box-shadow:var(--ov-sh)}
+#ov .explore-btn:hover{border-color:var(--ov-blue);background:var(--ov-blue-lt);box-shadow:0 0 0 3px var(--ov-blue-glow)}
+#ov .explore-btn:hover .eb-arrow{transform:translateX(4px)}
+#ov .eb-l{display:flex;align-items:center;gap:7px}
+#ov .eb-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+#ov .eb-ttl{font-size:11px;font-weight:700;color:var(--ov-blue);line-height:1.2}
+#ov .eb-hint{font-size:9px;color:var(--ink4);font-weight:400;line-height:1.2;margin-top:1px}
+#ov .eb-arrow{font-size:16px;color:var(--ov-blue);opacity:.6;transition:transform .15s,opacity .15s;flex-shrink:0}
+#ov .explore-btn:hover .eb-arrow{opacity:1}
+/* BADGE */
+#ov .ov-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.2px;padding:2px 8px 2px 6px;border-radius:var(--ov-r-full);border:1px solid;white-space:nowrap}
+#ov .ov-badge::before{content:'';width:5px;height:5px;border-radius:50%;background:currentColor}
+#ov .ov-badge.bg{background:var(--ov-green-lt);color:var(--ov-green);border-color:#a7f3d0}
+#ov .ov-badge.ba{background:var(--ov-amber-lt);color:var(--ov-amber);border-color:#fde68a}
+#ov .ov-badge.br{background:var(--ov-red-lt);color:var(--ov-red);border-color:#fecdd3}
+/* SECTION LABEL */
+#ov .ov-slabel{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin:16px 0 10px}
+#ov .ov-slabel::after{content:'';flex:1;height:1px;background:var(--ink7)}
+@media(max-width:900px){#ov .hero-row{grid-template-columns:1fr}#ov .sgrid{grid-template-columns:1fr}#ov .hl-row{grid-template-columns:1fr;background:none;border:none;gap:8px}#ov .hlc:first-child{border-right:none}}
 </style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
 </head>
 <body>
 <div id="authOverlay" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:Segoe UI,system-ui,sans-serif">
@@ -391,65 +428,74 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <!-- ══ OVERVIEW V9 ══ -->
 <div id="ov" class="pg on">
   <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">All Months</span></div>
-  <!-- Hero Row: Health Score Ring + 8-KPI Panel -->
-  <div class="ov-hero">
-    <div class="ov-hc">
-      <div class="ov-hc-top">
-        <div class="ov-ring-wrap">
-          <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="36" cy="36" r="31" stroke="#e8edf2" stroke-width="7"/>
-            <circle id="ov_hs_arc" cx="36" cy="36" r="31" stroke="#1b8a4a" stroke-width="7"
+
+  <!-- HERO ROW: Health Card + KPI Panel -->
+  <div class="hero-row">
+    <div class="health-card">
+      <div class="hc-top">
+        <div class="hc-ring-wrap">
+          <svg viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="38" cy="38" r="31" stroke="#e8f0f5" stroke-width="7"/>
+            <circle id="ov_hs_arc" cx="38" cy="38" r="31" stroke="#1a56db" stroke-width="7"
               stroke-linecap="round" stroke-dasharray="194.8" stroke-dashoffset="194.8"
-              transform="rotate(-90 36 36)" style="transition:stroke-dashoffset .6s ease"/>
+              transform="rotate(-90 38 38)" style="transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1),stroke .4s"/>
           </svg>
-          <div class="ov-ring-inner">
-            <div class="ov-ring-num" id="ov_hs_num">—</div>
-            <div class="ov-ring-den">/100</div>
+          <div class="hc-ring-inner">
+            <div class="hc-num" id="ov_hs_num">—</div>
+            <div class="hc-den">/100</div>
           </div>
         </div>
         <div>
-          <div class="ov-hc-title">Plant Health Score</div>
-          <div class="ov-hc-status" id="ov_hs_status">—</div>
-          <div class="ov-hc-period" id="ov_hs_period">—</div>
+          <div class="hc-label">Plant Health</div>
+          <div class="hc-status" id="ov_hs_status">—</div>
+          <div id="ov_hs_badge"></div>
+          <div class="hc-period" id="ov_hs_period">—</div>
         </div>
       </div>
-      <div class="ov-hcc-row" id="ov_hs_comps"></div>
+      <div class="hc-sparkline">
+        <div class="hs-spk-label">7-Period Trend</div>
+        <div id="ov_hs_spk"></div>
+      </div>
+      <div class="hc-comps-row" id="ov_hs_comps"></div>
     </div>
-    <div class="ov-kpi-panel">
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k1_bar"></div><div class="ov-kpi-lbl" id="ov_k1_lbl"></div><div class="ov-kpi-val" id="ov_k1_val">—</div><div class="ov-kpi-sub" id="ov_k1_sub"></div><div class="ov-kpi-dlt" id="ov_k1_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k2_bar"></div><div class="ov-kpi-lbl" id="ov_k2_lbl"></div><div class="ov-kpi-val" id="ov_k2_val">—</div><div class="ov-kpi-sub" id="ov_k2_sub"></div><div class="ov-kpi-dlt" id="ov_k2_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k3_bar"></div><div class="ov-kpi-lbl" id="ov_k3_lbl"></div><div class="ov-kpi-val" id="ov_k3_val">—</div><div class="ov-kpi-sub" id="ov_k3_sub"></div><div class="ov-kpi-dlt" id="ov_k3_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k4_bar"></div><div class="ov-kpi-lbl" id="ov_k4_lbl"></div><div class="ov-kpi-val" id="ov_k4_val">—</div><div class="ov-kpi-sub" id="ov_k4_sub"></div><div class="ov-kpi-dlt" id="ov_k4_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k5_bar"></div><div class="ov-kpi-lbl" id="ov_k5_lbl"></div><div class="ov-kpi-val" id="ov_k5_val">—</div><div class="ov-kpi-sub" id="ov_k5_sub"></div><div class="ov-kpi-dlt" id="ov_k5_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k6_bar"></div><div class="ov-kpi-lbl" id="ov_k6_lbl"></div><div class="ov-kpi-val" id="ov_k6_val">—</div><div class="ov-kpi-sub" id="ov_k6_sub"></div><div class="ov-kpi-dlt" id="ov_k6_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k7_bar"></div><div class="ov-kpi-lbl" id="ov_k7_lbl"></div><div class="ov-kpi-val" id="ov_k7_val">—</div><div class="ov-kpi-sub" id="ov_k7_sub"></div><div class="ov-kpi-dlt" id="ov_k7_dlt" style="display:none"></div></div>
-      <div class="ov-kpi"><div class="ov-kpi-bar" id="ov_k8_bar"></div><div class="ov-kpi-lbl" id="ov_k8_lbl"></div><div class="ov-kpi-val" id="ov_k8_val">—</div><div class="ov-kpi-sub" id="ov_k8_sub"></div><div class="ov-kpi-dlt" id="ov_k8_dlt" style="display:none"></div></div>
+    <div class="kpi-panel">
+      <div class="kpi"><div class="kpi-bar" id="ov_k1_bar"></div><div class="kpi-label" id="ov_k1_lbl"></div><div class="kpi-value" id="ov_k1_val">—</div><div class="kpi-sub" id="ov_k1_sub"></div><div class="kpi-delta" id="ov_k1_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k2_bar"></div><div class="kpi-label" id="ov_k2_lbl"></div><div class="kpi-value" id="ov_k2_val">—</div><div class="kpi-sub" id="ov_k2_sub"></div><div class="kpi-delta" id="ov_k2_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k3_bar"></div><div class="kpi-label" id="ov_k3_lbl"></div><div class="kpi-value" id="ov_k3_val">—</div><div class="kpi-sub" id="ov_k3_sub"></div><div class="kpi-delta" id="ov_k3_dlt" style="display:none"></div><div class="kpi-pb"><div class="kpi-pb-fill" id="ov_k3_pbf" style="width:0%"></div></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k4_bar"></div><div class="kpi-label" id="ov_k4_lbl"></div><div class="kpi-value" id="ov_k4_val">—</div><div class="kpi-sub" id="ov_k4_sub"></div><div class="kpi-delta" id="ov_k4_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k5_bar"></div><div class="kpi-label" id="ov_k5_lbl"></div><div class="kpi-value" id="ov_k5_val">—</div><div class="kpi-sub" id="ov_k5_sub"></div><div class="kpi-delta" id="ov_k5_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k6_bar"></div><div class="kpi-label" id="ov_k6_lbl"></div><div class="kpi-value" id="ov_k6_val">—</div><div class="kpi-sub" id="ov_k6_sub"></div><div class="kpi-delta" id="ov_k6_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k7_bar"></div><div class="kpi-label" id="ov_k7_lbl"></div><div class="kpi-value" id="ov_k7_val">—</div><div class="kpi-sub" id="ov_k7_sub"></div><div class="kpi-delta" id="ov_k7_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k8_bar"></div><div class="kpi-label" id="ov_k8_lbl"></div><div class="kpi-value" id="ov_k8_val">—</div><div class="kpi-sub" id="ov_k8_sub"></div><div class="kpi-delta" id="ov_k8_dlt" style="display:none"></div></div>
     </div>
   </div>
+
   <!-- Monthly/YTD content -->
   <div id="ov_mo_wrap">
     <!-- Achievement Strip -->
-    <div class="ov-strip-card">
-      <div class="ov-strip-hdr">
-        <div class="ov-strip-ttl">Monthly CBG Achievement vs Excel Target (1,30,000 kg)</div>
-        <div class="ov-strip-meta" id="ov_strip_meta"></div>
+    <div class="strip-card">
+      <div class="strip-hdr">
+        <div class="strip-title">Monthly CBG Achievement vs Excel Target (1,30,000 kg)</div>
+        <div class="strip-meta" id="ov_strip_meta"></div>
       </div>
-      <div class="ov-atiles" id="ov_strip_tiles"></div>
+      <div class="atiles" id="ov_strip_tiles"></div>
     </div>
     <!-- Best / Worst Highlights -->
-    <div class="ov-hl-row">
-      <div class="ov-hlc">
-        <div class="ov-hl-tag" id="ov_hl1_tag">Best Month</div>
-        <div><div class="ov-hl-ttl" id="ov_hl1_ttl">—</div><div class="ov-hl-body" id="ov_hl1_body">—</div></div>
+    <div class="hl-row">
+      <div class="hlc">
+        <div class="hl-tag" id="ov_hl1_tag">Best Month</div>
+        <div><div class="hl-ttl" id="ov_hl1_ttl">—</div><div class="hl-body" id="ov_hl1_body">—</div></div>
       </div>
-      <div class="ov-hlc">
-        <div class="ov-hl-tag" id="ov_hl2_tag">Worst Month</div>
-        <div><div class="ov-hl-ttl" id="ov_hl2_ttl">—</div><div class="ov-hl-body" id="ov_hl2_body">—</div></div>
+      <div class="hlc">
+        <div class="hl-tag" id="ov_hl2_tag">Worst Month</div>
+        <div><div class="hl-ttl" id="ov_hl2_ttl">—</div><div class="hl-body" id="ov_hl2_body">—</div></div>
       </div>
     </div>
-    <!-- 8-Section Performance Grid -->
-    <div class="ov-sgrid" id="ov_sgrid"></div>
+    <!-- Section Performance -->
+    <div class="ov-slabel">Section Performance</div>
+    <div class="sgrid" id="ov_sgrid"></div>
   </div>
+
   <!-- Day View content -->
   <div id="ov_day_wrap" style="display:none"></div>
 </div>
@@ -1966,31 +2012,51 @@ function showDayPanel(sectionId){
 // ═══ OVERVIEW V9 ════════════════════════════════════════════
 function _goTab(id){show(id,Array.from(document.querySelectorAll('.tb')).find(b=>(b.getAttribute('onclick')||'').includes("'"+id+"'")));}
 
+function spkSVG(vals,color,W,H){
+  const v=(vals||[]).filter(x=>x!=null);if(!v.length)return'';
+  const mn=Math.min(...v),mx=Math.max(...v),rng=mx-mn||1;
+  const n=v.length,sw=W/(n-1||1);
+  const pts=v.map((val,i)=>[i*sw,H-(val-mn)/rng*(H-4)-2]);
+  const d='M'+pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L');
+  return`<svg viewBox="0 0 ${W} ${H}" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:32px;display:block">
+    <path d="${d}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="3" fill="${color}"/>
+  </svg>`;
+}
+
 function _fillOVKpis(kpis){
   kpis.forEach((k,i)=>{
     const n=i+1;
     const bE=document.getElementById('ov_k'+n+'_bar');if(bE)bE.style.background=k.bar||'var(--blue)';
     const lE=document.getElementById('ov_k'+n+'_lbl');if(lE)lE.textContent=k.l||'';
-    const vE=document.getElementById('ov_k'+n+'_val');if(vE){vE.textContent=k.v||'—';vE.className='ov-kpi-val'+(k.dc?' '+k.dc:'');}
+    const vE=document.getElementById('ov_k'+n+'_val');if(vE){vE.textContent=k.v||'—';vE.className='kpi-value'+(k.dc?' '+k.dc:'');}
     const sE=document.getElementById('ov_k'+n+'_sub');if(sE)sE.textContent=k.s||'';
-    const dE=document.getElementById('ov_k'+n+'_dlt');if(dE){if(k.d){dE.textContent=k.d;dE.className='ov-kpi-dlt'+(k.dc?' '+k.dc:'');dE.style.display='';}else dE.style.display='none';}
+    const dE=document.getElementById('ov_k'+n+'_dlt');if(dE){if(k.d){dE.textContent=k.d;dE.className='kpi-delta'+(k.dc?' '+k.dc:'');dE.style.display='';}else dE.style.display='none';}
+    if(n===3&&k.pb!=null){const pf=document.getElementById('ov_k3_pbf');if(pf)pf.style.width=Math.min(100,k.pb)+'%';}
   });
 }
 
-function _fillOVHealthRing(hscore,period,comps){
-  const hclr=hscore>=80?'#1b8a4a':hscore>=65?'#c67c00':'#c62828';
+function _fillOVHealthRing(hscore,period,comps,spkVals){
+  const hclr=hscore>=80?'var(--ov-green)':hscore>=65?'var(--ov-amber)':'var(--ov-red)';
   const hst=hscore>=80?'Good':hscore>=65?'Caution':'Alert';
   const circ=194.8;
   const arc=document.getElementById('ov_hs_arc');
-  if(arc){arc.style.strokeDashoffset=(circ-circ*Math.min(100,hscore)/100).toFixed(1);arc.style.stroke=hclr;}
-  const n=document.getElementById('ov_hs_num');if(n)n.textContent=hscore||'—';
-  const s=document.getElementById('ov_hs_status');if(s){s.textContent=hst;s.style.color=hclr;}
-  const pd=document.getElementById('ov_hs_period');if(pd)pd.textContent=period||'';
+  if(arc){arc.style.strokeDashoffset=(circ-circ*Math.min(100,hscore)/100).toFixed(1);arc.style.stroke=hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c';}
+  const numEl=document.getElementById('ov_hs_num');if(numEl)numEl.textContent=hscore||'—';
+  const sEl=document.getElementById('ov_hs_status');if(sEl){sEl.textContent=hst;sEl.style.color=hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c';}
+  const pdEl=document.getElementById('ov_hs_period');if(pdEl)pdEl.textContent=period||'';
+  // sparkline
+  const spkEl=document.getElementById('ov_hs_spk');
+  if(spkEl&&spkVals&&spkVals.length>1)spkEl.innerHTML=spkSVG(spkVals,hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c',200,32);
+  // badge
+  const bdEl=document.getElementById('ov_hs_badge');
+  if(bdEl){const bc=hscore>=80?'#ecfdf5':hscore>=65?'#fffbeb':'#fff0f3';const tc=hscore>=80?'#065f46':hscore>=65?'#92400e':'#881337';bdEl.innerHTML=`<span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:700;background:${bc};color:${tc};letter-spacing:.3px">${hst}</span>`;}
+  // components
   const cc=document.getElementById('ov_hs_comps');
   if(cc&&comps){cc.innerHTML=comps.map(c=>{
-    const clr=c.ok===1?'#1b8a4a':c.ok===-1?'#c62828':'#c67c00';
+    const clr=c.ok===1?'#0d7d5f':c.ok===-1?'#be1c3c':'#b45309';
     const pct=Math.min(100,c.v!=null?c.v:0);
-    return`<div class="ov-hcc"><div class="ov-hcc-l">${c.l}</div><div class="ov-hcc-v" style="color:${clr}">${c.v!=null?Math.round(c.v)+'%':'—'}</div><div class="ov-hcc-bar"><div class="ov-hcc-fill" style="width:${pct}%;background:${clr}"></div></div></div>`;
+    return`<div style="display:flex;flex-direction:column;gap:3px;padding:6px 4px"><div style="font-size:9px;font-weight:600;color:#6b7f96;letter-spacing:.3px;text-transform:uppercase">${c.l}</div><div style="font-size:12px;font-weight:800;color:${clr}">${c.v!=null?Math.round(c.v)+'%':'—'}</div><div style="height:3px;background:#e8f0f5;border-radius:2px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${clr};border-radius:2px"></div></div></div>`;
   }).join('');}
 }
 
@@ -2068,22 +2134,30 @@ function _renderOVSections(mo){
      hint:'P&L and cost per kg'},
   ];
   const stLbl={ok:'Good',warn:'Caution',alert:'Alert'};
-  sg.innerHTML=SECS.map(s=>`<div class="ov-sc">
-    <div class="ov-sc-hdr">
-      <div class="ov-sc-hl">
-        <div class="ov-sc-ico" style="background:${s.ico}">${s.lbl}</div>
-        <div><div class="ov-sc-nm">${s.name}</div><div class="ov-sc-ps">${s.person}</div></div>
+  const stClr={ok:'#0d7d5f',warn:'#b45309',alert:'#be1c3c'};
+  const stBg={ok:'#ecfdf5',warn:'#fffbeb',alert:'#fff0f3'};
+  const stDot={ok:'#10b981',warn:'#f59e0b',alert:'#f43f5e'};
+  sg.innerHTML=SECS.map(s=>`<div class="sc">
+    <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8f0f5">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div class="sc-icon" style="background:${s.ico}">${s.lbl}</div>
+        <div><div style="font-size:13px;font-weight:700;color:#0a0f1e">${s.name}</div><div style="font-size:10px;color:#6b7f96;margin-top:1px">${s.person}</div></div>
       </div>
-      <div class="ov-status ${s.st}">${stLbl[s.st]}</div>
+      <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:9999px;font-size:10px;font-weight:700;background:${stBg[s.st]};color:${stClr[s.st]}">
+        <span style="width:6px;height:6px;border-radius:50%;background:${stDot[s.st]};flex-shrink:0"></span>${stLbl[s.st]}
+      </span>
     </div>
-    <div class="ov-sc-body">
-      <div class="ov-mg">${s.mx.map(m=>`<div class="ov-mc"><div class="ov-mc-l">${m.l}</div><div class="ov-mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}</div>
-      <div class="ov-ch-box"><canvas id="ov_ch_${s.id}"></canvas></div>
+    <div style="padding:12px 16px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px">
+        ${s.mx.map(m=>`<div><div style="font-size:9px;font-weight:600;color:#9aadbe;letter-spacing:.4px;text-transform:uppercase;margin-bottom:2px">${m.l}</div><div class="mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}
+      </div>
+      <div class="ch-box"><canvas id="ov_ch_${s.id}"></canvas></div>
     </div>
-    <div class="ov-sc-foot">
-      <button class="ov-exp-btn" onclick="_goTab('${s.tab}')">
-        <div class="ov-eb-l"><div class="ov-eb-t">Explore ${s.name}</div><div class="ov-eb-h">${s.hint}</div></div>
-        <div class="ov-eb-a">→</div>
+    <div style="padding:0 16px 14px">
+      <button class="explore-btn" onclick="_goTab('${s.tab}')">
+        <div class="eb-dot" style="background:${stDot[s.st]}"></div>
+        <span style="flex:1;font-size:11px;font-weight:600;color:#1e2d45">Explore ${s.name}</span>
+        <span style="font-size:11px;color:#6b7f96">→</span>
       </button>
     </div>
   </div>`).join('');
@@ -2116,7 +2190,7 @@ function renderOV(){
     // Health score for day
     const dc=[{l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},{l:'Dispatch',v:dDisp&&dCBG&&dCBG>0?dDisp/dCBG*100:null,ok:0},{l:'PSA',v:dUpt,ok:dUpt>=90?1:dUpt>=70?0:-1},{l:'Margin',v:dMgn,ok:dMgn>=40?1:dMgn>=25?0:-1},{l:'CH4',v:dCH4v,ok:dCH4v>=90?1:dCH4v>=80?0:-1},{l:'OLR',v:d1r.olr!=null?Math.min(100,d1r.olr/4.5*100):null,ok:d1r.olr>=2?1:d1r.olr>=1.5?0:-1}];
     const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.30,.15,.25,.20,.05,.05][i])*100,0));
-    _fillOVHealthRing(dHS,da+' 2026',dc);
+    _fillOVHealthRing(dHS,da+' 2026',dc,null);
     _fillOVKpis([
       {bar:'#1565C0',l:'Target CBG — Day',v:fmtN(Math.round(dDay))+' kg',s:'Daily capacity'},
       {bar:'#1b8a4a',l:'CBG Produced',v:dCBG!=null?fmtN(Math.round(dCBG))+' kg':'—',s:da+' 2026',d:dAch!=null?Math.round(dAch)+'% of target':null,dc:dAch>=90?'g':dAch>=75?'a':'r'},
@@ -2183,14 +2257,16 @@ function renderOV(){
   const wts=[.30,.15,.25,.20,.05,.05];
   const hs=Math.round(hComps.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*wts[i]*100,0));
   const hPeriod=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
-  _fillOVHealthRing(hs,hPeriod,hComps);
+  // 7-period sparkline: last 7 months' health scores approximated by cbg achievement
+  const cbgMo=D.M.cbg||[];const spkRaw=cbgMo.filter(v=>v!=null&&v>0).slice(-7).map(v=>Math.min(100,v/TGT.cbg_month*100));
+  _fillOVHealthRing(hs,hPeriod,hComps,spkRaw.length>1?spkRaw:null);
 
   // KPI panel
   const k2pct=tgtCBG>0?Math.round(tCBG/tgtCBG*100):null;
   _fillOVKpis([
     {bar:'#1565C0',l:'Target CBG — Capacity',v:fmtN(tgtCBG)+' kg',s:mo==='ALL'?'Full-year design capacity':mo+' capacity target'},
     {bar:'#1b8a4a',l:'Actual CBG Produced',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'YTD total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of target':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
-    {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM'},
+    {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
     {bar:'#c67c00',l:'Net Margin',v:marginPct!=null?marginPct.toFixed(1)+'%':'—',s:'Target: 40%+',d:marginPct>=40?'On target':'▼ Below 40%',dc:marginPct>=40?'g':marginPct>=25?'a':'r'},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
     {bar:'#c67c00',l:'Plant Uptime',v:uptPct!=null?uptPct.toFixed(1)+'%':'—',s:'Comp ÷ PSA hrs · ≥90%',d:uptPct>=90?'On target':'▼ Below 90%',dc:uptPct>=90?'g':uptPct>=70?'a':'r'},
@@ -2214,10 +2290,10 @@ function renderOV(){
       const p=v!=null&&v>0?Math.round(v/TGT.cbg_month*100):null;
       const bg=p==null?'var(--bg3)':p>=95?'#166534':p>=85?'#16a34a':p>=75?'#d97706':p>=65?'#c2410c':'#dc2626';
       const sel=(mo!=='ALL'&&mo===m)?';outline:2px solid var(--blue);outline-offset:1px':'';
-      return`<div class="ov-atm" style="background:${bg};color:${p==null?'var(--text3)':'#fff'}${sel}" onclick="setMonth('${m}')">
-        <div class="ov-atm-m">${m}</div>
-        <div class="ov-atm-p">${p!=null?p+'%':'—'}</div>
-        <div class="ov-atm-k">${v&&v>0?Math.round(v/1000)+'k':''}</div>
+      return`<div class="atm" style="background:${bg};color:${p==null?'var(--text3)':'#fff'}${sel}" onclick="setMonth('${m}')">
+        <div class="atm-m">${m}</div>
+        <div class="atm-p">${p!=null?p+'%':'—'}</div>
+        <div class="atm-k">${v&&v>0?Math.round(v/1000)+'k':''}</div>
       </div>`;
     }).join('');
   }
