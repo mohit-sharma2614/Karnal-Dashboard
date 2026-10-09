@@ -348,13 +348,25 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 #ov .sc-status.alert{background:var(--ov-red-lt);color:var(--ov-red)}
 /* SECTION BODY */
 #ov .sc-body{padding:14px 16px;flex:1;display:flex;flex-direction:column}
+#ov .sc-stat{display:flex;gap:8px;flex-wrap:wrap;padding-bottom:10px;margin-bottom:10px;border-bottom:1px solid var(--ink7)}
+#ov .sc-stat-i{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink3)}
+#ov .sdot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+#ov .sdot.g{background:var(--ov-green-md)}#ov .sdot.a{background:var(--ov-amber-md)}#ov .sdot.r{background:var(--ov-red-md)}
 #ov .mg{display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;margin-bottom:12px}
 #ov .mc-l{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ink5);margin-bottom:3px}
 #ov .mc-v{font-size:17px;font-weight:800;letter-spacing:-.4px;color:var(--ink);line-height:1.1}
 #ov .mc-v.g{color:var(--ov-green)}#ov .mc-v.r{color:var(--ov-red)}#ov .mc-v.a{color:var(--ov-amber)}#ov .mc-v.b{color:var(--ov-blue)}
 /* CHART */
+#ov .ch-lbl{font-size:9px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--ink5);margin:2px 0 7px}
 #ov .ch-box{position:relative;height:120px}
 #ov .ch-box canvas{position:absolute;top:0;left:0;width:100%!important;height:100%!important}
+/* SEASONAL */
+#ov .sc.sw-flag{border-top:3px solid transparent}
+#ov .sc.sw-winter{border-top-color:#3b82f6}
+#ov .sc.sw-feedstock{border-top-color:#f97316}
+#ov .sw-micro{font-size:9px;font-weight:700;padding:2px 6px;border-radius:var(--ov-r4);letter-spacing:.3px;text-transform:uppercase}
+#ov .sw-micro.sw-winter{background:#dbeafe;color:#1e40af}
+#ov .sw-micro.sw-feedstock{background:#ffedd5;color:#c2410c}
 /* EXPLORE BUTTON */
 #ov .sc-foot{border-top:1px solid var(--ink7);padding:10px 16px;background:var(--ink8)}
 #ov .explore-btn{display:flex;align-items:center;justify-content:space-between;width:100%;padding:8px 12px;border-radius:var(--ov-r8);border:1px solid var(--ink7);background:var(--ov-white);color:var(--ov-blue);font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;text-align:left;box-shadow:var(--ov-sh)}
@@ -2064,6 +2076,7 @@ function _renderOVSections(mo){
   const sg=document.getElementById('ov_sgrid');if(!sg)return;
   ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id=>{const k='ov_ch_'+id;if(charts[k]){try{charts[k].destroy();}catch(e){}charts[k]=null;}});
   const av=a=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
+  const per=mo==='ALL'?'YTD':mo;
   const lbls=mo==='ALL'?MONTHS:dDates('psa');
   const cbgD=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
@@ -2099,68 +2112,104 @@ function _renderOVSections(mo){
   const cpkV=mo==='ALL'?(D.kpis.ytd_cbg>0?D.finance.ytd_cost/D.kpis.ytd_cbg:null):(cpkMoV[mo]||null);
   const sOk=(v,g,w)=>v==null?'warn':v>=g?'ok':v>=w?'warn':'alert';
   const fmtMT=v=>fmtN(Math.round(v))+' MT';const fmtM3=v=>fmtN(Math.round(v))+' m³';
+  // seasonal flags
+  const mnth=new Date().getMonth()+1;
+  const actWin=(mnth>=10||mnth<=3),actFeed=(mnth>=4&&mnth<=10);
+
   const SECS=[
-    {id:'s1',tab:'s1',ico:'#1565C0',lbl:'S1',name:'Feedstock',person:'Mr. Vivek Kumar',st:sOk(sumA(pmF)+sumA(cdF)>0?100:null,80,50),
+    {id:'s1',tab:'s1',clr:'#1565C0',num:'S1',nm:'Feedstock',person:'Mr. Vivek Kumar',swFlag:'feedstock',
+     st:sOk(sumA(pmF)+sumA(cdF)>0?100:null,80,50),
+     stat:[{l:'Supply '+(sumA(pmF)>0?'OK':'Low'),c:sumA(pmF)>0?'g':'a'},{l:'Stock '+(D.stock&&D.stock.pm>0?'OK':'Low'),c:D.stock&&D.stock.pm>0?'g':'a'}],
      mx:[{l:'Pressmud Fed',v:fmtMT(sumA(pmF))},{l:'Cow Dung Fed',v:fmtMT(sumA(cdF))},{l:'CSL Fed',v:fmtN(Math.round(sumA(cslF)))+' KL'},{l:'GS Fed',v:fmtN(Math.round(sumA(gsF)))+' KL'}],
+     cl:'Monthly Procured vs Fed (MT)',
      ch:()=>bar('ov_ch_s1',mo==='ALL'?MONTHS:dDates('feed'),[bDS('PM (MT)',pmF,C.blue),bDS('CD (MT)',cdF,C.teal)],true),
-     hint:'Feed rates & procurement'},
-    {id:'s2',tab:'s2',ico:'#00695c',lbl:'S2',name:'Lab & Process',person:'Dr. Shikha / Mr. Jatin',st:sOk(avgO1,2.0,1.5),
+     exploreLbl:'Feedstock',exploreHint:'Supply · Mix · Inventory · Utilization'},
+    {id:'s2',tab:'s2',clr:'#00695c',num:'S2',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin',swFlag:'winter',
+     st:sOk(avgO1,2.0,1.5),
+     stat:[{l:'D1 '+(avgO1>=1.5?'Stable':'Caution'),c:avgO1>=1.5?'g':'a'},{l:'D2 '+(avgO2>=1.5?'Stable':'Caution'),c:avgO2>=1.5?'g':'a'}],
      mx:[{l:'OLR D1 (avg)',v:avgO1!=null?avgO1.toFixed(2):'—',vc:avgO1>=2.5?'g':avgO1>=1.5?'a':'r'},{l:'OLR D2 (avg)',v:avgO2!=null?avgO2.toFixed(2):'—',vc:avgO2>=2.5?'g':avgO2>=1.5?'a':'r'},{l:'pH D1 (latest)',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—'},{l:'pH D2 (latest)',v:D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'}],
+     cl:'Monthly OLR D1 & D2 (kg VS/m³/d)',
      ch:()=>line('ov_ch_s2',mo==='ALL'?MONTHS:dDates('d1'),[lDS('OLR D1',olrD1,C.blue),lDS('OLR D2',olrD2,C.teal)]),
-     hint:'Digester health & process'},
-    {id:'s3',tab:'s3',ico:'#283593',lbl:'S3',name:'Production',person:'Mr. Sohan Lal',st:sOk(tD1+tD2>0?100:null,80,50),
+     exploreLbl:'Lab & Process',exploreHint:'OLR · pH · IA/PA · TS/VS · Temperature'},
+    {id:'s3',tab:'s3',clr:'#283593',num:'S3',nm:'Production',person:'Mr. Sohan Lal',swFlag:'',
+     st:sOk(tD1+tD2>0?100:null,80,50),
+     stat:[{l:'D1 '+(tD1>0?'Normal':'No Data'),c:tD1>0?'g':'a'},{l:'D2 '+(tD2>0?'Normal':'No Data'),c:tD2>0?'g':'a'}],
      mx:[{l:'D1 Biogas',v:fmtM3(tD1)},{l:'D2 Biogas',v:fmtM3(tD2)},{l:'Expected Gas',v:fmtM3(tExp)},{l:'Purified',v:fmtM3(tPur),vc:purEff>=90?'g':purEff>=75?'a':'r'}],
+     cl:'Monthly Biogas D1 vs D2 (m³)',
      ch:()=>bar('ov_ch_s3',lbls,[bDS('D1 (m³)',d1bg,C.blue),bDS('D2 (m³)',d2bg,C.teal)]),
-     hint:'Raw biogas generation'},
-    {id:'s4',tab:'s4',ico:'#1b5e20',lbl:'S4',name:'Purification',person:'Mr. Bobby',st:sOk(ch4P,90,80),
+     exploreLbl:'Production',exploreHint:'Biogas · D1/D2 output · Vent/Flare'},
+    {id:'s4',tab:'s4',clr:'#1b5e20',num:'S4',nm:'Purification',person:'Mr. Bobby',swFlag:'',
+     st:sOk(ch4P,90,80),
+     stat:[{l:'PSA '+(ch4P>=90?'OK':ch4P>=80?'Caution':'Alert'),c:ch4P>=90?'g':ch4P>=80?'a':'r'}],
      mx:[{l:'CBG Produced',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Eff.',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4% (avg)',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hrs',v:fmtN(Math.round(tPH))}],
+     cl:'Monthly PSA Efficiency % — Target 90%',
      ch:()=>line('ov_ch_s4',lbls,[lDS('CBG (kg)',cbgD,C.green),lDS('Expected (m³)',expD,C.amber)]),
-     hint:'CBG purity & efficiency'},
-    {id:'s5',tab:'s5',ico:'#4a148c',lbl:'S5',name:'Compressor',person:'Mr. Rajendra Kumar',st:sOk(drPct,95,80),
+     exploreLbl:'Purification',exploreHint:'PSA efficiency · CH4 purity · hours'},
+    {id:'s5',tab:'s5',clr:'#4a148c',num:'S5',nm:'Compressor',person:'Mr. Rajendra Kumar',swFlag:'',
+     st:sOk(drPct,95,80),
+     stat:[{l:drPct>=90?'Running':'Dispatch Low',c:drPct>=90?'g':'a'}],
      mx:[{l:'CBG Dispatched',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'Comp. Hrs',v:fmtN(Math.round(tCH))},{l:'Uptime',v:uptP!=null?uptP.toFixed(1)+'%':'—',vc:uptP>=90?'g':uptP>=70?'a':'r'}],
+     cl:'Monthly Produced vs Dispatched (kg)',
      ch:()=>bar('ov_ch_s5',lbls,[bDS('Produced (kg)',cbgD,C.blue),bDS('Dispatched (kg)',dispD,C.green)]),
-     hint:'Cascade & dispatch'},
-    {id:'s6',tab:'s6',ico:'#e65100',lbl:'S6',name:'Manure',person:'Mr. Vivek Kumar',st:sOk(tSfom+tLfom>0?100:null,80,50),
+     exploreLbl:'Compressor',exploreHint:'CBG dispatch · utilization · trips'},
+    {id:'s6',tab:'s6',clr:'#e65100',num:'S6',nm:'Manure',person:'Mr. Vivek Kumar',swFlag:'',
+     st:sOk(tSfom+tLfom>0?100:null,80,50),
+     stat:[{l:'On Track',c:tSfom+tLfom>0?'g':'a'}],
      mx:[{l:'SFOM Produced',v:fmtM3(tSfom)},{l:'LFOM Produced',v:fmtM3(tLfom)},{l:'SFOM Revenue',v:fmtL(sumA(sfRevD))},{l:'LFOM Revenue',v:fmtL(sumA(lfRevD))}],
+     cl:'Monthly Revenue — SFOM + LFOM (₹L)',
      ch:()=>bar('ov_ch_s6',mo==='ALL'?MONTHS:dDates('d1'),[bDS('SFOM (m³)',sfomD,C.amber),bDS('LFOM (m³)',lfomD,C.teal)]),
-     hint:'Drain production & sales'},
-    {id:'s7',tab:'s7',ico:'#1b8a4a',lbl:'S7',name:'Sales',person:'Mr. Vivek Kumar',st:sOk(tRev>0?100:null,80,50),
+     exploreLbl:'Manure',exploreHint:'Drain · SFOM · LFOM · Revenue'},
+    {id:'s7',tab:'s7',clr:'#1b8a4a',num:'S7',nm:'Sales',person:'Mr. Vivek Kumar',swFlag:'',
+     st:sOk(tRev>0?100:null,80,50),
+     stat:[{l:drPct>=95?'Dispatch OK':'Dispatch Lag',c:drPct>=95?'g':'a'},{l:tRev>0?'Revenue OK':'No Revenue',c:tRev>0?'g':'r'}],
      mx:[{l:'Total Revenue',v:fmtL(tRev)},{l:'CBG Dispatched',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'CBG Produced',v:fmtN(Math.round(tCBG))+' kg'}],
+     cl:'Monthly Dispatched vs Revenue',
      ch:()=>mo==='ALL'?bar('ov_ch_s7',MONTHS,[bDS('Revenue (₹)',revD,C.green),bDS('Cost (₹)',costD,C.red)]):line('ov_ch_s7',dDates('rev'),[lDS('CBG Rev (₹)',revD,C.green,true)]),
-     hint:'CBG & manure revenue'},
-    {id:'s8',tab:'s8',ico:'#c62828',lbl:'S8',name:'Finance',person:'Management',st:sOk(mrg,40,25),
+     exploreLbl:'Sales',exploreHint:'Dispatch vs Sale · Revenue · Customer mix'},
+    {id:'s8',tab:'s8',clr:'#c62828',num:'S8',nm:'Finance',person:'Management',swFlag:'',
+     st:sOk(mrg,40,25),
+     stat:[{l:'Margin '+(mrg>=40?'OK':mrg>=25?'Caution':'Alert'),c:mrg>=40?'g':mrg>=25?'a':'r'}],
      mx:[{l:'Total Revenue',v:fmtL(tRev)},{l:'Total Cost',v:fmtL(tCost)},{l:'Net Margin',v:mrg!=null?mrg.toFixed(1)+'%':'—',vc:mrg>=40?'g':mrg>=25?'a':'r'},{l:'Cost / kg',v:cpkV!=null?'₹'+cpkV.toFixed(1)+'/kg':'—',vc:cpkV!=null&&cpkV<=TGT.cost_kg?'g':'r'}],
+     cl:'Monthly Net Margin % — Target 45%',
      ch:()=>mo==='ALL'?bar('ov_ch_s8',MONTHS,[bDS('Revenue (₹)',revD,C.green),bDS('Cost (₹)',costD,C.red)]):line('ov_ch_s8',MONTHS,(D.M.margin||[]).length?[lDS('Margin %',D.M.margin,C.green,true)]:[]),
-     hint:'P&L and cost per kg'},
+     exploreLbl:'Finance',exploreHint:'P&L · Cost breakdown · Margin trends'},
   ];
-  const stLbl={ok:'Good',warn:'Caution',alert:'Alert'};
-  const stClr={ok:'#0d7d5f',warn:'#b45309',alert:'#be1c3c'};
-  const stBg={ok:'#ecfdf5',warn:'#fffbeb',alert:'#fff0f3'};
-  const stDot={ok:'#10b981',warn:'#f59e0b',alert:'#f43f5e'};
-  sg.innerHTML=SECS.map(s=>`<div class="sc">
-    <div style="padding:14px 16px 10px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #e8f0f5">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div class="sc-icon" style="background:${s.ico}">${s.lbl}</div>
-        <div><div style="font-size:13px;font-weight:700;color:#0a0f1e">${s.name}</div><div style="font-size:10px;color:#6b7f96;margin-top:1px">${s.person}</div></div>
+  const stlblM={ok:'Good',warn:'Caution',alert:'Alert'};
+  const badgeM={ok:'bg',warn:'ba',alert:'br'};
+  sg.innerHTML=SECS.map(s=>{
+    let swClass='',swMicro='';
+    if(s.swFlag==='winter'&&actWin){swClass=' sw-flag sw-winter';swMicro='<span class="sw-micro sw-winter">Winter Watch</span>';}
+    else if(s.swFlag==='feedstock'&&actFeed){swClass=' sw-flag sw-feedstock';swMicro='<span class="sw-micro sw-feedstock">Feedstock Watch</span>';}
+    const statRow=`<div class="sc-stat">${s.stat.map(st=>`<div class="sc-stat-i"><span class="sdot ${st.c}"></span>${st.l}</div>`).join('')}</div>`;
+    const mxHtml=`<div class="mg">${s.mx.map(m=>`<div><div class="mc-l">${m.l}</div><div class="mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}</div>`;
+    return`<div class="sc${swClass}">
+      <div class="sc-hdr">
+        <div class="sc-hdr-l">
+          <div class="sc-icon" style="background:${s.clr}">${s.num}</div>
+          <div><div class="sc-name">${s.nm}</div><div class="sc-person">${s.person}</div></div>
+        </div>
+        <div class="sc-hdr-r">
+          <span class="ov-badge ${badgeM[s.st]}">${stlblM[s.st]} · ${per}</span>
+          ${swMicro}
+        </div>
       </div>
-      <span style="display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:9999px;font-size:10px;font-weight:700;background:${stBg[s.st]};color:${stClr[s.st]}">
-        <span style="width:6px;height:6px;border-radius:50%;background:${stDot[s.st]};flex-shrink:0"></span>${stLbl[s.st]}
-      </span>
-    </div>
-    <div style="padding:12px 16px">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px">
-        ${s.mx.map(m=>`<div><div style="font-size:9px;font-weight:600;color:#9aadbe;letter-spacing:.4px;text-transform:uppercase;margin-bottom:2px">${m.l}</div><div class="mc-v${m.vc?' '+m.vc:''}">${m.v}</div></div>`).join('')}
+      <div class="sc-body">
+        ${statRow}
+        ${mxHtml}
+        <div class="ch-lbl">${s.cl}</div>
+        <div class="ch-box"><canvas id="ov_ch_${s.id}"></canvas></div>
       </div>
-      <div class="ch-box"><canvas id="ov_ch_${s.id}"></canvas></div>
-    </div>
-    <div style="padding:0 16px 14px">
-      <button class="explore-btn" onclick="_goTab('${s.tab}')">
-        <div class="eb-dot" style="background:${stDot[s.st]}"></div>
-        <span style="flex:1;font-size:11px;font-weight:600;color:#1e2d45">Explore ${s.name}</span>
-        <span style="font-size:11px;color:#6b7f96">→</span>
-      </button>
-    </div>
-  </div>`).join('');
+      <div class="sc-foot">
+        <button class="explore-btn" onclick="_goTab('${s.tab}')">
+          <div class="eb-l">
+            <span class="eb-dot" style="background:${s.clr}"></span>
+            <div><div class="eb-ttl">Explore ${s.exploreLbl} Insights</div><div class="eb-hint">${s.exploreHint}</div></div>
+          </div>
+          <span class="eb-arrow">→</span>
+        </button>
+      </div>
+    </div>`;
+  }).join('');
   setTimeout(()=>{SECS.forEach(s=>{try{s.ch();}catch(e){}});},80);
 }
 
