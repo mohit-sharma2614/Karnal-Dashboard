@@ -389,57 +389,165 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 #ov .ov-slabel::after{content:'';flex:1;height:1px;background:var(--ink7)}
 @media(max-width:900px){#ov .hero-row{grid-template-columns:1fr}#ov .sgrid{grid-template-columns:1fr}#ov .hl-row{grid-template-columns:1fr;background:none;border:none;gap:8px}#ov .hlc:first-child{border-right:none}}
 /* ── REPORT MODAL ── */
+:root{--rp-ink:#0a0f1e;--rp-ink2:#1e2d45;--rp-ink3:#3d5068;--rp-ink4:#6b7f96;--rp-ink5:#9aadbe;--rp-ink6:#c8d5e0;--rp-ink7:#e8f0f5;--rp-ink8:#f4f7f9;--rp-wh:#fff;--rp-bl:#1a56db;--rp-bl-dk:#1240a8;--rp-bl-lt:#eff4ff;--rp-gr:#0d7d5f;--rp-gr-lt:#ecfdf5;--rp-am:#b45309;--rp-am-lt:#fffbeb;--rp-rd:#be1c3c;--rp-rd-lt:#fff0f3;--rp-sh:0 1px 2px rgba(0,0,0,.05),0 1px 4px rgba(0,0,0,.07);--rp-sh-md:0 4px 12px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04)}
 #rp-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 12px 40px}
 #rp-modal.hidden{display:none}
-#rp-modal-inner{background:var(--bg2,#f4f6f8);border-radius:16px;width:100%;max-width:860px;position:relative;padding:0 0 32px}
-.rp-modal-close{position:sticky;top:0;z-index:10;background:var(--bg2,#f4f6f8);border-radius:16px 16px 0 0;padding:12px 16px;display:flex;justify-content:flex-end;border-bottom:1px solid #e2e8f0}
-.rp-modal-close button{background:var(--bg3,#e8edf2);border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--text,#1a2332);cursor:pointer;display:flex;align-items:center;gap:6px}
-.rp-page{max-width:100%;padding:0 16px}
-.rp-cover{background:linear-gradient(135deg,#1a56db,#1e40af);border-radius:14px;padding:24px 24px 20px;margin-bottom:12px;color:#fff}
-.rp-cover-plant{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:.75;margin-bottom:6px}
-.rp-cover-title{font-size:22px;font-weight:800;margin-bottom:2px}
-.rp-cover-period{font-size:13px;opacity:.85;margin-bottom:16px}
-.rp-cover-meta{display:flex;gap:18px;flex-wrap:wrap}
-.rp-cover-m{}.rp-cover-ml{font-size:9px;text-transform:uppercase;opacity:.65;letter-spacing:.8px}
-.rp-cover-mv{font-size:13px;font-weight:700}
-.rp-three-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
-.rp-three-card{background:var(--bg,#fff);border:1px solid #e2e8f0;border-radius:12px;padding:16px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center}
-.rp-three-lbl{font-size:10px;font-weight:600;color:var(--text2,#607d8b);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
-.rp-three-val{font-size:22px;font-weight:800;margin-bottom:4px}
-.rp-three-sub{font-size:10px;color:var(--text2,#607d8b);margin-bottom:8px}
-.rp-three-bar{height:4px;background:var(--bg3,#e8edf2);border-radius:2px;overflow:hidden}
-.rp-three-bf{height:100%;border-radius:2px;transition:width .6s}
-.rp-sec{background:var(--bg,#fff);border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
-.rp-sec-hdr{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid #e2e8f0}
-.rp-sec-num{background:#1a56db;color:#fff;border-radius:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
-.rp-sec-name{font-size:12px;font-weight:700;color:var(--text,#1a2332)}
-.rp-sec-body{padding:14px}
-.rp-tbl{width:100%;border-collapse:collapse;font-size:11px}
-.rp-tbl th{background:var(--bg3,#e8edf2);padding:6px 8px;text-align:left;font-weight:700;font-size:10px;color:var(--text2,#607d8b);text-transform:uppercase}
-.rp-tbl td{padding:6px 8px;border-bottom:1px solid #f0f4f8}
-.rp-tbl tr:last-child td{border-bottom:none;font-weight:700;background:var(--bg2,#f4f6f8)}
-.rp-tbl td.ok{color:#16a34a;font-weight:700}.rp-tbl td.wa{color:#d97706;font-weight:700}.rp-tbl td.al{color:#dc2626;font-weight:700}
-.rp-mg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
-.rp-mc{background:var(--bg2,#f4f6f8);border:1px solid #e2e8f0;border-radius:8px;padding:10px 10px}
-.rp-ml{font-size:9px;color:var(--text2,#607d8b);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
-.rp-mv{font-size:14px;font-weight:800;color:var(--text,#1a2332)}
-.rp-mv.g{color:#16a34a}.rp-mv.r{color:#dc2626}.rp-mv.a{color:#d97706}.rp-mv.b{color:#1a56db}
-.rp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
-.rp-finding{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f0f4f8}
-.rp-finding:last-child{border-bottom:none}
-.rp-f-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px}
-.rp-f-body{flex:1}
-.rp-f-ttl{font-size:12px;font-weight:700;color:var(--text,#1a2332);margin-bottom:3px}
-.rp-f-txt{font-size:11px;color:var(--text2,#607d8b);line-height:1.5}
-.rp-action-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0f4f8}
-.rp-action-row:last-child{border-bottom:none}
-.rp-ap{border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;flex-shrink:0;margin-top:2px}
-.rp-at{font-size:12px;font-weight:700;color:var(--text,#1a2332);margin-bottom:2px}
-.rp-ao{font-size:10px;color:var(--text2,#607d8b)}
-@media(max-width:600px){.rp-three-row{grid-template-columns:1fr}.rp-mg{grid-template-columns:repeat(2,1fr)}.rp-two{grid-template-columns:1fr}}
+#rp-modal-inner{background:var(--rp-ink8);border-radius:16px;width:100%;max-width:900px;position:relative;padding:0 0 32px;font-family:'Inter',system-ui,sans-serif;font-size:13px;line-height:1.5;color:var(--rp-ink);-webkit-font-smoothing:antialiased}
+.rp-modal-close{position:sticky;top:0;z-index:10;background:var(--rp-ink8);border-radius:16px 16px 0 0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--rp-ink7)}
+.rp-modal-close button{background:var(--rp-ink7);border:none;border-radius:7px;padding:6px 14px;font-size:12px;font-weight:700;color:var(--rp-ink);cursor:pointer;font-family:inherit}
+/* toolbar */
+.rp-toolbar{background:var(--rp-wh);border-bottom:1px solid var(--rp-ink7);display:flex;align-items:center;padding:0 20px;height:46px;gap:12px}
+.rp-tb-mark{width:24px;height:24px;border-radius:5px;background:var(--rp-ink);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;letter-spacing:-.5px;flex-shrink:0}
+.rp-tb-name{font-size:11px;font-weight:700;color:var(--rp-ink)}
+.rp-tb-sep{width:1px;height:16px;background:var(--rp-ink7)}
+.rp-rtabs{display:flex;background:var(--rp-ink8);border:1px solid var(--rp-ink7);border-radius:6px;padding:2px;gap:2px}
+.rp-rtt{padding:3px 10px;border-radius:4px;border:none;background:transparent;font-family:inherit;font-size:11px;font-weight:600;color:var(--rp-ink4);cursor:pointer;white-space:nowrap}
+.rp-rtt.on{background:var(--rp-wh);color:var(--rp-ink);box-shadow:var(--rp-sh);border:1px solid var(--rp-ink7)}
+.rp-period-pill{background:var(--rp-bl-lt);border:1px solid var(--rp-bl);border-radius:9999px;padding:3px 11px;font-size:11px;font-weight:700;color:var(--rp-bl);margin-left:auto}
+/* page */
+.rpage2{padding:0 20px}
+/* cover */
+.rp-cover2{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:14px;box-shadow:var(--rp-sh-md);overflow:hidden;margin-top:16px}
+.rp-cover-band{height:4px;background:linear-gradient(90deg,var(--rp-bl),var(--rp-bl-dk))}
+.rp-cover-body{padding:26px 30px 22px}
+.rp-cover-eyebrow{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--rp-bl);margin-bottom:10px}
+.rp-cover-title{font-family:'DM Serif Display',Georgia,serif;font-size:26px;font-weight:400;color:var(--rp-ink);line-height:1.15;letter-spacing:-.5px;margin-bottom:4px}
+.rp-cover-sub{font-size:12px;color:var(--rp-ink3);margin-bottom:18px}
+.rp-cover-meta{display:flex;gap:22px;flex-wrap:wrap;padding-top:14px;border-top:1px solid var(--rp-ink7)}
+.rp-cm-l{font-size:8px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--rp-ink5);margin-bottom:2px}
+.rp-cm-v{font-size:11px;font-weight:700;color:var(--rp-ink2)}
+.rp-status-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:16px}
+.rp-st-chip{padding:9px 12px;border-radius:7px;border:1px solid}
+.rp-st-chip.g{background:var(--rp-gr-lt);border-color:rgba(13,125,95,.25)}.rp-st-chip.a{background:var(--rp-am-lt);border-color:rgba(180,83,9,.25)}.rp-st-chip.r{background:var(--rp-rd-lt);border-color:rgba(190,28,60,.25)}.rp-st-chip.b{background:var(--rp-bl-lt);border-color:rgba(26,86,219,.25)}
+.rp-st-lbl{font-size:8px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px}
+.rp-st-chip.g .rp-st-lbl{color:var(--rp-gr)}.rp-st-chip.a .rp-st-lbl{color:var(--rp-am)}.rp-st-chip.r .rp-st-lbl{color:var(--rp-rd)}.rp-st-chip.b .rp-st-lbl{color:var(--rp-bl)}
+.rp-st-v{font-size:15px;font-weight:800;letter-spacing:-.4px;color:var(--rp-ink)}
+.rp-st-sup{font-size:9px;color:var(--rp-ink4);margin-top:2px}
+/* sec header */
+.rp-sec-hdr2{margin:20px 0 10px;display:flex;align-items:center;gap:9px}
+.rp-sec-hdr2::after{content:'';flex:1;height:1px;background:var(--rp-ink7)}
+.rp-sec-num2{width:20px;height:20px;border-radius:4px;background:var(--rp-ink);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:#fff;flex-shrink:0}
+.rp-sec-ttl{font-size:13px;font-weight:800;color:var(--rp-ink);letter-spacing:-.3px}
+/* three-num */
+.rp-three-num{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.rp-tn{padding:13px 15px;background:var(--rp-wh);border-right:1px solid var(--rp-ink7);position:relative}
+.rp-tn:last-child{border-right:none}
+.rp-tn-bar{position:absolute;top:0;left:0;right:0;height:3px}
+.rp-tn-lbl{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--rp-ink5);margin-bottom:4px}
+.rp-tn-v{font-size:20px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.rp-tn-v.blue{color:var(--rp-bl)}.rp-tn-v.amber{color:var(--rp-am)}.rp-tn-v.green{color:var(--rp-gr)}.rp-tn-v.red{color:var(--rp-rd)}
+.rp-tn-unit{font-size:9px;color:var(--rp-ink4);margin-top:3px}.rp-tn-proof{font-size:8px;color:var(--rp-ink5);margin-top:2px}
+.rp-tn-pct-row{display:flex;align-items:center;gap:6px;margin-top:7px;padding-top:7px;border-top:1px solid var(--rp-ink7)}
+.rp-tn-bar2{flex:1;height:3px;background:var(--rp-ink7);border-radius:2px;overflow:hidden}
+.rp-tn-fill{height:100%;border-radius:2px}
+.rp-tn-pct-v{font-size:9px;font-weight:700;white-space:nowrap}
+/* metric grid */
+.rp-metric-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:10px}
+.rp-mc2{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden}
+.rp-mc-stripe{height:2px}
+.rp-mc-inner{padding:9px 11px}
+.rp-mc-lbl{font-size:8px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--rp-ink5);margin-bottom:4px}
+.rp-mc-v{font-size:17px;font-weight:800;letter-spacing:-.4px;line-height:1}
+.rp-mc-v.r{color:var(--rp-rd)}.rp-mc-v.a{color:var(--rp-am)}.rp-mc-v.g{color:var(--rp-gr)}.rp-mc-v.b{color:var(--rp-bl)}.rp-mc-v.n{color:var(--rp-ink)}
+.rp-mc-delta{font-size:9px;font-weight:600;margin-top:3px;margin-bottom:5px}
+.rp-mc-delta.r{color:var(--rp-rd)}.rp-mc-delta.a{color:var(--rp-am)}.rp-mc-delta.g{color:var(--rp-gr)}.rp-mc-delta.nt{color:var(--rp-ink5)}
+.rp-mc-proof{background:var(--rp-ink8);border-top:1px solid var(--rp-ink7);padding:5px 11px;display:flex;gap:5px;align-items:center;flex-wrap:wrap}
+.rp-mp{flex:1;min-width:0}.rp-mp-l{font-size:7px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--rp-ink5);margin-bottom:1px}.rp-mp-v{font-size:10px;font-weight:700;color:var(--rp-ink2);white-space:nowrap}
+.rp-mp-div{font-size:12px;color:var(--rp-ink6);flex-shrink:0}.rp-mp-eq{font-size:9px;font-weight:700;flex-shrink:0}
+.rp-mp-eq.r{color:var(--rp-rd)}.rp-mp-eq.a{color:var(--rp-am)}.rp-mp-eq.g{color:var(--rp-gr)}.rp-mp-eq.b{color:var(--rp-bl)}
+/* feedstock */
+.rp-fs-wrap{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.rp-fs-table{width:100%;border-collapse:collapse}
+.rp-fs-table thead th{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--rp-ink5);padding:8px 11px;border-bottom:1px solid var(--rp-ink7);text-align:right;background:var(--rp-ink8);white-space:nowrap}
+.rp-fs-table thead th:first-child{text-align:left}
+.rp-fs-table tbody td{padding:8px 11px;border-bottom:1px solid var(--rp-ink7);text-align:right;font-size:11px;vertical-align:top}
+.rp-fs-table tbody td:first-child{text-align:left;font-weight:600;color:var(--rp-ink2)}
+.rp-fs-table tbody tr:last-child td{border-bottom:none;font-weight:700;background:var(--rp-ink8)}
+.rp-fs-pct{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.rp-fs-pct-v{font-size:11px;font-weight:700}.rp-fs-pct-v.g{color:var(--rp-gr)}.rp-fs-pct-v.a{color:var(--rp-am)}.rp-fs-pct-v.r{color:var(--rp-rd)}
+.rp-fs-proof{font-size:8px;color:var(--rp-ink5)}
+/* digesters */
+.rp-dig-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.rp-dig-card{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden}
+.rp-dig-hdr{padding:9px 13px;border-bottom:1px solid var(--rp-ink7);display:flex;align-items:center;justify-content:space-between;background:var(--rp-ink8)}
+.rp-dig-name{font-size:10px;font-weight:800;color:var(--rp-ink)}
+.rp-dig-badge{font-size:7px;font-weight:700;padding:2px 7px;border-radius:3px}
+.rp-dig-badge.g{background:var(--rp-gr-lt);color:var(--rp-gr)}.rp-dig-badge.a{background:var(--rp-am-lt);color:var(--rp-am)}.rp-dig-badge.r{background:var(--rp-rd-lt);color:var(--rp-rd)}
+.rp-dig-row{display:flex;justify-content:space-between;align-items:flex-end;padding:7px 13px;border-bottom:1px solid var(--rp-ink7)}
+.rp-dig-row:last-child{border-bottom:none}
+.rp-dig-rl{font-size:9px;color:var(--rp-ink4);flex:1}
+.rp-dig-rv-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:1px}
+.rp-dig-rv{font-size:12px;font-weight:700;color:var(--rp-ink)}
+.rp-dig-rv.r{color:var(--rp-rd)}.rp-dig-rv.a{color:var(--rp-am)}.rp-dig-rv.g{color:var(--rp-gr)}.rp-dig-rv.b{color:var(--rp-bl)}
+.rp-dig-proof{font-size:7px;color:var(--rp-ink5)}
+/* sales */
+.rp-dvs-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.rp-dvs-card{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden}
+.rp-dvs-stripe{height:3px}.rp-dvs-inner{padding:13px 15px}
+.rp-dvs-lbl{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.rp-dvs-v{font-size:24px;font-weight:800;letter-spacing:-.6px;line-height:1;margin-bottom:3px}
+.rp-dvs-proof{font-size:9px;color:var(--rp-ink4);margin-bottom:9px}
+.rp-dvs-bar-wrap{height:3px;background:var(--rp-ink7);border-radius:2px;overflow:hidden;margin-bottom:5px}
+.rp-dvs-bar-fill{height:100%;border-radius:2px}
+.rp-dvs-pct{font-size:9px;font-weight:700}
+.rp-dvs-gap{margin-top:7px;padding-top:7px;border-top:1px solid var(--rp-ink7);font-size:9px;color:var(--rp-ink4)}
+/* P&L */
+.rp-pnl-wrap{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden;margin-bottom:10px}
+.rp-pnl-row{display:flex;align-items:flex-start;padding:8px 15px;border-bottom:1px solid var(--rp-ink7);gap:10px}
+.rp-pnl-row:last-child{border-bottom:none}
+.rp-pnl-row.subtotal{background:var(--rp-ink8)}.rp-pnl-row.total{background:var(--rp-ink);color:#fff}
+.rp-pnl-lbl{flex:1;font-size:11px;color:var(--rp-ink3)}
+.rp-pnl-row.subtotal .rp-pnl-lbl{font-weight:700;color:var(--rp-ink)}.rp-pnl-row.total .rp-pnl-lbl{color:rgba(255,255,255,.7);font-weight:600}
+.rp-pnl-v-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:1px;min-width:90px}
+.rp-pnl-v{font-size:11px;font-weight:700;text-align:right}
+.rp-pnl-row.total .rp-pnl-v{color:#fff;font-size:14px;font-weight:800}.rp-pnl-row.subtotal .rp-pnl-v{color:var(--rp-ink)}
+.rp-pnl-sub{font-size:8px;color:var(--rp-ink5);text-align:right}.rp-pnl-row.total .rp-pnl-sub{color:rgba(255,255,255,.5)}
+.rp-pnl-pct{font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;white-space:nowrap}
+.rp-pnl-pct.g{background:var(--rp-gr-lt);color:var(--rp-gr)}.rp-pnl-pct.a{background:var(--rp-am-lt);color:var(--rp-am)}.rp-pnl-pct.nt{background:var(--rp-ink8);color:var(--rp-ink5)}.rp-pnl-row.total .rp-pnl-pct{background:rgba(255,255,255,.15);color:#fff}
+/* findings */
+.rp-findings-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px}
+.rp-finding2{border-radius:12px;overflow:hidden;border:1px solid}
+.rp-finding2.al{border-color:rgba(190,28,60,.3)}.rp-finding2.wa{border-color:rgba(180,83,9,.3)}.rp-finding2.ok{border-color:rgba(13,125,95,.3)}
+.rp-finding-top{padding:11px 13px}
+.rp-finding2.al .rp-finding-top{background:var(--rp-rd-lt)}.rp-finding2.wa .rp-finding-top{background:var(--rp-am-lt)}.rp-finding2.ok .rp-finding-top{background:var(--rp-gr-lt)}
+.rp-f-badge{font-size:7px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;display:flex;align-items:center;gap:4px;margin-bottom:5px}
+.rp-finding2.al .rp-f-badge{color:var(--rp-rd)}.rp-finding2.wa .rp-f-badge{color:var(--rp-am)}.rp-finding2.ok .rp-f-badge{color:var(--rp-gr)}
+.rp-f-badge::before{content:'';width:9px;height:2px;border-radius:1px;background:currentColor}
+.rp-f-head{font-size:11px;font-weight:700;color:var(--rp-ink);line-height:1.4}
+.rp-finding-proof2{background:var(--rp-wh);border-top:1px solid var(--rp-ink7);padding:9px 13px;display:flex;flex-wrap:wrap;gap:6px}
+.rp-fp{flex:1;min-width:68px;max-width:92px}
+.rp-fp-l{font-size:6px;font-weight:600;text-transform:uppercase;letter-spacing:.3px;color:var(--rp-ink5);margin-bottom:2px}
+.rp-fp-v{font-size:12px;font-weight:700;color:var(--rp-ink)}
+.rp-fp-v.r{color:var(--rp-rd)}.rp-fp-v.a{color:var(--rp-am)}.rp-fp-v.g{color:var(--rp-gr)}.rp-fp-v.nt{color:var(--rp-ink4)}
+.rp-fp-f{font-size:7px;color:var(--rp-ink5);margin-top:1px;line-height:1.3}
+/* comparison */
+.rp-cmp-wrap{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-radius:12px;overflow:hidden;margin-bottom:10px;overflow-x:auto}
+.rp-cmp{width:100%;border-collapse:collapse}
+.rp-cmp thead th{font-size:8px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--rp-ink5);padding:8px 11px;border-bottom:1px solid var(--rp-ink7);text-align:right;background:var(--rp-ink8)}
+.rp-cmp thead th:first-child{text-align:left}.rp-cmp thead th.hl{background:var(--rp-bl-lt);color:var(--rp-bl)}
+.rp-cmp tbody td{padding:7px 11px;border-bottom:1px solid var(--rp-ink7);text-align:right;vertical-align:top}
+.rp-cmp tbody td:first-child{text-align:left;color:var(--rp-ink3);font-size:10px;font-weight:500}
+.rp-cmp tbody tr:last-child td{border-bottom:none}
+.rp-num-pair{display:flex;flex-direction:column;gap:2px;align-items:flex-end}
+.rp-np-big{font-size:11px;font-weight:700}.rp-np-small{font-size:8px;color:var(--rp-ink5)}
+.rp-chip{display:inline-block;font-size:8px;font-weight:700;padding:2px 5px;border-radius:3px;white-space:nowrap}
+.rp-chip.up{background:var(--rp-gr-lt);color:var(--rp-gr)}.rp-chip.dn{background:var(--rp-rd-lt);color:var(--rp-rd)}.rp-chip.wa{background:var(--rp-am-lt);color:var(--rp-am)}.rp-chip.nt{background:var(--rp-ink8);color:var(--rp-ink4);border:1px solid var(--rp-ink7)}
+/* actions */
+.rp-action-hdr{background:var(--rp-ink);color:#fff;padding:9px 15px;display:flex;align-items:center;gap:9px;border-radius:12px 12px 0 0}
+.rp-action-hdr-ttl{font-size:10px;font-weight:700;flex:1}.rp-action-hdr-sub{font-size:9px;color:var(--rp-ink5)}
+.rp-action-rows{background:var(--rp-wh);border:1px solid var(--rp-ink7);border-top:none;border-radius:0 0 12px 12px;overflow:hidden}
+.rp-arow{display:grid;grid-template-columns:20px 1fr 90px 80px 60px;align-items:start;gap:9px;padding:9px 15px;border-bottom:1px solid var(--rp-ink7)}
+.rp-arow:last-child{border-bottom:none}
+.rp-a-num{width:18px;height:18px;border-radius:4px;background:var(--rp-ink8);border:1px solid var(--rp-ink7);display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:800;color:var(--rp-ink4);flex-shrink:0}
+.rp-a-action{font-size:11px;font-weight:600;color:var(--rp-ink);line-height:1.4}
+.rp-a-sub{font-size:9px;color:var(--rp-ink4);margin-top:2px;line-height:1.4}
+.rp-a-owner{font-size:9px;color:var(--rp-ink3)}.rp-a-dead{font-size:9px;color:var(--rp-ink4)}
+.rp-a-pri{display:inline-block;font-size:7px;font-weight:700;padding:2px 6px;border-radius:3px;text-transform:uppercase;letter-spacing:.3px}
+.rp-a-pri.hi{background:var(--rp-rd-lt);color:var(--rp-rd)}.rp-a-pri.md{background:var(--rp-am-lt);color:var(--rp-am)}.rp-a-pri.lo{background:var(--rp-bl-lt);color:var(--rp-bl)}
+@media(max-width:640px){.rp-status-row,.rp-metric-grid,.rp-dig-grid,.rp-dvs-row,.rp-findings-row{grid-template-columns:1fr 1fr}.rp-three-num{grid-template-columns:1fr}.rp-tn{border-right:none;border-bottom:1px solid var(--rp-ink7)}.rp-tn:last-child{border-bottom:none}.rp-arow{grid-template-columns:20px 1fr auto}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=DM+Serif+Display:ital@0;1&display=swap">
 </head>
 <body>
 <div id="authOverlay" style="position:fixed;inset:0;background:#fff;z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;font-family:Segoe UI,system-ui,sans-serif">
@@ -6164,9 +6272,405 @@ async function initDashboard() {
   } catch(e) { setStatus('Error: '+e.message); console.error(e); }
 }
 // ── GENERATE REPORT ────────────────────────────────────────────────
+let _rpP='monthly';
 function openReport(){
-  if(!D||!D.months||!D.months.length){alert('Data not loaded yet. Please wait.');return;}
-  _expOverview();
+  if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
+  if(curDay!=='ALL')_rpP='daily';
+  else if(curMonth!=='ALL')_rpP='monthly';
+  else _rpP='yearly';
+  document.getElementById('rp-view').innerHTML=_buildRp(_rpP);
+  document.getElementById('rp-modal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function closeReport(){
+  document.getElementById('rp-modal').classList.add('hidden');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReport();});
+function switchRpPeriod(p,btn){
+  _rpP=p;
+  document.querySelectorAll('.rp-rtt').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  document.getElementById('rp2-body').innerHTML=_buildRpBody(p);
+}
+
+function _buildRp(p){
+  const today=new Date();
+  const genDate=today.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()]+' '+today.getFullYear()+', '+today.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
+  const periodLabel=p==='daily'?'Daily Report':p==='monthly'?'Monthly Report':'Annual Report';
+  const mo=curMonth!=='ALL'?curMonth:MONTHS[MONTHS.length-1];
+  const da=curDay!=='ALL'?curDay:'—';
+  let pillTxt=p==='daily'?da:p==='monthly'?mo+' 2026':'FY 2026';
+  return`<div class="rp-toolbar">
+    <div class="rp-tb-mark">CBG</div>
+    <div class="rp-tb-name">LREKPL — Karnal Plant</div>
+    <div class="rp-tb-sep"></div>
+    <div class="rp-rtabs">
+      <button class="rp-rtt${p==='yearly'?' on':''}" onclick="switchRpPeriod('yearly',this)">Yearly</button>
+      <button class="rp-rtt${p==='monthly'?' on':''}" onclick="switchRpPeriod('monthly',this)">Monthly</button>
+      <button class="rp-rtt${p==='daily'?' on':''}" onclick="switchRpPeriod('daily',this)">Daily</button>
+    </div>
+    <div class="rp-period-pill">${pillTxt}</div>
+  </div>
+  <div class="rpage2" id="rp2-body">${_buildRpBody(p)}</div>`;
+}
+
+function _buildRpBody(p){
+  const mo=curMonth!=='ALL'?curMonth:MONTHS[MONTHS.length-1];
+  const da=curDay!=='ALL'?curDay:null;
+  const moIdx=MONTHS.indexOf(mo);
+  const today=new Date();
+  const genDate=today.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()]+' '+today.getFullYear();
+
+  // ── helpers ──────────────────────────────────────────────────────
+  const nv=v=>(v==null||v===''||isNaN(+v))?null:+v;
+  const fL=v=>{if(v==null)return'—';const a=Math.abs(v);const s=v<0?'−':'';return s+'₹'+(a>=1e7?(a/1e7).toFixed(2)+' Cr':a>=1e5?(a/1e5).toFixed(1)+' L':(a/1000).toFixed(1)+'k');};
+  const fN=v=>v==null?'—':v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'k':Math.round(v).toLocaleString('en-IN');
+  const fNI=v=>v==null?'—':Math.round(v).toLocaleString('en-IN');
+  const sumA=a=>(a||[]).reduce((s,x)=>s+(x||0),0);
+  const avgA=a=>{const f=(a||[]).filter(x=>x!=null&&x>0);return f.length?f.reduce((s,x)=>s+x,0)/f.length:null;};
+  const pBar=(pct,clr)=>`<div class="rp-tn-bar2"><div class="rp-tn-fill" style="width:${Math.min(pct||0,100).toFixed(1)}%;background:${clr||'var(--rp-bl)'}"></div></div>`;
+  const secH=(n,nm)=>`<div class="rp-sec-hdr2"><div class="rp-sec-num2">${n}</div><span class="rp-sec-ttl">${nm}</span></div>`;
+  const chip=(t,cls)=>`<span class="rp-chip ${cls}">${t}</span>`;
+
+  // ── period-specific data ──────────────────────────────────────────
+  let ytdCBG,tgtCBG,ytdRev,ytdCost,ytdMgn,tgtAch;
+  ytdCBG=D.kpis.ytd_cbg||sumA(D.M.cbg);
+  tgtCBG=TGT.cbg_total||TGT.cbg_month*MONTHS.length;
+  ytdRev=D.finance.ytd_rev||sumA(D.M.total_rev);
+  ytdCost=D.finance.ytd_cost||sumA(D.M.total_cost);
+  ytdMgn=ytdRev>0?Math.round((ytdRev-ytdCost)/ytdRev*100):null;
+  tgtAch=tgtCBG>0?Math.round(ytdCBG/tgtCBG*100):null;
+
+  let moCBG,moRev,moCost,moMgn,moTgtAch,dim;
+  moCBG=(D.M.cbg||[])[moIdx]||0;
+  moRev=(D.M.total_rev||[])[moIdx]||0;
+  moCost=(D.M.total_cost||[])[moIdx]||0;
+  moMgn=moRev>0?Math.round((moRev-moCost)/moRev*100):null;
+  moTgtAch=TGT.cbg_month>0?Math.round(moCBG/TGT.cbg_month*100):null;
+  dim=MDAYS[mo]||30;
+
+  let dRec,dCBG,dRev,dCost,dMgn,dTgtDay,dAch;
+  if(p==='daily'&&da){
+    dRec=D.days[da]||{};
+    dCBG=nv(dRec.psa?.cbg_tot);
+    const drv=dRec.rev||{};
+    dRev=(nv(drv.cbg_rev)||0)+(nv(drv.sfom_rev)||0)+(nv(drv.lfom_rev)||0)||(nv(drv.total_rev)||null);
+    dCost=nv(drv.total_cost);
+    dMgn=dRev&&dCost&&dRev>0?Math.round((dRev-dCost)/dRev*100):null;
+    dTgtDay=TGT.cbg_month/30;
+    dAch=dCBG&&dTgtDay>0?Math.round(dCBG/dTgtDay*100):null;
+  }
+
+  // ── cover ──────────────────────────────────────────────────────
+  let coverEyebrow,coverTitle,coverSub,coverMeta,statusChips;
+  if(p==='yearly'){
+    coverEyebrow='LREKPL · Annual Performance Report';
+    coverTitle='Full Year Review — FY 2026';
+    coverSub=`${MONTHS[0]} – ${MONTHS[MONTHS.length-1]} 2026 · ${MONTHS.length} months of data · Generated ${genDate}`;
+    coverMeta=[{l:'Capacity',v:'5.4 TPD'},{l:'Months',v:MONTHS.length+' / 12'},{l:'CBG Produced',v:fNI(ytdCBG)+' kg'},{l:'Revenue YTD',v:fL(ytdRev)}];
+    statusChips=[
+      {t:'CBG Achievement',v:tgtAch!=null?tgtAch+'%':'—',sub:'vs '+fNI(tgtCBG)+' kg target',cls:tgtAch>=90?'g':tgtAch>=75?'a':'r'},
+      {t:'Net Margin',v:ytdMgn!=null?ytdMgn+'%':'—',sub:'Target: 45%',cls:ytdMgn>=40?'g':ytdMgn>=25?'a':'r'},
+      {t:'pH Status',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(1):'—',sub:'D1 latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'Months Tracked',v:MONTHS.length+' / 12',sub:'Data completeness',cls:'b'},
+    ];
+  } else if(p==='monthly'){
+    coverEyebrow='LREKPL · Monthly Operations Report';
+    coverTitle=mo+' 2026 — Performance Summary';
+    coverSub=`${dim} days · CBG Plant, Karnal · Generated ${genDate}`;
+    coverMeta=[{l:'Month',v:mo+' 2026'},{l:'Days',v:dim},{l:'CBG Produced',v:fNI(moCBG)+' kg'},{l:'Revenue',v:fL(moRev)}];
+    statusChips=[
+      {t:'CBG Achievement',v:moTgtAch!=null?moTgtAch+'%':'—',sub:'vs '+fNI(TGT.cbg_month)+' kg target',cls:moTgtAch>=90?'g':moTgtAch>=75?'a':'r'},
+      {t:'Net Margin',v:moMgn!=null?moMgn+'%':'—',sub:'Target: 45%',cls:moMgn>=40?'g':moMgn>=25?'a':'r'},
+      {t:'pH D1',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—',sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'OLR D1',v:(D.M.d1_olr||[])[moIdx]!=null?((D.M.d1_olr||[])[moIdx]).toFixed(2)+' kg/m³/d':'—',sub:'Target ≥ 3.5',cls:(D.M.d1_olr||[])[moIdx]>=3.5?'g':(D.M.d1_olr||[])[moIdx]?'a':'b'},
+    ];
+  } else {
+    const daLabel=da||'—';
+    const parts=daLabel!=='—'?daLabel.split('-'):['—','—'];
+    coverEyebrow='LREKPL · Daily Operations Report';
+    coverTitle=(parts[0]+' '+parts[1]+' 2026 — Daily Summary');
+    coverSub=`Single day view · Generated ${genDate}`;
+    coverMeta=[{l:'Date',v:daLabel},{l:'Plant',v:'Karnal CBG'},{l:'CBG',v:fNI(dCBG)+' kg'},{l:'Est. Revenue',v:fL(dRev)}];
+    statusChips=[
+      {t:'Daily Achievement',v:dAch!=null?dAch+'%':'—',sub:'Daily target: '+fNI(dTgtDay)+' kg',cls:dAch>=90?'g':dAch>=75?'a':'r'},
+      {t:'Est. Margin',v:dMgn!=null?dMgn+'%':'—',sub:'Estimated',cls:dMgn>=40?'g':dMgn>=25?'a':'r'},
+      {t:'pH D1',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—',sub:'Latest',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'Temp D1',v:D.kpis.temp_d1!=null?D.kpis.temp_d1.toFixed(1)+' °C':'—',sub:'Latest',cls:D.kpis.temp_d1&&D.kpis.temp_d1>=33?'g':D.kpis.temp_d1?'a':'b'},
+    ];
+  }
+
+  const cover=`<div class="rp-cover2">
+    <div class="rp-cover-band"></div>
+    <div class="rp-cover-body">
+      <div class="rp-cover-eyebrow">${coverEyebrow}</div>
+      <div class="rp-cover-title">${coverTitle}</div>
+      <div class="rp-cover-sub">${coverSub}</div>
+      <div class="rp-cover-meta">${coverMeta.map(m=>`<div><div class="rp-cm-l">${m.l}</div><div class="rp-cm-v">${m.v}</div></div>`).join('')}</div>
+      <div class="rp-status-row">${statusChips.map(s=>`<div class="rp-st-chip ${s.cls}"><div class="rp-st-lbl">${s.t}</div><div class="rp-st-v">${s.v}</div><div class="rp-st-sup">${s.sub}</div></div>`).join('')}</div>
+    </div>
+  </div>`;
+
+  // ── 1: three-num row ──────────────────────────────────────────────
+  let tn1v,tn1u,tn1c,tn1pct,tn2v,tn2u,tn2c,tn2pct,tn3v,tn3u,tn3c,tn3pct;
+  if(p==='yearly'){
+    tn1v='5.4 TPD';tn1u='Installed Capacity';tn1c='blue';tn1pct=100;
+    tn2v=fNI(tgtCBG)+' kg';tn2u='Annual CBG Target';tn2c='amber';tn2pct=100;
+    tn3v=fNI(ytdCBG)+' kg';tn3u='Actual CBG YTD';tn3c=tgtAch>=90?'green':tgtAch>=75?'amber':'red';tn3pct=Math.min(tgtAch||0,100);
+  } else if(p==='monthly'){
+    tn1v='5.4 TPD';tn1u='Plant Capacity';tn1c='blue';tn1pct=100;
+    tn2v=fNI(TGT.cbg_month)+' kg';tn2u=mo+' Target';tn2c='amber';tn2pct=100;
+    tn3v=fNI(moCBG)+' kg';tn3u=mo+' Actual';tn3c=moTgtAch>=90?'green':moTgtAch>=75?'amber':'red';tn3pct=Math.min(moTgtAch||0,100);
+  } else {
+    tn1v='180 kg/d';tn1u='Daily Target (est.)';tn1c='blue';tn1pct=100;
+    tn2v=fNI(dTgtDay)+' kg';tn2u='Calculated Target';tn2c='amber';tn2pct=100;
+    tn3v=fNI(dCBG)+' kg';tn3u='Actual Today';tn3c=dAch>=90?'green':dAch>=75?'amber':'red';tn3pct=Math.min(dAch||0,100);
+  }
+  const threeNum=`${secH('1','Capacity → Plan → Actual')}
+  <div class="rp-three-num">
+    <div class="rp-tn"><div class="rp-tn-bar" style="background:var(--rp-bl)"></div><div class="rp-tn-lbl">Capacity</div><div class="rp-tn-v blue">${tn1v}</div><div class="rp-tn-unit">${tn1u}</div><div class="rp-tn-pct-row">${pBar(100,'var(--rp-bl)')}<span class="rp-tn-pct-v" style="color:var(--rp-bl)">Design</span></div></div>
+    <div class="rp-tn"><div class="rp-tn-bar" style="background:var(--rp-am)"></div><div class="rp-tn-lbl">Plan / Target</div><div class="rp-tn-v amber">${tn2v}</div><div class="rp-tn-unit">${tn2u}</div><div class="rp-tn-pct-row">${pBar(100,'var(--rp-am)')}<span class="rp-tn-pct-v" style="color:var(--rp-am)">100%</span></div></div>
+    <div class="rp-tn"><div class="rp-tn-bar" style="background:var(--rp-${tn3c==='green'?'gr':tn3c==='red'?'rd':'am'})"></div><div class="rp-tn-lbl">Actual</div><div class="rp-tn-v ${tn3c}">${tn3v}</div><div class="rp-tn-unit">${tn3u}</div><div class="rp-tn-pct-row">${pBar(tn3pct,'var(--rp-'+(tn3c==='green'?'gr':tn3c==='red'?'rd':'am')+')')}<span class="rp-tn-pct-v" style="color:var(--rp-${tn3c==='green'?'gr':tn3c==='red'?'rd':'am'})">${tn3pct}%</span></div></div>
+  </div>`;
+
+  // ── 2: feedstock table ────────────────────────────────────────────
+  const fsKeys=['pm_feed','cd_feed','gs_qty','csl_feed','sg_feed'];
+  const fsCostKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost'];
+  const fsProcKeys=['pm_proc','cd_proc','gs_qty','csl_proc','sg_proc'];
+  const fsNames=['Pressmud','Cow Dung','Grain Syrup','CSL','Spent Grain'];
+  let fsTotalFed=0,fsTotalCost=0,fsTotalProc=0;
+  const fsRows2=fsNames.map((nm,i)=>{
+    let fed=0,cost=0,proc=0;
+    if(p==='daily'&&da){const f=dRec?.feed||{};fed=nv(f[fsKeys[i]])||0;}
+    else if(p==='monthly'){fed=nv((D.M[fsKeys[i]]||[])[moIdx])||0;cost=nv((D.M[fsCostKeys[i]]||[])[moIdx])||0;proc=nv((D.M[fsProcKeys[i]]||[])[moIdx])||0;}
+    else{fed=sumA(D.M[fsKeys[i]]||[]);cost=sumA(D.M[fsCostKeys[i]]||[]);proc=sumA(D.M[fsProcKeys[i]]||[]);}
+    fsTotalFed+=fed;fsTotalCost+=cost;fsTotalProc+=proc||fed;
+    const util=proc>0?Math.round(fed/proc*100):null;
+    const utlClr=util==null?'nt':util>=90?'g':util>=75?'a':'r';
+    return`<tr>
+      <td>${nm}</td>
+      <td>${proc>0?fNI(proc):'—'}</td>
+      <td>${fed>0?fNI(fed):'—'}</td>
+      <td><div class="rp-fs-pct"><span class="rp-fs-pct-v ${utlClr}">${util!=null?util+'%':'—'}</span></div></td>
+      <td>${cost>0?fL(cost/Math.max(fed,1)/1000):'—'}</td>
+      <td>${cost>0?fL(cost):'—'}</td>
+    </tr>`;
+  });
+  const fsUtil=fsTotalProc>0?Math.round(fsTotalFed/fsTotalProc*100):null;
+  const feedstock=`${secH('2','Feedstock — Procurement & Utilization')}
+  <div class="rp-fs-wrap">
+    <table class="rp-fs-table">
+      <thead><tr><th>Feedstock</th><th>Procured</th><th>Fed</th><th>Util %</th><th>₹/MT</th><th>Total Cost</th></tr></thead>
+      <tbody>${fsRows2.join('')}
+        <tr><td>Total</td><td>${fsTotalProc>0?fNI(fsTotalProc):'—'}</td><td>${fsTotalFed>0?fNI(fsTotalFed):'—'}</td><td><span class="rp-fs-pct-v ${fsUtil==null?'nt':fsUtil>=90?'g':fsUtil>=75?'a':'r'}">${fsUtil!=null?fsUtil+'%':'—'}</span></td><td>—</td><td>${fsTotalCost>0?fL(fsTotalCost):'—'}</td></tr>
+      </tbody>
+    </table>
+  </div>`;
+
+  // ── 3: digesters D1/D2 cards ──────────────────────────────────────
+  const olr1=p==='monthly'?(D.M.d1_olr||[])[moIdx]:avgA(D.M.d1_olr);
+  const olr2=p==='monthly'?(D.M.d2_olr||[])[moIdx]:avgA(D.M.d2_olr);
+  const ph1=D.kpis.ph_d1,ph2=D.kpis.ph_d2;
+  const iapa1=D.kpis.iapa_d1,iapa2=D.kpis.iapa_d2;
+  const ts1=D.kpis.ts_d1,ts2=D.kpis.ts_d2;
+  const vs1=D.kpis.vs_d1,vs2=D.kpis.vs_d2;
+  const t1=D.kpis.temp_d1,t2=D.kpis.temp_d2;
+  const digRow=(l,v,c,proof)=>`<div class="rp-dig-row"><span class="rp-dig-rl">${l}</span><div class="rp-dig-rv-wrap"><span class="rp-dig-rv ${c||''}">${v}</span>${proof?`<span class="rp-dig-proof">${proof}</span>`:''}</div></div>`;
+  const olrClr1=olr1>=3.5?'g':olr1?'a':'';const olrClr2=olr2>=3.5?'g':olr2?'a':'';
+  const iapaBadge=v=>v==null?'b':v<=0.35?'g':v<=0.5?'a':'r';
+  const digesters=`${secH('3','Digesters — Process Health')}
+  <div class="rp-dig-grid">
+    <div class="rp-dig-card">
+      <div class="rp-dig-hdr"><span class="rp-dig-name">Digester 1 (D1)</span><span class="rp-dig-badge ${olrClr1||'b'}">${olrClr1==='g'?'OPTIMAL':olrClr1==='a'?'REVIEW':'N/A'}</span></div>
+      ${digRow('OLR (kg VS/m³/d)',olr1!=null?olr1.toFixed(2)+'':'—',olrClr1,'Target ≥ 3.5')}
+      ${digRow('pH',ph1!=null?ph1.toFixed(2):'—',ph1&&ph1>=6.5&&ph1<=7.5?'g':ph1?'a':'','Range 6.5–7.5')}
+      ${digRow('IA/PA Ratio',iapa1!=null?iapa1.toFixed(3):'—',iapaBadge(iapa1),'Target ≤ 0.4')}
+      ${digRow('Temperature',t1!=null?t1.toFixed(1)+' °C':'—',t1&&t1>=33?'g':t1?'a':'','Mesophilic: 33–40°C')}
+      ${digRow('TS%',ts1!=null?ts1.toFixed(1)+'%':'—','','Latest sample')}
+      ${digRow('VS%',vs1!=null?vs1.toFixed(1)+'%':'—','','Latest sample')}
+    </div>
+    <div class="rp-dig-card">
+      <div class="rp-dig-hdr"><span class="rp-dig-name">Digester 2 (D2)</span><span class="rp-dig-badge ${olrClr2||'b'}">${olrClr2==='g'?'OPTIMAL':olrClr2==='a'?'REVIEW':'N/A'}</span></div>
+      ${digRow('OLR (kg VS/m³/d)',olr2!=null?olr2.toFixed(2)+'':'—',olrClr2,'Target ≥ 3.5')}
+      ${digRow('pH',ph2!=null?ph2.toFixed(2):'—',ph2&&ph2>=6.5&&ph2<=7.5?'g':ph2?'a':'','Range 6.5–7.5')}
+      ${digRow('IA/PA Ratio',iapa2!=null?iapa2.toFixed(3):'—',iapaBadge(iapa2),'Target ≤ 0.4')}
+      ${digRow('Temperature',t2!=null?t2.toFixed(1)+' °C':'—',t2&&t2>=33?'g':t2?'a':'','Mesophilic: 33–40°C')}
+      ${digRow('TS%',ts2!=null?ts2.toFixed(1)+'%':'—','','Latest sample')}
+      ${digRow('VS%',vs2!=null?vs2.toFixed(1)+'%':'—','','Latest sample')}
+    </div>
+  </div>`;
+
+  // ── 4: production metrics (4-column) ─────────────────────────────
+  let cbgV,cbgTgt,cbgAch,biogasV,psaEff,cbgKg;
+  if(p==='yearly'){
+    cbgV=fNI(ytdCBG)+' kg';cbgTgt=fNI(tgtCBG)+' kg';cbgAch=tgtAch;biogasV=fN(sumA(D.M.raw_biogas||[]))+' m³';psaEff=null;cbgKg=fN(ytdCBG/Math.max(MONTHS.length,1))+' kg/mo';
+  } else if(p==='monthly'){
+    cbgV=fNI(moCBG)+' kg';cbgTgt=fNI(TGT.cbg_month)+' kg';cbgAch=moTgtAch;biogasV=fN((D.M.raw_biogas||[])[moIdx])+' m³';
+    const eff=(D.M.psa_eff||[])[moIdx];psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg=fNI(moCBG/Math.max(dim,1))+' kg/d avg';
+  } else {
+    cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.act_raw))+' m³';
+    const eff=nv(dRec?.psa?.psa_eff);psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg='—';
+  }
+  const mc2=(stripe,lbl,v,cls,dl,drc,proof1,proof2)=>`<div class="rp-mc2">
+    <div class="rp-mc-stripe" style="background:${stripe}"></div>
+    <div class="rp-mc-inner">
+      <div class="rp-mc-lbl">${lbl}</div>
+      <div class="rp-mc-v ${cls}">${v}</div>
+      <div class="rp-mc-delta ${drc}">${dl}</div>
+    </div>
+    <div class="rp-mc-proof">
+      <div class="rp-mp"><div class="rp-mp-l">Target</div><div class="rp-mp-v">${proof1}</div></div>
+      <div class="rp-mp-div">·</div>
+      <div class="rp-mp"><div class="rp-mp-l">Ach.</div><div class="rp-mp-v">${proof2}</div></div>
+    </div>
+  </div>`;
+  const achClr=a=>a==null?'n':a>=90?'g':a>=75?'a':'r';
+  const production=`${secH('4','Production — Biogas & CBG Output')}
+  <div class="rp-metric-grid">
+    ${mc2('var(--rp-gr)','CBG Produced',cbgV,achClr(cbgAch)+'',cbgAch!=null?cbgAch+'% of target':'—',cbgAch>=90?'g':cbgAch>=75?'a':'r',cbgTgt,cbgAch!=null?cbgAch+'%':'—')}
+    ${mc2('var(--rp-bl)','Biogas Inlet',biogasV,'b','Raw biogas volume','nt','PSA Feed',psaEff||'—')}
+    ${mc2('var(--rp-am)','PSA Efficiency',psaEff||'—',psaEff?'n':'n',psaEff||'No data','nt','Target','>85%')}
+    ${mc2('var(--rp-ink3)','Avg Daily CBG',cbgKg,'n',p==='yearly'?'Monthly avg':'Daily avg','nt','Period',p==='yearly'?MONTHS.length+'mo':p==='monthly'?dim+'d':'1d')}
+  </div>`;
+
+  // ── 5: sales dispatched / invoiced ───────────────────────────────
+  let dspV,dspSub,invV,invSub,dspPct,invPct;
+  if(p==='yearly'){
+    dspV=fL(ytdRev);dspSub='Total CBG + Manure revenue YTD';dspPct=Math.min(tgtAch||0,100);
+    invV=fL(ytdRev);invSub='All customers combined';invPct=ytdMgn||0;
+  } else if(p==='monthly'){
+    dspV=fL(moRev);dspSub=mo+' total revenue';dspPct=Math.min(moTgtAch||0,100);
+    const veer=(D.M.veer_rev||[])[moIdx]||0,adi=(D.M.adi_rev||[])[moIdx]||0;
+    invV=fL(veer+adi);invSub='Veer + Adinath CBG';invPct=moRev>0?Math.round((veer+adi)/moRev*100):0;
+  } else {
+    const drv=dRec?.rev||{};
+    dspV=fL(nv(drv.cbg_rev));dspSub='CBG dispatched today';dspPct=Math.min(dAch||0,100);
+    invV=fL((nv(drv.sfom_rev)||0)+(nv(drv.lfom_rev)||0));invSub='SFOM + LFOM';invPct=50;
+  }
+  const dvsCard=(stripe,lbl,v,sub,pct,pctClr,gap)=>`<div class="rp-dvs-card">
+    <div class="rp-dvs-stripe" style="background:${stripe}"></div>
+    <div class="rp-dvs-inner">
+      <div class="rp-dvs-lbl">${lbl}</div>
+      <div class="rp-dvs-v">${v}</div>
+      <div class="rp-dvs-proof">${sub}</div>
+      <div class="rp-dvs-bar-wrap"><div class="rp-dvs-bar-fill" style="width:${Math.min(pct,100)}%;background:${stripe}"></div></div>
+      <div class="rp-dvs-pct" style="color:${pctClr}">${pct}%</div>
+      ${gap?`<div class="rp-dvs-gap">${gap}</div>`:''}
+    </div>
+  </div>`;
+  const sales=`${secH('5','Sales — Dispatch & Revenue')}
+  <div class="rp-dvs-row">
+    ${dvsCard('var(--rp-bl)','CBG Revenue / Dispatch',dspV,dspSub,dspPct,'var(--rp-bl)',p==='monthly'?`Target: ${fNI(TGT.cbg_month)} kg · Gap: ${fNI(Math.max((TGT.cbg_month||0)-moCBG,0))} kg`:'—')}
+    ${dvsCard('var(--rp-gr)','Invoiced Revenue',invV,invSub,invPct,'var(--rp-gr)',p==='monthly'?'Veer Gas + Adinath Gas (primary customers)':'—')}
+  </div>`;
+
+  // ── 6: P&L ───────────────────────────────────────────────────────
+  let pnlRev,pnlCost,pnlFeed,pnlMaint,pnlElec,pnlEMI,pnlFixed;
+  if(p==='yearly'){pnlRev=ytdRev;pnlCost=ytdCost;pnlFeed=D.finance.ytd_feed_cost||sumA(D.M.feed_cost||[]);pnlMaint=D.finance.ytd_manpower||sumA(D.M.manpower||[]);pnlElec=D.finance.ytd_elec||sumA(D.M.elec||[]);pnlFixed=sumA(D.M.fixed_cost||[]);pnlEMI=sumA(D.M.emi||[]);}
+  else if(p==='monthly'){pnlRev=(D.M.total_rev||[])[moIdx];pnlCost=(D.M.total_cost||[])[moIdx];pnlFeed=(D.M.feed_cost||[])[moIdx];pnlMaint=(D.M.manpower||[])[moIdx];pnlElec=(D.M.elec||[])[moIdx];pnlFixed=(D.M.fixed_cost||[])[moIdx];pnlEMI=(D.M.emi||[])[moIdx];}
+  else{const rv3=dRec?.rev||{};pnlRev=(nv(rv3.cbg_rev)||0)+(nv(rv3.sfom_rev)||0)+(nv(rv3.lfom_rev)||0)||(nv(rv3.total_rev)||null);pnlCost=nv(rv3.total_cost);pnlFeed=null;pnlMaint=null;pnlElec=null;pnlFixed=null;pnlEMI=null;}
+  const pnlMgn=pnlRev&&pnlCost&&pnlRev>0?pnlRev-pnlCost:null;
+  const pnlMgnPct=pnlRev&&pnlMgn!=null?Math.round(pnlMgn/pnlRev*100):null;
+  const pRow=(lbl,v,pct,type,sub)=>`<div class="rp-pnl-row ${type||''}">
+    <div class="rp-pnl-lbl">${lbl}</div>
+    <div class="rp-pnl-v-wrap">
+      <div class="rp-pnl-v">${v}</div>
+      ${sub?`<div class="rp-pnl-sub">${sub}</div>`:''}
+    </div>
+    ${pct!=null?`<div class="rp-pnl-pct ${pct>=40?'g':pct>=20?'a':'nt'}">${pct}%</div>`:''}
+  </div>`;
+  const pnl=`${secH('6','P&L — Cost Structure & Net Margin')}
+  <div class="rp-pnl-wrap">
+    ${pRow('Total Revenue',fL(pnlRev),pnlRev?100:'','',pnlRev?'CBG + Manure combined':null)}
+    ${pnlFeed!=null?pRow('Feedstock Cost',fL(pnlFeed),pnlRev&&pnlFeed?-Math.round(pnlFeed/pnlRev*100):null,'','Pressmud, GS, CD, CSL, SG'):''}
+    ${pnlMaint!=null?pRow('Manpower & O&M',fL(pnlMaint),null,'','Operations & maintenance'):''}
+    ${pnlElec!=null?pRow('Power & Utilities',fL(pnlElec),null,'','Electricity & utility costs'):''}
+    ${pnlFixed!=null?pRow('Fixed Overheads',fL(pnlFixed),null,'','Monthly fixed ₹3,00,000'):''}
+    ${pnlEMI!=null?pRow('EMI / Debt Service',fL(pnlEMI),null,'','Loan repayment'):''}
+    ${pRow('Total Operating Cost',fL(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'subtotal',null)}
+    ${pRow('Net Profit / Margin',fL(pnlMgn),pnlMgnPct,'total',pnlMgnPct!=null?`${pnlMgnPct}% net margin · Target: 45%`:null)}
+  </div>`;
+
+  // ── 7: findings (3 columns) ───────────────────────────────────────
+  const allFindings=[];
+  // CBG achievement
+  const achKpi=p==='yearly'?tgtAch:p==='monthly'?moTgtAch:dAch;
+  if(achKpi!=null&&achKpi<75)allFindings.push({cls:'al',badge:'ALERT',head:'CBG Achievement Critical',vals:[{l:'Actual',v:fNI(p==='yearly'?ytdCBG:p==='monthly'?moCBG:dCBG)+' kg',c:'r'},{l:'Target',v:fNI(p==='yearly'?tgtCBG:p==='monthly'?TGT.cbg_month:dTgtDay)+' kg',c:'nt'},{l:'Gap',v:(100-achKpi)+'%',c:'r'}]});
+  else if(achKpi!=null&&achKpi<90)allFindings.push({cls:'wa',badge:'WATCH',head:'CBG Below 90% Target',vals:[{l:'Achievement',v:achKpi+'%',c:'a'},{l:'Target',v:'≥90%',c:'nt'},{l:'Gap',v:(90-achKpi)+'%',c:'a'}]});
+  else allFindings.push({cls:'ok',badge:'OK',head:'CBG Production On Target',vals:[{l:'Achievement',v:(achKpi||'—')+(achKpi!=null?'%':''),c:'g'},{l:'Target',v:'≥90%',c:'nt'},{l:'Status',v:'On Track',c:'g'}]});
+  // margin
+  const mgnKpi=p==='yearly'?ytdMgn:p==='monthly'?moMgn:dMgn;
+  if(mgnKpi!=null&&mgnKpi<25)allFindings.push({cls:'al',badge:'ALERT',head:'Net Margin Below 25%',vals:[{l:'Margin',v:mgnKpi+'%',c:'r'},{l:'Target',v:'45%',c:'nt'},{l:'Gap',v:(45-mgnKpi)+'%',c:'r'}]});
+  else if(mgnKpi!=null&&mgnKpi<40)allFindings.push({cls:'wa',badge:'WATCH',head:'Margin Below 40% Target',vals:[{l:'Margin',v:mgnKpi+'%',c:'a'},{l:'Target',v:'45%',c:'nt'},{l:'Gap',v:(45-mgnKpi)+'%',c:'a'}]});
+  else allFindings.push({cls:'ok',badge:'OK',head:'Margin Within Target Range',vals:[{l:'Margin',v:mgnKpi!=null?mgnKpi+'%':'—',c:'g'},{l:'Target',v:'45%',c:'nt'},{l:'Status',v:'Healthy',c:'g'}]});
+  // temperature
+  if(t1!=null&&t1<33)allFindings.push({cls:'al',badge:'ALERT',head:'Digester Temperature Low',vals:[{l:'D1 Temp',v:t1.toFixed(1)+'°C',c:'r'},{l:'D2 Temp',v:t2!=null?t2.toFixed(1)+'°C':'—',c:t2&&t2<33?'r':'nt'},{l:'Threshold',v:'33°C',c:'nt'}]});
+  else if(t1!=null&&t1<35)allFindings.push({cls:'wa',badge:'WATCH',head:'Temperature Near Winter Threshold',vals:[{l:'D1 Temp',v:t1.toFixed(1)+'°C',c:'a'},{l:'D2 Temp',v:t2!=null?t2.toFixed(1)+'°C':'—',c:'nt'},{l:'Threshold',v:'33°C',c:'nt'}]});
+  else allFindings.push({cls:'ok',badge:'OK',head:'Digester Temperature Normal',vals:[{l:'D1 Temp',v:t1!=null?t1.toFixed(1)+'°C':'—',c:t1?'g':'nt'},{l:'D2 Temp',v:t2!=null?t2.toFixed(1)+'°C':'—',c:t2?'g':'nt'},{l:'Range',v:'33–40°C',c:'nt'}]});
+  const top3=allFindings.slice(0,3);
+  const findings=`${secH('7','Key Findings')}
+  <div class="rp-findings-row">
+    ${top3.map(f=>`<div class="rp-finding2 ${f.cls}">
+      <div class="rp-finding-top">
+        <div class="rp-f-badge">${f.badge}</div>
+        <div class="rp-f-head">${f.head}</div>
+      </div>
+      <div class="rp-finding-proof2">
+        ${f.vals.map(fv=>`<div class="rp-fp"><div class="rp-fp-l">${fv.l}</div><div class="rp-fp-v ${fv.c}">${fv.v}</div></div>`).join('')}
+      </div>
+    </div>`).join('')}
+  </div>`;
+
+  // ── 8: comparison table ───────────────────────────────────────────
+  let cmpHtml;
+  if(p==='yearly'){
+    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th><th>Revenue</th><th>Margin</th></tr></thead><tbody>
+      ${MONTHS.map((m,i)=>{
+        const c=(D.M.cbg||[])[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;
+        const r=(D.M.total_rev||[])[i];const mg=(D.M.margin||[])[i];
+        return`<tr><td>${m}</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(t)}</span></div></td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td><div class="rp-num-pair"><span class="rp-np-big">${r!=null?fL(r):'—'}</span></div></td><td>${mg!=null?chip(mg+'%',mg>=40?'up':mg>=25?'wa':'dn'):'—'}</td></tr>`;
+      }).join('')}
+      <tr><td><strong>YTD Total</strong></td><td><strong>${fNI(ytdCBG)}</strong></td><td><strong>${fNI(tgtCBG)}</strong></td><td>${tgtAch!=null?chip(tgtAch+'%',tgtAch>=90?'up':tgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(ytdRev)}</strong></td><td>${ytdMgn!=null?chip(ytdMgn+'%',ytdMgn>=40?'up':ytdMgn>=25?'wa':'dn'):'—'}</td></tr>
+    </tbody></table></div>`;
+  } else if(p==='monthly'){
+    const cbgDays=[];const cbgDates=[];
+    Object.keys(D.days||{}).filter(k=>{const pt=k.split('-');return pt[1]&&pt[1].toLowerCase()===mo.toLowerCase();}).sort().forEach(k=>{cbgDays.push(nv(D.days[k]?.psa?.cbg_tot));cbgDates.push(k);});
+    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Date</th><th>CBG (kg)</th><th>Daily Target</th><th>Achiev.</th></tr></thead><tbody>
+      ${cbgDays.map((c,i)=>{const t=TGT.cbg_month/dim;const a=c&&t>0?Math.round(c/t*100):null;return`<tr><td>${cbgDates[i]||i+1}</td><td>${fNI(c)}</td><td>${fNI(t)}</td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td></tr>`;}).join('')}
+    </tbody></table></div>`;
+  } else {
+    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Parameter</th><th>D1</th><th>D2</th><th>Unit</th></tr></thead><tbody>
+      <tr><td>OLR</td><td>${olr1!=null?olr1.toFixed(2):'—'}</td><td>${olr2!=null?olr2.toFixed(2):'—'}</td><td>kg VS/m³/d</td></tr>
+      <tr><td>pH</td><td>${ph1!=null?ph1.toFixed(2):'—'}</td><td>${ph2!=null?ph2.toFixed(2):'—'}</td><td>pH units</td></tr>
+      <tr><td>IA/PA</td><td>${iapa1!=null?iapa1.toFixed(3):'—'}</td><td>${iapa2!=null?iapa2.toFixed(3):'—'}</td><td>ratio</td></tr>
+      <tr><td>Temperature</td><td>${t1!=null?t1.toFixed(1):'—'}</td><td>${t2!=null?t2.toFixed(1):'—'}</td><td>°C</td></tr>
+    </tbody></table></div>`;
+  }
+  const comparison=`${secH('8','Period Comparison')}${cmpHtml}`;
+
+  // ── 9: actions ───────────────────────────────────────────────────
+  const actData=[
+    {n:1,action:'Review PSA Efficiency — Root Cause Analysis',sub:'Biogas-to-CBG conversion below design spec. Check compressor performance and gas quality.',owner:'Mr. Bobby',deadline:'Ongoing',pri:'hi'},
+    {n:2,action:'Winter Temperature Protocol — Pre-emptive Heating',sub:'Digester temps approaching 33°C threshold. Activate insulation and heat-exchange protocol.',owner:'Dr. Shikha + Mr. Jatin',deadline:'Oct 2026',pri:'md'},
+    {n:3,action:'Optimise Feedstock Mix — Reduce Unit Cost',sub:'Evaluate higher VS% feedstocks (Pressmud, CSL) to improve OLR without cost increase.',owner:'Mr. Vivek Kumar',deadline:'End of Month',pri:'md'},
+    {n:4,action:'Complete Pending Data Entry — FlowMeter & Missing Rows',sub:'Sep 21–30 FlowMeter readings and Aug digester data missing from master workbook.',owner:'Data Team',deadline:'Immediate',pri:'hi'},
+  ];
+  const actions=`<div class="rp-action-hdr">
+    <span class="rp-action-hdr-ttl">Action Items</span>
+    <span class="rp-action-hdr-sub">${actData.length} items</span>
+  </div>
+  <div class="rp-action-rows">
+    ${actData.map(a=>`<div class="rp-arow">
+      <div class="rp-a-num">${a.n}</div>
+      <div><div class="rp-a-action">${a.action}</div><div class="rp-a-sub">${a.sub}</div></div>
+      <div class="rp-a-owner">${a.owner}</div>
+      <div class="rp-a-dead">${a.deadline}</div>
+      <div><span class="rp-a-pri ${a.pri}">${a.pri==='hi'?'HIGH':a.pri==='md'?'MED':'LOW'}</span></div>
+    </div>`).join('')}
+  </div>`;
+
+  return cover+threeNum+feedstock+digesters+production+sales+pnl+findings+comparison+actions;
 }
 
 function renderReport(){
