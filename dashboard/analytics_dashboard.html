@@ -388,6 +388,55 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 #ov .ov-slabel{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin:16px 0 10px}
 #ov .ov-slabel::after{content:'';flex:1;height:1px;background:var(--ink7)}
 @media(max-width:900px){#ov .hero-row{grid-template-columns:1fr}#ov .sgrid{grid-template-columns:1fr}#ov .hl-row{grid-template-columns:1fr;background:none;border:none;gap:8px}#ov .hlc:first-child{border-right:none}}
+/* ── REPORT MODAL ── */
+#rp-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 12px 40px}
+#rp-modal.hidden{display:none}
+#rp-modal-inner{background:var(--bg2,#f4f6f8);border-radius:16px;width:100%;max-width:860px;position:relative;padding:0 0 32px}
+.rp-modal-close{position:sticky;top:0;z-index:10;background:var(--bg2,#f4f6f8);border-radius:16px 16px 0 0;padding:12px 16px;display:flex;justify-content:flex-end;border-bottom:1px solid #e2e8f0}
+.rp-modal-close button{background:var(--bg3,#e8edf2);border:none;border-radius:8px;padding:7px 16px;font-size:12px;font-weight:700;color:var(--text,#1a2332);cursor:pointer;display:flex;align-items:center;gap:6px}
+.rp-page{max-width:100%;padding:0 16px}
+.rp-cover{background:linear-gradient(135deg,#1a56db,#1e40af);border-radius:14px;padding:24px 24px 20px;margin-bottom:12px;color:#fff}
+.rp-cover-plant{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;opacity:.75;margin-bottom:6px}
+.rp-cover-title{font-size:22px;font-weight:800;margin-bottom:2px}
+.rp-cover-period{font-size:13px;opacity:.85;margin-bottom:16px}
+.rp-cover-meta{display:flex;gap:18px;flex-wrap:wrap}
+.rp-cover-m{}.rp-cover-ml{font-size:9px;text-transform:uppercase;opacity:.65;letter-spacing:.8px}
+.rp-cover-mv{font-size:13px;font-weight:700}
+.rp-three-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+.rp-three-card{background:var(--bg,#fff);border:1px solid #e2e8f0;border-radius:12px;padding:16px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06);text-align:center}
+.rp-three-lbl{font-size:10px;font-weight:600;color:var(--text2,#607d8b);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.rp-three-val{font-size:22px;font-weight:800;margin-bottom:4px}
+.rp-three-sub{font-size:10px;color:var(--text2,#607d8b);margin-bottom:8px}
+.rp-three-bar{height:4px;background:var(--bg3,#e8edf2);border-radius:2px;overflow:hidden}
+.rp-three-bf{height:100%;border-radius:2px;transition:width .6s}
+.rp-sec{background:var(--bg,#fff);border:1px solid #e2e8f0;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px;overflow:hidden}
+.rp-sec-hdr{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid #e2e8f0}
+.rp-sec-num{background:#1a56db;color:#fff;border-radius:6px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.rp-sec-name{font-size:12px;font-weight:700;color:var(--text,#1a2332)}
+.rp-sec-body{padding:14px}
+.rp-tbl{width:100%;border-collapse:collapse;font-size:11px}
+.rp-tbl th{background:var(--bg3,#e8edf2);padding:6px 8px;text-align:left;font-weight:700;font-size:10px;color:var(--text2,#607d8b);text-transform:uppercase}
+.rp-tbl td{padding:6px 8px;border-bottom:1px solid #f0f4f8}
+.rp-tbl tr:last-child td{border-bottom:none;font-weight:700;background:var(--bg2,#f4f6f8)}
+.rp-tbl td.ok{color:#16a34a;font-weight:700}.rp-tbl td.wa{color:#d97706;font-weight:700}.rp-tbl td.al{color:#dc2626;font-weight:700}
+.rp-mg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.rp-mc{background:var(--bg2,#f4f6f8);border:1px solid #e2e8f0;border-radius:8px;padding:10px 10px}
+.rp-ml{font-size:9px;color:var(--text2,#607d8b);font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.rp-mv{font-size:14px;font-weight:800;color:var(--text,#1a2332)}
+.rp-mv.g{color:#16a34a}.rp-mv.r{color:#dc2626}.rp-mv.a{color:#d97706}.rp-mv.b{color:#1a56db}
+.rp-two{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.rp-finding{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid #f0f4f8}
+.rp-finding:last-child{border-bottom:none}
+.rp-f-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px}
+.rp-f-body{flex:1}
+.rp-f-ttl{font-size:12px;font-weight:700;color:var(--text,#1a2332);margin-bottom:3px}
+.rp-f-txt{font-size:11px;color:var(--text2,#607d8b);line-height:1.5}
+.rp-action-row{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #f0f4f8}
+.rp-action-row:last-child{border-bottom:none}
+.rp-ap{border-radius:6px;padding:3px 8px;font-size:10px;font-weight:800;flex-shrink:0;margin-top:2px}
+.rp-at{font-size:12px;font-weight:700;color:var(--text,#1a2332);margin-bottom:2px}
+.rp-ao{font-size:10px;color:var(--text2,#607d8b)}
+@media(max-width:600px){.rp-three-row{grid-template-columns:1fr}.rp-mg{grid-template-columns:repeat(2,1fr)}.rp-two{grid-template-columns:1fr}}
 </style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap">
@@ -439,7 +488,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ OVERVIEW V9 ══ -->
 <div id="ov" class="pg on">
-  <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">All Months</span></div>
+  <div class="stitle" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">Plant Overview <span id="ov_period" class="mo-badge">All Months</span><button onclick="openReport()" style="margin-left:auto;padding:5px 14px;background:#1a56db;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">📄 Generate Report</button></div>
 
   <!-- HERO ROW: Health Card + KPI Panel -->
   <div class="hero-row">
@@ -896,6 +945,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="stitle">Monthly P&amp;L Summary</div>
   <table class="tbl" id="s8_tbl"></table>
   </div><!-- /s8_main_content -->
+</div>
+
+<!-- REPORT MODAL -->
+<div id="rp-modal" class="hidden">
+  <div id="rp-modal-inner">
+    <div class="rp-modal-close"><button onclick="closeReport()">✕ Close</button></div>
+    <div id="rp-view"></div>
+  </div>
 </div>
 
 <div class="footer">LREKPL — 5.4 TPD CBG Plant Karnal &nbsp;|&nbsp; Jan–Jun 2026 &nbsp;|&nbsp; Data: CBG_Karnal_D1_D2_2026.xlsx</div>
@@ -6106,6 +6163,300 @@ async function initDashboard() {
     try{ renderOV(); }catch(e){ console.error('OV init error',e); }
   } catch(e) { setStatus('Error: '+e.message); console.error(e); }
 }
+// ── GENERATE REPORT MODAL ──────────────────────────────────────────
+function openReport(){
+  if(!D){alert('Data not loaded yet.');return;}
+  renderReport();
+  document.getElementById('rp-modal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+function closeReport(){
+  document.getElementById('rp-modal').classList.add('hidden');
+  document.body.style.overflow='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReport();});
+
+function renderReport(){
+  const mo=curMonth,da=curDay,isDa=da!=='ALL',isMo=!isDa&&mo!=='ALL';
+  const v=isDa?'daily':isMo?'monthly':'yearly';
+  const el=document.getElementById('rp-view');
+  const fL=v=>v==null?'—':'₹'+(v>=1e7?(v/1e7).toFixed(2)+' Cr':v>=1e5?(v/1e5).toFixed(1)+' L':(v/1000).toFixed(1)+'k');
+  const fN=v=>v==null?'—':v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'k':Math.round(v).toLocaleString('en-IN');
+  const fNI=v=>v==null?'—':Math.round(v).toLocaleString('en-IN');
+  const sumA=a=>(a||[]).reduce((s,x)=>s+(x||0),0);
+  const avgA=a=>{const f=(a||[]).filter(x=>x!=null&&x>0);return f.length?f.reduce((s,x)=>s+x,0)/f.length:null;};
+  const today=new Date();
+  const genDate=today.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()]+' '+today.getFullYear();
+  const moIdx=MONTHS.indexOf(mo);
+
+  // ── Period config ──
+  let pconf;
+  if(v==='yearly'){
+    const ytdCBG=D.kpis.ytd_cbg||sumA(D.M.cbg);
+    const ytdRev=D.finance.ytd_rev;
+    const ytdCost=D.finance.ytd_cost;
+    const ytdMgn=ytdRev&&ytdCost&&ytdRev>0?Math.round((ytdRev-ytdCost)/ytdRev*100):null;
+    const tgtCBG=TGT.cbg_total||TGT.cbg_month*MONTHS.length;
+    const tgtAch=tgtCBG>0?Math.round(ytdCBG/tgtCBG*100):null;
+    pconf={
+      title:'Annual Performance Report',
+      period:`FY 2026 · ${MONTHS[0]} – ${MONTHS[MONTHS.length-1]} 2026`,
+      meta:[{l:'Months',v:MONTHS.length+' of 12'},{l:'Days Covered',v:(D.meta&&D.meta.days)||'—'},{l:'Capacity',v:'5.4 TPD'},{l:'Target Ach.',v:tgtAch!=null?tgtAch+'%':'—'}],
+      three:[
+        {lbl:'Actual CBG Produced',val:fNI(ytdCBG)+' kg',sub:MONTHS[0]+'–'+MONTHS[MONTHS.length-1]+' 2026 · '+(tgtAch!=null?tgtAch+'% of target':''),pct:tgtAch||0,clr:tgtAch>=90?'#16a34a':tgtAch>=75?'#d97706':'#dc2626'},
+        {lbl:'Total Revenue',val:fL(ytdRev),sub:'CBG + SFOM + LFOM combined',pct:90,clr:'#16a34a'},
+        {lbl:'Net Margin YTD',val:ytdMgn!=null?ytdMgn+'%':'—',sub:'Target: 45% · '+(ytdMgn!=null&&ytdMgn<45?'▼ '+(45-ytdMgn).toFixed(1)+'% below target':'✓ On target'),pct:ytdMgn||0,clr:ytdMgn>=40?'#d97706':'#dc2626'},
+      ]
+    };
+  } else if(v==='monthly'){
+    const moCBG=D.M.cbg?.[moIdx]||0;
+    const moRev=D.M.total_rev?.[moIdx]||0;
+    const moCost=D.M.total_cost?.[moIdx]||0;
+    const moMgn=moRev>0?Math.round((moRev-moCost)/moRev*100):null;
+    const tgtAch=TGT.cbg_month>0?Math.round(moCBG/TGT.cbg_month*100):null;
+    const dim=MDAYS[mo]||30;
+    pconf={
+      title:'Monthly Performance Report',
+      period:mo+' 2026',
+      meta:[{l:'Month',v:mo+' 2026'},{l:'Days',v:dim},{l:'Data Through',v:mo+' 30'},{l:'Target Ach.',v:tgtAch!=null?tgtAch+'%':'—'}],
+      three:[
+        {lbl:'CBG Produced — '+mo,val:fNI(moCBG)+' kg',sub:mo+' 2026 · '+(tgtAch!=null?tgtAch+'% of target':''),pct:tgtAch||0,clr:tgtAch>=90?'#16a34a':tgtAch>=75?'#d97706':'#dc2626'},
+        {lbl:'Revenue — '+mo,val:fL(moRev),sub:'CBG + Manure revenue',pct:moRev>0&&D.finance.ytd_rev>0?Math.round(moRev/D.finance.ytd_rev*100):0,clr:'#d97706'},
+        {lbl:'Net Margin — '+mo,val:moMgn!=null?moMgn+'%':'—',sub:'Target: 45% · '+(moMgn!=null&&moMgn<45?'▼ '+(45-moMgn).toFixed(1)+'% gap':'✓ On target'),pct:moMgn||0,clr:moMgn>=40?'#d97706':'#dc2626'},
+      ]
+    };
+  } else {
+    const rec=D.days[da]||{};
+    const dp=rec.psa||{},rv=rec.rev||{};
+    const dCBG=dp.cbg_tot||null;
+    const dRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
+    const dCost=rv.total_cost||null;
+    const dMgn=dRev&&dCost&&dRev>0?Math.round((dRev-dCost)/dRev*100):null;
+    const dTgt=TGT.cbg_month/30;
+    const dAch=dCBG&&dTgt>0?Math.round(dCBG/dTgt*100):null;
+    const parts=da.split('-');
+    const dow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(parts[1]+' '+parts[0]+' 2026').getDay()]||'';
+    pconf={
+      title:'Daily Operations Report',
+      period:parts[0]+' '+parts[1]+' 2026',
+      meta:[{l:'Date',v:parts[1]+' '+parts[0]+', 2026'},{l:'Day',v:dow},{l:'Shift',v:'All Shifts'},{l:'Plant Status',v:'Running'}],
+      three:[
+        {lbl:'CBG Produced Today',val:fNI(dCBG)+' kg',sub:da+' · '+(dAch!=null?dAch+'% of daily target':''),pct:dAch||0,clr:dAch>=90?'#16a34a':dAch>=75?'#d97706':'#dc2626'},
+        {lbl:'Est. Revenue Today',val:fL(dRev),sub:'CBG + Manure estimated',pct:dRev>0&&D.finance.ytd_rev>0?Math.min(100,Math.round(dRev/(D.finance.ytd_rev/MONTHS.length/30)*100)):0,clr:'#d97706'},
+        {lbl:'Est. Margin Today',val:dMgn!=null?dMgn+'%':'—',sub:'Target: 45% · '+(dMgn!=null&&dMgn<45?'▼ Below target':'✓ On target'),pct:dMgn||0,clr:dMgn>=40?'#d97706':'#dc2626'},
+      ]
+    };
+  }
+
+  // ── Section 3: Feedstock ──
+  function fsTbl(){
+    const keys=['PM','CD','GS','CSL','SG'];
+    const names=['Pressmud (PM)','Cow Dung (CD)','Grain Syrup (GS)','CSL','Spent Grain (SG)'];
+    const feedKeys=['pm_feed','cd_feed','gs_qty','csl_feed','sg_feed'];
+    const procKeys=['pm_proc','cd_proc','gs_qty','csl_proc','sg_proc'];
+    const costKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost'];
+    let rows='',tF=0,tC=0;
+    keys.forEach((k,i)=>{
+      let fed,cost;
+      if(v==='daily'){const f=D.days[da]?.feed||{};fed=f[feedKeys[i]||k.toLowerCase()+'_fed']||0;cost=0;}
+      else if(v==='monthly'){fed=(D.M[feedKeys[i]]||[])[moIdx]||0;cost=(D.M[costKeys[i]]||[])[moIdx]||0;}
+      else{fed=sumA(D.M[feedKeys[i]]||[]);cost=sumA(D.M[costKeys[i]]||[]);}
+      tF+=fed;tC+=cost;
+      rows+=`<tr><td>${names[i]}</td><td>${fed>0?fed.toLocaleString('en-IN'):'—'}</td><td>${cost>0?fL(cost):'—'}</td></tr>`;
+    });
+    return`<table class="rp-tbl"><thead><tr><th>Feedstock</th><th>Fed (MT/KL)</th><th>Cost</th></tr></thead><tbody>${rows}<tr><td>Total</td><td>${tF>0?tF.toLocaleString('en-IN'):'—'}</td><td>${tC>0?fL(tC):'—'}</td></tr></tbody></table>`;
+  }
+
+  // ── Section 4: Digesters ──
+  function digTbl(){
+    if(v==='yearly'){
+      const olr1=avgA(D.M.d1_olr),olr2=avgA(D.M.d2_olr);
+      return`<div class="rp-mg">
+        <div class="rp-mc"><div class="rp-ml">OLR D1 Avg</div><div class="rp-mv ${olr1>=3.5?'g':'a'}">${olr1!=null?olr1.toFixed(2)+' kg VS/m³/d':'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">OLR D2 Avg</div><div class="rp-mv ${olr2>=3.5?'g':'a'}">${olr2!=null?olr2.toFixed(2)+' kg VS/m³/d':'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">pH D1 Latest</div><div class="rp-mv">${D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">pH D2 Latest</div><div class="rp-mv">${D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">TS% D1 Latest</div><div class="rp-mv">${D.kpis.ts_d1!=null?D.kpis.ts_d1.toFixed(1)+'%':'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">VS% D1 Latest</div><div class="rp-mv">${D.kpis.vs_d1!=null?D.kpis.vs_d1.toFixed(1)+'%':'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">IA/PA D1</div><div class="rp-mv ${D.kpis.iapa_d1<=0.4?'g':'a'}">${D.kpis.iapa_d1!=null?D.kpis.iapa_d1.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">IA/PA D2</div><div class="rp-mv ${D.kpis.iapa_d2<=0.4?'g':'a'}">${D.kpis.iapa_d2!=null?D.kpis.iapa_d2.toFixed(2):'—'}</div></div>
+      </div>
+      <table class="rp-tbl"><thead><tr><th>Month</th><th>OLR D1</th><th>OLR D2</th></tr></thead><tbody>
+        ${MONTHS.map((m,i)=>`<tr><td>${m}</td><td class="${(D.M.d1_olr||[])[i]>=3.5?'ok':'wa'}">${(D.M.d1_olr||[])[i]!=null?((D.M.d1_olr||[])[i]).toFixed(2):'—'}</td><td class="${(D.M.d2_olr||[])[i]>=3.5?'ok':'wa'}">${(D.M.d2_olr||[])[i]!=null?((D.M.d2_olr||[])[i]).toFixed(2):'—'}</td></tr>`).join('')}
+      </tbody></table>`;
+    }
+    if(v==='monthly'){
+      const olr1=(D.M.d1_olr||[])[moIdx],olr2=(D.M.d2_olr||[])[moIdx];
+      const t1=D.kpis.temp_d1,t2=D.kpis.temp_d2;
+      return`<div class="rp-mg">
+        <div class="rp-mc"><div class="rp-ml">OLR D1 ${mo}</div><div class="rp-mv ${olr1>=3.5?'g':'a'}">${olr1!=null?olr1.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">OLR D2 ${mo}</div><div class="rp-mv ${olr2>=3.5?'g':'a'}">${olr2!=null?olr2.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">pH D1 Latest</div><div class="rp-mv">${D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">pH D2 Latest</div><div class="rp-mv">${D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">Temp D1 (°C)</div><div class="rp-mv ${t1&&t1<33?'a':''}">${t1!=null?t1.toFixed(1)+' °C'+(t1<33?' ⚠':''):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">Temp D2 (°C)</div><div class="rp-mv ${t2&&t2<33?'a':''}">${t2!=null?t2.toFixed(1)+' °C'+(t2<33?' ⚠':''):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">IA/PA D1</div><div class="rp-mv ${D.kpis.iapa_d1<=0.4?'g':'a'}">${D.kpis.iapa_d1!=null?D.kpis.iapa_d1.toFixed(2):'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">IA/PA D2</div><div class="rp-mv ${D.kpis.iapa_d2<=0.4?'g':'a'}">${D.kpis.iapa_d2!=null?D.kpis.iapa_d2.toFixed(2):'—'}</div></div>
+      </div>`;
+    }
+    // daily
+    const rec=D.days[da]||{};const d1r=rec.d1||{},d2r=rec.d2||{},hp=rec.psa||{};
+    return`<table class="rp-tbl"><thead><tr><th>Parameter</th><th>D1</th><th>D2</th></tr></thead><tbody>
+      <tr><td>OLR (kg VS/m³/d)</td><td class="${d1r.olr>=3.5?'ok':'wa'}">${d1r.olr!=null?d1r.olr.toFixed(2):'—'}</td><td class="${d2r.olr>=3.5?'ok':'wa'}">${d2r.olr!=null?d2r.olr.toFixed(2):'—'}</td></tr>
+      <tr><td>pH</td><td>${d1r.ph!=null?d1r.ph.toFixed(2):'—'}</td><td>${d2r.ph!=null?d2r.ph.toFixed(2):'—'}</td></tr>
+      <tr><td>IA/PA</td><td class="${d1r.iapa<=0.4?'ok':'wa'}">${d1r.iapa!=null?d1r.iapa.toFixed(2)+(d1r.iapa>0.4?' ⚠':''):'—'}</td><td class="${d2r.iapa<=0.4?'ok':'wa'}">${d2r.iapa!=null?d2r.iapa.toFixed(2)+(d2r.iapa>0.4?' ⚠':''):'—'}</td></tr>
+      <tr><td>Temperature (°C)</td><td>${d1r.temp!=null?d1r.temp.toFixed(1)+'°C':'—'}</td><td>${d2r.temp!=null?d2r.temp.toFixed(1)+'°C':'—'}</td></tr>
+    </tbody></table>`;
+  }
+
+  // ── Section 5: Production ──
+  function prodTbl(){
+    if(v==='yearly'){
+      const ytdCBG=D.kpis.ytd_cbg||sumA(D.M.cbg);
+      const tgtCBG=TGT.cbg_total||TGT.cbg_month*MONTHS.length;
+      return`<div class="rp-mg">
+        <div class="rp-mc"><div class="rp-ml">CBG Produced YTD</div><div class="rp-mv a">${fNI(ytdCBG)} kg</div></div>
+        <div class="rp-mc"><div class="rp-ml">YTD Target</div><div class="rp-mv">${fNI(tgtCBG)} kg</div></div>
+        <div class="rp-mc"><div class="rp-ml">Achievement</div><div class="rp-mv ${tgtCBG>0&&ytdCBG/tgtCBG>=0.9?'g':'a'}">${tgtCBG>0?Math.round(ytdCBG/tgtCBG*100)+'%':'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">Months Tracked</div><div class="rp-mv">${MONTHS.length}</div></div>
+      </div>
+      <table class="rp-tbl"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target (kg)</th><th>Achiev.</th></tr></thead><tbody>
+        ${MONTHS.map((m,i)=>{const c=D.M.cbg?.[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;return`<tr><td>${m}</td><td>${fNI(c)}</td><td>${fNI(t)}</td><td class="${a>=90?'ok':a>=75?'wa':'al'}">${a!=null?a+'%':'—'}</td></tr>`;}).join('')}
+        <tr><td>YTD Total</td><td>${fNI(ytdCBG)}</td><td>${fNI(tgtCBG)}</td><td class="${tgtCBG>0&&ytdCBG/tgtCBG>=0.9?'ok':'wa'}">${tgtCBG>0?Math.round(ytdCBG/tgtCBG*100)+'%':'—'}</td></tr>
+      </tbody></table>`;
+    }
+    if(v==='monthly'){
+      const moCBG=(D.M.cbg||[])[moIdx]||0;const tgt=TGT.cbg_month;const ach=tgt>0?Math.round(moCBG/tgt*100):null;
+      const days=dArr('psa','cbg_tot');const dates=dDates('psa');
+      return`<div class="rp-mg">
+        <div class="rp-mc"><div class="rp-ml">CBG ${mo}</div><div class="rp-mv ${ach>=90?'g':ach>=75?'a':'r'}">${fNI(moCBG)} kg</div></div>
+        <div class="rp-mc"><div class="rp-ml">Target</div><div class="rp-mv">${fNI(tgt)} kg</div></div>
+        <div class="rp-mc"><div class="rp-ml">Achievement</div><div class="rp-mv ${ach>=90?'g':ach>=75?'a':'r'}">${ach!=null?ach+'%':'—'}</div></div>
+        <div class="rp-mc"><div class="rp-ml">Days in Period</div><div class="rp-mv">${MDAYS[mo]||30}</div></div>
+      </div>`;
+    }
+    const rec=D.days[da]||{};const dp=rec.psa||{};
+    const dCBG=dp.cbg_tot,dBio=dp.act_raw,dTgt=TGT.cbg_month/30,dAch=dCBG&&dTgt>0?Math.round(dCBG/dTgt*100):null;
+    return`<div class="rp-mg">
+      <div class="rp-mc"><div class="rp-ml">CBG Produced</div><div class="rp-mv ${dAch>=90?'g':dAch>=75?'a':'r'}">${fNI(dCBG)} kg</div></div>
+      <div class="rp-mc"><div class="rp-ml">Daily Target</div><div class="rp-mv">${fNI(dTgt)} kg</div></div>
+      <div class="rp-mc"><div class="rp-ml">Achievement</div><div class="rp-mv ${dAch>=90?'g':dAch>=75?'a':'r'}">${dAch!=null?dAch+'%':'—'}</div></div>
+      <div class="rp-mc"><div class="rp-ml">Biogas Inlet</div><div class="rp-mv b">${fNI(dBio)} m³</div></div>
+    </div>`;
+  }
+
+  // ── Section 6: Sales ──
+  function salesTbl(){
+    if(v==='yearly'){
+      const veer=sumA(D.M.veer_rev),adi=sumA(D.M.adi_rev),gail=sumA(D.M.gail_rev),sps=sumA(D.M.sps_rev);
+      const total=veer+adi+gail+sps;
+      return`<table class="rp-tbl"><thead><tr><th>Customer</th><th>Revenue</th><th>Share</th></tr></thead><tbody>
+        <tr><td>Veer Gas</td><td>${fL(veer)}</td><td>${total>0?Math.round(veer/total*100)+'%':'—'}</td></tr>
+        <tr><td>Adinath Gas</td><td>${fL(adi)}</td><td>${total>0?Math.round(adi/total*100)+'%':'—'}</td></tr>
+        ${gail>0?`<tr><td>GAIL</td><td>${fL(gail)}</td><td>${Math.round(gail/total*100)}%</td></tr>`:''}
+        ${sps>0?`<tr><td>SPS</td><td>${fL(sps)}</td><td>${Math.round(sps/total*100)}%</td></tr>`:''}
+        <tr><td>Total CBG Revenue</td><td>${fL(total)}</td><td>100%</td></tr>
+      </tbody></table>`;
+    }
+    if(v==='monthly'){
+      const veer=(D.M.veer_rev||[])[moIdx]||0,adi=(D.M.adi_rev||[])[moIdx]||0;
+      const total=(D.M.total_rev||[])[moIdx]||0;
+      return`<table class="rp-tbl"><thead><tr><th>Item</th><th>Value</th></tr></thead><tbody>
+        <tr><td>Veer Gas Revenue</td><td>${fL(veer)}</td></tr>
+        <tr><td>Adinath Gas Revenue</td><td>${fL(adi)}</td></tr>
+        <tr><td>Total Revenue ${mo}</td><td>${fL(total)}</td></tr>
+      </tbody></table>`;
+    }
+    const rv=D.days[da]?.rev||{};
+    return`<table class="rp-tbl"><thead><tr><th>Item</th><th>Today</th></tr></thead><tbody>
+      <tr><td>CBG Revenue</td><td>${fL(rv.cbg_rev)}</td></tr>
+      <tr><td>Manure Revenue</td><td>${fL((rv.sfom_rev||0)+(rv.lfom_rev||0))}</td></tr>
+      <tr><td>Total Revenue</td><td>${fL((rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0))}</td></tr>
+    </tbody></table>`;
+  }
+
+  // ── Section 7: P&L ──
+  function plTbl(){
+    let rev,cost,feedCost,maint,elec;
+    if(v==='yearly'){rev=D.finance.ytd_rev;cost=D.finance.ytd_cost;feedCost=D.finance.ytd_feed_cost;maint=D.finance.ytd_manpower;elec=D.finance.ytd_elec;}
+    else if(v==='monthly'){rev=(D.M.total_rev||[])[moIdx];cost=(D.M.total_cost||[])[moIdx];feedCost=(D.M.feed_cost||[])[moIdx];maint=(D.M.manpower||[])[moIdx];elec=(D.M.elec||[])[moIdx];}
+    else{const rv2=D.days[da]?.rev||{};rev=(rv2.cbg_rev||0)+(rv2.sfom_rev||0)+(rv2.lfom_rev||0);cost=rv2.total_cost||0;}
+    const margin=rev&&cost&&rev>0?Math.round((rev-cost)/rev*100):null;
+    return`<table class="rp-tbl"><thead><tr><th>Line Item</th><th>Amount</th><th>% Revenue</th></tr></thead><tbody>
+      <tr><td>Total Revenue</td><td>${fL(rev)}</td><td>100%</td></tr>
+      ${feedCost!=null?`<tr><td>Feedstock Cost</td><td>${fL(feedCost)}</td><td class="al">${rev>0?Math.round(feedCost/rev*100)+'%':'—'}</td></tr>`:''}
+      ${maint!=null?`<tr><td>Manpower Cost</td><td>${fL(maint)}</td><td>${rev>0?Math.round(maint/rev*100)+'%':'—'}</td></tr>`:''}
+      ${elec!=null?`<tr><td>Power / Utilities</td><td>${fL(elec)}</td><td>${rev>0?Math.round(elec/rev*100)+'%':'—'}</td></tr>`:''}
+      <tr><td>Total Cost</td><td>${fL(cost)}</td><td>${rev>0?Math.round(cost/rev*100)+'%':'—'}</td></tr>
+      <tr><td>Net Margin</td><td>${fL(rev&&cost?rev-cost:null)}</td><td class="${margin>=40?'ok':margin>=25?'wa':'al'}">${margin!=null?margin+'%':'—'}</td></tr>
+    </tbody></table>`;
+  }
+
+  // ── Section 8: Findings ──
+  function findingsHtml(){
+    const items=[];
+    const ytdCBG=D.kpis.ytd_cbg||sumA(D.M.cbg);
+    const tgtCBG=TGT.cbg_total||TGT.cbg_month*MONTHS.length;
+    const ytdMgn=D.finance.ytd_rev>0?Math.round((D.finance.ytd_rev-D.finance.ytd_cost)/D.finance.ytd_rev*100):null;
+    const t1=D.kpis.temp_d1,t2=D.kpis.temp_d2;
+    if(tgtCBG>0&&ytdCBG/tgtCBG<0.9)items.push({bg:'#fef3c7',clr:'#d97706',t:'CBG Achievement Below 90%',txt:`YTD achievement at ${Math.round(ytdCBG/tgtCBG*100)}% of target. Review PSA efficiency and feedstock supply gaps.`});
+    else items.push({bg:'#d1fae5',clr:'#16a34a',t:'CBG Achievement On Track',txt:`YTD ${Math.round(ytdCBG/tgtCBG*100)}% achievement. Plant maintaining target output across ${MONTHS.length} months.`});
+    if(ytdMgn!=null&&ytdMgn<40)items.push({bg:'#fee2e2',clr:'#dc2626',t:'Margin Below 40% — Action Required',txt:`Net margin at ${ytdMgn}% vs target 45%. Feedstock cost optimization is the primary lever.`});
+    else if(ytdMgn!=null)items.push({bg:'#d1fae5',clr:'#16a34a',t:'Margin Healthy at '+ytdMgn+'%',txt:'Net margin within acceptable range. Continue monitoring feedstock cost as main variable.'});
+    if(t1!=null&&t1<33)items.push({bg:'#fef3c7',clr:'#d97706',t:'Digester Temperature Alert',txt:`D1 temp ${t1.toFixed(1)}°C${t2!=null?' · D2 '+t2.toFixed(1)+'°C':''} — approaching 32°C winter threshold. Heating protocol review recommended.`});
+    return items.map(f=>`<div class="rp-finding"><div class="rp-f-icon" style="background:${f.bg};color:${f.clr}">●</div><div class="rp-f-body"><div class="rp-f-ttl">${f.t}</div><div class="rp-f-txt">${f.txt}</div></div></div>`).join('');
+  }
+
+  // ── Section 9: Comparison ──
+  function compTbl(){
+    if(v==='yearly'){
+      return`<div style="overflow-x:auto"><table class="rp-tbl"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target (kg)</th><th>Achiev.</th><th>Revenue</th><th>Margin%</th></tr></thead><tbody>
+        ${MONTHS.map((m,i)=>{const c=D.M.cbg?.[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;const r=(D.M.total_rev||[])[i];const mg=(D.M.margin||[])[i];return`<tr><td>${m} 2026</td><td>${fNI(c)}</td><td>${fNI(t)}</td><td class="${a>=90?'ok':a>=75?'wa':'al'}">${a!=null?a+'%':'—'}</td><td>${r!=null?fL(r):'—'}</td><td class="${mg>=40?'ok':mg>=25?'wa':'al'}">${mg!=null?mg+'%':'—'}</td></tr>`;}).join('')}
+      </tbody></table></div>`;
+    }
+    if(v==='monthly'){
+      const cbgD=dArr('psa','cbg_tot');const dates=dDates('psa');
+      return`<div style="overflow-x:auto"><table class="rp-tbl"><thead><tr><th>Date</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th></tr></thead><tbody>
+        ${cbgD.map((c,i)=>{const t=TGT.cbg_month/30;const a=t>0?Math.round(c/t*100):null;return`<tr><td>${dates[i]||i+1}</td><td>${fNI(c)}</td><td>${fNI(t)}</td><td class="${a>=90?'ok':a>=75?'wa':'al'}">${a!=null?a+'%':'—'}</td></tr>`;}).join('')}
+      </tbody></table></div>`;
+    }
+    return`<div class="rp-mg"><div class="rp-mc" style="grid-column:1/-1"><div class="rp-ml">Selected Day</div><div class="rp-mv">${da}</div></div></div>`;
+  }
+
+  // ── Section 10: Actions ──
+  const actions=[
+    {n:'A1',clr:'#dc2626',t:'Review PSA Efficiency — Root Cause Analysis',o:'Owner: Mr. Bobby · Priority: High'},
+    {n:'A2',clr:'#d97706',t:'Digester Temperature — Winter Protocol Check',o:'Owner: Dr. Shikha + Mr. Jatin · Due: Oct 2026'},
+    {n:'A3',clr:'#d97706',t:'Optimize Feedstock Mix to Reduce Cost',o:'Owner: Mr. Vivek Kumar · Due: End of Month'},
+    {n:'A4',clr:'#1a56db',t:'Complete Pending Data Entry — FlowMeter & Missing Rows',o:'Owner: Data Team · Due: Immediate'},
+  ];
+
+  const secH=(n,nm)=>`<div class="rp-sec-hdr"><div class="rp-sec-num">${n}</div><div class="rp-sec-name">${nm}</div></div>`;
+
+  el.innerHTML=`<div class="rp-page">
+    <div class="rp-cover">
+      <div class="rp-cover-plant">LREKPL · CBG Karnal Plant · 5.4 TPD Compressed Biogas</div>
+      <div class="rp-cover-title">${pconf.title}</div>
+      <div class="rp-cover-period">${pconf.period}</div>
+      <div class="rp-cover-meta">
+        ${pconf.meta.map(m=>`<div class="rp-cover-m"><div class="rp-cover-ml">${m.l}</div><div class="rp-cover-mv">${m.v}</div></div>`).join('')}
+        <div class="rp-cover-m"><div class="rp-cover-ml">Generated</div><div class="rp-cover-mv">${genDate}</div></div>
+      </div>
+    </div>
+    <div class="rp-three-row">
+      ${pconf.three.map(t=>`<div class="rp-three-card"><div class="rp-three-lbl">${t.lbl}</div><div class="rp-three-val" style="color:${t.clr}">${t.val}</div><div class="rp-three-sub">${t.sub}</div><div class="rp-three-bar"><div class="rp-three-bf" style="width:${Math.min(t.pct,100).toFixed(1)}%;background:${t.clr}"></div></div></div>`).join('')}
+    </div>
+    <div class="rp-sec">${secH('3','Feedstock — Procurement & Utilization')}<div class="rp-sec-body">${fsTbl()}</div></div>
+    <div class="rp-sec">${secH('4','Digesters — Process Parameters')}<div class="rp-sec-body">${digTbl()}</div></div>
+    <div class="rp-sec">${secH('5','Production — Biogas & CBG Output')}<div class="rp-sec-body">${prodTbl()}</div></div>
+    <div class="rp-sec">${secH('6','Sales — Dispatch & Revenue')}<div class="rp-sec-body">${salesTbl()}</div></div>
+    <div class="rp-sec">${secH('7','P&L — Cost Structure & Net Margin')}<div class="rp-sec-body">${plTbl()}</div></div>
+    <div class="rp-sec">${secH('8','Key Findings')}<div class="rp-sec-body">${findingsHtml()}</div></div>
+    <div class="rp-sec">${secH('9','Period Comparison Data')}<div class="rp-sec-body">${compTbl()}</div></div>
+    <div class="rp-sec">${secH('10','Action Items')}<div class="rp-sec-body">${actions.map(a=>`<div class="rp-action-row"><div class="rp-ap" style="background:${a.clr}22;border:1px solid ${a.clr};color:${a.clr}">${a.n}</div><div><div class="rp-at">${a.t}</div><div class="rp-ao">${a.o}</div></div></div>`).join('')}</div></div>
+  </div>`;
+}
+
 window.addEventListener('DOMContentLoaded', async function(){
   try {
     const app=await getMsalApp();
