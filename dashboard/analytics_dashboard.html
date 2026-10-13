@@ -326,12 +326,26 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 #ov .cv1{background:#065f46;color:#fff}#ov .cv2{background:#059669;color:#fff}#ov .cv3{background:#34d399;color:#064e3b}
 #ov .cv4{background:#fcd34d;color:#78350f}#ov .cv5{background:#f97316;color:#fff}#ov .cv6{background:#dc2626;color:#fff}
 /* HIGHLIGHTS */
-#ov .hl-row{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--ink7);border:1px solid var(--ink7);border-radius:var(--ov-r12);overflow:hidden;box-shadow:var(--ov-sh);margin-bottom:10px}
-#ov .hlc{background:var(--ov-white);padding:14px 18px;display:flex;align-items:flex-start;gap:10px}
-#ov .hlc:first-child{border-right:1px solid var(--ink7)}
-#ov .hl-tag{font-size:9px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border:1px solid var(--ink6);border-radius:var(--ov-r4);padding:2px 6px;color:var(--ink4);white-space:nowrap;flex-shrink:0;margin-top:2px}
-#ov .hl-ttl{font-size:13px;font-weight:700;letter-spacing:-.2px;margin-bottom:2px}
-#ov .hl-body{font-size:11px;color:var(--ink3);line-height:1.5}
+#ov .hl-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+#ov .hlc{background:var(--ov-white);border:1px solid var(--ink7);border-radius:var(--ov-r12);box-shadow:var(--ov-sh);overflow:hidden;display:flex;flex-direction:column}
+#ov .hl-accent{height:3px}
+#ov .hlc-inner{padding:14px 16px;flex:1;display:flex;flex-direction:column;gap:10px}
+#ov .hl-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+#ov .hl-tag{font-size:8px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;border-radius:3px;padding:3px 8px;white-space:nowrap}
+#ov .hlc-best .hl-tag{background:#ecfdf5;color:#065f46;border:1px solid rgba(6,95,70,.2)}
+#ov .hlc-worst .hl-tag{background:#fff7ed;color:#9a3412;border:1px solid rgba(154,52,18,.2)}
+#ov .hl-pct-badge{font-size:18px;font-weight:800;letter-spacing:-.5px;line-height:1}
+#ov .hlc-best .hl-pct-badge{color:#059669}
+#ov .hlc-worst .hl-pct-badge{color:#ea580c}
+#ov .hl-mid{display:flex;flex-direction:column;gap:2px}
+#ov .hl-ttl{font-size:15px;font-weight:800;letter-spacing:-.3px;line-height:1.2;color:var(--ink)}
+#ov .hl-body{font-size:11px;color:var(--ink4);line-height:1.4}
+#ov .hl-bar-wrap{height:4px;background:var(--ink7);border-radius:2px;overflow:hidden}
+#ov .hl-bar-fill{height:100%;border-radius:2px;transition:width .5s}
+#ov .hlc-best .hl-bar-fill{background:linear-gradient(90deg,#059669,#34d399)}
+#ov .hlc-worst .hl-bar-fill{background:linear-gradient(90deg,#ea580c,#fb923c)}
+#ov .hl-foot{display:flex;align-items:center;justify-content:space-between;font-size:9px;color:var(--ink4)}
+#ov .hl-foot-v{font-weight:700;color:var(--ink3)}
 /* SECTION GRID */
 #ov .sgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
 #ov .sc{background:var(--ov-white);border:1px solid var(--ink7);border-radius:var(--ov-r12);box-shadow:var(--ov-sh);display:flex;flex-direction:column;overflow:hidden;transition:box-shadow .15s,transform .15s}
@@ -387,7 +401,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* SECTION LABEL */
 #ov .ov-slabel{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink4);margin:16px 0 10px}
 #ov .ov-slabel::after{content:'';flex:1;height:1px;background:var(--ink7)}
-@media(max-width:900px){#ov .hero-row{grid-template-columns:1fr}#ov .sgrid{grid-template-columns:1fr}#ov .hl-row{grid-template-columns:1fr;background:none;border:none;gap:8px}#ov .hlc:first-child{border-right:none}}
+@media(max-width:900px){#ov .hero-row{grid-template-columns:1fr}#ov .sgrid{grid-template-columns:1fr}#ov .hl-row{grid-template-columns:1fr;gap:8px}}
 /* ── REPORT MODAL ── */
 :root{--rp-ink:#0a0f1e;--rp-ink2:#1e2d45;--rp-ink3:#3d5068;--rp-ink4:#6b7f96;--rp-ink5:#9aadbe;--rp-ink6:#c8d5e0;--rp-ink7:#e8f0f5;--rp-ink8:#f4f7f9;--rp-wh:#fff;--rp-bl:#1a56db;--rp-bl-dk:#1240a8;--rp-bl-lt:#eff4ff;--rp-gr:#0d7d5f;--rp-gr-lt:#ecfdf5;--rp-am:#b45309;--rp-am-lt:#fffbeb;--rp-rd:#be1c3c;--rp-rd-lt:#fff0f3;--rp-sh:0 1px 2px rgba(0,0,0,.05),0 1px 4px rgba(0,0,0,.07);--rp-sh-md:0 4px 12px rgba(0,0,0,.07),0 0 0 1px rgba(0,0,0,.04)}
 #rp-modal{position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.55);display:flex;align-items:flex-start;justify-content:center;overflow-y:auto;padding:24px 12px 40px}
@@ -651,13 +665,39 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     </div>
     <!-- Best / Worst Highlights -->
     <div class="hl-row">
-      <div class="hlc">
-        <div class="hl-tag" id="ov_hl1_tag">Best Month</div>
-        <div><div class="hl-ttl" id="ov_hl1_ttl">—</div><div class="hl-body" id="ov_hl1_body">—</div></div>
+      <div class="hlc hlc-best">
+        <div class="hl-accent" style="background:linear-gradient(90deg,#059669,#34d399)"></div>
+        <div class="hlc-inner">
+          <div class="hl-top">
+            <div class="hl-tag" id="ov_hl1_tag">Best Month</div>
+            <div class="hl-pct-badge" id="ov_hl1_pct">—</div>
+          </div>
+          <div class="hl-mid">
+            <div class="hl-ttl" id="ov_hl1_ttl">—</div>
+            <div class="hl-body" id="ov_hl1_body">—</div>
+          </div>
+          <div>
+            <div class="hl-bar-wrap"><div class="hl-bar-fill" id="ov_hl1_bar" style="width:0%"></div></div>
+            <div class="hl-foot"><span>vs monthly target</span><span class="hl-foot-v" id="ov_hl1_tgt">—</span></div>
+          </div>
+        </div>
       </div>
-      <div class="hlc">
-        <div class="hl-tag" id="ov_hl2_tag">Worst Month</div>
-        <div><div class="hl-ttl" id="ov_hl2_ttl">—</div><div class="hl-body" id="ov_hl2_body">—</div></div>
+      <div class="hlc hlc-worst">
+        <div class="hl-accent" style="background:linear-gradient(90deg,#ea580c,#fb923c)"></div>
+        <div class="hlc-inner">
+          <div class="hl-top">
+            <div class="hl-tag" id="ov_hl2_tag">Worst Month</div>
+            <div class="hl-pct-badge" id="ov_hl2_pct">—</div>
+          </div>
+          <div class="hl-mid">
+            <div class="hl-ttl" id="ov_hl2_ttl">—</div>
+            <div class="hl-body" id="ov_hl2_body">—</div>
+          </div>
+          <div>
+            <div class="hl-bar-wrap"><div class="hl-bar-fill" id="ov_hl2_bar" style="width:0%"></div></div>
+            <div class="hl-foot"><span>vs monthly target</span><span class="hl-foot-v" id="ov_hl2_tgt">—</span></div>
+          </div>
+        </div>
       </div>
     </div>
     <!-- Section Performance -->
@@ -2579,12 +2619,16 @@ function renderOV(){
   // Highlights
   const bv=cbgMAll[bestIdx]||0,wv=cbgMAll[worstIdx]||0;
   const bp=bv>0?Math.round(bv/TGT.cbg_month*100):0,wp=wv>0?Math.round(wv/TGT.cbg_month*100):0;
-  [{tag:'Best Month',ttl:(MONTHS[bestIdx]??'—')+' 2026',body:`CBG ${fmtN(Math.round(bv))} kg · Achievement <b>${bp}%</b>`,id:1},
-   {tag:'Worst Month',ttl:(MONTHS[worstIdx]??'—')+' 2026',body:`CBG ${fmtN(Math.round(wv))} kg · Achievement <b>${wp}%</b>`,id:2}
+  const bRev=(D.M.total_rev||[])[bestIdx],wRev=(D.M.total_rev||[])[worstIdx];
+  [{id:1,mo:MONTHS[bestIdx]??'—',val:bv,pct:bp,rev:bRev,gap:Math.max(TGT.cbg_month-bv,0)},
+   {id:2,mo:MONTHS[worstIdx]??'—',val:wv,pct:wp,rev:wRev,gap:Math.max(TGT.cbg_month-wv,0)}
   ].forEach(h=>{
-    const t=document.getElementById('ov_hl'+h.id+'_tag');if(t)t.textContent=h.tag;
-    const tt=document.getElementById('ov_hl'+h.id+'_ttl');if(tt)tt.textContent=h.ttl;
-    const b=document.getElementById('ov_hl'+h.id+'_body');if(b)b.innerHTML=h.body;
+    const el=id=>document.getElementById('ov_hl'+h.id+'_'+id);
+    const ttl=el('ttl');if(ttl)ttl.textContent=h.mo+' 2026';
+    const pct=el('pct');if(pct)pct.textContent=h.pct+'%';
+    const body=el('body');if(body)body.innerHTML=`${fmtN(Math.round(h.val))} kg CBG${h.rev!=null?' · Rev '+fmtL(h.rev):''}`;
+    const bar=el('bar');if(bar)bar.style.width=Math.min(h.pct,100)+'%';
+    const tgt=el('tgt');if(tgt)tgt.textContent=h.gap>0?fmtN(Math.round(h.gap))+' kg gap':'On target ✓';
   });
 
   // Section grid
