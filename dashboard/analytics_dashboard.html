@@ -482,13 +482,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
         style="background:var(--bg3);border:1px solid var(--bdr);color:var(--text);padding:4px 10px;
         border-radius:4px;font-size:11px;cursor:pointer;min-width:100px"></select>
     </div>
-    <button onclick="exportReport()" style="margin-left:auto;padding:4px 13px;background:var(--acc);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0">⬇ Export Report</button>
+    <button onclick="openReport()" style="margin-left:auto;padding:4px 13px;background:var(--acc);color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:11px;font-weight:600;white-space:nowrap;flex-shrink:0">📄 Generate Report</button>
   </div>
 </nav>
 
 <!-- ══ OVERVIEW V9 ══ -->
 <div id="ov" class="pg on">
-  <div class="stitle" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">Plant Overview <span id="ov_period" class="mo-badge">All Months</span><button onclick="openReport()" style="margin-left:auto;padding:5px 14px;background:#1a56db;color:#fff;border:none;border-radius:7px;font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0">📄 Generate Report</button></div>
+  <div class="stitle">Plant Overview <span id="ov_period" class="mo-badge">All Months</span></div>
 
   <!-- HERO ROW: Health Card + KPI Panel -->
   <div class="hero-row">
