@@ -6163,18 +6163,11 @@ async function initDashboard() {
     try{ renderOV(); }catch(e){ console.error('OV init error',e); }
   } catch(e) { setStatus('Error: '+e.message); console.error(e); }
 }
-// ── GENERATE REPORT MODAL ──────────────────────────────────────────
+// ── GENERATE REPORT ────────────────────────────────────────────────
 function openReport(){
-  if(!D){alert('Data not loaded yet.');return;}
-  renderReport();
-  document.getElementById('rp-modal').classList.remove('hidden');
-  document.body.style.overflow='hidden';
+  if(!D||!D.months||!D.months.length){alert('Data not loaded yet. Please wait.');return;}
+  _expOverview();
 }
-function closeReport(){
-  document.getElementById('rp-modal').classList.add('hidden');
-  document.body.style.overflow='';
-}
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReport();});
 
 function renderReport(){
   const mo=curMonth,da=curDay,isDa=da!=='ALL',isMo=!isDa&&mo!=='ALL';
