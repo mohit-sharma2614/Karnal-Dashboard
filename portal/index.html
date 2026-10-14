@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>CBG Karnal — Data Entry Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.27.0/lib/msal-browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
     :root{
       --bg:#f0f2f8;--surface:#fff;--border:#dde1ec;--text:#1a1d2e;
@@ -75,6 +76,31 @@
       background:var(--success);color:#fff;font-size:.85rem;font-weight:500;
       box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;z-index:999;}
     #toast.err{background:var(--danger);}
+    /* ── Upload Feature ─────────────────────────────────── */
+    .upl-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);
+      padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;margin:0}
+    .upl-drop-zone:hover{border-color:var(--accent2)}
+    .upl-drop-icon{font-size:2.5rem;margin-bottom:8px}
+    .upl-drop-msg{font-weight:600;color:var(--text);font-size:1.05rem}
+    .upl-drop-sub{font-size:.82rem;color:var(--muted);margin-top:6px}
+    .upl-loading{padding:20px;color:var(--muted);font-size:.9rem}
+    .upl-sheet-grid{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
+    .upl-sheet-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
+      padding:10px 14px;min-width:155px;flex:1}
+    .upl-sc-name{font-weight:700;font-size:.9rem;color:var(--text)}
+    .upl-sc-rows{font-size:.82rem;color:var(--accent);margin-top:2px}
+    .upl-sc-dates{font-size:.78rem;color:var(--muted);margin-top:1px}
+    .upl-sc-mode{font-size:.74rem;color:var(--muted);font-style:italic;margin-top:2px}
+    .upl-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+    .upl-tbl th{background:var(--bg);padding:5px 8px;text-align:left;font-weight:600;
+      border-bottom:1px solid var(--border);white-space:nowrap}
+    .upl-tbl td{padding:4px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+    .upl-tbl tr:last-child td{border-bottom:none}
+    #uplProgress{max-height:220px;overflow-y:auto;background:var(--bg);
+      border:1px solid var(--border);border-radius:var(--radius);
+      padding:10px 12px;font-size:.81rem;font-family:monospace;line-height:1.6}
+    .upl-log-ok{color:var(--text)}
+    .upl-log-err{color:var(--danger);font-weight:600}
   </style>
 </head>
 <body>
@@ -113,7 +139,7 @@ const SHEETS = [
 
 // ─── DIGESTER 1 ───────────────────────────────────────────
 {id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1', hasDate:true, sections:[
-  // ── EXPECTED (Excel C2–C10) ──────────────────────────────
+  // ── EXPECTED (Excel C2–C15) ──────────────────────────────
   {t:'Expected',f:[
     {k:'cd_exp',       l:'Cow Dung — Expected (MT/day)',         tp:'num'},
     {k:'pm_exp',       l:'Pressmud — Expected (MT/day)',         tp:'num'},
@@ -121,6 +147,7 @@ const SHEETS = [
     {k:'csl_exp',      l:'CSL — Expected (KL/day)',              tp:'num'},
     {k:'sg_exp',       l:'Spent Grain — Expected (ton/day)',     tp:'num'},
     {k:'gs_exp',       l:'Grain Syrup — Expected (KL/day)',      tp:'num'},
+    {k:'ap_exp',       l:'Apple Pomace — Expected (MT/day)',     tp:'num'},
     {k:'total_feed_exp',l:'Total Feed Expected (MT/day)',        tp:'num'},
     {k:'fw_exp',       l:'Fresh Water — Expected (m³)',          tp:'num'},
     {k:'rs_exp',       l:'Recycle Slurry — Expected (m³)',       tp:'num'},
@@ -129,7 +156,7 @@ const SHEETS = [
     {k:'sfom_exp',     l:'SFOM — Expected (tons)',               tp:'num'},
     {k:'lfom_exp',     l:'LFOM — Expected (KL)',                 tp:'num'},
   ]},
-  // ── ACTUAL (Excel C15–C37) ───────────────────────────────
+  // ── ACTUAL (Excel C16–C33) ───────────────────────────────
   {t:'Actual — Feeding',f:[
     {k:'cd_act',       l:'Cow Dung — Actual (MT/day)',           tp:'num'},
     {k:'pm_act',       l:'Pressmud — Actual (MT/day)',           tp:'num'},
@@ -141,6 +168,7 @@ const SHEETS = [
     {k:'poultry_vs',     l:'Poultry VS% (lab)',                  tp:'num'},
     {k:'gs_act',         l:'Grain Syrup — Actual (KL/day)',      tp:'num'},
     {k:'sg_act',         l:'Spent Grain — Actual (tons)',        tp:'num'},
+    {k:'ap_act',         l:'Apple Pomace — Actual (MT/day)',     tp:'num'},
     {k:'total_feed_act', l:'Total Feed Actual (MT/day)',         tp:'num'},
     {k:'total_feed_kl',  l:'Total Feed Actual (KL/day)',         tp:'num'},
     {k:'fw_act',         l:'Fresh Water — Actual (m³)',          tp:'num'},
@@ -181,6 +209,7 @@ const SHEETS = [
     {k:'gs_bpp',   l:'Grain Syrup BPP (m³)', tp:'calc', fn:'bpp_gs'},
     {k:'csl_bpp',  l:'CSL BPP (m³)',         tp:'calc', fn:'bpp_csl'},
     {k:'sg_bpp',   l:'Spent Grain BPP (m³)', tp:'calc', fn:'bpp_sg'},
+    {k:'ap_bpp',   l:'Apple Pomace BPP (m³)',tp:'calc', fn:'bpp_ap'},
     {k:'wv',       l:'Working Volume (m³)',   tp:'calc', fn:'wv'},
     {k:'olr',      l:'OLR (kg VS/m³/day)',   tp:'calc', fn:'olr'},
     {k:'psa_eff',  l:'PSA Efficiency (%)',   tp:'calc', fn:'psa_eff'},
@@ -207,7 +236,7 @@ const SHEETS = [
 
 // ─── DIGESTER 2 ───────────────────────────────────────────
 {id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2', hasDate:true, sections:[
-  // ── EXPECTED (Excel C2–C10) ──────────────────────────────
+  // ── EXPECTED (Excel C2–C15) ──────────────────────────────
   {t:'Expected',f:[
     {k:'cd_exp',       l:'Cow Dung — Expected (MT/day)',         tp:'num'},
     {k:'pm_exp',       l:'Pressmud — Expected (MT/day)',         tp:'num'},
@@ -215,6 +244,7 @@ const SHEETS = [
     {k:'csl_exp',      l:'CSL — Expected (KL/day)',              tp:'num'},
     {k:'sg_exp',       l:'Spent Grain — Expected (ton/day)',     tp:'num'},
     {k:'gs_exp',       l:'Grain Syrup — Expected (KL/day)',      tp:'num'},
+    {k:'ap_exp',       l:'Apple Pomace — Expected (MT/day)',     tp:'num'},
     {k:'total_feed_exp',l:'Total Feed Expected (MT/day)',        tp:'num'},
     {k:'fw_exp',       l:'Fresh Water — Expected (m³)',          tp:'num'},
     {k:'rs_exp',       l:'Recycle Slurry — Expected (m³)',       tp:'num'},
@@ -223,7 +253,7 @@ const SHEETS = [
     {k:'sfom_exp',     l:'SFOM — Expected (tons)',               tp:'num'},
     {k:'lfom_exp',     l:'LFOM — Expected (KL)',                 tp:'num'},
   ]},
-  // ── ACTUAL (Excel C15–C37) ───────────────────────────────
+  // ── ACTUAL (Excel C16–C33) ───────────────────────────────
   {t:'Actual — Feeding',f:[
     {k:'cd_act',       l:'Cow Dung — Actual (MT/day)',           tp:'num'},
     {k:'pm_act',       l:'Pressmud — Actual (MT/day)',           tp:'num'},
@@ -235,6 +265,7 @@ const SHEETS = [
     {k:'poultry_vs',     l:'Poultry VS% (lab)',                  tp:'num'},
     {k:'gs_act',         l:'Grain Syrup — Actual (KL/day)',      tp:'num'},
     {k:'sg_act',         l:'Spent Grain — Actual (tons)',        tp:'num'},
+    {k:'ap_act',         l:'Apple Pomace — Actual (MT/day)',     tp:'num'},
     {k:'total_feed_act', l:'Total Feed Actual (MT/day)',         tp:'num'},
     {k:'total_feed_kl',  l:'Total Feed Actual (KL/day)',         tp:'num'},
     {k:'fw_act',         l:'Fresh Water — Actual (m³)',          tp:'num'},
@@ -250,7 +281,7 @@ const SHEETS = [
     {k:'rbg_total',      l:'Raw Biogas Total Produce (m³)',      tp:'num'},
     {k:'cbg_prod',       l:'CBG Produced (kg)',                  tp:'num'},
     {k:'cbg_vent',       l:'CBG Vent (kg)',                      tp:'num'},
-    {k:'biogas_est2',    l:'Biogas Estimated (m³) — D2 C39',    tp:'num'},
+    {k:'biogas_est2',    l:'Biogas Estimated (m³) — D2 C41',    tp:'num'},
     {k:'cbg_exp',        l:'CBG Expected (kg)',                  tp:'num'},
     {k:'cbg_exp_slot',   l:'CBG Expected per Slot (kg)',         tp:'num'},
     {k:'biogas_per_hr',  l:'Per Hour Biogas Generation (kg)',    tp:'num'},
@@ -276,6 +307,7 @@ const SHEETS = [
     {k:'gs_bpp',   l:'Grain Syrup BPP (m³)', tp:'calc', fn:'bpp_gs'},
     {k:'csl_bpp',  l:'CSL BPP (m³)',         tp:'calc', fn:'bpp_csl'},
     {k:'sg_bpp',   l:'Spent Grain BPP (m³)', tp:'calc', fn:'bpp_sg'},
+    {k:'ap_bpp',   l:'Apple Pomace BPP (m³)',tp:'calc', fn:'bpp_ap'},
     {k:'wv',       l:'Working Volume (m³)',   tp:'calc', fn:'wv'},
     {k:'olr',      l:'OLR (kg VS/m³/day)',   tp:'calc', fn:'olr'},
     {k:'psa_eff',  l:'PSA Efficiency (%)',   tp:'calc', fn:'psa_eff'},
@@ -703,7 +735,8 @@ const FN = {
   bpp_gs:    (v,m) => n(v.gs_act)*220,
   bpp_csl:   (v,m) => n(v.csl_act)*270,
   bpp_sg:    (v,m) => n(v.sg_act)*130,
-  tot_bpp:   (v,m) => n(v.cd_act)*45 + n(v.pm_act)*(PM_BPP[m]||95) + n(v.gs_act)*220 + n(v.csl_act)*270 + n(v.sg_act)*130,
+  bpp_ap:    (v,m) => n(v.ap_act)*100,
+  tot_bpp:   (v,m) => n(v.cd_act)*45 + n(v.pm_act)*(PM_BPP[m]||95) + n(v.gs_act)*220 + n(v.csl_act)*270 + n(v.sg_act)*130 + n(v.ap_act)*100,
 
   // TS tonnes
   cd_ts_t:   (v) => n(v.cd_act)  * (n(v.cd_ts)/100),
@@ -837,6 +870,8 @@ function buildNav(){
     html+=`<div class="ng">${g}</div>`
     items.forEach(s=>{ html+=`<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>` })
   }
+  html+=`<div class="ng" style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">Tools</div>`
+  html+=`<button data-id="_upload" onclick="showUploadView()" style="font-weight:600">&#128228; Upload Workbook</button>`
   nav.innerHTML=html
 }
 
@@ -921,32 +956,39 @@ window.recompute=recompute
 // ══════════════════════════════════════════════════════════
 const COLUMN_MAP = {
   D1: {
-    cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, total_feed_exp:8, fw_exp:9, rs_exp:10,
-    biogas_est:11, slurry_exp:12, sfom_exp:13, lfom_exp:14,
-    cd_act:15, pm_act:16, poultry:17, csl_act:18, poultry_tons:19, poultry_tons_vs:20,
-    poultry_ts:21, poultry_vs:22,
-    gs_act:23, sg_act:24, total_feed_act:25, total_feed_kl:26,
-    fw_act:27, rs_act:28, flow_mtr:29, planned_drain:30, drain:31,
-    biogas_est_act:32, rbg_psa:33, rbg_vent:34, rbg_total:35, cbg_prod:36, cbg_vent:37,
-    cbg_exp:39, cbg_exp_slot:40, biogas_per_hr:41, psa_eff_hr:42,
-    sl_ht:49,
-    // Calculated — written so historical data is self-contained
-    cd_bpp:43, pm_bpp:44, gs_bpp:45, csl_bpp:46, sg_bpp:47, wv:48, olr:50, psa_eff:51,
-    remarks:52,
+    // Expected: ap_exp inserted at col 8; all cols after shift +1
+    cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, ap_exp:8,
+    total_feed_exp:9, fw_exp:10, rs_exp:11,
+    biogas_est:12, slurry_exp:13, sfom_exp:14, lfom_exp:15,
+    // Actual: ap_act inserted at col 26; feeding cols 16-25 shift +1, rest shift +2
+    cd_act:16, pm_act:17, poultry:18, csl_act:19, poultry_tons:20, poultry_tons_vs:21,
+    poultry_ts:22, poultry_vs:23,
+    gs_act:24, sg_act:25, ap_act:26, total_feed_act:27, total_feed_kl:28,
+    fw_act:29, rs_act:30, flow_mtr:31, planned_drain:32, drain:33,
+    biogas_est_act:34, rbg_psa:35, rbg_vent:36, rbg_total:37, cbg_prod:38, cbg_vent:39,
+    cbg_exp:41, cbg_exp_slot:42, biogas_per_hr:43, psa_eff_hr:44,
+    // BPP: ap_bpp inserted at col 50; all calcs after shift +3 vs original
+    cd_bpp:45, pm_bpp:46, gs_bpp:47, csl_bpp:48, sg_bpp:49, ap_bpp:50,
+    wv:51, sl_ht:52, olr:53, psa_eff:54,
+    remarks:55,
   },
   D2: {
-    cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, total_feed_exp:8, fw_exp:9, rs_exp:10,
-    biogas_est:11, slurry_exp:12, sfom_exp:13, lfom_exp:14,
-    cd_act:15, pm_act:16, poultry:17, csl_act:18, poultry_tons:19, poultry_tons_vs:20,
-    poultry_ts:21, poultry_vs:22,
-    gs_act:23, sg_act:24, total_feed_act:25, total_feed_kl:26,
-    fw_act:27, rs_act:28, flow_mtr:29, planned_drain:30, drain:31,
-    biogas_est_act:32, rbg_psa:33, rbg_vent:34, rbg_total:35, cbg_prod:36, cbg_vent:37,
-    // D2 has an extra column C39 'Biogas Estimated (m3)' not present in D1 — all C39+ shift by 1
-    biogas_est2:39, cbg_exp:40, cbg_exp_slot:41, biogas_per_hr:42, psa_eff_hr:43,
-    sl_ht:50,
-    cd_bpp:44, pm_bpp:45, gs_bpp:46, csl_bpp:47, sg_bpp:48, wv:49, olr:51, psa_eff:52,
-    remarks:53,
+    // Expected: same as D1 (ap_exp at col 8)
+    cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, ap_exp:8,
+    total_feed_exp:9, fw_exp:10, rs_exp:11,
+    biogas_est:12, slurry_exp:13, sfom_exp:14, lfom_exp:15,
+    // Actual: same as D1 (ap_act at col 26)
+    cd_act:16, pm_act:17, poultry:18, csl_act:19, poultry_tons:20, poultry_tons_vs:21,
+    poultry_ts:22, poultry_vs:23,
+    gs_act:24, sg_act:25, ap_act:26, total_feed_act:27, total_feed_kl:28,
+    fw_act:29, rs_act:30, flow_mtr:31, planned_drain:32, drain:33,
+    biogas_est_act:34, rbg_psa:35, rbg_vent:36, rbg_total:37, cbg_prod:38, cbg_vent:39,
+    // D2 has extra col 41 'Biogas Estimated (m3)' not in D1; CBG Expected shifts to 42
+    biogas_est2:41, cbg_exp:42, cbg_exp_slot:43, biogas_per_hr:44, psa_eff_hr:45,
+    // BPP: ap_bpp at col 51 (D2 has one extra col vs D1 in Gas Prod section)
+    cd_bpp:46, pm_bpp:47, gs_bpp:48, csl_bpp:49, sg_bpp:50, ap_bpp:51,
+    wv:52, sl_ht:53, olr:54, psa_eff:55,
+    remarks:56,
   },
   PSA: {
     // C9=Avg RBG Flow (auto formula), C15=Avg Flow (auto formula) — do NOT write
@@ -1421,6 +1463,314 @@ function toast(msg,err=false){
 
 buildNav()
 loadSheet('D1')
+
+// ═══════════════════════════════════════════════════════════════
+// UPLOAD WORKBOOK FEATURE
+// ═══════════════════════════════════════════════════════════════
+
+// Excel sheet name → COLUMN_MAP key + parse config
+const UPL_CFG = {
+  'D1':                    { cmKey:'D1',      dateCol:1, dataStart:3, append:false },
+  'D2':                    { cmKey:'D2',      dateCol:1, dataStart:3, append:false },
+  'PSA Production':        { cmKey:'PSA',     dateCol:1, dataStart:3, append:false },
+  'Digester pH':           { cmKey:'PH',      dateCol:1, dataStart:3, append:false },
+  'Digester Temp':         { cmKey:'TEMP',    dateCol:1, dataStart:3, append:false },
+  'Digester TS-VS':        { cmKey:'TSVS',    dateCol:1, dataStart:3, append:false },
+  'Digester IA-PA':        { cmKey:'IAPA',    dateCol:1, dataStart:3, append:false },
+  'Feedstock Supply':      { cmKey:'FS',      dateCol:1, dataStart:3, append:false },
+  'Feed & Balance':        { cmKey:'FB',      dateCol:1, dataStart:3, append:false },
+  'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:2, dataStart:3, append:true  },
+  'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:2, dataStart:3, append:true  },
+  'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:2, dataStart:3, append:true  },
+  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:2, dataStart:3, append:true  },
+  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:2, dataStart:3, append:true  },
+  'Daily Revenue & Costs': { cmKey:'REVCOST', dateCol:1, dataStart:3, append:false },
+  'Manure Sales':          { cmKey:'MANURE',  dateCol:2, dataStart:3, append:true  },
+  'Maintenance':           { cmKey:'MAINT',   dateCol:2, dataStart:3, append:true  },
+  'Sales Detail':          { cmKey:'SALES',   dateCol:1, dataStart:3, append:false },
+}
+
+let _uplWb   = null   // SheetJS workbook
+let _uplParsed = {}   // { sheetName: [ {serial, dateStr, rowData} ] }
+let _uplFile = null
+
+function showUploadView(){
+  cur = null
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'))
+  document.querySelector('#nav button[data-id="_upload"]')?.classList.add('active')
+  document.getElementById('main').innerHTML = `
+    <div class="sh"><h2>Upload Workbook</h2>
+      <div class="sub">Upload a filled input workbook (.xlsx) — data writes directly to the SharePoint master sheet.</div></div>
+    <div class="sec upl-drop-zone" id="uplDropZone"
+         onclick="document.getElementById('uplFileInp').click()"
+         ondragover="event.preventDefault()"
+         ondrop="onUplDrop(event)">
+      <div class="upl-drop-icon">&#128228;</div>
+      <div class="upl-drop-msg">Click to select or drag &amp; drop your workbook here</div>
+      <div class="upl-drop-sub">Supported: Production RBG, Lab, Digester Health, Feedstock, Sales &amp; Finance workbooks (.xlsx)</div>
+      <input type="file" id="uplFileInp" accept=".xlsx" style="display:none" onchange="onUplFileSelect(this)"/>
+    </div>
+    <div id="uplPreview" style="display:none"></div>`
+}
+
+function onUplDrop(e){
+  e.preventDefault()
+  const f = e.dataTransfer?.files?.[0]
+  if(f && f.name.toLowerCase().endsWith('.xlsx')) loadUplFile(f)
+  else toast('Please drop an .xlsx file', true)
+}
+function onUplFileSelect(inp){
+  const f = inp.files?.[0]
+  if(f) loadUplFile(f)
+}
+
+async function loadUplFile(file){
+  _uplFile = file
+  const zone = document.getElementById('uplDropZone')
+  if(zone) zone.innerHTML = `<div class="upl-loading">Reading <b>${file.name}</b>…</div>`
+  try {
+    const buf = await file.arrayBuffer()
+    _uplWb = XLSX.read(buf, {type:'array', raw:true})
+    parseUplWorkbook()
+    renderUplPreview()
+  } catch(e) {
+    toast(`Failed to read file: ${e.message}`, true)
+    showUploadView()
+  }
+}
+
+function parseUplWorkbook(){
+  _uplParsed = {}
+  for(const sName of _uplWb.SheetNames){
+    const cfg = UPL_CFG[sName]
+    if(!cfg) continue
+    const cm = COLUMN_MAP[cfg.cmKey]
+    if(!cm) continue
+    const ws = _uplWb.Sheets[sName]
+    const all = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null})
+    const dataRows = all.slice(cfg.dataStart - 1)
+    const rows = []
+    for(const row of dataRows){
+      if(!row || row.length === 0) continue
+      const rawDate = row[cfg.dateCol - 1]
+      if(rawDate == null || rawDate === '') continue
+      let serial
+      if(typeof rawDate === 'number' && rawDate > 40000 && rawDate < 50000){
+        serial = Math.round(rawDate)
+      } else if(typeof rawDate === 'string'){
+        const m = rawDate.match(/^(\d{4}-\d{2}-\d{2})/)
+        if(m) serial = toExcelSerial(m[1])
+        else {
+          const dmy = rawDate.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/)
+          if(dmy) serial = toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)
+        }
+      }
+      if(!serial) continue
+      const dateStr = fromExcelSerial(serial)
+      if(!dateStr) continue
+      const rowData = {[cfg.dateCol]: serial}
+      for(const [key, col] of Object.entries(cm)){
+        const v = row[col - 1]
+        if(v != null && v !== '') rowData[col] = v
+      }
+      rows.push({serial, dateStr, rowData})
+    }
+    if(rows.length > 0) _uplParsed[sName] = rows
+  }
+}
+
+function renderUplPreview(){
+  const previewEl = document.getElementById('uplPreview')
+  if(!previewEl) return
+  const recognized = Object.keys(_uplParsed)
+  const unknown = (_uplWb.SheetNames||[]).filter(s => !UPL_CFG[s])
+
+  if(recognized.length === 0){
+    previewEl.style.display = 'block'
+    previewEl.innerHTML = `<div class="sec">
+      <div class="sec-title-row"><span class="sec-title" style="color:var(--danger)">No recognized sheets found</span></div>
+      <p style="color:var(--muted);font-size:.9rem">Sheets in file: ${(_uplWb.SheetNames||[]).join(', ')}<br>
+      Expected sheets like: D1, D2, PSA Production, Pressmud Cal., etc.</p>
+      <button class="clear-btn" onclick="showUploadView()" style="margin-top:8px">Try another file</button>
+    </div>`
+    return
+  }
+
+  let html = `<div class="sec"><div class="sec-title-row"><span class="sec-title">File: ${_uplFile.name}</span></div>
+    <div class="upl-sheet-grid">`
+  for(const [sName, rows] of Object.entries(_uplParsed)){
+    const dates = rows.map(r=>r.dateStr)
+    const first = dates[0], last = dates[dates.length-1]
+    const cfg = UPL_CFG[sName]
+    html += `<div class="upl-sheet-card">
+      <div class="upl-sc-name">${sName}</div>
+      <div class="upl-sc-rows">${rows.length} row${rows.length===1?'':'s'}</div>
+      <div class="upl-sc-dates">${first===last ? first : `${first} &#8594; ${last}`}</div>
+      <div class="upl-sc-mode">${cfg.append ? 'Append mode' : 'Date-indexed'}</div>
+    </div>`
+  }
+  html += `</div>`
+  if(unknown.length > 0) html += `<div style="margin-top:10px;font-size:.83rem;color:var(--muted)">Sheets skipped (not in schema): ${unknown.join(', ')}</div>`
+  html += `</div>`
+
+  for(const [sName, rows] of Object.entries(_uplParsed)){
+    const cm = COLUMN_MAP[UPL_CFG[sName].cmKey]
+    const keys = Object.keys(cm).slice(0,6)
+    const showRows = rows.slice(0,10)
+    html += `<div class="sec"><div class="sec-title-row">
+      <span class="sec-title">${sName}</span>
+      <span style="font-size:.8rem;color:var(--muted)">${rows.length} rows</span></div>
+      <div style="overflow-x:auto"><table class="upl-tbl"><thead><tr>
+        <th>Date</th>${keys.map(k=>`<th>${k}</th>`).join('')}
+      </tr></thead><tbody>`
+    showRows.forEach(({dateStr,rowData})=>{
+      html += `<tr><td>${dateStr}</td>${keys.map(k=>{
+        const v = rowData[cm[k]]; return `<td>${v!=null?v:'—'}</td>`
+      }).join('')}</tr>`
+    })
+    if(rows.length > 10) html += `<tr><td colspan="${keys.length+1}" style="text-align:center;color:var(--muted);font-style:italic">… ${rows.length} rows total (first 10 shown)</td></tr>`
+    html += `</tbody></table></div></div>`
+  }
+
+  html += `<div class="sec"><div class="sec-title-row"><span class="sec-title">Write Options</span></div>
+    <div class="fgrid"><div class="fg">
+      <label>Conflict Handling <span style="font-size:.78rem;color:var(--muted)">(date-indexed sheets only)</span></label>
+      <select id="uplConflictMode">
+        <option value="overwrite">Overwrite existing rows</option>
+        <option value="skip">Skip existing dates</option>
+      </select>
+    </div></div>
+    <div id="uplProgress" style="display:none;margin-top:12px"></div>
+    <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <button class="save-btn" onclick="submitUpload()" id="uplSubmitBtn">
+        Write to SharePoint (${recognized.length} sheet${recognized.length===1?'':'s'}, ${Object.values(_uplParsed).reduce((a,r)=>a+r.length,0)} rows)
+      </button>
+      <button class="clear-btn" onclick="showUploadView()">&#8617; Start Over</button>
+    </div></div>`
+
+  previewEl.style.display = 'block'
+  previewEl.innerHTML = html
+}
+
+function uplLog(msg, isErr=false){
+  const el = document.getElementById('uplProgress')
+  if(!el) return
+  el.style.display = 'block'
+  const line = document.createElement('div')
+  line.className = isErr ? 'upl-log-err' : 'upl-log-ok'
+  line.textContent = msg
+  el.appendChild(line)
+  el.scrollTop = el.scrollHeight
+}
+
+async function submitUpload(){
+  await initMsal()
+  const t = await getToken()
+  if(!t){ toast('Sign in first', true); return }
+
+  const btn = document.getElementById('uplSubmitBtn')
+  const mode = document.getElementById('uplConflictMode')?.value || 'overwrite'
+  const logEl = document.getElementById('uplProgress')
+  if(btn) btn.disabled = true
+  if(logEl){ logEl.style.display='block'; logEl.innerHTML='' }
+
+  let totalWritten=0, totalSkipped=0, totalErrors=0
+
+  try {
+    const sid = await getSession()
+
+    for(const [sName, rows] of Object.entries(_uplParsed)){
+      const cfg = UPL_CFG[sName]
+      const cm  = COLUMN_MAP[cfg.cmKey]
+      uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`)
+
+      for(let i=0; i<rows.length; i++){
+        const {serial, dateStr, rowData} = rows[i]
+        uplLog(`  [${i+1}/${rows.length}] ${dateStr} …`)
+
+        try {
+          const enc = encodeURIComponent(sName)
+          let rowNum
+
+          if(cfg.append){
+            const dc = cfg.dateCol
+            const d = await gGet(`/worksheets('${enc}')/range(address='${colLetter(dc)}${cfg.dataStart}:${colLetter(dc)}600')`)
+            const existRows = (d&&d.values)||[]
+            let last = cfg.dataStart - 1
+            for(let j=existRows.length-1; j>=0; j--){
+              if(existRows[j][0]!=null && existRows[j][0]!==''){ last=cfg.dataStart+j; break }
+            }
+            rowData[1] = last - cfg.dataStart + 2  // auto Sr.No
+            rowNum = last + 1
+          } else {
+            rowNum = await findRow(sName, serial, cfg.dataStart)
+            if(rowNum && mode === 'skip'){
+              uplLog(`  → Skipped (already at row ${rowNum})`)
+              totalSkipped++; continue
+            }
+            if(!rowNum){
+              const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A400')`)
+              const existRows = (d&&d.values)||[]
+              let last = cfg.dataStart - 1
+              for(let j=existRows.length-1; j>=0; j--){
+                if(existRows[j][0]!=null && existRows[j][0]!==''){ last=cfg.dataStart+j; break }
+              }
+              rowNum = last + 1
+            }
+          }
+
+          // PSA: convert decimal hours → Excel time fraction
+          if(sName === 'PSA Production'){
+            if(rowData[2]) rowData[2] = rowData[2] / 24
+            if(rowData[4]) rowData[4] = rowData[4] / 24
+            if(rowData[5]) rowData[5] = rowData[5] / 60 / 24
+          }
+          // Manure: auto-derive Month string for col 7
+          if(sName === 'Manure Sales'){
+            const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+            const ds2 = fromExcelSerial(serial)
+            if(ds2){ const [y,m]=ds2.split('-'); rowData[7]=`${MON[parseInt(m,10)-1]}-${y}` }
+          }
+
+          const maxCol = Math.max(...Object.keys(rowData).map(Number), 10)
+          const values = Array(maxCol).fill(null)
+          for(const [c,v] of Object.entries(rowData)) values[parseInt(c)-1] = v??null
+
+          const range = `A${rowNum}:${colLetter(maxCol)}${rowNum}`
+          const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values]}, sid)
+
+          if(res && res.error){
+            uplLog(`  → ERROR: ${res.error.message}`, true)
+            totalErrors++
+          } else {
+            uplLog(`  → Row ${rowNum} written ✓`)
+            appendSubmissionLog(serial, `${sName} [upload]`, sid).catch(()=>{})
+            totalWritten++
+          }
+        } catch(e){
+          uplLog(`  → ERROR: ${e.message}`, true)
+          totalErrors++
+        }
+      }
+    }
+
+    uplLog(``)
+    uplLog(`═ Done: ${totalWritten} written  ${totalSkipped} skipped  ${totalErrors} error${totalErrors===1?'':'s'} ═`)
+    if(totalErrors === 0) toast(`Upload complete — ${totalWritten} row${totalWritten===1?'':'s'} written to SharePoint`)
+    else toast(`Upload done with ${totalErrors} error${totalErrors===1?'':'s'} — see log`, true)
+
+  } catch(e){
+    uplLog(`Fatal: ${e.message}`, true)
+    toast(`Upload failed: ${e.message}`, true)
+  } finally {
+    if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
+  }
+}
+
+window.showUploadView = showUploadView
+window.onUplDrop = onUplDrop
+window.onUplFileSelect = onUplFileSelect
+window.submitUpload = submitUpload
 </script>
 </body>
 </html>
