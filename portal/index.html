@@ -77,6 +77,16 @@
       box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;z-index:999;}
     #toast.err{background:var(--danger);}
     /* ── Upload Feature ─────────────────────────────────── */
+    .upl-nav-btn{
+      width:calc(100% - 4px);margin:8px 2px 12px;
+      background:var(--accent);color:#fff!important;
+      border:none;border-radius:var(--radius);padding:9px 12px;
+      font-size:.85rem;font-weight:700;cursor:pointer;text-align:left;
+      box-shadow:0 2px 8px rgba(28,82,163,.25);
+      border-bottom:3px solid rgba(0,0,0,.18);
+    }
+    .upl-nav-btn:hover{background:var(--accent2)}
+    .upl-nav-btn.active{background:var(--accent2);box-shadow:none}
     .upl-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);
       padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;margin:0}
     .upl-drop-zone:hover{border-color:var(--accent2)}
@@ -866,12 +876,11 @@ function buildNav(){
   const grps={}
   SHEETS.forEach(s=>{ if(!grps[s.group]) grps[s.group]=[]; grps[s.group].push(s) })
   let html=''
+  html+=`<button data-id="_upload" onclick="showUploadView()" class="upl-nav-btn">&#128228;&nbsp; Upload Workbook</button>`
   for(const [g,items] of Object.entries(grps)){
     html+=`<div class="ng">${g}</div>`
     items.forEach(s=>{ html+=`<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>` })
   }
-  html+=`<div class="ng" style="margin-top:12px;border-top:1px solid var(--border);padding-top:10px">Tools</div>`
-  html+=`<button data-id="_upload" onclick="showUploadView()" style="font-weight:600">&#128228; Upload Workbook</button>`
   nav.innerHTML=html
 }
 
