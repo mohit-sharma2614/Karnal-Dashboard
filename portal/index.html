@@ -78,15 +78,16 @@
     #toast.err{background:var(--danger);}
     /* ── Upload Feature ─────────────────────────────────── */
     .upl-nav-btn{
-      width:calc(100% - 4px);margin:8px 2px 12px;
-      background:var(--accent);color:#fff!important;
-      border:none;border-radius:var(--radius);padding:9px 12px;
-      font-size:.85rem;font-weight:700;cursor:pointer;text-align:left;
-      box-shadow:0 2px 8px rgba(28,82,163,.25);
-      border-bottom:3px solid rgba(0,0,0,.18);
+      display:flex;align-items:center;gap:7px;
+      width:100%;text-align:left;padding:9px 13px 9px 10px;
+      border:none;border-left:3px solid transparent;
+      border-top:1px solid var(--border);
+      background:none;color:var(--accent);
+      cursor:pointer;font-size:.82rem;font-weight:600;
+      transition:background .1s;letter-spacing:.01em;
     }
-    .upl-nav-btn:hover{background:var(--accent2)}
-    .upl-nav-btn.active{background:var(--accent2);box-shadow:none}
+    .upl-nav-btn:hover{background:var(--bg);}
+    .upl-nav-btn.active{border-left-color:var(--accent);background:var(--bg);}
     .upl-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);
       padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;margin:0}
     .upl-drop-zone:hover{border-color:var(--accent2)}
@@ -876,7 +877,7 @@ function buildNav(){
   const grps={}
   SHEETS.forEach(s=>{ if(!grps[s.group]) grps[s.group]=[]; grps[s.group].push(s) })
   let html=''
-  html+=`<button data-id="_upload" onclick="showUploadView()" class="upl-nav-btn">&#128228;&nbsp; Upload Workbook</button>`
+  html+=`<button data-id="_upload" onclick="showUploadView()" class="upl-nav-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Workbook</button>`
   for(const [g,items] of Object.entries(grps)){
     html+=`<div class="ng">${g}</div>`
     items.forEach(s=>{ html+=`<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>` })
