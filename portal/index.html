@@ -1161,9 +1161,7 @@ async function getToken(){
     const r = await _msal.acquireTokenSilent({ scopes:CONFIG.scopes, account })
     _token=r.accessToken; _user=account.name||account.username
     return _token
-  }catch{
   }catch{ await _msal.acquireTokenRedirect({ scopes:CONFIG.scopes }); return null }
-  }
 }
 
 function updateAuthUI(){
