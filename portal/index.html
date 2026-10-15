@@ -1126,9 +1126,8 @@ async function initMsal(){
   if(_msal) return
   const { PublicClientApplication } = window.msal
   _msal = new PublicClientApplication({
-    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: 'https://mohit-sharma2614.github.io/Karnal-Dashboard/portal/index.html' },
-    cache: { cacheLocation:'sessionStorage' },
-    system: { navigateToLoginRequestUrl: false },
+    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: 'https://mohit-sharma2614.github.io/Karnal-Dashboard/portal/index.html', navigateToLoginRequestUrl: false },
+    cache: { cacheLocation:'localStorage' },
   })
   await _msal.initialize()
   const result = await _msal.handleRedirectPromise()
