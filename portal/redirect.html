@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<script src="https://alcdn.msauth.net/browser/3.27.0/js/msal-browser.min.js"></script>
+<script>
+  const { PublicClientApplication } = window.msal
+  const pca = new PublicClientApplication({ auth: { clientId: 'cca66a21-2c5b-455c-bff6-009f2877849c' } })
+  pca.initialize().then(() => pca.handleRedirectPromise())
+</script>
+</head><body></body></html>

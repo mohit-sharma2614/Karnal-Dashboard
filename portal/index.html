@@ -1126,7 +1126,7 @@ async function initMsal(){
   if(_msal) return
   const { PublicClientApplication } = window.msal
   _msal = new PublicClientApplication({
-    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: window.location.href.split('?')[0] },
+    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: 'https://mohit-sharma2614.github.io/Karnal-Dashboard/portal/redirect.html' },
     cache: { cacheLocation:'sessionStorage' },
   })
   await _msal.initialize()
@@ -1161,7 +1161,9 @@ async function getToken(){
     const r = await _msal.acquireTokenSilent({ scopes:CONFIG.scopes, account })
     _token=r.accessToken; _user=account.name||account.username
     return _token
-  }catch{ await _msal.acquireTokenRedirect({ scopes:CONFIG.scopes }); return null }
+  }catch{
+    try{ const r=await _msal.acquireTokenPopup({scopes:CONFIG.scopes,account}); _token=r.accessToken; return _token }catch{ return null }
+  }
 }
 
 function updateAuthUI(){
