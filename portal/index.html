@@ -1126,7 +1126,7 @@ async function initMsal(){
   if(_msal) return
   const { PublicClientApplication } = window.msal
   _msal = new PublicClientApplication({
-    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: 'https://mohit-sharma2614.github.io/Karnal-Dashboard/portal/redirect.html' },
+    auth:  { clientId: CONFIG.clientId, authority: `https://login.microsoftonline.com/${CONFIG.tenantId}`, redirectUri: window.location.href.split('?')[0] },
     cache: { cacheLocation:'sessionStorage' },
   })
   await _msal.initialize()
@@ -1162,7 +1162,7 @@ async function getToken(){
     _token=r.accessToken; _user=account.name||account.username
     return _token
   }catch{
-    try{ const r=await _msal.acquireTokenPopup({scopes:CONFIG.scopes,account}); _token=r.accessToken; return _token }catch{ return null }
+  }catch{ await _msal.acquireTokenRedirect({ scopes:CONFIG.scopes }); return null }
   }
 }
 
@@ -1180,11 +1180,7 @@ window.handleSignIn = async ()=>{
   await initMsal()
   const accounts = _msal.getAllAccounts()
   if(accounts.length){ _msal.logoutRedirect(); return }
-  try{
-    const resp = await _msal.loginPopup({ scopes:CONFIG.scopes })
-    _msal.setActiveAccount(resp.account)
-    await updateAuthUI()
-  }catch(e){ console.error('Login failed',e) }
+  await _msal.loginRedirect({ scopes:CONFIG.scopes })
 }
 
 // ── Graph API helpers ─────────────────────────────────────────────────────────
