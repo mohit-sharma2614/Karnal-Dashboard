@@ -1074,14 +1074,15 @@ const COLUMN_MAP = {
     fb_tot_fed:17,
     fb_pm_bal:18, fb_gs_bal:19, fb_csl_bal:20, fb_cd_bal:21, fb_sg_bal:22,
     remarks:23,
+    ap_cost:33,
   },
   // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6, TS Tonnes=7(formula), VS Tonnes=8(formula), Remarks=9
   // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
   PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
   CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:11 },
+  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, qty:10, remarks:11 },
   CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:11 },
+  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, qty:9, remarks:10 },
   MANURE: {
     // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6, Month=7(auto from date), Remarks=8
     v_type:3, farmer:4, type:5, amount:6,
@@ -1095,8 +1096,8 @@ const COLUMN_MAP = {
     total_kg:10, total_rs:11, remarks:12,
   },
   MAINT: {
-    // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8, Remarks=9
-    unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8, remarks:9,
+    // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8, Remarks=10
+    unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8, remarks:10,
   },
   REVCOST: {
     // Date=1, CBG Sale=2(auto), SFOM=3, LFOM=4, Feedstock=5(auto), Transport=6, Maint=7(auto), Elec/day=8, Manpow=9, EMI=10, Remarks=11
