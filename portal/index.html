@@ -88,30 +88,44 @@
     }
     .upl-nav-btn:hover{background:var(--bg);}
     .upl-nav-btn.active{border-left-color:var(--accent);background:var(--bg);}
-    .upl-drop-zone{border:2px dashed var(--border);border-radius:var(--radius);
-      padding:36px 20px;text-align:center;cursor:pointer;transition:border-color .2s;margin:0}
-    .upl-drop-zone:hover{border-color:var(--accent2)}
-    .upl-drop-icon{font-size:2.5rem;margin-bottom:8px}
-    .upl-drop-msg{font-weight:600;color:var(--text);font-size:1.05rem}
-    .upl-drop-sub{font-size:.82rem;color:var(--muted);margin-top:6px}
-    .upl-loading{padding:20px;color:var(--muted);font-size:.9rem}
-    .upl-sheet-grid{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0}
-    .upl-sheet-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius);
-      padding:10px 14px;min-width:155px;flex:1}
-    .upl-sc-name{font-weight:700;font-size:.9rem;color:var(--text)}
-    .upl-sc-rows{font-size:.82rem;color:var(--accent);margin-top:2px}
-    .upl-sc-dates{font-size:.78rem;color:var(--muted);margin-top:1px}
-    .upl-sc-mode{font-size:.74rem;color:var(--muted);font-style:italic;margin-top:2px}
-    .upl-tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+    .upl-file-panel{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:var(--radius);padding:18px 20px;
+      display:flex;align-items:center;gap:16px;margin-bottom:20px;
+      transition:border-color .15s;
+    }
+    .upl-file-panel:hover{border-color:var(--accent2);}
+    .upl-file-icon{flex-shrink:0;color:var(--accent);opacity:.7;}
+    .upl-file-meta{flex:1;min-width:0;}
+    .upl-file-label{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
+    .upl-file-name{font-size:.87rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .upl-file-name.empty{color:var(--muted);font-style:italic;}
+    .upl-browse-btn{flex-shrink:0;padding:6px 14px;border:1px solid var(--accent);border-radius:6px;
+      background:none;color:var(--accent);font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;
+      transition:background .12s,color .12s;}
+    .upl-browse-btn:hover{background:var(--accent);color:#fff;}
+    .upl-wb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;}
+    .upl-wb-chip{font-size:.74rem;font-weight:500;color:var(--muted);
+      border:1px solid var(--border);border-radius:20px;padding:3px 10px;
+      background:var(--surface);}
+    .upl-loading{font-size:.85rem;color:var(--muted);padding:4px 0;}
+    .upl-sheet-grid{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
+    .upl-sheet-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;
+      padding:9px 12px;min-width:145px;flex:1;}
+    .upl-sc-name{font-weight:700;font-size:.82rem;color:var(--text);}
+    .upl-sc-rows{font-size:.77rem;color:var(--accent);margin-top:3px;}
+    .upl-sc-dates{font-size:.74rem;color:var(--muted);margin-top:1px;}
+    .upl-sc-mode{font-size:.7rem;color:var(--muted);margin-top:1px;}
+    .upl-tbl{width:100%;border-collapse:collapse;font-size:.8rem;}
     .upl-tbl th{background:var(--bg);padding:5px 8px;text-align:left;font-weight:600;
-      border-bottom:1px solid var(--border);white-space:nowrap}
-    .upl-tbl td{padding:4px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
-    .upl-tbl tr:last-child td{border-bottom:none}
-    #uplProgress{max-height:220px;overflow-y:auto;background:var(--bg);
+      border-bottom:1px solid var(--border);white-space:nowrap;color:var(--muted);font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;}
+    .upl-tbl td{padding:5px 8px;border-bottom:1px solid var(--border);white-space:nowrap;}
+    .upl-tbl tr:last-child td{border-bottom:none;}
+    #uplProgress{max-height:200px;overflow-y:auto;background:var(--bg);
       border:1px solid var(--border);border-radius:var(--radius);
-      padding:10px 12px;font-size:.81rem;font-family:monospace;line-height:1.6}
-    .upl-log-ok{color:var(--text)}
-    .upl-log-err{color:var(--danger);font-weight:600}
+      padding:10px 12px;font-size:.79rem;font-family:'Cascadia Code','Consolas',monospace;line-height:1.7;margin-top:14px;}
+    .upl-log-ok{color:var(--text);}
+    .upl-log-err{color:var(--danger);font-weight:600;}
   </style>
 </head>
 <body>
@@ -1510,16 +1524,33 @@ function showUploadView(){
   document.querySelector('#nav button[data-id="_upload"]')?.classList.add('active')
   document.getElementById('main').innerHTML = `
     <div class="sh"><h2>Upload Workbook</h2>
-      <div class="sub">Upload a filled input workbook (.xlsx) — data writes directly to the SharePoint master sheet.</div></div>
-    <div class="sec upl-drop-zone" id="uplDropZone"
-         onclick="document.getElementById('uplFileInp').click()"
-         ondragover="event.preventDefault()"
-         ondrop="onUplDrop(event)">
-      <div class="upl-drop-icon">&#128228;</div>
-      <div class="upl-drop-msg">Click to select or drag &amp; drop your workbook here</div>
-      <div class="upl-drop-sub">Supported: Production RBG, Lab, Digester Health, Feedstock, Sales &amp; Finance workbooks (.xlsx)</div>
+      <div class="sub">Select a filled input workbook — all recognised sheets are parsed and written to the SharePoint master.</div></div>
+
+    <div class="upl-file-panel" ondragover="event.preventDefault()" ondrop="onUplDrop(event)">
+      <svg class="upl-file-icon" width="28" height="28" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="12" y1="18" x2="12" y2="12"/>
+        <polyline points="9 15 12 12 15 15"/>
+      </svg>
+      <div class="upl-file-meta">
+        <div class="upl-file-label">Workbook file</div>
+        <div class="upl-file-name empty" id="uplFileName">No file selected — drag here or click Browse</div>
+      </div>
+      <button class="upl-browse-btn" onclick="document.getElementById('uplFileInp').click()">Browse</button>
       <input type="file" id="uplFileInp" accept=".xlsx" style="display:none" onchange="onUplFileSelect(this)"/>
     </div>
+
+    <div class="upl-wb-chips">
+      <span class="upl-wb-chip">Production RBG</span>
+      <span class="upl-wb-chip">Lab / Cal</span>
+      <span class="upl-wb-chip">Digester Health</span>
+      <span class="upl-wb-chip">Feedstock Supply</span>
+      <span class="upl-wb-chip">Sales &amp; Finance</span>
+      <span class="upl-wb-chip">CBG Production</span>
+    </div>
+
     <div id="uplPreview" style="display:none"></div>`
 }
 
@@ -1536,8 +1567,8 @@ function onUplFileSelect(inp){
 
 async function loadUplFile(file){
   _uplFile = file
-  const zone = document.getElementById('uplDropZone')
-  if(zone) zone.innerHTML = `<div class="upl-loading">Reading <b>${file.name}</b>…</div>`
+  const nameEl = document.getElementById('uplFileName')
+  if(nameEl){ nameEl.textContent = `Reading ${file.name}…`; nameEl.classList.remove('empty') }
   try {
     const buf = await file.arrayBuffer()
     _uplWb = XLSX.read(buf, {type:'array', raw:true})
