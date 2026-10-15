@@ -1178,7 +1178,11 @@ window.handleSignIn = async ()=>{
   await initMsal()
   const accounts = _msal.getAllAccounts()
   if(accounts.length){ _msal.logoutRedirect(); return }
-  await _msal.loginRedirect({ scopes:CONFIG.scopes })
+  try{
+    const resp = await _msal.loginPopup({ scopes:CONFIG.scopes })
+    _msal.setActiveAccount(resp.account)
+    await updateAuthUI()
+  }catch(e){ console.error('Login failed',e) }
 }
 
 // ── Graph API helpers ─────────────────────────────────────────────────────────
