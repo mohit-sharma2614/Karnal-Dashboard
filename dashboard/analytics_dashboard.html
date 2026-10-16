@@ -5943,7 +5943,7 @@ const CFG = {
   scopes:   ['Files.ReadWrite.All','Sites.ReadWrite.All','User.Read'],
   driveId:  'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
   fileId:   '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
-  allowed:  ['it@elanenergy.in','ekas@elanenergy.in','shikha@elanenergy.in','ea@elanenergy.in'],
+  allowed:  ['it@elanenergy.in','ekas@elanenergy.in','shikha@elanenergy.in','ea@elanenergy.in','ceo@elanenergy.in'],
 };
 let _msalApp = null;
 async function getMsalApp() {
@@ -6040,6 +6040,7 @@ async function buildAnalyticsD() {
   M.psa_hrs=aggMonth(psa,gD,psaH); M.comp_hrs=aggMonth(psa,gD,r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;});
   // CH4% guard: skip values >100 (data entry errors — kg values entered in wrong column)
   M.ch4=months.map((_,mi)=>{const vals=psa.filter(r=>{const dt=gD(r);return dt&&mIdx(moKey(dt))===mi;}).map(r=>nv(r[22])).filter(v=>v!==null&&v>0&&v<=100);return vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;});
+  M.rbg_tot=aggMonth(psa,gD,7);
   M.d1_bg=aggMonth(psa,gD,5); M.d2_bg=aggMonth(psa,gD,6);
   M.d1_cbg=aggMonth(psa,gD,10); M.d2_cbg=aggMonth(psa,gD,11); M.act_pur=aggMonth(psa,gD,9);
   M.ideal_pur=aggMonth(cbgExp,gD,16); M.ideal_raw=aggMonth(cbgExp,gD,15); M.ideal_cbg=aggMonth(cbgExp,gD,17); M.exp_tot=aggMonth(cbgExp,gD,13); M.d1_exp=aggMonth(cbgExp,gD,6); M.d2_exp_exp=aggMonth(cbgExp,gD,12);
@@ -6097,10 +6098,12 @@ async function buildAnalyticsD() {
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
   M.cbg_rev=aggMonth(rc,gD,1);
-  // SFOM/LFOM revenue: read from Daily Revenue & Costs cols C(idx2) and D(idx3)
-  // same sheet as CBG revenue — single source of truth, avoids Manure Sales duplicate rows
-  M.sfom_mn=aggMonth(rc,gD,2);
-  M.lfom_mn=aggMonth(rc,gD,3);
+  // SFOM/LFOM revenue from Manure Sales transactions (manR).
+  // Daily Revenue & Costs cols C/D are NULL for Aug 2026 and mostly NULL for Sep 2026.
+  const manRows=getRows(manR,1);
+  const gManD=r=>toDate(r[1]);
+  M.sfom_mn=mkA(); M.lfom_mn=mkA();
+  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const t=(r[4]||'').toString().toUpperCase().trim(),a=nv(r[5])||0;if(t==='SFOM')M.sfom_mn[mi]+=a;else if(t==='LFOM')M.lfom_mn[mi]+=a;});
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
@@ -6125,6 +6128,9 @@ async function buildAnalyticsD() {
     cd_exp:1,pm_exp:2,csl_exp:4,gs_exp:6,sg_exp:5,cd_act:14,pm_act:15,csl_act:17,gs_act:22,sg_act:23});
   DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
+  // Patch daily SFOM/LFOM from Manure Sales transactions (rc cols 2/3 are NULL for Aug-Sep 2026)
+  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const m=moKey(dt);if(!DD.rev[m])return;const dk=dayKey(dt);const di=DD.rev[m].dates.indexOf(dk);if(di<0)return;const t=(r[4]||'').toString().toUpperCase().trim(),a=nv(r[5])||0;if(t==='SFOM')DD.rev[m].sfom_rev[di]=(DD.rev[m].sfom_rev[di]||0)+a;else if(t==='LFOM')DD.rev[m].lfom_rev[di]=(DD.rev[m].lfom_rev[di]||0)+a;});
+  months.forEach(m=>{if(!DD.rev[m])return;DD.rev[m].total_rev=DD.rev[m].dates.map((_,di)=>(DD.rev[m].cbg_rev[di]||0)+(DD.rev[m].sfom_rev[di]||0)+(DD.rev[m].lfom_rev[di]||0));});
   DD.exp=buildDA(cbgExp,gD,{tot_exp:13,d1_exp:6,d2_exp:12,ideal_raw:15,ideal_pur:16,ideal_cbg:17,act_pur:18,act_cbg:19,act_disp:20,
     d1_pm_bpp:1,d1_cd_bpp:2,d1_csl_bpp:3,d1_gs_bpp:4,d1_sg_bpp:5,
     d2_pm_bpp:7,d2_cd_bpp:8,d2_csl_bpp:9,d2_gs_bpp:10,d2_sg_bpp:11});
