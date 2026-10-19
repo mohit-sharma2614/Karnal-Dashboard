@@ -1491,10 +1491,12 @@ buildNav()
 loadSheet('D1')
 
 // ═══════════════════════════════════════════════════════════════
-// UPLOAD WORKBOOK FEATURE
+// UPLOAD WORKBOOK FEATURE  (v2 — all loopholes fixed)
 // ═══════════════════════════════════════════════════════════════
 
 // Excel sheet name → COLUMN_MAP key + parse config
+// append:true  → multiple rows per date allowed (Cal/Manure/Maint)
+// dupKey:array → columns used for duplicate detection on append sheets (0-based in rowData cols)
 const UPL_CFG = {
   'D1':                    { cmKey:'D1',      dateCol:1, dataStart:3, append:false },
   'D2':                    { cmKey:'D2',      dateCol:1, dataStart:3, append:false },
@@ -1505,29 +1507,54 @@ const UPL_CFG = {
   'Digester IA-PA':        { cmKey:'IAPA',    dateCol:1, dataStart:3, append:false },
   'Feedstock Supply':      { cmKey:'FS',      dateCol:1, dataStart:3, append:false },
   'Feed & Balance':        { cmKey:'FB',      dateCol:1, dataStart:3, append:false },
-  'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:2, dataStart:3, append:true  },
-  'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:2, dataStart:3, append:true  },
-  'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:2, dataStart:3, append:true  },
-  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:2, dataStart:3, append:true  },
-  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:2, dataStart:3, append:true  },
+  'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  }, // date+sample+location
+  'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
+  'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
+  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
+  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
   'Daily Revenue & Costs': { cmKey:'REVCOST', dateCol:1, dataStart:3, append:false },
-  'Manure Sales':          { cmKey:'MANURE',  dateCol:2, dataStart:3, append:true  },
-  'Maintenance':           { cmKey:'MAINT',   dateCol:2, dataStart:3, append:true  },
+  'Manure Sales':          { cmKey:'MANURE',  dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  }, // date+vehicleType+farmer
+  'Maintenance':           { cmKey:'MAINT',   dateCol:2, dataStart:3, append:true,  dupCols:[2,4,5]  }, // date+equipment+work_type
   'Sales Detail':          { cmKey:'SALES',   dateCol:1, dataStart:3, append:false },
 }
 
-let _uplWb   = null   // SheetJS workbook
-let _uplParsed = {}   // { sheetName: [ {serial, dateStr, rowData} ] }
-let _uplFile = null
+// Fix 7: Known valid values for Manure Sales validation
+const KNOWN_MANURE = {
+  vehicleTypes: ['Tractor Trolley','JCB','Truck','Mini Truck','Tempo','Pickup'],
+  manureTypes:  ['SFOM','LFOM','Mix','Solid','Liquid'],
+}
+
+// Date-row sheets — used for gap cross-check (Fix 1)
+const DATE_ROW_SHEETS = new Set(['D1','D2','PSA Production','Digester pH','Digester Temp',
+  'Digester TS-VS','Digester IA-PA','Feedstock Supply','Feed & Balance',
+  'Daily Revenue & Costs','Sales Detail'])
+
+let _uplWb       = null   // SheetJS workbook
+let _uplParsed   = {}     // { sheetName: [ {serial, dateStr, rowData} ] }
+let _uplRejected = {}     // { sheetName: count }  — Fix 6 date-window rejects
+let _uplFile     = null
+
+// Fix 6: helper to convert JS Date → Excel serial
+function dateToSerial(d){
+  return toExcelSerial(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`)
+}
 
 function showUploadView(){
   cur = null
   document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'))
   document.querySelector('#nav button[data-id="_upload"]')?.classList.add('active')
   document.getElementById('main').innerHTML = `
-    <div class="sh"><h2>Upload Workbook</h2>
-      <div class="sub">Select a filled input workbook — all recognised sheets are parsed and written to the SharePoint master.</div></div>
-
+    <div class="sh">
+      <h2>Upload Workbook</h2>
+      <div class="sub">Select a filled input workbook (.xlsx). All recognised sheets are validated and written to the SharePoint master in one atomic pass.</div>
+    </div>
+    <div style="background:var(--warn-bg);color:var(--warn-text);border-radius:var(--radius);padding:9px 14px;font-size:.79rem;margin-bottom:16px">
+      <strong>Rules:</strong>
+      Dates outside the last 60 days are rejected automatically &nbsp;·&nbsp;
+      Calc columns are never overwritten &nbsp;·&nbsp;
+      Duplicate Cal/Manure rows (same date+sample+location) are skipped &nbsp;·&nbsp;
+      Upload is logged with file name, date range and your email.
+    </div>
     <div class="upl-file-panel" ondragover="event.preventDefault()" ondrop="onUplDrop(event)">
       <svg class="upl-file-icon" width="28" height="28" viewBox="0 0 24 24" fill="none"
            stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -1543,7 +1570,6 @@ function showUploadView(){
       <button class="upl-browse-btn" onclick="document.getElementById('uplFileInp').click()">Browse</button>
       <input type="file" id="uplFileInp" accept=".xlsx" style="display:none" onchange="onUplFileSelect(this)"/>
     </div>
-
     <div class="upl-wb-chips">
       <span class="upl-wb-chip">Production RBG</span>
       <span class="upl-wb-chip">Lab / Cal</span>
@@ -1552,7 +1578,6 @@ function showUploadView(){
       <span class="upl-wb-chip">Sales &amp; Finance</span>
       <span class="upl-wb-chip">CBG Production</span>
     </div>
-
     <div id="uplPreview" style="display:none"></div>`
 }
 
@@ -1583,7 +1608,14 @@ async function loadUplFile(file){
 }
 
 function parseUplWorkbook(){
-  _uplParsed = {}
+  _uplParsed   = {}
+  _uplRejected = {}
+
+  // Fix 6: accept dates within [today-60, today+7]
+  const now     = new Date()
+  const minSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 60))
+  const maxSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7))
+
   for(const sName of _uplWb.SheetNames){
     const cfg = UPL_CFG[sName]
     if(!cfg) continue
@@ -1593,6 +1625,8 @@ function parseUplWorkbook(){
     const all = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null})
     const dataRows = all.slice(cfg.dataStart - 1)
     const rows = []
+    let rejected = 0
+
     for(const row of dataRows){
       if(!row || row.length === 0) continue
       const rawDate = row[cfg.dateCol - 1]
@@ -1609,6 +1643,10 @@ function parseUplWorkbook(){
         }
       }
       if(!serial) continue
+
+      // Fix 6: reject out-of-window dates
+      if(serial < minSer || serial > maxSer){ rejected++; continue }
+
       const dateStr = fromExcelSerial(serial)
       if(!dateStr) continue
       const rowData = {[cfg.dateCol]: serial}
@@ -1619,6 +1657,7 @@ function parseUplWorkbook(){
       rows.push({serial, dateStr, rowData})
     }
     if(rows.length > 0) _uplParsed[sName] = rows
+    if(rejected > 0) _uplRejected[sName] = rejected
   }
 }
 
@@ -1629,17 +1668,86 @@ function renderUplPreview(){
   const unknown = (_uplWb.SheetNames||[]).filter(s => !UPL_CFG[s])
 
   if(recognized.length === 0){
+    const rejTotal = Object.values(_uplRejected).reduce((a,b)=>a+b,0)
     previewEl.style.display = 'block'
     previewEl.innerHTML = `<div class="sec">
-      <div class="sec-title-row"><span class="sec-title" style="color:var(--danger)">No recognized sheets found</span></div>
-      <p style="color:var(--muted);font-size:.9rem">Sheets in file: ${(_uplWb.SheetNames||[]).join(', ')}<br>
-      Expected sheets like: D1, D2, PSA Production, Pressmud Cal., etc.</p>
+      <div class="sec-title-row"><span class="sec-title" style="color:var(--danger)">No recognised sheets found</span></div>
+      <p style="color:var(--muted);font-size:.9rem">
+        Sheets in file: ${(_uplWb.SheetNames||[]).join(', ')}<br>
+        Expected: D1, D2, PSA Production, Pressmud Cal., etc.
+        ${rejTotal>0 ? `<br><strong style="color:var(--danger)">${rejTotal} rows rejected — dates outside last 60 days.</strong>` : ''}
+      </p>
       <button class="clear-btn" onclick="showUploadView()" style="margin-top:8px">Try another file</button>
     </div>`
     return
   }
 
-  let html = `<div class="sec"><div class="sec-title-row"><span class="sec-title">File: ${_uplFile.name}</span></div>
+  // ── Fix 1: Date coverage cross-check for date-row sheets ────────────
+  const drSheets = recognized.filter(s => DATE_ROW_SHEETS.has(s))
+  let gapHtml = ''
+  if(drSheets.length > 1){
+    // Union of all dates across date-row sheets
+    const allDates = new Set()
+    drSheets.forEach(s => _uplParsed[s].forEach(r => allDates.add(r.dateStr)))
+    const sortedDates = [...allDates].sort()
+    const hasGaps = drSheets.some(s => {
+      const sheetDates = new Set(_uplParsed[s].map(r=>r.dateStr))
+      return sortedDates.some(d => !sheetDates.has(d))
+    })
+    if(hasGaps){
+      gapHtml = `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem">
+        <strong style="color:#856404">⚠ Date gap detected across sheets</strong>
+        <div style="margin-top:6px;overflow-x:auto">
+        <table class="upl-tbl"><thead><tr><th>Sheet</th>${sortedDates.map(d=>`<th style="font-size:.72rem">${d.slice(5)}</th>`).join('')}</tr></thead><tbody>`
+      drSheets.forEach(s => {
+        const sheetDates = new Set(_uplParsed[s].map(r=>r.dateStr))
+        gapHtml += `<tr><td style="font-weight:600">${s}</td>${sortedDates.map(d =>
+          sheetDates.has(d)
+            ? `<td style="text-align:center;color:var(--success)">✓</td>`
+            : `<td style="text-align:center;color:var(--danger);font-weight:700">✗</td>`
+        ).join('')}</tr>`
+      })
+      gapHtml += `</tbody></table></div>
+        <div style="margin-top:6px;color:#856404">Missing dates will create gaps in the master workbook. Consider completing those sheets before uploading.</div>
+      </div>`
+    }
+  }
+
+  // ── Fix 7: Manure Sales validation ──────────────────────────────────
+  let manureWarnHtml = ''
+  if(_uplParsed['Manure Sales']){
+    const unknownVTypes = new Set()
+    const unknownTypes  = new Set()
+    _uplParsed['Manure Sales'].forEach(({rowData}) => {
+      const vt = String(rowData[3]||'').trim()
+      const mt = String(rowData[5]||'').trim()
+      if(vt && !KNOWN_MANURE.vehicleTypes.includes(vt)) unknownVTypes.add(vt)
+      if(mt && !KNOWN_MANURE.manureTypes.includes(mt))  unknownTypes.add(mt)
+    })
+    if(unknownVTypes.size || unknownTypes.size){
+      manureWarnHtml = `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem">
+        <strong style="color:#856404">⚠ Manure Sales — unknown values detected</strong><br>
+        ${unknownVTypes.size ? `Vehicle types not in master list: <em>${[...unknownVTypes].join(', ')}</em><br>` : ''}
+        ${unknownTypes.size  ? `Manure types not in master list: <em>${[...unknownTypes].join(', ')}</em>` : ''}
+        <div style="margin-top:4px;color:#856404">These will be uploaded as-is. Check spelling to avoid duplicate entries in analytics.</div>
+      </div>`
+    }
+  }
+
+  // ── Fix 6: Rejected rows warning ────────────────────────────────────
+  let rejHtml = ''
+  const rejEntries = Object.entries(_uplRejected)
+  if(rejEntries.length){
+    rejHtml = `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem">
+      <strong style="color:var(--danger)">Rows rejected (dates outside ±60-day window):</strong>
+      ${rejEntries.map(([s,c])=>`<span style="margin-left:10px">${s}: <b>${c}</b></span>`).join('')}
+    </div>`
+  }
+
+  let html = gapHtml + manureWarnHtml + rejHtml
+
+  // ── Summary cards ────────────────────────────────────────────────────
+  html += `<div class="sec"><div class="sec-title-row"><span class="sec-title">File: ${_uplFile.name}</span></div>
     <div class="upl-sheet-grid">`
   for(const [sName, rows] of Object.entries(_uplParsed)){
     const dates = rows.map(r=>r.dateStr)
@@ -1648,14 +1756,15 @@ function renderUplPreview(){
     html += `<div class="upl-sheet-card">
       <div class="upl-sc-name">${sName}</div>
       <div class="upl-sc-rows">${rows.length} row${rows.length===1?'':'s'}</div>
-      <div class="upl-sc-dates">${first===last ? first : `${first} &#8594; ${last}`}</div>
-      <div class="upl-sc-mode">${cfg.append ? 'Append mode' : 'Date-indexed'}</div>
+      <div class="upl-sc-dates">${first===last ? first : `${first} → ${last}`}</div>
+      <div class="upl-sc-mode">${cfg.append ? 'Append (dup-safe)' : 'Date-indexed'}</div>
     </div>`
   }
   html += `</div>`
   if(unknown.length > 0) html += `<div style="margin-top:10px;font-size:.83rem;color:var(--muted)">Sheets skipped (not in schema): ${unknown.join(', ')}</div>`
   html += `</div>`
 
+  // ── Per-sheet data preview ───────────────────────────────────────────
   for(const [sName, rows] of Object.entries(_uplParsed)){
     const cm = COLUMN_MAP[UPL_CFG[sName].cmKey]
     const keys = Object.keys(cm).slice(0,6)
@@ -1675,6 +1784,8 @@ function renderUplPreview(){
     html += `</tbody></table></div></div>`
   }
 
+  // ── Write options ────────────────────────────────────────────────────
+  const totalRows = Object.values(_uplParsed).reduce((a,r)=>a+r.length,0)
   html += `<div class="sec"><div class="sec-title-row"><span class="sec-title">Write Options</span></div>
     <div class="fgrid"><div class="fg">
       <label>Conflict Handling <span style="font-size:.78rem;color:var(--muted)">(date-indexed sheets only)</span></label>
@@ -1683,10 +1794,15 @@ function renderUplPreview(){
         <option value="skip">Skip existing dates</option>
       </select>
     </div></div>
+    <div style="margin-top:10px;font-size:.8rem;color:var(--muted)">
+      ℹ Calc columns are never written regardless of what is in the file.
+      Append sheets skip rows where date + sample/location already exist in master.
+      This upload will be recorded in Submission Log with your email and file name.
+    </div>
     <div id="uplProgress" style="display:none;margin-top:12px"></div>
     <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
       <button class="save-btn" onclick="submitUpload()" id="uplSubmitBtn">
-        Write to SharePoint (${recognized.length} sheet${recognized.length===1?'':'s'}, ${Object.values(_uplParsed).reduce((a,r)=>a+r.length,0)} rows)
+        Transfer to Master Workbook (${recognized.length} sheet${recognized.length===1?'':'s'}, ${totalRows} rows)
       </button>
       <button class="clear-btn" onclick="showUploadView()">&#8617; Start Over</button>
     </div></div>`
@@ -1711,31 +1827,70 @@ async function submitUpload(){
   const t = await getToken()
   if(!t){ toast('Sign in first', true); return }
 
-  const btn = document.getElementById('uplSubmitBtn')
-  const mode = document.getElementById('uplConflictMode')?.value || 'overwrite'
-  const logEl = document.getElementById('uplProgress')
+  const btn      = document.getElementById('uplSubmitBtn')
+  const mode     = document.getElementById('uplConflictMode')?.value || 'overwrite'
+  const logEl    = document.getElementById('uplProgress')
   if(btn) btn.disabled = true
   if(logEl){ logEl.style.display='block'; logEl.innerHTML='' }
 
-  let totalWritten=0, totalSkipped=0, totalErrors=0
+  let totalWritten=0, totalSkipped=0, totalDupSkipped=0, totalErrors=0
+  const sheetsWritten = []  // Fix 2: track partial state
+
+  // Fix 3: collect date range for audit log
+  const allDates = Object.values(_uplParsed).flat().map(r=>r.dateStr).sort()
+  const dateRangeStr = allDates.length
+    ? (allDates[0]===allDates[allDates.length-1] ? allDates[0] : `${allDates[0]}→${allDates[allDates.length-1]}`)
+    : 'no dates'
 
   try {
     const sid = await getSession()
+
+    // Fix 2 + Fix 3: write UPLOAD START to submission log before touching any sheet
+    const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
+    await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, uploadLabel, sid).catch(()=>{})
 
     for(const [sName, rows] of Object.entries(_uplParsed)){
       const cfg = UPL_CFG[sName]
       const cm  = COLUMN_MAP[cfg.cmKey]
       uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`)
 
+      // Fix 4: for append sheets, pre-fetch existing keys (date+dupCols) to detect duplicates
+      let existingKeys = new Set()
+      if(cfg.append && cfg.dupCols){
+        try {
+          const enc = encodeURIComponent(sName)
+          const dc  = cfg.dateCol
+          // fetch date col + first 2 dup cols
+          const endCol = Math.max(dc, ...cfg.dupCols)
+          const d = await gGet(`/worksheets('${enc}')/range(address='${colLetter(1)}${cfg.dataStart}:${colLetter(endCol)}600')`)
+          const existRows = (d&&d.values)||[]
+          for(const er of existRows){
+            const dateV = er[dc-1]
+            if(dateV==null || dateV==='') continue
+            const key = [dateV, ...cfg.dupCols.filter(c=>c!==dc).map(c=>String(er[c-1]||'').trim().toLowerCase())].join('|')
+            existingKeys.add(key)
+          }
+          uplLog(`  (loaded ${existingKeys.size} existing keys for dup-check)`)
+        } catch(e){ uplLog(`  (dup-check pre-fetch failed: ${e.message} — will append all)`) }
+      }
+
       for(let i=0; i<rows.length; i++){
         const {serial, dateStr, rowData} = rows[i]
-        uplLog(`  [${i+1}/${rows.length}] ${dateStr} …`)
 
         try {
           const enc = encodeURIComponent(sName)
           let rowNum
 
           if(cfg.append){
+            // Fix 4: check duplicate by date+sample+location key
+            if(cfg.dupCols){
+              const key = [serial, ...cfg.dupCols.filter(c=>c!==cfg.dateCol).map(c=>String(rowData[c]||'').trim().toLowerCase())].join('|')
+              if(existingKeys.has(key)){
+                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip (${String(rowData[cfg.dupCols[1]]||'').slice(0,20)})`)
+                totalDupSkipped++; continue
+              }
+              existingKeys.add(key) // prevent dup within same upload batch
+            }
             const dc = cfg.dateCol
             const d = await gGet(`/worksheets('${enc}')/range(address='${colLetter(dc)}${cfg.dataStart}:${colLetter(dc)}600')`)
             const existRows = (d&&d.values)||[]
@@ -1748,7 +1903,7 @@ async function submitUpload(){
           } else {
             rowNum = await findRow(sName, serial, cfg.dataStart)
             if(rowNum && mode === 'skip'){
-              uplLog(`  → Skipped (already at row ${rowNum})`)
+              uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Skipped (row ${rowNum} exists)`)
               totalSkipped++; continue
             }
             if(!rowNum){
@@ -1783,27 +1938,39 @@ async function submitUpload(){
           const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values]}, sid)
 
           if(res && res.error){
-            uplLog(`  → ERROR: ${res.error.message}`, true)
+            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${res.error.message}`, true)
             totalErrors++
           } else {
-            uplLog(`  → Row ${rowNum} written ✓`)
-            appendSubmissionLog(serial, `${sName} [upload]`, sid).catch(()=>{})
+            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Row ${rowNum} ✓`)
             totalWritten++
           }
         } catch(e){
-          uplLog(`  → ERROR: ${e.message}`, true)
+          uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${e.message}`, true)
           totalErrors++
         }
       }
+      sheetsWritten.push(sName)  // Fix 2: record this sheet completed
     }
 
     uplLog(``)
-    uplLog(`═ Done: ${totalWritten} written  ${totalSkipped} skipped  ${totalErrors} error${totalErrors===1?'':'s'} ═`)
-    if(totalErrors === 0) toast(`Upload complete — ${totalWritten} row${totalWritten===1?'':'s'} written to SharePoint`)
-    else toast(`Upload done with ${totalErrors} error${totalErrors===1?'':'s'} — see log`, true)
+    uplLog(`═ Done: ${totalWritten} written  ${totalSkipped} skipped  ${totalDupSkipped} dup-skipped  ${totalErrors} error${totalErrors===1?'':'s'} ═`)
+
+    // Fix 2 + Fix 3: write UPLOAD COMPLETE to submission log with full summary
+    const status = totalErrors === 0 ? 'COMPLETE' : `PARTIAL (${totalErrors} errors)`
+    const endLabel = `[UPLOAD ${status}] ${_uplFile.name} | ${dateRangeStr} | written:${totalWritten} skipped:${totalSkipped+totalDupSkipped} errors:${totalErrors}`
+    await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, endLabel, sid).catch(()=>{})
+
+    if(totalErrors === 0) toast(`Transfer complete — ${totalWritten} row${totalWritten===1?'':'s'} written to master workbook`)
+    else toast(`Transfer done with ${totalErrors} error${totalErrors===1?'':'s'} — see log`, true)
 
   } catch(e){
+    // Fix 2: log failure state so partial writes are traceable
     uplLog(`Fatal: ${e.message}`, true)
+    const sid2 = await getSession().catch(()=>null)
+    if(sid2){
+      const failLabel = `[UPLOAD FAILED] ${_uplFile.name} | ${dateRangeStr} | sheets completed before failure: ${sheetsWritten.join(', ')||'none'} | error: ${e.message}`
+      await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, failLabel, sid2).catch(()=>{})
+    }
     toast(`Upload failed: ${e.message}`, true)
   } finally {
     if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
