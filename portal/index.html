@@ -1077,28 +1077,30 @@ const COLUMN_MAP = {
     remarks:23,
     ap_cost:33,
   },
-  // Cal sheets: Sr.No=1(auto), Date=2, SampleName=3, Location=4, TS%=5, VS%=6, TS Tonnes=7(formula), VS Tonnes=8(formula), Remarks=9
-  // Col 7=TS Tonnes(calc), Col 8=VS Tonnes(calc), Col 9=Remarks, Col 10=Qty Fed Today
-  PMCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  CDCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  GSCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, qty:10, remarks:11 },
-  CSLCAL: { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, remarks:9, qty:10 },
-  SGCAL:  { sample:3, loc:4, ts_pct:5, vs_pct:6, ts_t:7, vs_t:8, qty:9, remarks:10 },
+  // Cal sheets: Date=1, SampleName=2, Location=3, TS%=4, VS%=5, Qty=6, TS Tonnes=7(calc), VS Tonnes=8(calc), Remarks=9
+  // Verified against master workbook Oct 2026 — no Sr.No column; Date is col1.
+  PMCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
+  CDCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
+  GSCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
+  CSLCAL: { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
+  SGCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
   MANURE: {
-    // Sl.No=1(auto), Date=2, VehicleType=3, FarmerName=4, Type=5, Amount(₹)=6, Month=7(auto from date), Remarks=8
-    v_type:3, farmer:4, type:5, amount:6,
-    // month col (7) is written automatically in save logic — not a form field
-    remarks:8,
+    // Date=1, VehicleType=2, FarmerName=3, Type=4, Amount(Rs)=5, Month=6(auto from date), Remarks=7
+    // Verified against master Oct 2026 — no Sr.No column.
+    v_type:2, farmer:3, type:4, amount:5,
+    // month col (6) written automatically in save logic — not a form field
+    remarks:7,
   },
   SALES: {
-    // Date=1; Veer qty=2, rate=3; Adinath qty=4,rate=5; GAIL qty=6,rate=7; SPS qty=8,rate=9; Total kg=10, Total Rs=11, Remarks=12
+    // Date=1 (header row3, data row4); Veer qty=2, Rs=3; Adinath qty=4, Rs=5; GAIL qty=6, Rs=7; SPS qty=8, Rs=9; Total kg=10, Total Rs=11
     veer_qty:2, veer_rate:3, adinath_qty:4, adinath_rate:5,
     gail_qty:6, gail_rate:7, sps_qty:8, sps_rate:9,
-    total_kg:10, total_rs:11, remarks:12,
+    total_kg:10, total_rs:11,
   },
   MAINT: {
-    // Sr.No=1(auto), Date=2, Unit=3, Equipment=4, WorkType=5, Description=6, Vendor=7, Cost=8, Remarks=10
-    unit:3, equipment:4, work_type:5, description:6, vendor:7, cost:8, remarks:10,
+    // Date=1, Unit=2, Equipment=3, WorkType=4, Description=5, Vendor=6, Cost=7, Remarks=8
+    // Verified against master Oct 2026 — no Sr.No column.
+    unit:2, equipment:3, work_type:4, description:5, vendor:6, cost:7, remarks:8,
   },
   REVCOST: {
     // Date=1, CBG Sale=2(auto), SFOM=3, LFOM=4, Feedstock=5(auto), Transport=6, Maint=7(auto), Elec/day=8, Manpow=9, EMI=10, Remarks=11
@@ -1507,15 +1509,15 @@ const UPL_CFG = {
   'Digester IA-PA':        { cmKey:'IAPA',    dateCol:1, dataStart:3, append:false },
   'Feedstock Supply':      { cmKey:'FS',      dateCol:1, dataStart:3, append:false },
   'Feed & Balance':        { cmKey:'FB',      dateCol:1, dataStart:3, append:false },
-  'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  }, // date+sample+location
-  'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
-  'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
-  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
-  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  },
-  'Daily Revenue & Costs': { cmKey:'REVCOST', dateCol:1, dataStart:3, append:false },
-  'Manure Sales':          { cmKey:'MANURE',  dateCol:2, dataStart:3, append:true,  dupCols:[2,3,4]  }, // date+vehicleType+farmer
-  'Maintenance':           { cmKey:'MAINT',   dateCol:2, dataStart:3, append:true,  dupCols:[2,4,5]  }, // date+equipment+work_type
-  'Sales Detail':          { cmKey:'SALES',   dateCol:1, dataStart:3, append:false },
+  'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+sample+location
+  'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
+  'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
+  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
+  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
+  'Daily Revenue & Costs': { cmKey:'REVCOST', dateCol:1, dataStart:4, append:false },
+  'Manure Sales':          { cmKey:'MANURE',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+vehicleType+farmer
+  'Maintenance':           { cmKey:'MAINT',   dateCol:1, dataStart:4, append:true,  dupCols:[1,3,4]  }, // date+equipment+work_type
+  'Sales Detail':          { cmKey:'SALES',   dateCol:1, dataStart:4, append:false },
 }
 
 // Fix 7: Known valid values for Manure Sales validation
@@ -1923,11 +1925,11 @@ async function submitUpload(){
             if(rowData[4]) rowData[4] = rowData[4] / 24
             if(rowData[5]) rowData[5] = rowData[5] / 60 / 24
           }
-          // Manure: auto-derive Month string for col 7
+          // Manure: auto-derive Month string for col 6 (master col structure: Date=1,VType=2,Farmer=3,Type=4,Amount=5,Month=6)
           if(sName === 'Manure Sales'){
             const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
             const ds2 = fromExcelSerial(serial)
-            if(ds2){ const [y,m]=ds2.split('-'); rowData[7]=`${MON[parseInt(m,10)-1]}-${y}` }
+            if(ds2){ const [y,m]=ds2.split('-'); rowData[6]=`${MON[parseInt(m,10)-1]}-${y}` }
           }
 
           const maxCol = Math.max(...Object.keys(rowData).map(Number), 10)
