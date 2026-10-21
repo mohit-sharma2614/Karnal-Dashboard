@@ -88,30 +88,142 @@
     }
     .upl-nav-btn:hover{background:var(--bg);}
     .upl-nav-btn.active{border-left-color:var(--accent);background:var(--bg);}
-    .upl-file-panel{
+
+    /* ── Step bar ── */
+    .upl-stepbar{
+      display:flex;align-items:stretch;
       background:var(--surface);border:1px solid var(--border);
-      border-radius:var(--radius);padding:18px 20px;
-      display:flex;align-items:center;gap:16px;margin-bottom:20px;
-      transition:border-color .15s;
+      border-radius:14px;margin-bottom:22px;overflow:hidden;
     }
-    .upl-file-panel:hover{border-color:var(--accent2);}
-    .upl-file-icon{flex-shrink:0;color:var(--accent);opacity:.7;}
-    .upl-file-meta{flex:1;min-width:0;}
-    .upl-file-label{font-size:.7rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
-    .upl-file-name{font-size:.87rem;color:var(--text);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .upl-file-name.empty{color:var(--muted);font-style:italic;}
-    .upl-browse-btn{flex-shrink:0;padding:6px 14px;border:1px solid var(--accent);border-radius:6px;
-      background:none;color:var(--accent);font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap;
-      transition:background .12s,color .12s;}
-    .upl-browse-btn:hover{background:var(--accent);color:#fff;}
-    .upl-wb-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px;}
-    .upl-wb-chip{font-size:.74rem;font-weight:500;color:var(--muted);
-      border:1px solid var(--border);border-radius:20px;padding:3px 10px;
-      background:var(--surface);}
+    .upl-sb-step{
+      flex:1;padding:12px 18px;display:flex;align-items:center;gap:10px;
+      border-right:1px solid var(--border);
+    }
+    .upl-sb-step:last-child{border-right:none;}
+    .upl-sb-step.active{background:rgba(37,99,235,.03);}
+    .upl-sb-num{
+      width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);
+      display:flex;align-items:center;justify-content:center;
+      font-size:.72rem;font-weight:800;color:var(--muted);flex-shrink:0;
+      background:var(--surface);transition:all .2s;
+    }
+    .upl-sb-step.active .upl-sb-num{background:#111827;border-color:#111827;color:#fff;}
+    .upl-sb-step.done .upl-sb-num{background:var(--success);border-color:var(--success);color:#fff;}
+    .upl-sb-info .upl-sb-step-label{font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--border);}
+    .upl-sb-step.active .upl-sb-step-label{color:var(--muted);}
+    .upl-sb-info .upl-sb-step-title{font-size:.78rem;font-weight:700;color:var(--muted);margin-top:1px;}
+    .upl-sb-step.active .upl-sb-step-title{color:var(--text);}
+    .upl-sb-step.done .upl-sb-step-title{color:var(--success);}
+
+    /* ── Two-column grid ── */
+    .upl-grid{display:grid;grid-template-columns:1fr 285px;gap:18px;align-items:start;}
+
+    /* ── Upload card ── */
+    .upl-upload-card{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:18px;overflow:hidden;
+      box-shadow:0 1px 3px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+    }
+
+    /* ── Drop zone ── */
+    .upl-drop-zone{
+      padding:50px 32px 42px;display:flex;flex-direction:column;
+      align-items:center;cursor:pointer;text-align:center;
+      position:relative;overflow:hidden;transition:background .2s;
+      border-bottom:1px solid var(--bg);
+    }
+    .upl-dz-shimmer{
+      position:absolute;inset:0;
+      background:radial-gradient(ellipse at 50% -20%,rgba(37,99,235,.06) 0%,transparent 65%);
+      pointer-events:none;
+    }
+    .upl-drop-zone:hover,.upl-drop-zone.dragging{background:rgba(37,99,235,.025);}
+    .upl-drop-ring{
+      width:74px;height:74px;border-radius:20px;
+      border:1.5px solid var(--border);background:var(--surface);
+      display:flex;align-items:center;justify-content:center;
+      margin-bottom:18px;position:relative;z-index:1;
+      transition:border-color .2s;box-shadow:0 2px 8px rgba(0,0,0,.06);
+    }
+    .upl-drop-zone:hover .upl-drop-ring,.upl-drop-zone.dragging .upl-drop-ring{border-color:var(--accent2);}
+    .upl-drop-ring-inner{
+      width:48px;height:48px;background:#f0f7ff;
+      border-radius:13px;display:flex;align-items:center;justify-content:center;
+    }
+    .upl-drop-title{font-size:1.08rem;font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:5px;position:relative;z-index:1;}
+    .upl-drop-sub{font-size:.79rem;color:var(--muted);line-height:1.65;max-width:300px;margin-bottom:22px;position:relative;z-index:1;}
+    .upl-drop-cta{display:flex;align-items:center;gap:10px;position:relative;z-index:1;}
+    .upl-drop-btn{
+      padding:10px 26px;background:#111827;color:#fff;border:none;border-radius:9px;
+      font-size:.82rem;font-weight:700;cursor:pointer;font-family:inherit;
+      letter-spacing:.005em;transition:opacity .15s;
+    }
+    .upl-drop-btn:hover{opacity:.85;}
+    .upl-drop-or{font-size:.74rem;color:var(--border);}
+    .upl-drop-link{font-size:.79rem;color:var(--accent2);font-weight:600;cursor:pointer;}
+    .upl-drop-meta{display:flex;align-items:center;gap:14px;margin-top:18px;position:relative;z-index:1;}
+    .upl-drop-meta-item{display:flex;align-items:center;gap:5px;font-size:.68rem;color:var(--border);font-weight:500;}
+    .upl-drop-meta-dot{width:3px;height:3px;background:var(--border);border-radius:50%;}
+
+    /* ── Card footer ── */
+    .upl-card-footer{padding:12px 22px;background:var(--bg);display:flex;align-items:center;gap:9px;}
+    .upl-footer-lock{
+      width:22px;height:22px;background:var(--border);border-radius:6px;
+      display:flex;align-items:center;justify-content:center;flex-shrink:0;opacity:.5;
+    }
+    .upl-footer-text{font-size:.69rem;color:var(--muted);line-height:1.5;}
+    .upl-footer-text strong{color:var(--text);font-weight:600;}
+
+    /* ── File selected state ── */
+    .upl-file-selected{
+      display:flex;align-items:center;gap:14px;
+      background:var(--surface);
+      border:2px solid var(--accent2);border-radius:12px;padding:14px 18px;
+    }
+    .upl-file-sel-icon{
+      width:42px;height:42px;border-radius:10px;flex-shrink:0;
+      background:rgba(37,99,235,.1);display:flex;align-items:center;justify-content:center;
+    }
+    .upl-file-sel-meta{flex:1;min-width:0;}
+    .upl-file-sel-name{font-size:.87rem;font-weight:700;color:var(--text);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .upl-file-sel-hint{font-size:.73rem;color:var(--muted);margin-top:3px;}
+    .upl-file-sel-change{
+      flex-shrink:0;padding:6px 14px;border:1.5px solid var(--border);border-radius:7px;
+      background:none;color:var(--muted);font-size:.76rem;font-weight:500;cursor:pointer;
+      transition:border-color .12s,color .12s;
+    }
+    .upl-file-sel-change:hover{border-color:var(--accent);color:var(--accent);}
+
+    /* ── Right column ── */
+    .upl-right-col{display:flex;flex-direction:column;gap:14px;}
+    .upl-dept-wrap{
+      background:var(--surface);border:1px solid var(--border);
+      border-radius:14px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03);
+    }
+    .upl-dept-head{padding:11px 16px 9px;border-bottom:1px solid var(--bg);}
+    .upl-dept-head-lbl{font-size:.62rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--border);}
+    .upl-dept-list{padding:4px 0;}
+    .upl-dept-row{display:flex;align-items:center;gap:9px;padding:8px 16px;transition:background .15s;}
+    .upl-dept-row:hover{background:var(--bg);}
+    .upl-dept-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .upl-dept-info{flex:1;min-width:0;}
+    .upl-dept-name{font-size:.77rem;font-weight:700;color:var(--text);}
+    .upl-dept-sheets{font-size:.65rem;color:var(--border);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .upl-dept-count{font-size:.63rem;font-weight:700;color:var(--muted);background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:1px 6px;flex-shrink:0;}
+    .upl-rules-card{background:var(--warn-bg);border:1px solid rgba(217,119,6,.3);border-radius:14px;padding:14px 16px;}
+    .upl-rc-head{display:flex;align-items:center;gap:7px;margin-bottom:10px;}
+    .upl-rc-icon{width:22px;height:22px;background:rgba(251,191,36,.4);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+    .upl-rc-title{font-size:.64rem;font-weight:800;color:var(--warn-text);letter-spacing:.07em;text-transform:uppercase;}
+    .upl-rc-list{display:flex;flex-direction:column;gap:7px;}
+    .upl-rc-item{display:flex;gap:7px;align-items:flex-start;font-size:.72rem;color:var(--warn-text);line-height:1.5;}
+    .upl-rc-dash{flex-shrink:0;color:#d97706;font-weight:800;}
+
+    /* Preview / progress (unchanged internals) */
     .upl-loading{font-size:.85rem;color:var(--muted);padding:4px 0;}
     .upl-sheet-grid{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;}
-    .upl-sheet-card{background:var(--bg);border:1px solid var(--border);border-radius:6px;
-      padding:9px 12px;min-width:145px;flex:1;}
+    .upl-sheet-card{background:var(--bg);border:1px solid var(--border);border-radius:8px;
+      padding:10px 13px;min-width:145px;flex:1;}
     .upl-sc-name{font-weight:700;font-size:.82rem;color:var(--text);}
     .upl-sc-rows{font-size:.77rem;color:var(--accent);margin-top:3px;}
     .upl-sc-dates{font-size:.74rem;color:var(--muted);margin-top:1px;}
@@ -1546,41 +1658,161 @@ function showUploadView(){
   document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'))
   document.querySelector('#nav button[data-id="_upload"]')?.classList.add('active')
   document.getElementById('main').innerHTML = `
-    <div class="sh">
-      <h2>Upload Workbook</h2>
-      <div class="sub">Select a filled input workbook (.xlsx). All recognised sheets are validated and written to the SharePoint master in one atomic pass.</div>
+    <!-- Page title -->
+    <div style="margin-bottom:22px;">
+      <div style="font-size:1.25rem;font-weight:800;color:var(--text);letter-spacing:-.025em;margin-bottom:4px;">Upload your workbook</div>
+      <div style="font-size:.81rem;color:var(--muted);line-height:1.6;">Select a department workbook — all recognised sheets are auto-detected, validated, and written to the SharePoint master in a single pass.</div>
     </div>
-    <div style="background:var(--warn-bg);color:var(--warn-text);border-radius:var(--radius);padding:9px 14px;font-size:.79rem;margin-bottom:16px">
-      <strong>Rules:</strong>
-      Dates outside the last 60 days are rejected automatically &nbsp;·&nbsp;
-      Calc columns are never overwritten &nbsp;·&nbsp;
-      Duplicate Cal/Manure rows (same date+sample+location) are skipped &nbsp;·&nbsp;
-      Upload is logged with file name, date range and your email.
-    </div>
-    <div class="upl-file-panel" ondragover="event.preventDefault()" ondrop="onUplDrop(event)">
-      <svg class="upl-file-icon" width="28" height="28" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-        <line x1="12" y1="18" x2="12" y2="12"/>
-        <polyline points="9 15 12 12 15 15"/>
-      </svg>
-      <div class="upl-file-meta">
-        <div class="upl-file-label">Workbook file</div>
-        <div class="upl-file-name empty" id="uplFileName">No file selected — drag here or click Browse</div>
+
+    <!-- Step bar -->
+    <div class="upl-stepbar">
+      <div class="upl-sb-step active" id="uplStep1">
+        <div class="upl-sb-num">1</div>
+        <div class="upl-sb-info">
+          <div class="upl-sb-step-label">Step 1</div>
+          <div class="upl-sb-step-title">Select your file</div>
+        </div>
       </div>
-      <button class="upl-browse-btn" onclick="document.getElementById('uplFileInp').click()">Browse</button>
-      <input type="file" id="uplFileInp" accept=".xlsx" style="display:none" onchange="onUplFileSelect(this)"/>
+      <div class="upl-sb-step" id="uplStep2">
+        <div class="upl-sb-num">2</div>
+        <div class="upl-sb-info">
+          <div class="upl-sb-step-label">Step 2</div>
+          <div class="upl-sb-step-title">Validate sheets</div>
+        </div>
+      </div>
+      <div class="upl-sb-step" id="uplStep3">
+        <div class="upl-sb-num">3</div>
+        <div class="upl-sb-info">
+          <div class="upl-sb-step-label">Step 3</div>
+          <div class="upl-sb-step-title">Push to master</div>
+        </div>
+      </div>
     </div>
-    <div class="upl-wb-chips">
-      <span class="upl-wb-chip">Production RBG</span>
-      <span class="upl-wb-chip">Lab / Cal</span>
-      <span class="upl-wb-chip">Digester Health</span>
-      <span class="upl-wb-chip">Feedstock Supply</span>
-      <span class="upl-wb-chip">Sales &amp; Finance</span>
-      <span class="upl-wb-chip">CBG Production</span>
+
+    <!-- Two-column grid -->
+    <div class="upl-grid">
+
+      <!-- Left: Upload card -->
+      <div class="upl-upload-card">
+        <div class="upl-drop-zone" id="uplDropZone"
+             ondragover="event.preventDefault();document.getElementById('uplDropZone').classList.add('dragging')"
+             ondragleave="document.getElementById('uplDropZone').classList.remove('dragging')"
+             ondrop="document.getElementById('uplDropZone').classList.remove('dragging');onUplDrop(event)"
+             onclick="document.getElementById('uplFileInp').click()">
+          <div class="upl-dz-shimmer"></div>
+          <div class="upl-drop-ring">
+            <div class="upl-drop-ring-inner">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+              </svg>
+            </div>
+          </div>
+          <div class="upl-drop-title">Drop your .xlsx file here</div>
+          <div class="upl-drop-sub">Drag any department workbook onto this area. All matching sheets are identified automatically — no configuration needed.</div>
+          <div class="upl-drop-cta">
+            <button class="upl-drop-btn" onclick="event.stopPropagation();document.getElementById('uplFileInp').click()">Choose file</button>
+            <span class="upl-drop-or">or</span>
+            <span class="upl-drop-link">drag &amp; drop</span>
+          </div>
+          <div class="upl-drop-meta">
+            <div class="upl-drop-meta-item">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Excel .xlsx only
+            </div>
+            <div class="upl-drop-meta-dot"></div>
+            <div class="upl-drop-meta-item">Max 20 MB</div>
+            <div class="upl-drop-meta-dot"></div>
+            <div class="upl-drop-meta-item">Any department</div>
+          </div>
+          <input type="file" id="uplFileInp" accept=".xlsx" style="display:none" onchange="onUplFileSelect(this)"/>
+        </div>
+        <div class="upl-card-footer">
+          <div class="upl-footer-lock">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <div class="upl-footer-text">Data is written securely via <strong>Microsoft Graph API</strong> directly to your SharePoint master workbook. Nothing is stored externally.</div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="upl-right-col">
+        <!-- Dept card -->
+        <div class="upl-dept-wrap">
+          <div class="upl-dept-head">
+            <div class="upl-dept-head-lbl">Which file do I upload?</div>
+          </div>
+          <div class="upl-dept-list">
+            <div class="upl-dept-row">
+              <div class="upl-dept-dot" style="background:#6366f1"></div>
+              <div class="upl-dept-info">
+                <div class="upl-dept-name">Production RBG</div>
+                <div class="upl-dept-sheets">D1 · D2 · PSA · CBG Expected · Daily Planner</div>
+              </div>
+              <div class="upl-dept-count">5</div>
+            </div>
+            <div class="upl-dept-row">
+              <div class="upl-dept-dot" style="background:#8b5cf6"></div>
+              <div class="upl-dept-info">
+                <div class="upl-dept-name">Lab / Cal</div>
+                <div class="upl-dept-sheets">Pressmud · CD · CSL · Grain Syrup · Spent Grain</div>
+              </div>
+              <div class="upl-dept-count">5</div>
+            </div>
+            <div class="upl-dept-row">
+              <div class="upl-dept-dot" style="background:#10b981"></div>
+              <div class="upl-dept-info">
+                <div class="upl-dept-name">Digester health</div>
+                <div class="upl-dept-sheets">pH · Temp · TS-VS · IA-PA</div>
+              </div>
+              <div class="upl-dept-count">4</div>
+            </div>
+            <div class="upl-dept-row">
+              <div class="upl-dept-dot" style="background:#f59e0b"></div>
+              <div class="upl-dept-info">
+                <div class="upl-dept-name">Feedstock supply</div>
+                <div class="upl-dept-sheets">Feedstock Supply · Feed &amp; Balance</div>
+              </div>
+              <div class="upl-dept-count">2</div>
+            </div>
+            <div class="upl-dept-row">
+              <div class="upl-dept-dot" style="background:#ef4444"></div>
+              <div class="upl-dept-info">
+                <div class="upl-dept-name">Sales &amp; finance</div>
+                <div class="upl-dept-sheets">Sales Detail · Daily Revenue · Manure Sales</div>
+              </div>
+              <div class="upl-dept-count">3</div>
+            </div>
+            <div class="upl-dept-row">
+              <div class="upl-dept-dot" style="background:#f97316"></div>
+              <div class="upl-dept-info">
+                <div class="upl-dept-name">CBG production</div>
+                <div class="upl-dept-sheets">CBG Expected · Maintenance</div>
+              </div>
+              <div class="upl-dept-count">2</div>
+            </div>
+          </div>
+        </div>
+        <!-- Rules card -->
+        <div class="upl-rules-card">
+          <div class="upl-rc-head">
+            <div class="upl-rc-icon">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <div class="upl-rc-title">Data guard rules</div>
+          </div>
+          <div class="upl-rc-list">
+            <div class="upl-rc-item"><span class="upl-rc-dash">—</span>Dates outside last 60 days are auto-rejected</div>
+            <div class="upl-rc-item"><span class="upl-rc-dash">—</span>Calculated columns are never overwritten</div>
+            <div class="upl-rc-item"><span class="upl-rc-dash">—</span>Duplicate Cal / Manure rows are skipped silently</div>
+            <div class="upl-rc-item"><span class="upl-rc-dash">—</span>Upload logged with your email and date range</div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div id="uplPreview" style="display:none"></div>`
+
+    <div id="uplPreview" style="display:none;margin-top:20px;"></div>`
 }
 
 function onUplDrop(e){
@@ -1596,8 +1828,30 @@ function onUplFileSelect(inp){
 
 async function loadUplFile(file){
   _uplFile = file
-  const nameEl = document.getElementById('uplFileName')
-  if(nameEl){ nameEl.textContent = `Reading ${file.name}…`; nameEl.classList.remove('empty') }
+  // Replace drop zone with file-selected card
+  const dz = document.getElementById('uplDropZone')
+  if(dz){
+    const kb = Math.round(file.size/1024)
+    const sizeStr = kb > 1024 ? `${(kb/1024).toFixed(1)} MB` : `${kb} KB`
+    dz.outerHTML = `<div class="upl-file-selected">
+      <div class="upl-file-sel-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <div class="upl-file-sel-meta">
+        <div class="upl-file-sel-name">${file.name}</div>
+        <div class="upl-file-sel-hint">${sizeStr} &nbsp;·&nbsp; Reading sheets…</div>
+      </div>
+      <button class="upl-file-sel-change" onclick="showUploadView()">Change</button>
+    </div>`
+  }
+  // Advance stepper to step 2
+  const s1=document.getElementById('uplStep1'), l1=document.getElementById('uplLine1'), s2=document.getElementById('uplStep2')
+  if(s1){s1.classList.remove('active');s1.classList.add('done')}
+  if(l1){l1.classList.add('done')}
+  if(s2){s2.classList.add('active')}
   try {
     const buf = await file.arrayBuffer()
     _uplWb = XLSX.read(buf, {type:'array', raw:true})
@@ -1828,6 +2082,12 @@ async function submitUpload(){
   await initMsal()
   const t = await getToken()
   if(!t){ toast('Sign in first', true); return }
+
+  // Advance stepper to step 3
+  const s2=document.getElementById('uplStep2'), l2=document.getElementById('uplLine2'), s3=document.getElementById('uplStep3')
+  if(s2){s2.classList.remove('active');s2.classList.add('done')}
+  if(l2){l2.classList.add('done')}
+  if(s3){s3.classList.add('active')}
 
   const btn      = document.getElementById('uplSubmitBtn')
   const mode     = document.getElementById('uplConflictMode')?.value || 'overwrite'
