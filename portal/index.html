@@ -6,6 +6,7 @@
   <title>CBG Karnal — Data Entry Portal</title>
   <script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.27.0/lib/msal-browser.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"/>
   <style>
     :root{
       --bg:#f0f2f8;--surface:#fff;--border:#dde1ec;--text:#1a1d2e;
@@ -15,30 +16,67 @@
       --warn-bg:#fef3c7;--warn-text:#92400e;
       --radius:8px;--hh:54px;
     }
-    @media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
-      --bg:#0f1117;--surface:#1a1d2e;--border:#2d3148;--text:#e8eaf6;
-      --muted:#8892b0;--accent:#3b82f6;--calc:#fbbf24;--calc-bg:#1c1400;
-      --warn-bg:#1c1400;--warn-text:#fbbf24;
-    }}
     *{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
-    header{height:var(--hh);background:var(--accent);color:#fff;display:flex;align-items:center;
-      padding:0 18px;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3);}
-    .logo{width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:6px;
-      display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.8rem;flex-shrink:0;}
-    header h1{font-size:.9rem;font-weight:600;flex:1;}
-    .hbtn{padding:5px 13px;border-radius:6px;border:1.5px solid rgba(255,255,255,.6);
-      background:transparent;color:#fff;cursor:pointer;font-size:.8rem;font-weight:500;}
-    #banner{background:var(--warn-bg);color:var(--warn-text);text-align:center;
-      padding:7px;font-size:.79rem;font-weight:500;border-bottom:1px solid rgba(0,0,0,.07);}
-    .layout{display:flex;height:calc(100vh - var(--hh) - 33px);}
-    nav{width:210px;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;flex-shrink:0;}
-    .ng{padding:10px 13px 3px;font-size:.66rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);}
-    nav button{display:block;width:100%;text-align:left;padding:7px 13px;border:none;background:none;
-      color:var(--text);cursor:pointer;font-size:.82rem;border-left:3px solid transparent;transition:background .1s;}
-    nav button:hover{background:var(--bg);}
-    nav button.active{border-left-color:var(--accent);color:var(--accent);font-weight:600;background:var(--bg);}
-    .content{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+    body{font-family:'Inter','Segoe UI',system-ui,sans-serif;background:#f5f5f6;color:#18181b;font-size:13px;height:100vh;overflow:hidden;}
+
+    /* ══ APP SHELL ══ */
+    .app{display:flex;height:100vh;width:100%}
+
+    /* ══ SIDEBAR ══ */
+    .sidebar{width:222px;background:#fff;border-right:1px solid #e4e4e7;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;}
+    .sb-brand{padding:14px 14px 11px;border-bottom:1px solid #f4f4f5;display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .sb-logo{width:32px;height:32px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#fff;flex-shrink:0;box-shadow:0 2px 8px rgba(79,70,229,.25)}
+    .sb-plant{font-size:12.5px;font-weight:700;color:#18181b;letter-spacing:-.02em}
+    .sb-loc{font-size:9.5px;color:#a1a1aa;margin-top:1px}
+    .sb-upl{margin:9px 9px 3px;border-radius:10px;background:linear-gradient(135deg,#eef2ff,#f5f3ff);border:1px solid #c7d2fe;padding:7px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;flex-shrink:0}
+    .sb-upl:hover{background:linear-gradient(135deg,#e0e7ff,#ede9fe)}
+    .sb-upl-icon{width:23px;height:23px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#fff;font-size:12px;font-weight:700}
+    .sb-upl-label{font-size:11.5px;font-weight:600;color:#4338ca;flex:1}
+    .sb-upl-badge{background:#4f46e5;color:#fff;font-size:9px;font-weight:800;padding:2px 6px;border-radius:99px}
+    .sb-sec{padding:11px 13px 4px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#d4d4d8;flex-shrink:0}
+    .date-pills{padding:0 9px;display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+    .dp{padding:7px 10px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:all .13s}
+    .dp:hover{background:#fafafa}
+    .dp.active{background:#f0f0ff;border-color:#c7d2fe}
+    .dp-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+    .dp-date{font-size:11.5px;font-weight:600;color:#3f3f46}
+    .dp.active .dp-date{color:#4f46e5}
+    .dp-pct{font-size:10px;font-weight:700}
+    .dp-bar{height:4px;background:#f0eeee;border-radius:99px;overflow:hidden}
+    .dp-fill{height:100%;border-radius:99px;transition:width .3s}
+    .sb-divider{height:1px;background:#f4f4f5;margin:9px 9px;flex-shrink:0}
+    .sb-summary{padding:0 10px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+    .sb-ring{position:relative;width:46px;height:46px;flex-shrink:0}
+    .sb-ring svg{transform:rotate(-90deg)}
+    .sb-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:#18181b}
+    .sb-sum-info{flex:1}
+    .sb-sum-v{font-size:14px;font-weight:900;color:#18181b;letter-spacing:-.03em;line-height:1}
+    .sb-sum-l{font-size:9.5px;color:#a1a1aa;margin-top:2px}
+    .sb-alert{margin:0 9px;background:#fef2f2;border:1px solid #fecaca;border-radius:9px;padding:8px 10px;flex-shrink:0}
+    .sb-alert-title{font-size:10px;font-weight:700;color:#b91c1c;margin-bottom:5px}
+    .sb-alert-item{display:flex;align-items:center;gap:6px;padding:2px 0}
+    .sb-alert-dot{width:5px;height:5px;border-radius:50%;background:#ef4444;flex-shrink:0}
+    .sb-alert-text{font-size:10px;color:#7f1d1d}
+    .sb-audit-btn{margin:6px 9px 0;background:#4f46e5;color:#fff;border-radius:8px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer;text-align:center;box-shadow:0 2px 8px rgba(79,70,229,.25);border:none;font-family:inherit;width:calc(100% - 18px);display:block;flex-shrink:0}
+    .sb-foot{margin-top:auto;padding:10px 12px;border-top:1px solid #f4f4f5;display:flex;align-items:center;gap:9px;flex-shrink:0}
+    .sb-av{width:27px;height:27px;border-radius:50%;background:linear-gradient(135deg,#4f46e5,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#fff;flex-shrink:0;position:relative}
+    .sb-av::after{content:'';position:absolute;bottom:0;right:0;width:8px;height:8px;background:#22c55e;border-radius:50%;border:1.5px solid #fff}
+    .sb-un{font-size:11px;font-weight:600;color:#18181b}
+    .sb-role{font-size:9.5px;color:#a1a1aa}
+
+    /* ══ MAIN AREA ══ */
+    .main-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden}
+    .topbar{height:48px;background:#fff;border-bottom:1px solid #e4e4e7;padding:0 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+    .tb-live{display:flex;align-items:center;gap:6px;padding:4px 11px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:99px}
+    .tb-pulse{width:6px;height:6px;border-radius:50%;background:#16a34a;animation:blink 2s infinite}
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+    .tb-ltext{font-size:11px;font-weight:700;color:#15803d;letter-spacing:.04em}
+    .tb-sp{flex:1}
+    .tb-date{font-size:11px;color:#a1a1aa}
+    .tb-date strong{color:#52525b;font-weight:600}
+    .tb-btn{padding:6px 15px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+    .tb-btn.signed{background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0}
+    .main-content{flex:1;display:flex;flex-direction:column;overflow:hidden}
     main{flex:1;overflow-y:auto;padding:16px 20px;}
     .sh{margin-bottom:12px;}
     .sh h2{font-size:.98rem;font-weight:700;}
@@ -76,6 +114,153 @@
       background:var(--success);color:#fff;font-size:.85rem;font-weight:500;
       box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;z-index:999;}
     #toast.err{background:var(--danger);}
+    /* ── Home / Audit views ─────────────────────────────── */
+    .hero{border-radius:14px;overflow:hidden;position:relative;background:#fff;border:1px solid #e4e4e7;box-shadow:0 1px 4px rgba(0,0,0,.04);flex-shrink:0}
+    .hero-grad{position:absolute;top:0;right:0;width:55%;height:100%;background:linear-gradient(135deg,#eef2ff 0%,#f5f3ff 55%,#fdf4ff 100%);clip-path:polygon(10% 0,100% 0,100% 100%,0% 100%)}
+    .hero-inner{position:relative;z-index:1;padding:22px 26px;display:flex;align-items:center;gap:20px}
+    .hero-left{flex:1}
+    .hero-tag{display:inline-block;margin-bottom:9px;background:#f0f0ff;border:1px solid #c7d2fe;padding:3px 11px;border-radius:99px;font-size:9.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#4338ca}
+    .hero-h1{font-size:22px;font-weight:900;color:#18181b;letter-spacing:-.04em;line-height:1.08;margin-bottom:7px}
+    .hero-h1 em{font-style:normal;background:linear-gradient(135deg,#4f46e5,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .hero-sub{font-size:11.5px;color:#71717a;line-height:1.7;max-width:310px;margin-bottom:12px}
+    .hero-btns{display:flex;gap:8px}
+    .h-btn-p{padding:7px 17px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 3px 10px rgba(79,70,229,.28)}
+    .h-btn-s{padding:7px 14px;background:#fff;color:#52525b;border:1px solid #e4e4e7;border-radius:8px;font-size:11.5px;font-weight:500;cursor:pointer;font-family:inherit}
+    .hero-right{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0;width:220px}
+    .hstat{background:#fff;border:1px solid #e4e4e7;border-radius:10px;padding:10px 12px;box-shadow:0 1px 3px rgba(0,0,0,.04);position:relative;overflow:hidden}
+    .hstat::before{content:'';position:absolute;top:0;left:0;width:100%;height:2px;border-radius:10px 10px 0 0}
+    .c1::before{background:linear-gradient(90deg,#4f46e5,#7c3aed)}
+    .c2::before{background:linear-gradient(90deg,#10b981,#34d399)}
+    .c3::before{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+    .c4::before{background:linear-gradient(90deg,#ef4444,#f87171)}
+    .hv{font-size:18px;font-weight:900;color:#18181b;letter-spacing:-.04em;line-height:1}
+    .hu{font-size:8px;color:#a1a1aa;margin-left:1px}
+    .hl{font-size:9px;color:#a1a1aa;margin-top:3px}
+    .hs{font-size:9px;font-weight:600;margin-top:2px}
+    .sec-hd{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .sec-hd-title{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa}
+    .wb-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;flex-shrink:0}
+    .wcard{background:#fff;border-radius:12px;overflow:hidden;border:1px solid #e4e4e7;box-shadow:0 1px 3px rgba(0,0,0,.04);cursor:pointer;transition:box-shadow .15s,transform .12s}
+    .wcard:hover{box-shadow:0 6px 20px rgba(0,0,0,.09);transform:translateY(-2px)}
+    .wc-head{padding:11px 13px 9px;position:relative;overflow:hidden}
+    .wc-mesh{position:absolute;inset:0;opacity:.07;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,1) 0px,transparent 1px,transparent 8px,rgba(255,255,255,1) 9px)}
+    .wc-hi{position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between}
+    .wc-lbl{font-size:8.5px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-bottom:2px}
+    .wc-name{font-size:12.5px;font-weight:800;color:#fff;letter-spacing:-.02em;line-height:1.1}
+    .wc-cnt{font-size:9px;color:rgba(255,255,255,.55);margin-top:2px}
+    .wc-rw{text-align:center;flex-shrink:0}
+    .wc-ring{width:32px;height:32px}
+    .wc-pct{font-size:9.5px;font-weight:900;color:#fff;margin-top:1px}
+    .wc-body{padding:2px 0}
+    .ws{display:flex;align-items:center;gap:7px;padding:5px 12px;border-bottom:1px solid #fafafa;transition:background .1s;cursor:pointer}
+    .ws:last-child{border-bottom:none}
+    .ws:hover{background:#fafafa}
+    .ws-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .ws-name{font-size:10.5px;color:#3f3f46;flex:1;font-weight:500}
+    .ws-pill{font-size:8.5px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0}
+    .ws-go{font-size:10.5px;font-weight:700;color:#d4d4d8;margin-left:2px}
+    .ws:hover .ws-go{color:#4f46e5}
+    .wc-foot{height:3px}
+    .bottom-row{display:grid;grid-template-columns:1fr 200px;gap:11px;flex-shrink:0}
+    .panel{background:#fff;border:1px solid #e4e4e7;border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+    .panel-head{padding:9px 13px;border-bottom:1px solid #f4f4f5;display:flex;align-items:center;justify-content:space-between}
+    .panel-title{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#a1a1aa}
+    .ai{padding:7px 12px;display:flex;align-items:center;gap:9px;border-bottom:1px solid #fafafa}
+    .ai:last-child{border-bottom:none}
+    .ai-av{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;flex-shrink:0}
+    .ai-body{flex:1;min-width:0}
+    .ai-text{font-size:10.5px;color:#71717a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .ai-text strong{color:#18181b;font-weight:600}
+    .ai-badge{font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;flex-shrink:0}
+    .ai-time{font-size:9.5px;color:#d4d4d8;white-space:nowrap;flex-shrink:0}
+    .prog-body{display:flex;flex-direction:column;align-items:center;padding:10px 10px;gap:8px}
+    .ring-wrap{position:relative;width:80px;height:80px;flex-shrink:0}
+    .ring-wrap svg{transform:rotate(-90deg)}
+    .ring-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .ring-pct{font-size:22px;font-weight:900;color:#18181b;letter-spacing:-.04em;line-height:1}
+    .ring-lbl{font-size:8.5px;color:#a1a1aa;margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
+    .prog-list{width:100%;display:flex;flex-direction:column;gap:5px}
+    .pi{display:flex;align-items:center;gap:7px}
+    .pi-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+    .pi-name{font-size:10px;color:#71717a;flex:1}
+    .pi-badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:4px}
+    /* AUDIT */
+    .audit-header{background:#fff;border:1px solid #e4e4e7;border-radius:13px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 1px 3px rgba(0,0,0,.03);flex-shrink:0}
+    .ah-tag{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#4338ca;background:#f0f0ff;border:1px solid #c7d2fe;padding:3px 10px;border-radius:99px;display:inline-block;margin-bottom:7px}
+    .ah-title{font-size:19px;font-weight:900;color:#18181b;letter-spacing:-.04em}
+    .ah-sub{font-size:11.5px;color:#71717a;margin-top:3px}
+    .ah-stats{display:flex;gap:16px}
+    .ah-stat{text-align:center}
+    .ah-stat-v{font-size:20px;font-weight:900;letter-spacing:-.04em}
+    .ah-stat-l{font-size:9.5px;color:#a1a1aa;margin-top:2px}
+    .audit-tabs-row{display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .audit-tabs{display:flex;gap:4px}
+    .atab{padding:5px 13px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;border:1px solid transparent}
+    .atab.on{background:#fff;border-color:#e4e4e7;color:#4f46e5;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .atab.off{color:#a1a1aa;background:transparent}
+    .matrix{background:#fff;border:1px solid #e4e4e7;border-radius:13px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+    .mh-row{display:grid;background:#f9f9fb;border-bottom:1px solid #f0f0f0}
+    .mh{padding:8px 12px;font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#a1a1aa;text-align:center}
+    .mh:first-child{text-align:left}
+    .mr{display:grid;border-bottom:1px solid #fafafa;align-items:center}
+    .mr-name{padding:9px 12px;display:flex;align-items:center;gap:8px}
+    .mr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .mr-label{font-size:11px;font-weight:600;color:#3f3f46}
+    .mr-cell{padding:6px 8px;display:flex;align-items:center;justify-content:center}
+    .cell{width:100%;padding:5px 7px;border-radius:7px;font-size:10px;font-weight:700;text-align:center;cursor:pointer;transition:all .13s;border:1px solid transparent}
+    .cell:hover{filter:brightness(.95)}
+    .done{background:#f0fdf4;color:#16a34a;border-color:#bbf7d0}
+    .pend{background:#fffbeb;color:#b45309;border-color:#fde68a}
+    .miss{background:#fef2f2;color:#b91c1c;border-color:#fecaca;animation:missflash 2s infinite}
+    @keyframes missflash{0%,100%{opacity:1}50%{opacity:.6}}
+    .legend-row{display:flex;gap:12px;padding:8px 12px;background:#fafafa;border-top:1px solid #f0f0f0}
+    .leg{display:flex;align-items:center;gap:5px;font-size:10px;color:#71717a}
+    .leg-sq{width:10px;height:10px;border-radius:3px}
+    /* HOME VIEW scroll container */
+    .home-scroll{flex:1;overflow-y:auto;padding:16px 20px;display:flex;flex-direction:column;gap:13px}
+    .home-scroll::-webkit-scrollbar{width:3px}
+    .home-scroll::-webkit-scrollbar-thumb{background:#e4e4e7;border-radius:4px}
+    /* SHEET VIEW */
+    .sheet-view{display:flex;flex-direction:column;flex:1;overflow:hidden}
+    .sh{margin-bottom:12px;}
+    .sh h2{font-size:.98rem;font-weight:700;}
+    .sh .sub{font-size:.77rem;color:var(--muted);margin-top:2px;}
+    .date-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap;
+      padding:9px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+    .date-row label{font-size:.79rem;font-weight:600;}
+    .date-row input[type="date"]{padding:5px 8px;border:1px solid var(--border);border-radius:6px;
+      background:var(--bg);color:var(--text);font-size:.85rem;}
+    .sec{margin-bottom:20px;}
+    .sec-title-row{display:flex;align-items:center;justify-content:space-between;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:11px;}
+    .sec-title{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+    .clear-btn{font-size:.65rem;font-weight:600;color:var(--danger);background:none;border:1px solid var(--danger);
+      border-radius:4px;padding:2px 8px;cursor:pointer;opacity:.7;transition:opacity .15s;}
+    .clear-btn:hover{opacity:1;}
+    .fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:11px;}
+    .fg{display:flex;flex-direction:column;gap:3px;}
+    .fg label{font-size:.71rem;font-weight:600;color:var(--muted);display:flex;align-items:center;gap:4px;}
+    .atag{font-size:.62rem;color:var(--calc);font-weight:700;letter-spacing:.04em;
+      text-transform:uppercase;background:var(--calc-bg);padding:1px 4px;border-radius:3px;}
+    .fg input,.fg select,.fg textarea{padding:6px 8px;border:1px solid var(--border);border-radius:6px;
+      background:var(--surface);color:var(--text);font-size:.87rem;
+      font-variant-numeric:tabular-nums;transition:border-color .15s;width:100%;}
+    .fg input:focus,.fg select:focus{outline:none;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(37,99,235,.1);}
+    .fg input.cf{background:var(--calc-bg);color:var(--calc);font-weight:600;border-color:transparent;cursor:default;}
+    .fg textarea{resize:vertical;min-height:56px;}
+    .info-row{grid-column:1/-1;color:var(--muted);font-size:.78rem;font-style:italic;padding:3px 0;}
+    .save-bar{padding:9px 20px;background:var(--surface);border-top:1px solid var(--border);
+      display:flex;align-items:center;gap:12px;flex-shrink:0}
+    #saveBtn{padding:7px 22px;border:none;border-radius:6px;background:var(--accent);
+      color:#fff;cursor:pointer;font-size:.87rem;font-weight:600;}
+    #saveBtn:disabled{opacity:.4;cursor:not-allowed;}
+    #saveNote{font-size:.77rem;color:var(--muted);}
+    #toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;border-radius:var(--radius);
+      background:var(--success);color:#fff;font-size:.85rem;font-weight:500;
+      box-shadow:0 4px 14px rgba(0,0,0,.2);display:none;z-index:999;}
+    #toast.err{background:var(--danger);}
+    #banner{display:none}
+    .save-btn{padding:8px 22px;border:none;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-size:.87rem;font-weight:600;font-family:inherit;}
+    .save-btn:disabled{opacity:.4;cursor:not-allowed;}
     /* ── Upload Feature ─────────────────────────────────── */
     .upl-nav-btn{
       display:flex;align-items:center;gap:7px;
@@ -241,20 +426,28 @@
   </style>
 </head>
 <body>
-<header>
-  <div class="logo">CBG</div>
-  <h1>LR Energy — CBG Karnal &nbsp;|&nbsp; Data Entry Portal</h1>
-  <a class="hbtn" href="../dashboard/analytics_dashboard.html" target="_blank" style="text-decoration:none;margin-right:6px">Analytics Dashboard</a>
-  <button class="hbtn" id="signBtn" onclick="handleSignIn()">Sign In</button>
-</header>
-<div id="banner">⚠️ Demo mode — all calculations run live. Sign in with Microsoft account to save data to SharePoint.</div>
-<div class="layout">
-  <nav id="nav"></nav>
-  <div class="content">
-    <main id="main"></main>
-    <div class="save-bar">
-      <button id="saveBtn" disabled>Save to SharePoint</button>
-      <span id="saveNote">Sign in to enable saving</span>
+<div id="banner"></div>
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebarEl"></div>
+
+  <!-- MAIN -->
+  <div class="main-wrap">
+    <!-- TOPBAR -->
+    <div class="topbar">
+      <div class="tb-live"><div class="tb-pulse"></div><span class="tb-ltext">PLANT LIVE</span></div>
+      <div class="tb-sp"></div>
+      <div class="tb-date" id="tbDate"></div>
+      <button class="tb-btn" id="signBtn" onclick="handleSignIn()">Sign in with Microsoft →</button>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="main-content">
+      <main id="main" style="flex:1;overflow-y:auto;padding:0;background:#f5f5f6"></main>
+      <div class="save-bar" id="saveBarEl" style="display:none">
+        <button id="saveBtn" disabled>Save to SharePoint</button>
+        <span id="saveNote">Sign in to enable saving</span>
+      </div>
     </div>
   </div>
 </div>
@@ -999,17 +1192,419 @@ function runCalcs(sheet, inp, ds){
 // ══════════════════════════════════════════════════════════
 let cur=null, inp={}, drafts={}
 
-function buildNav(){
-  const nav=document.getElementById('nav')
-  const grps={}
-  SHEETS.forEach(s=>{ if(!grps[s.group]) grps[s.group]=[]; grps[s.group].push(s) })
-  let html=''
-  html+=`<button data-id="_upload" onclick="showUploadView()" class="upl-nav-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>Upload Workbook</button>`
-  for(const [g,items] of Object.entries(grps)){
-    html+=`<div class="ng">${g}</div>`
-    items.forEach(s=>{ html+=`<button data-id="${s.id}" onclick="loadSheet('${s.id}')">${s.label}</button>` })
+// ── Sidebar & home/audit views ────────────────────────────────────────────────
+
+// Workbook card definitions (group SHEETS into 6 cards)
+const WB_CARDS = [
+  { label:'Production RBG',   sub:'Digesters',              grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
+  { label:'Lab / Cal',        sub:'Calibrations',           grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL'] },
+  { label:'Digester Health',  sub:'pH · Temp · TS-VS · IA', grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
+  { label:'Feedstock Supply', sub:'Supply & Balance',       grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FS','FB'] },
+  { label:'Sales & Finance',  sub:'Revenue · Sales',        grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES'] },
+  { label:'CBG Production',   sub:'PSA · Plans',            grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA','CBGEXP','PLANNER','MAINT','FIXED','EMI'] },
+]
+
+function _sheetLabel(id){ const s=SHEETS.find(x=>x.id===id); return s?s.label:id }
+
+function _todayStr(){
+  const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+}
+function _fmtDayPill(dStr){
+  const d=new Date(dStr+'T00:00:00')
+  const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const today=_todayStr()
+  const lbl=dStr===today?'Today':`${months[d.getMonth()]} ${d.getDate()} · ${days[d.getDay()]}`
+  return lbl
+}
+function _last3Days(){
+  const res=[]
+  for(let i=2;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i)
+    res.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`)
   }
-  nav.innerHTML=html
+  return res
+}
+
+function _savedOnDate(dateStr){
+  // returns set of sheet labels saved on dateStr from subLog
+  const saved=new Set()
+  if(!window._subLog) return saved
+  const serial = toExcelSerial(dateStr)
+  for(const row of window._subLog){
+    if(!row||row.length<2) continue
+    const rs=row[0]; const lbl=row[1]
+    if(typeof rs==='number'&&Math.round(rs)===serial&&lbl&&!String(lbl).startsWith('[UPLOAD')) saved.add(lbl)
+  }
+  return saved
+}
+
+function _sheetLabelToId(lbl){
+  return SHEETS.find(s=>s.label===lbl)?.id||null
+}
+
+function buildSidebar(){
+  const sb=document.getElementById('sidebarEl')
+  if(!sb) return
+  const days=_last3Days()
+  const today=_todayStr()
+  const _curDay=window._activeDateStr||today
+
+  // 3-day audit stats
+  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI').map(s=>s.label)
+  let totalSaved=0,totalPossible=allTracked.length*3
+  const missAlerts=[]
+  days.forEach(d=>{
+    const saved=_savedOnDate(d)
+    totalSaved+=saved.size
+    if(d!==today){
+      const missing=allTracked.filter(l=>!saved.has(l))
+      if(missing.length>0) missAlerts.push({d,count:missing.length,items:missing.slice(0,2)})
+    }
+  })
+  const ringPct=totalPossible>0?Math.round(totalSaved/totalPossible*100):0
+  const ringCirc=113, ringOff=Math.round(ringCirc*(1-ringPct/100))
+  const todaySaved=_savedOnDate(today)
+  const todayTotal=allTracked.length
+
+  // Pill progress per day
+  function dayPct(d){ const s=_savedOnDate(d); return todayTotal>0?Math.round(s.size/todayTotal*100):0 }
+  function pillColor(pct){ return pct>=80?'#22c55e':pct>=40?'#f59e0b':'#4f46e5' }
+
+  const signedIn=window._user
+  const initials=signedIn?signedIn.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase():'--'
+
+  let alertHtml=''
+  if(missAlerts.length>0){
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+    alertHtml=`<div class="sb-alert">
+      <div class="sb-alert-title">${missAlerts.reduce((a,x)=>a+x.count,0)} sheets missing</div>
+      ${missAlerts.slice(0,3).map(a=>{
+        const dObj=new Date(a.d+'T00:00:00')
+        const dLabel=`${months[dObj.getMonth()]} ${dObj.getDate()}`
+        return a.items.map(it=>`<div class="sb-alert-item"><div class="sb-alert-dot"></div><span class="sb-alert-text">${it} · ${dLabel}</span></div>`).join('')
+      }).join('')}
+    </div>
+    <button class="sb-audit-btn" onclick="renderAudit()">View full audit matrix →</button>`
+  }
+
+  sb.innerHTML=`
+    <div class="sb-brand">
+      <div class="sb-logo">LR</div>
+      <div><div class="sb-plant">CBG Karnal</div><div class="sb-loc">Haryana · Plant active</div></div>
+    </div>
+    <div class="sb-upl" onclick="showUploadView()">
+      <div class="sb-upl-icon">↑</div><span class="sb-upl-label">Upload workbook</span>
+    </div>
+    <div class="sb-sec">Entering data for</div>
+    <div class="date-pills">
+      ${days.map((d,i)=>{
+        const pct=dayPct(d); const col=pillColor(pct)
+        const active=d===_curDay?'active':''
+        const lbl=_fmtDayPill(d)
+        return `<div class="dp ${active}" onclick="selectPortalDate('${d}')">
+          <div class="dp-top"><span class="dp-date">${lbl}</span><span class="dp-pct" style="color:${col}">${pct}%</span></div>
+          <div class="dp-bar"><div class="dp-fill" style="width:${pct}%;background:${col}"></div></div>
+        </div>`
+      }).join('')}
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-summary">
+      <div class="sb-ring">
+        <svg width="46" height="46" viewBox="0 0 46 46">
+          <circle cx="23" cy="23" r="18" fill="none" stroke="#f4f4f5" stroke-width="5"></circle>
+          <circle cx="23" cy="23" r="18" fill="none" stroke="url(#sbg${Date.now()%1000})" stroke-width="5" stroke-linecap="round" stroke-dasharray="${ringCirc}" stroke-dashoffset="${ringOff}" transform="rotate(-90 23 23)"></circle>
+          <defs><linearGradient id="sbg${Date.now()%1000}" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+        </svg>
+        <div class="sb-ring-val">${ringPct}%</div>
+      </div>
+      <div class="sb-sum-info">
+        <div class="sb-sum-v">3-day audit</div>
+        <div class="sb-sum-l">${totalSaved} of ${totalPossible} sheets done</div>
+      </div>
+    </div>
+    <div class="sb-divider"></div>
+    ${alertHtml}
+    <div class="sb-foot">
+      <div class="sb-av">${initials}</div>
+      <div>
+        <div class="sb-un">${signedIn||'Demo mode'}</div>
+        <div class="sb-role">${signedIn?'Signed in':'Sign in to save'}</div>
+      </div>
+    </div>`
+}
+
+function selectPortalDate(dateStr){
+  window._activeDateStr=dateStr
+  buildSidebar()
+  renderHome()
+}
+
+// Topbar date label
+function updateTopbarDate(){
+  const el=document.getElementById('tbDate')
+  if(!el) return
+  const d=new Date()
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const wk=Math.ceil((d-new Date(d.getFullYear(),0,1))/604800000)
+  el.innerHTML=`<strong>${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}</strong> · Week ${wk}`
+}
+
+function renderHome(){
+  const main=document.getElementById('main')
+  if(!main) return
+  document.getElementById('saveBarEl').style.display='none'
+  main.style.padding='0'
+  cur=null
+  const today=_todayStr()
+  const dateStr=window._activeDateStr||today
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const dObj=new Date(dateStr+'T00:00:00')
+  const dateLbl=`${months[dObj.getMonth()]} ${dObj.getDate()}`
+
+  // Sheet save status
+  const savedToday=_savedOnDate(dateStr)
+  function sheetStatus(id){
+    const s=SHEETS.find(x=>x.id===id)
+    if(!s) return null
+    const saved=savedToday.has(s.label)
+    return saved?'done':'pend'
+  }
+  function statusPill(id){
+    const st=sheetStatus(id)
+    if(!st) return ''
+    return st==='done'?`<span class="ws-pill" style="background:#f0fdf4;color:#16a34a">Saved ✓</span>`
+                      :`<span class="ws-pill" style="background:#fffbeb;color:#b45309">Pending</span>`
+  }
+
+  // Workbook card completion rings
+  function cardRing(ids){
+    const tracked=ids.filter(id=>SHEETS.find(s=>s.id===id))
+    if(!tracked.length) return {pct:0,done:0,total:0}
+    const done=tracked.filter(id=>{
+      const s=SHEETS.find(x=>x.id===id); return s&&savedToday.has(s.label)
+    }).length
+    return {pct:Math.round(done/tracked.length*100),done,total:tracked.length}
+  }
+
+  // Activity feed from subLog
+  let actHtml=''
+  if(window._subLog&&window._subLog.length>0){
+    const recents=[...window._subLog].reverse().filter(r=>r&&r[1]&&!String(r[1]).startsWith('[UPLOAD')).slice(0,4)
+    actHtml=recents.map(r=>{
+      const lbl=r[1]||''; const name=r[2]||'User'; const email=r[3]||''
+      const ts=r[4]||''
+      const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()
+      const gradIdx=Math.abs(email.charCodeAt(0)||0)%4
+      const grads=['linear-gradient(135deg,#4f46e5,#7c3aed)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#d97706)']
+      return `<div class="ai">
+        <div class="ai-av" style="background:${grads[gradIdx]}">${initials}</div>
+        <div class="ai-body"><div class="ai-text"><strong>${name}</strong> saved ${lbl}</div></div>
+        <span class="ai-badge" style="background:#f0fdf4;color:#16a34a">Saved</span>
+        <span class="ai-time">${ts?String(ts).slice(0,16):''}</span>
+      </div>`
+    }).join('')
+    if(!actHtml) actHtml=`<div style="padding:14px 13px;font-size:11px;color:#a1a1aa">No activity yet today.</div>`
+  } else {
+    actHtml=`<div style="padding:14px 13px;font-size:11px;color:#a1a1aa">Sign in to see team activity.</div>`
+  }
+
+  // Today's completion ring
+  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI')
+  const todayDone=allTracked.filter(s=>savedToday.has(s.label)).length
+  const todayTotal=allTracked.length
+  const todayPct=todayTotal>0?Math.round(todayDone/todayTotal*100):0
+  const r2Circ=226, r2Off=Math.round(r2Circ*(1-todayPct/100))
+
+  // Group mini-completion for ring list
+  const groupDone={}; const groupTotal={}
+  allTracked.forEach(s=>{
+    const g=s.group; groupTotal[g]=(groupTotal[g]||0)+1
+    if(savedToday.has(s.label)) groupDone[g]=(groupDone[g]||0)+1
+  })
+  const grpEntries=Object.entries(groupTotal).slice(0,4)
+  function grpColor(done,total){ const pct=total>0?done/total:0; return pct>=0.8?'#22c55e':pct>=0.4?'#f59e0b':'#f59e0b' }
+  function grpPillSty(done,total){ const pct=total>0?done/total:0; return pct>=0.8?'background:#f0fdf4;color:#16a34a':'background:#fffbeb;color:#b45309' }
+
+  main.innerHTML=`<div class="home-scroll">
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-grad"></div>
+      <div class="hero-inner">
+        <div class="hero-left">
+          <div class="hero-tag">CBG Karnal · Data Portal</div>
+          <div class="hero-h1">Your plant's<br><em>daily command</em> centre.</div>
+          <div class="hero-sub">Enter, validate, and sync production data for D1 &amp; D2 digesters, lab calibrations, feedstock, and sales.</div>
+          <div class="hero-btns">
+            <button class="h-btn-p" onclick="loadSheet('D1')">Start today's entry</button>
+            <button class="h-btn-s" onclick="renderAudit()">View 3-day audit ↗</button>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hstat c1"><div class="hv">—<span class="hu">m³</span></div><div class="hl">Biogas today</div><div class="hs" style="color:#a1a1aa">Sign in</div></div>
+          <div class="hstat c2"><div class="hv">${SHEETS.length}<span class="hu">sh</span></div><div class="hl">Sheets configured</div><div class="hs" style="color:#16a34a">All active</div></div>
+          <div class="hstat c3"><div class="hv">${todayDone}<span class="hu">done</span></div><div class="hl">Today's entries</div><div class="hs" style="color:#d97706">${todayDone} of ${todayTotal}</div></div>
+          <div class="hstat c4"><div class="hv">${todayTotal-todayDone}<span class="hu">left</span></div><div class="hl">Pending sheets</div><div class="hs" style="color:${todayTotal-todayDone>0?'#dc2626':'#16a34a'}">${dateLbl}</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- WORKBOOK CARDS -->
+    <div class="sec-hd">
+      <span class="sec-hd-title">Sheets by workbook — ${dateLbl}</span>
+      <a href="../dashboard/analytics_dashboard.html" target="_blank" style="font-size:11px;color:#4f46e5;font-weight:600;text-decoration:none">Analytics Dashboard ↗</a>
+    </div>
+    <div class="wb-grid">
+      ${WB_CARDS.map((wb,wi)=>{
+        const ring=cardRing(wb.ids)
+        const circ=82, off=Math.round(circ*(1-ring.pct/100))
+        const sheetRows=wb.ids.map(id=>{
+          const s=SHEETS.find(x=>x.id===id)
+          if(!s) return ''
+          return `<div class="ws" onclick="loadSheet('${id}')">
+            <div class="ws-dot" style="background:${wb.dot}"></div>
+            <span class="ws-name">${s.label}</span>
+            ${statusPill(id)}
+            <span class="ws-go">→</span>
+          </div>`
+        }).filter(Boolean).join('')
+        return `<div class="wcard">
+          <div class="wc-head" style="background:${wb.grad}">
+            <div class="wc-mesh"></div>
+            <div class="wc-hi">
+              <div>
+                <div class="wc-lbl">Workbook ${wi+1}</div>
+                <div class="wc-name">${wb.label}</div>
+                <div class="wc-cnt">${ring.total} sheets · ${wb.sub}</div>
+              </div>
+              <div class="wc-rw">
+                <svg class="wc-ring" viewBox="0 0 34 34">
+                  <circle cx="17" cy="17" r="13" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3.5"></circle>
+                  <circle cx="17" cy="17" r="13" fill="none" stroke="rgba(255,255,255,.85)" stroke-width="3.5" stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round" transform="rotate(-90 17 17)"></circle>
+                </svg>
+                <div class="wc-pct">${ring.pct}%</div>
+              </div>
+            </div>
+          </div>
+          <div class="wc-body">${sheetRows}</div>
+          <div class="wc-foot" style="background:${wb.grad}"></div>
+        </div>`
+      }).join('')}
+    </div>
+
+    <!-- BOTTOM ROW -->
+    <div class="bottom-row">
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Recent activity · team</span></div>
+        ${actHtml}
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Today's completion</span></div>
+        <div class="prog-body">
+          <div class="ring-wrap">
+            <svg width="80" height="80" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="36" fill="none" stroke="#f4f4f5" stroke-width="8"></circle>
+              <circle cx="45" cy="45" r="36" fill="none" stroke="url(#rg2)" stroke-width="8" stroke-linecap="round" stroke-dasharray="${r2Circ}" stroke-dashoffset="${r2Off}" transform="rotate(-90 45 45)"></circle>
+              <defs><linearGradient id="rg2" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#4f46e5"/><stop offset="100%" stop-color="#7c3aed"/></linearGradient></defs>
+            </svg>
+            <div class="ring-center"><div class="ring-pct">${todayPct}%</div><div class="ring-lbl">Done</div></div>
+          </div>
+          <div class="prog-list">
+            ${grpEntries.map(([g,tot])=>{
+              const dn=groupDone[g]||0
+              return `<div class="pi"><div class="pi-dot" style="background:${grpColor(dn,tot)}"></div><span class="pi-name">${g}</span><span class="pi-badge" style="${grpPillSty(dn,tot)}">${dn}/${tot}</span></div>`
+            }).join('')}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`
+}
+
+function renderAudit(){
+  const main=document.getElementById('main')
+  if(!main) return
+  document.getElementById('saveBarEl').style.display='none'
+  main.style.padding='0'
+  cur=null
+  const days=_last3Days()
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+  const today=_todayStr()
+
+  function dayLabel(d){
+    const dObj=new Date(d+'T00:00:00')
+    const dayN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    const s=`${months[dObj.getMonth()]} ${dObj.getDate()} · ${dayN[dObj.getDay()]}`
+    return d===today?s+' (Today)':s
+  }
+
+  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI')
+  let totalSaved=0,totalPending=0,totalMissing=0
+  days.forEach((d,di)=>{
+    const saved=_savedOnDate(d)
+    allTracked.forEach(s=>{
+      if(saved.has(s.label)) totalSaved++
+      else if(di===days.length-1) totalPending++
+      else totalMissing++
+    })
+  })
+
+  const cols=days.length+1
+  const colTemplate=`140px ${days.map(()=>'1fr').join(' ')}`
+
+  const matrixRows=WB_CARDS.map(wb=>{
+    const trackedIds=wb.ids.filter(id=>allTracked.find(s=>s.id===id))
+    if(!trackedIds.length) return ''
+    const cells=days.map((d,di)=>{
+      const saved=_savedOnDate(d)
+      const allDone=trackedIds.every(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) })
+      const noneDone=trackedIds.every(id=>{ const s=SHEETS.find(x=>x.id===id); return !s||!saved.has(s.label) })
+      const isToday=d===today
+      if(allDone) return `<div class="mr-cell"><div class="cell done">Saved ✓</div></div>`
+      if(noneDone&&!isToday) return `<div class="mr-cell"><div class="cell miss">Missing !</div></div>`
+      const doneCount=trackedIds.filter(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) }).length
+      const lbl=doneCount>0?`${doneCount}/${trackedIds.length} done`:'Pending →'
+      return `<div class="mr-cell"><div class="cell pend">${lbl}</div></div>`
+    }).join('')
+    return `<div class="mr" style="grid-template-columns:${colTemplate}">
+      <div class="mr-name"><div class="mr-dot" style="background:${wb.dot}"></div><span class="mr-label">${wb.label}</span></div>
+      ${cells}
+    </div>`
+  }).filter(Boolean).join('')
+
+  main.innerHTML=`<div class="home-scroll">
+    <div class="audit-header">
+      <div>
+        <div class="ah-tag">3-Day Data Audit</div>
+        <div class="ah-title">${dayLabel(days[0]).split(' · ')[0]} – ${dayLabel(days[days.length-1]).split(' · ')[0]}</div>
+        <div class="ah-sub">Click any cell to open that sheet for that date</div>
+      </div>
+      <div class="ah-stats">
+        <div class="ah-stat"><div class="ah-stat-v" style="color:#16a34a">${totalSaved}</div><div class="ah-stat-l">Sheets saved</div></div>
+        <div class="ah-stat"><div class="ah-stat-v" style="color:#d97706">${totalPending}</div><div class="ah-stat-l">Pending today</div></div>
+        <div class="ah-stat"><div class="ah-stat-v" style="color:#dc2626">${totalMissing}</div><div class="ah-stat-l">Missing</div></div>
+      </div>
+    </div>
+    <div class="audit-tabs-row">
+      <div class="audit-tabs">
+        <div class="atab on">Matrix view</div>
+      </div>
+      <span onclick="renderHome()" style="font-size:11px;color:#4f46e5;font-weight:600;cursor:pointer">← Back to home</span>
+    </div>
+    <div class="matrix">
+      <div class="mh-row" style="grid-template-columns:${colTemplate}">
+        <div class="mh">Workbook</div>
+        ${days.map(d=>`<div class="mh">${dayLabel(d)}</div>`).join('')}
+      </div>
+      ${matrixRows}
+      <div class="legend-row">
+        <div class="leg"><div class="leg-sq" style="background:#f0fdf4;border:1px solid #bbf7d0"></div>Saved</div>
+        <div class="leg"><div class="leg-sq" style="background:#fffbeb;border:1px solid #fde68a"></div>Pending — click to enter</div>
+        <div class="leg"><div class="leg-sq" style="background:#fef2f2;border:1px solid #fecaca"></div>Missing — needs urgent attention</div>
+      </div>
+    </div>
+  </div>`
 }
 
 function loadSheet(id){
@@ -1018,7 +1613,8 @@ function loadSheet(id){
   cur=SHEETS.find(s=>s.id===id)
   // Restore draft values for this sheet (persist across section switches)
   inp=Object.assign({},drafts[id]||{})
-  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id))
+  document.getElementById('saveBarEl').style.display='flex'
+  document.getElementById('main').style.padding='16px 20px'
   let html=`<div class="sh"><h2>${cur.label}</h2><div class="sub">Sheet: <b>${cur.sheet}</b></div></div>`
   if(cur.hasDate){
     html+=`<div class="date-row"><label>Date</label>
@@ -1282,10 +1878,15 @@ function updateAuthUI(){
   const accounts = _msal?.getAllAccounts()||[]
   const signedIn = accounts.length>0
   _user = accounts[0]?.name||accounts[0]?.username||_user
+  window._user = _user
   document.getElementById('saveBtn').disabled = !signedIn
   document.getElementById('saveNote').textContent = signedIn ? `Signed in as ${_user}` : 'Sign in to enable saving'
-  document.getElementById('banner').style.display = signedIn ? 'none' : ''
-  document.getElementById('signBtn').textContent = signedIn ? 'Sign Out' : 'Sign In'
+  const signBtn=document.getElementById('signBtn')
+  if(signBtn){
+    signBtn.textContent = signedIn ? `${_user||'Signed in'} · Sign Out` : 'Sign in with Microsoft →'
+    signBtn.className = signedIn ? 'tb-btn signed' : 'tb-btn'
+  }
+  buildSidebar()
 }
 
 window.handleSignIn = async ()=>{
@@ -1557,8 +2158,7 @@ function colLetter(n){ let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))
 
 document.getElementById('saveBtn').onclick=window.handleSave
 
-// Init MSAL on page load (handles redirect token silently)
-initMsal().catch(e=>console.warn('MSAL init:',e))
+// MSAL init handled in boot sequence above
 
 function today(){
   // Use local date components — toISOString() returns UTC which can be 1 day behind in IST at midnight
@@ -1601,8 +2201,175 @@ function toast(msg,err=false){
   setTimeout(()=>t.style.display='none',3200)
 }
 
-buildNav()
-loadSheet('D1')
+// ══════════════════════════════════════════════════════════
+// FEEDSTOCK WIZARD
+// ══════════════════════════════════════════════════════════
+
+function loadFeedstockRegistry(){
+  try{
+    const reg=JSON.parse(localStorage.getItem('FEEDSTOCK_REGISTRY')||'[]')
+    reg.forEach(fs=>{
+      if(!fs||!fs.id||!fs.colIdx) return
+      // Merge into COLUMN_MAP for D1, D2, FS
+      const baseD1=56, baseD2=57
+      COLUMN_MAP['D1'][`${fs.id}_exp`]=baseD1+fs.colOffset
+      COLUMN_MAP['D1'][`${fs.id}_act`]=baseD1+fs.colOffset+1
+      COLUMN_MAP['D1'][`${fs.id}_bpp`]=baseD1+fs.colOffset+2
+      COLUMN_MAP['D2'][`${fs.id}_exp`]=baseD2+fs.colOffset
+      COLUMN_MAP['D2'][`${fs.id}_act`]=baseD2+fs.colOffset+1
+      COLUMN_MAP['D2'][`${fs.id}_bpp`]=baseD2+fs.colOffset+2
+    })
+  }catch(e){ console.warn('loadFeedstockRegistry:',e) }
+}
+
+let _fsWizStep=1, _fsWizData={}
+
+function showFeedstockWizard(){
+  cur=null
+  document.getElementById('saveBarEl').style.display='none'
+  document.getElementById('main').style.padding='16px 20px'
+  _fsWizStep=1; _fsWizData={}
+  renderFsStep()
+}
+
+function renderFsStep(){
+  const main=document.getElementById('main'); if(!main) return
+  const steps=['Identity & Unit','Cost & Supply','BPP & Potential','Review & Register']
+  const stepBar=steps.map((s,i)=>`<div style="flex:1;padding:11px 14px;display:flex;align-items:center;gap:9px;border-right:${i<steps.length-1?'1px solid var(--border)':'none'};${_fsWizStep===i+1?'background:rgba(79,70,229,.04)':''}">
+    <div style="width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;${_fsWizStep>i+1?'background:#16a34a;color:#fff':_fsWizStep===i+1?'background:#18181b;color:#fff':'border:1.5px solid var(--border);color:var(--muted)'}">${_fsWizStep>i+1?'✓':i+1}</div>
+    <div><div style="font-size:.62rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:${_fsWizStep===i+1?'var(--muted)':'var(--border)'}">${_fsWizStep>i+1?'Done':'Step '+(i+1)}</div>
+    <div style="font-size:.78rem;font-weight:700;color:${_fsWizStep===i+1?'var(--text)':_fsWizStep>i+1?'var(--success)':'var(--muted)'}">${s}</div></div>
+  </div>`).join('')
+
+  let bodyHtml=''
+  if(_fsWizStep===1){
+    bodyHtml=`<div class="fgrid">
+      <div class="fg"><label>Feedstock Name</label><input type="text" id="fs_name" placeholder="e.g. Rice Straw" value="${_fsWizData.name||''}" oninput="_fsWizData.name=this.value"/></div>
+      <div class="fg"><label>Short ID (4–6 chars, no spaces)</label><input type="text" id="fs_id" placeholder="e.g. RS" maxlength="6" value="${_fsWizData.id||''}" oninput="_fsWizData.id=this.value.replace(/[^A-Za-z0-9]/g,'').toUpperCase();this.value=_fsWizData.id"/></div>
+      <div class="fg"><label>Unit</label><select id="fs_unit" onchange="_fsWizData.unit=this.value"><option value="MT" ${_fsWizData.unit==='MT'?'selected':''}>MT (Metric Tonnes)</option><option value="KL" ${_fsWizData.unit==='KL'?'selected':''}>KL (Kilolitres)</option><option value="KG" ${_fsWizData.unit==='KG'?'selected':''}>KG (Kilograms)</option></select></div>
+      <div class="fg"><label>Category</label><select id="fs_cat" onchange="_fsWizData.cat=this.value"><option value="Solid" ${_fsWizData.cat==='Solid'?'selected':''}>Solid</option><option value="Liquid" ${_fsWizData.cat==='Liquid'?'selected':''}>Liquid</option></select></div>
+    </div>`
+  } else if(_fsWizStep===2){
+    bodyHtml=`<div class="fgrid">
+      <div class="fg"><label>Rate (₹ per ${_fsWizData.unit||'MT'})</label><input type="number" id="fs_rate" step="any" placeholder="0" value="${_fsWizData.rate||''}" oninput="_fsWizData.rate=parseFloat(this.value)||0"/></div>
+      <div class="fg"><label>Typical supply (${_fsWizData.unit||'MT'}/day)</label><input type="number" id="fs_supply" step="any" placeholder="0" value="${_fsWizData.supply||''}" oninput="_fsWizData.supply=parseFloat(this.value)||0"/></div>
+      <div class="fg"><label>Vendor / Supplier</label><input type="text" id="fs_vendor" placeholder="Optional" value="${_fsWizData.vendor||''}" oninput="_fsWizData.vendor=this.value"/></div>
+    </div>`
+  } else if(_fsWizStep===3){
+    bodyHtml=`<div class="fgrid">
+      <div class="fg"><label>BPP Rate (m³ gas per ${_fsWizData.unit||'MT'})</label><input type="number" id="fs_bpp" step="any" placeholder="e.g. 130" value="${_fsWizData.bpp||''}" oninput="_fsWizData.bpp=parseFloat(this.value)||0"/></div>
+      <div class="fg"><label>VS% (Volatile Solids %)</label><input type="number" id="fs_vs" step="any" placeholder="e.g. 75" value="${_fsWizData.vs||''}" oninput="_fsWizData.vs=parseFloat(this.value)||0"/></div>
+      <div class="fg"><label>TS% (Total Solids %)</label><input type="number" id="fs_ts" step="any" placeholder="e.g. 20" value="${_fsWizData.ts||''}" oninput="_fsWizData.ts=parseFloat(this.value)||0"/></div>
+    </div>`
+  } else {
+    const reg=JSON.parse(localStorage.getItem('FEEDSTOCK_REGISTRY')||'[]')
+    const nextOffset=reg.length*3
+    bodyHtml=`<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:16px 18px;margin-bottom:14px">
+      <div style="font-size:.82rem;font-weight:700;color:#15803d;margin-bottom:10px">Review before registering</div>
+      <div class="fgrid">
+        ${Object.entries({Name:_fsWizData.name,ID:_fsWizData.id,Unit:_fsWizData.unit,Category:_fsWizData.cat,'Rate (₹)':_fsWizData.rate,'Supply/day':_fsWizData.supply,'BPP rate':_fsWizData.bpp,'VS%':_fsWizData.vs,'TS%':_fsWizData.ts}).map(([k,v])=>
+          `<div class="fg"><label>${k}</label><input type="text" class="cf" value="${v||'—'}" readonly/></div>`
+        ).join('')}
+      </div>
+      <div style="font-size:.77rem;color:#166534;margin-top:10px">This will add 3 new columns to the master workbook: ${_fsWizData.id}_exp, ${_fsWizData.id}_act, ${_fsWizData.id}_bpp</div>
+    </div>`
+  }
+
+  const isLast=_fsWizStep===4
+  main.innerHTML=`<div style="margin-bottom:18px">
+    <div style="font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.025em;margin-bottom:4px">Add New Feedstock</div>
+    <div style="font-size:.81rem;color:var(--muted)">Register a new feedstock type — adds columns to the master workbook and enables data entry.</div>
+  </div>
+  <div style="display:flex;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px">${stepBar}</div>
+  <div class="sec"><div class="sec-title-row"><span class="sec-title">Step ${_fsWizStep} — ${steps[_fsWizStep-1]}</span></div>
+    ${bodyHtml}
+  </div>
+  <div style="display:flex;gap:10px;margin-top:16px">
+    ${_fsWizStep>1?`<button class="clear-btn" onclick="_fsWizStep--;renderFsStep()">← Back</button>`:''}
+    <button style="padding:7px 20px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:.87rem;font-weight:700;cursor:pointer;font-family:inherit"
+      onclick="${isLast?'registerFeedstock(_fsWizData)':'_fsWizStep++;renderFsStep()'}">
+      ${isLast?'Register Feedstock ✓':'Next →'}
+    </button>
+    <button class="clear-btn" onclick="renderHome()">Cancel</button>
+  </div>`
+}
+
+async function registerFeedstock(data){
+  if(!data.name||!data.id){ toast('Name and ID are required',true); return }
+  const btn=document.querySelector('#main button[onclick^="registerFeedstock"]')
+  if(btn){ btn.disabled=true; btn.textContent='Registering…' }
+
+  // 3-lock: read existing headers, append new columns, read back to verify
+  try{
+    await initMsal(); const t=await getToken()
+    if(!t){ toast('Sign in to register feedstock',true); if(btn){ btn.disabled=false; btn.textContent='Register Feedstock ✓' } return }
+    const sid=await getSession()
+
+    // Lock 1: read current used range to find last column
+    const d1=await gGet(`/worksheets('D1')/usedRange`)
+    if(!d1||d1.error) throw new Error('Could not read D1 used range')
+    const lastCol=d1.columnCount||60
+    const newColIdx=lastCol+1
+
+    // Lock 2: write 3 header cells
+    const hdrRow=2
+    const cols=[newColIdx,newColIdx+1,newColIdx+2]
+    const hdrs=[`${data.id}_exp`,`${data.id}_act`,`${data.id}_bpp`]
+    for(let i=0;i<3;i++){
+      const addr=`${colLetter(cols[i])}${hdrRow}`
+      await gPatch(`/worksheets('D1')/range(address='${addr}')`,{values:[[hdrs[i]]]},sid)
+      await gPatch(`/worksheets('D2')/range(address='${addr}')`,{values:[[hdrs[i]]]},sid)
+    }
+
+    // Lock 3: read back to verify
+    const verify=await gGet(`/worksheets('D1')/range(address='${colLetter(cols[0])}${hdrRow}:${colLetter(cols[2])}${hdrRow}')`)
+    if(!verify||!verify.values) throw new Error('Verification read failed')
+    const written=verify.values[0]||[]
+    for(let i=0;i<3;i++){
+      if(String(written[i]).toLowerCase()!==hdrs[i].toLowerCase()) throw new Error(`Header mismatch: expected ${hdrs[i]}, got ${written[i]}`)
+    }
+
+    // Persist to registry
+    const colOffset=newColIdx-57
+    const reg=JSON.parse(localStorage.getItem('FEEDSTOCK_REGISTRY')||'[]')
+    reg.push({...data,colIdx:newColIdx,colOffset,registeredAt:new Date().toISOString()})
+    localStorage.setItem('FEEDSTOCK_REGISTRY',JSON.stringify(reg))
+
+    // Merge into COLUMN_MAP
+    COLUMN_MAP['D1'][`${data.id}_exp`]=cols[0]; COLUMN_MAP['D1'][`${data.id}_act`]=cols[1]; COLUMN_MAP['D1'][`${data.id}_bpp`]=cols[2]
+    COLUMN_MAP['D2'][`${data.id}_exp`]=cols[0]; COLUMN_MAP['D2'][`${data.id}_act`]=cols[1]; COLUMN_MAP['D2'][`${data.id}_bpp`]=cols[2]
+
+    toast(`${data.name} registered — columns added at ${colLetter(cols[0])}–${colLetter(cols[2])}`)
+    renderHome()
+  } catch(e){
+    toast(`Registration failed: ${e.message}`,true)
+    if(btn){ btn.disabled=false; btn.textContent='Register Feedstock ✓' }
+  }
+}
+
+window.showFeedstockWizard=showFeedstockWizard
+
+// ══════════════════════════════════════════════════════════
+// Expose globals
+window.renderHome=renderHome
+window.renderAudit=renderAudit
+window.selectPortalDate=selectPortalDate
+window.buildSidebar=buildSidebar
+window.renderFsStep=renderFsStep
+
+// Boot
+loadFeedstockRegistry()
+updateTopbarDate()
+buildSidebar()
+renderHome()
+// Load subLog for progress tracking, then refresh sidebar + home
+initMsal().then(()=>{
+  updateAuthUI()
+  // Try to load submission log for progress tracking
+  gGet(`/worksheets('Submission%20Log')/range(address='A3:E300')`).then(d=>{
+    if(d&&d.values){ window._subLog=d.values; buildSidebar(); renderHome() }
+  }).catch(()=>{})
+}).catch(()=>{})
 
 // ═══════════════════════════════════════════════════════════════
 // UPLOAD WORKBOOK FEATURE  (v2 — all loopholes fixed)
@@ -1655,8 +2422,8 @@ function dateToSerial(d){
 
 function showUploadView(){
   cur = null
-  document.querySelectorAll('#nav button').forEach(b=>b.classList.remove('active'))
-  document.querySelector('#nav button[data-id="_upload"]')?.classList.add('active')
+  document.getElementById('saveBarEl').style.display='none'
+  document.getElementById('main').style.padding='16px 20px'
   document.getElementById('main').innerHTML = `
     <!-- Page title -->
     <div style="margin-bottom:22px;">
