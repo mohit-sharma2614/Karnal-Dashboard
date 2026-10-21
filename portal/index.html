@@ -1234,7 +1234,7 @@ function _savedOnDate(dateStr){
   for(const row of window._subLog){
     if(!row||row.length<2) continue
     const rs=row[0]; const lbl=row[1]
-    if(typeof rs==='number'&&Math.round(rs)===serial&&lbl&&!String(lbl).startsWith('[UPLOAD')) saved.add(lbl)
+    if(Math.round(Number(rs))===serial&&lbl&&!String(lbl).startsWith('[UPLOAD')) saved.add(lbl)
   }
   return saved
 }
@@ -1278,11 +1278,11 @@ function buildSidebar(){
   if(missAlerts.length>0){
     const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
     alertHtml=`<div class="sb-alert">
-      <div class="sb-alert-title">${missAlerts.reduce((a,x)=>a+x.count,0)} sheets missing</div>
+      <div class="sb-alert-title">${missAlerts.reduce((a,x)=>a+x.count,0)} entries missing</div>
       ${missAlerts.slice(0,3).map(a=>{
         const dObj=new Date(a.d+'T00:00:00')
         const dLabel=`${months[dObj.getMonth()]} ${dObj.getDate()}`
-        return a.items.map(it=>`<div class="sb-alert-item"><div class="sb-alert-dot"></div><span class="sb-alert-text">${it} · ${dLabel}</span></div>`).join('')
+        return `<div class="sb-alert-item"><div class="sb-alert-dot"></div><span class="sb-alert-text">${a.count} sheets · ${dLabel}</span></div>`
       }).join('')}
     </div>
     <button class="sb-audit-btn" onclick="renderAudit()">View full audit matrix →</button>`
@@ -1324,12 +1324,12 @@ function buildSidebar(){
       </div>
     </div>
     <div class="sb-divider"></div>
-    ${alertHtml}
     <div class="sb-sec">Admin</div>
     <div class="sb-upl" onclick="showFeedstockWizard()" style="background:#fefce8;border-color:#fef08a">
       <div class="sb-upl-icon" style="background:#fef9c3;color:#854d0e">＋</div><span class="sb-upl-label" style="color:#854d0e">Add New Feedstock</span>
     </div>
     <div class="sb-divider"></div>
+    ${alertHtml}
     <div class="sb-foot">
       <div class="sb-av">${initials}</div>
       <div>
@@ -1362,6 +1362,7 @@ function renderHome(){
   document.getElementById('saveBarEl').style.display='none'
   main.style.padding='0'
   cur=null
+  window._activeDateStr=null
   const today=_todayStr()
   const dateStr=window._activeDateStr||today
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -1458,7 +1459,7 @@ function renderHome(){
     <!-- WORKBOOK CARDS -->
     <div class="sec-hd">
       <span class="sec-hd-title">Sheets by workbook — ${dateLbl}</span>
-      <a href="../dashboard/analytics_dashboard.html" target="_blank" style="font-size:11px;color:#4f46e5;font-weight:600;text-decoration:none">Analytics Dashboard ↗</a>
+      <a href="https://mohit-sharma2614.github.io/Karnal-Dashboard/dashboard/analytics_dashboard.html" target="_blank" style="font-size:11px;color:#4f46e5;font-weight:600;text-decoration:none">Analytics Dashboard ↗</a>
     </div>
     <div class="wb-grid">
       ${WB_CARDS.map((wb,wi)=>{
@@ -1622,9 +1623,10 @@ function loadSheet(id){
   document.getElementById('main').style.padding='16px 20px'
   let html=`<div class="sh"><h2>${cur.label}</h2><div class="sub">Sheet: <b>${cur.sheet}</b></div></div>`
   if(cur.hasDate){
+    const _sheetDate=window._activeDateStr||today()
     html+=`<div class="date-row"><label>Date</label>
-      <input type="date" id="dp" value="${today()}" max="${today()}" oninput="onDateChange()"/>
-      <span id="dp-display" style="font-size:.83rem;font-weight:600;color:var(--accent)">${fmtDisplay(today())}</span>
+      <input type="date" id="dp" value="${_sheetDate}" max="${today()}" oninput="onDateChange()"/>
+      <span id="dp-display" style="font-size:.83rem;font-weight:600;color:var(--accent)">${fmtDisplay(_sheetDate)}</span>
       <span id="dp-err" style="font-size:.77rem;color:#e53935;display:none">Invalid date</span></div>`
   }
   cur.sections.forEach((sec,si)=>{
@@ -1864,7 +1866,6 @@ function isAllowedAccount(account){
 }
 
 async function getToken(){
-  if(_token) return _token
   const accounts = _msal.getAllAccounts()
   if(!accounts.length) return null
   const account = accounts[0]
@@ -2003,7 +2004,7 @@ async function findRow(sheetName, serial, dataStart=3){
 
 // ── Save current sheet to SharePoint ─────────────────────────────────────────
 window.handleSave = async ()=>{
-  await initMsal()
+  if(!_msal) await initMsal()
   const t=await getToken()
   if(!t){ toast('Sign in first',true); return }
   if(!cur){ toast('Select a sheet first',true); return }
@@ -2292,11 +2293,26 @@ function renderFsStep(){
   <div style="display:flex;gap:10px;margin-top:16px">
     ${_fsWizStep>1?`<button class="clear-btn" onclick="_fsWizStep--;renderFsStep()">← Back</button>`:''}
     <button style="padding:7px 20px;background:#4f46e5;color:#fff;border:none;border-radius:8px;font-size:.87rem;font-weight:700;cursor:pointer;font-family:inherit"
-      onclick="${isLast?'registerFeedstock(_fsWizData)':'_fsWizStep++;renderFsStep()'}">
+      onclick="${isLast?'registerFeedstock(_fsWizData)':'validateFsStep()&&(_fsWizStep++,renderFsStep())'}">
       ${isLast?'Register Feedstock ✓':'Next →'}
     </button>
     <button class="clear-btn" onclick="renderHome()">Cancel</button>
   </div>`
+}
+
+function validateFsStep(){
+  if(_fsWizStep===1){
+    if(!_fsWizData.name||!_fsWizData.name.trim()){ toast('Feedstock name is required',true); return false }
+    if(!_fsWizData.id||!/^[A-Za-z0-9]{2,6}$/.test(_fsWizData.id)){ toast('Short ID must be 2–6 alphanumeric characters',true); return false }
+    if(!_fsWizData.unit){ toast('Unit is required',true); return false }
+  }
+  if(_fsWizStep===2){
+    if(!_fsWizData.cost||isNaN(_fsWizData.cost)||Number(_fsWizData.cost)<=0){ toast('Enter a valid cost per MT',true); return false }
+  }
+  if(_fsWizStep===3){
+    if(!_fsWizData.bpp||isNaN(_fsWizData.bpp)||Number(_fsWizData.bpp)<=0){ toast('Enter a valid BPP rate',true); return false }
+  }
+  return true
 }
 
 async function registerFeedstock(data){
@@ -2334,8 +2350,8 @@ async function registerFeedstock(data){
       if(String(written[i]).toLowerCase()!==hdrs[i].toLowerCase()) throw new Error(`Header mismatch: expected ${hdrs[i]}, got ${written[i]}`)
     }
 
-    // Persist to registry
-    const colOffset=newColIdx-57
+    // Persist to registry — colOffset relative to first data column (col 2 = date, col 3 = first data)
+    const colOffset=newColIdx-lastCol
     const reg=JSON.parse(localStorage.getItem('FEEDSTOCK_REGISTRY')||'[]')
     reg.push({...data,colIdx:newColIdx,colOffset,registeredAt:new Date().toISOString()})
     localStorage.setItem('FEEDSTOCK_REGISTRY',JSON.stringify(reg))
@@ -2620,9 +2636,8 @@ async function loadUplFile(file){
     </div>`
   }
   // Advance stepper to step 2
-  const s1=document.getElementById('uplStep1'), l1=document.getElementById('uplLine1'), s2=document.getElementById('uplStep2')
+  const s1=document.getElementById('uplStep1'), s2=document.getElementById('uplStep2')
   if(s1){s1.classList.remove('active');s1.classList.add('done')}
-  if(l1){l1.classList.add('done')}
   if(s2){s2.classList.add('active')}
   try {
     const buf = await file.arrayBuffer()
@@ -2856,9 +2871,8 @@ async function submitUpload(){
   if(!t){ toast('Sign in first', true); return }
 
   // Advance stepper to step 3
-  const s2=document.getElementById('uplStep2'), l2=document.getElementById('uplLine2'), s3=document.getElementById('uplStep3')
+  const s2=document.getElementById('uplStep2'), s3=document.getElementById('uplStep3')
   if(s2){s2.classList.remove('active');s2.classList.add('done')}
-  if(l2){l2.classList.add('done')}
   if(s3){s3.classList.add('active')}
 
   const btn      = document.getElementById('uplSubmitBtn')
