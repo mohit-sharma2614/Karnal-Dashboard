@@ -1342,7 +1342,7 @@ function buildSidebar(){
 function selectPortalDate(dateStr){
   window._activeDateStr=dateStr
   buildSidebar()
-  renderHome()
+  renderHome(false)
 }
 
 // Topbar date label
@@ -1356,13 +1356,13 @@ function updateTopbarDate(){
   el.innerHTML=`<strong>${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}</strong> · Week ${wk}`
 }
 
-function renderHome(){
+function renderHome(resetDate=true){
   const main=document.getElementById('main')
   if(!main) return
   document.getElementById('saveBarEl').style.display='none'
   main.style.padding='0'
   cur=null
-  window._activeDateStr=null
+  if(resetDate) window._activeDateStr=null
   const today=_todayStr()
   const dateStr=window._activeDateStr||today
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
@@ -2388,7 +2388,7 @@ initMsal().then(()=>{
   updateAuthUI()
   // Try to load submission log for progress tracking
   gGet(`/worksheets('Submission%20Log')/range(address='A3:E300')`).then(d=>{
-    if(d&&d.values){ window._subLog=d.values; buildSidebar(); renderHome() }
+    if(d&&d.values){ window._subLog=d.values; buildSidebar(); renderHome(false) }
   }).catch(()=>{})
 }).catch(()=>{})
 
