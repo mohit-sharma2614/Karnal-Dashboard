@@ -772,120 +772,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
         <span id="rpt-picker-period" style="font-size:11px;color:#64748b;margin-left:6px;font-weight:500">—</span>
       </div>
     </div>
-    <!-- Report Cards Grid -->
-    <div style="padding:16px 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow-y:auto">
-
-      <!-- Card 1: Plant Overview -->
-      <div class="rpt-card" onclick="viewRptType('ov')" style="border:1px solid #e8edf5;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;position:relative;background:#fff">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="width:36px;height:36px;border-radius:9px;background:#eff6ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="2" y="11" width="3" height="7" rx="1" stroke="#2563eb" stroke-width="1.4"/>
-              <rect x="7" y="7" width="3" height="11" rx="1" stroke="#2563eb" stroke-width="1.4"/>
-              <rect x="12" y="4" width="3" height="14" rx="1" stroke="#2563eb" stroke-width="1.4"/>
-              <path d="M17 3l-5 4-4-2-5 3" stroke="#2563eb" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div>
-            <div style="font-size:12.5px;font-weight:700;color:#0f172a;line-height:1.2">Plant Overview</div>
-            <div style="font-size:10.5px;color:#64748b;margin-top:1px">KPIs &amp; health summary</div>
-          </div>
-        </div>
-        <div style="font-size:10.5px;color:#94a3b8;line-height:1.5;margin-bottom:12px">CBG production, uptime, revenue targets, and overall plant performance at a glance.</div>
-        <div style="display:flex;gap:7px">
-          <button onclick="event.stopPropagation();viewRptType('ov')" class="rpt-act-btn rpt-act-view">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>View
-          </button>
-          <button onclick="event.stopPropagation();dlRptType('ov')" class="rpt-act-btn rpt-act-dl">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 11h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>PDF
-          </button>
-        </div>
-      </div>
-
-      <!-- Card 2: Feedstock -->
-      <div class="rpt-card" onclick="viewRptType('s1')" style="border:1px solid #e8edf5;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;position:relative;background:#fff">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="width:36px;height:36px;border-radius:9px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M3 15c1-3 3-5 7-5s6 2 7 5" stroke="#16a34a" stroke-width="1.4" stroke-linecap="round"/>
-              <path d="M10 10V6" stroke="#16a34a" stroke-width="1.4" stroke-linecap="round"/>
-              <path d="M10 6c0-2 2-3.5 2-3.5S10.5 4 10 6z" stroke="#16a34a" stroke-width="1.2" stroke-linejoin="round"/>
-              <path d="M10 6c0-2-2-3.5-2-3.5S9.5 4 10 6z" stroke="#16a34a" stroke-width="1.2" stroke-linejoin="round"/>
-              <ellipse cx="10" cy="15.5" rx="6" ry="2" stroke="#16a34a" stroke-width="1.3"/>
-            </svg>
-          </div>
-          <div>
-            <div style="font-size:12.5px;font-weight:700;color:#0f172a;line-height:1.2">Feedstock</div>
-            <div style="font-size:10.5px;color:#64748b;margin-top:1px">Input material analysis</div>
-          </div>
-        </div>
-        <div style="font-size:10.5px;color:#94a3b8;line-height:1.5;margin-bottom:12px">Manure, biomass and slurry feed quantities, OLR trends, and feedstock cost breakdown.</div>
-        <div style="display:flex;gap:7px">
-          <button onclick="event.stopPropagation();viewRptType('s1')" class="rpt-act-btn rpt-act-view">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>View
-          </button>
-          <button onclick="event.stopPropagation();dlRptType('s1')" class="rpt-act-btn rpt-act-dl">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 11h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>PDF
-          </button>
-        </div>
-      </div>
-
-      <!-- Card 3: Lab & Process -->
-      <div class="rpt-card" onclick="viewRptType('s2')" style="border:1px solid #e8edf5;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;position:relative;background:#fff">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="width:36px;height:36px;border-radius:9px;background:#fdf4ff;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M8 3v6l-3.5 6.5a1 1 0 00.9 1.5h9.2a1 1 0 00.9-1.5L12 9V3" stroke="#9333ea" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M7 3h6" stroke="#9333ea" stroke-width="1.4" stroke-linecap="round"/>
-              <circle cx="9.5" cy="13" r=".8" fill="#9333ea"/>
-              <circle cx="12" cy="14.5" r=".6" fill="#9333ea"/>
-              <circle cx="8" cy="15" r=".5" fill="#9333ea"/>
-            </svg>
-          </div>
-          <div>
-            <div style="font-size:12.5px;font-weight:700;color:#0f172a;line-height:1.2">Lab &amp; Process</div>
-            <div style="font-size:10.5px;color:#64748b;margin-top:1px">Quality &amp; gas metrics</div>
-          </div>
-        </div>
-        <div style="font-size:10.5px;color:#94a3b8;line-height:1.5;margin-bottom:12px">CH₄ purity, H₂S levels, pH, VFA/Alk ratio, and daily lab test results.</div>
-        <div style="display:flex;gap:7px">
-          <button onclick="event.stopPropagation();viewRptType('s2')" class="rpt-act-btn rpt-act-view">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>View
-          </button>
-          <button onclick="event.stopPropagation();dlRptType('s2')" class="rpt-act-btn rpt-act-dl">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 11h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>PDF
-          </button>
-        </div>
-      </div>
-
-      <!-- Card 4: Digester Performance -->
-      <div class="rpt-card" onclick="viewRptType('s3')" style="border:1px solid #e8edf5;border-radius:12px;padding:16px;cursor:pointer;transition:all .15s;position:relative;background:#fff">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div style="width:36px;height:36px;border-radius:9px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0">
-            <svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="10" cy="10" rx="7" ry="5.5" stroke="#ea580c" stroke-width="1.4"/>
-              <ellipse cx="10" cy="10" rx="4" ry="2.5" stroke="#ea580c" stroke-width="1.2"/>
-              <path d="M10 4.5V2M10 17.5V18" stroke="#ea580c" stroke-width="1.3" stroke-linecap="round"/>
-              <path d="M16.5 7l1.3-.75M2.2 13.75L3.5 13" stroke="#ea580c" stroke-width="1.2" stroke-linecap="round"/>
-              <path d="M16.5 13l1.3.75M2.2 6.25L3.5 7" stroke="#ea580c" stroke-width="1.2" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <div>
-            <div style="font-size:12.5px;font-weight:700;color:#0f172a;line-height:1.2">Digester Performance</div>
-            <div style="font-size:10.5px;color:#64748b;margin-top:1px">D1 &amp; D2 operational data</div>
-          </div>
-        </div>
-        <div style="font-size:10.5px;color:#94a3b8;line-height:1.5;margin-bottom:12px">Digester temperature, biogas output, HRT, working volume, and D1/D2 comparison.</div>
-        <div style="display:flex;gap:7px">
-          <button onclick="event.stopPropagation();viewRptType('s3')" class="rpt-act-btn rpt-act-view">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.3"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>View
-          </button>
-          <button onclick="event.stopPropagation();dlRptType('s3')" class="rpt-act-btn rpt-act-dl">
-            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 2v7M4.5 6.5L7 9l2.5-2.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 11h9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>PDF
-          </button>
-        </div>
-      </div>
-
+    <!-- Actions -->
+    <div style="padding:24px 20px 24px;display:flex;flex-direction:column;gap:10px">
+      <button id="rpt-view-btn" onclick="doViewReport()" style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px;border-radius:10px;border:none;background:#0f172a;color:#fff;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .12s" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='#0f172a'">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" fill="currentColor"/></svg>
+        View Report
+      </button>
+      <button id="rpt-dl-btn" onclick="doDownloadReport()" style="display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px;border-radius:10px;border:1px solid #e2e8f0;background:#f8fafc;color:#0f172a;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .12s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2v9M5 8.5L8 11l3-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M2.5 13h11" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+        Download PDF
+      </button>
     </div>
   </div>
 </div>
@@ -6651,9 +6547,11 @@ function openRptPicker(){
   const lbl=document.getElementById('rpt-picker-period');
   if(lbl)lbl.textContent=_rptPeriodLabel(autoPeriod);
   const dataReady=!!(D&&D.months&&D.months.length);
-  document.querySelectorAll('.rpt-act-btn').forEach(b=>{
+  ['rpt-view-btn','rpt-dl-btn'].forEach(id=>{
+    const b=document.getElementById(id);
+    if(!b)return;
     b.disabled=!dataReady;
-    b.style.opacity=dataReady?'1':'.4';
+    b.style.opacity=dataReady?'1':'.5';
     b.style.cursor=dataReady?'pointer':'not-allowed';
   });
   const ov=document.getElementById('rpt-picker-overlay');
@@ -6679,20 +6577,18 @@ function _switchToSection(sec){
     });
   }
 }
-function viewRptType(sec){
+function doViewReport(){
+  if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
   closeRptPicker();
   _rpP=_rptPickerPeriod;
-  _switchToSection(sec);
-  // Build report with chosen period directly
-  if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
   document.getElementById('rp-view').innerHTML=_buildRp(_rpP);
   document.getElementById('rp-modal').classList.remove('hidden');
   document.body.style.overflow='hidden';
 }
-function dlRptType(sec){
+function doDownloadReport(){
+  if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
   closeRptPicker();
   _rpP=_rptPickerPeriod;
-  _switchToSection(sec);
   setTimeout(()=>exportReportPDF(),80);
 }
 function exportReportPDF(){
