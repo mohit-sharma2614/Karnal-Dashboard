@@ -405,6 +405,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 /* ── REPORT PICKER MODAL ── */
 @keyframes rptPickerIn{from{opacity:0;transform:scale(.94) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
 .rpt-card:hover{border-color:#c7d9f5!important;background:#f8faff!important;box-shadow:0 4px 16px rgba(37,99,235,.08)}
+.rpt-period-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:6px;border:none;font-size:11.5px;font-weight:600;font-family:inherit;cursor:pointer;color:#64748b;background:transparent;transition:all .15s;letter-spacing:.1px}
+.rpt-period-active{background:#fff!important;color:#0f172a!important;box-shadow:0 1px 3px rgba(0,0,0,.1),0 0 0 1px rgba(0,0,0,.06)}
 .rpt-act-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 11px;border-radius:6px;border:none;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .12s;letter-spacing:.1px}
 .rpt-act-view{background:#eff6ff;color:#2563eb}
 .rpt-act-view:hover{background:#dbeafe;color:#1d4ed8}
@@ -746,14 +748,29 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <div id="rpt-picker-overlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.55);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);align-items:center;justify-content:center">
   <div id="rpt-picker-card" style="background:#fff;border-radius:16px;box-shadow:0 24px 64px rgba(0,0,0,.22),0 4px 12px rgba(0,0,0,.1);width:min(640px,calc(100vw - 32px));max-height:calc(100vh - 48px);overflow:hidden;display:flex;flex-direction:column;animation:rptPickerIn .22s cubic-bezier(.34,1.2,.64,1) both">
     <!-- Header -->
-    <div style="padding:20px 24px 16px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
-      <div>
+    <div style="padding:18px 20px 14px;border-bottom:1px solid #f1f5f9">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div style="font-size:15px;font-weight:700;color:#0f172a;letter-spacing:-.2px">Generate Report</div>
-        <div style="font-size:12px;color:#64748b;margin-top:3px">Select a report type · Period: <span id="rpt-picker-period" style="font-weight:600;color:#334155">—</span></div>
+        <button onclick="closeRptPicker()" style="width:28px;height:28px;border-radius:7px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/></svg>
+        </button>
       </div>
-      <button onclick="closeRptPicker()" style="width:28px;height:28px;border-radius:7px;border:1px solid #e2e8f0;background:#f8fafc;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .12s" onmouseover="this.style.background='#f1f5f9'" onmouseout="this.style.background='#f8fafc'">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 2l8 8M10 2l-8 8" stroke="#64748b" stroke-width="1.6" stroke-linecap="round"/></svg>
-      </button>
+      <!-- Period Toggle -->
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:10.5px;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px;margin-right:4px">Period</span>
+        <div style="display:flex;background:#f1f5f9;border-radius:8px;padding:3px;gap:2px">
+          <button id="rpt-period-yearly" class="rpt-period-btn rpt-period-active" onclick="setRptPeriod('yearly',this)">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 2V1M9.5 2V1M1.5 5h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Yearly
+          </button>
+          <button id="rpt-period-monthly" class="rpt-period-btn" onclick="setRptPeriod('monthly',this)">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="1.5" y="2" width="11" height="10" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4.5 2V1M9.5 2V1M1.5 5h11" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="3" y="7" width="2" height="2" rx=".4" fill="currentColor"/><rect x="6" y="7" width="2" height="2" rx=".4" fill="currentColor"/></svg>Monthly
+          </button>
+          <button id="rpt-period-daily" class="rpt-period-btn" onclick="setRptPeriod('daily',this)">
+            <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.3"/><path d="M7 4.5V7l1.5 1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>Daily
+          </button>
+        </div>
+        <span id="rpt-picker-period" style="font-size:11px;color:#64748b;margin-left:6px;font-weight:500">—</span>
+      </div>
     </div>
     <!-- Report Cards Grid -->
     <div style="padding:16px 20px 20px;display:grid;grid-template-columns:1fr 1fr;gap:12px;overflow-y:auto">
@@ -6607,16 +6624,33 @@ function closeReport(){
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeReport();closeRptPicker();}});
 
 /* ── Report Picker ── */
-function _rptPeriodLabel(){
-  const mo=curMonth!=='ALL'?curMonth:'All Months';
-  const da=curDay!=='ALL'?curDay:null;
-  return da?da+' 2026':mo+(mo==='All Months'?' 2026':' 2026');
+let _rptPickerPeriod='yearly';
+function _rptPeriodLabel(p){
+  if(p==='daily'){
+    return curDay!=='ALL'?curDay+' 2026':'Select a day above';
+  }
+  if(p==='monthly'){
+    return curMonth!=='ALL'?curMonth+' 2026':'Select a month above';
+  }
+  return (D&&D.months&&D.months.length)?(D.months[0]+' – '+D.months[D.months.length-1]+' 2026'):'Full Year 2026';
+}
+function setRptPeriod(p, btn){
+  _rptPickerPeriod=p;
+  document.querySelectorAll('.rpt-period-btn').forEach(b=>b.classList.remove('rpt-period-active'));
+  btn.classList.add('rpt-period-active');
+  const lbl=document.getElementById('rpt-picker-period');
+  if(lbl)lbl.textContent=_rptPeriodLabel(p);
 }
 function openRptPicker(){
+  // Auto-detect best period from current filter state
+  const autoPeriod=curDay!=='ALL'?'daily':curMonth!=='ALL'?'monthly':'yearly';
+  _rptPickerPeriod=autoPeriod;
+  document.querySelectorAll('.rpt-period-btn').forEach(b=>b.classList.remove('rpt-period-active'));
+  const activeBtn=document.getElementById('rpt-period-'+autoPeriod);
+  if(activeBtn)activeBtn.classList.add('rpt-period-active');
   const lbl=document.getElementById('rpt-picker-period');
+  if(lbl)lbl.textContent=_rptPeriodLabel(autoPeriod);
   const dataReady=!!(D&&D.months&&D.months.length);
-  if(lbl)lbl.textContent=dataReady?_rptPeriodLabel():'Loading…';
-  // Disable/enable action buttons based on data state
   document.querySelectorAll('.rpt-act-btn').forEach(b=>{
     b.disabled=!dataReady;
     b.style.opacity=dataReady?'1':'.4';
@@ -6647,11 +6681,17 @@ function _switchToSection(sec){
 }
 function viewRptType(sec){
   closeRptPicker();
+  _rpP=_rptPickerPeriod;
   _switchToSection(sec);
-  openReport();
+  // Build report with chosen period directly
+  if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
+  document.getElementById('rp-view').innerHTML=_buildRp(_rpP);
+  document.getElementById('rp-modal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
 }
 function dlRptType(sec){
   closeRptPicker();
+  _rpP=_rptPickerPeriod;
   _switchToSection(sec);
   setTimeout(()=>exportReportPDF(),80);
 }
