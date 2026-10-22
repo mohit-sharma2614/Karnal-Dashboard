@@ -6613,9 +6613,15 @@ function _rptPeriodLabel(){
   return da?da+' 2026':mo+(mo==='All Months'?' 2026':' 2026');
 }
 function openRptPicker(){
-  if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
   const lbl=document.getElementById('rpt-picker-period');
-  if(lbl)lbl.textContent=_rptPeriodLabel();
+  const dataReady=!!(D&&D.months&&D.months.length);
+  if(lbl)lbl.textContent=dataReady?_rptPeriodLabel():'Loading…';
+  // Disable/enable action buttons based on data state
+  document.querySelectorAll('.rpt-act-btn').forEach(b=>{
+    b.disabled=!dataReady;
+    b.style.opacity=dataReady?'1':'.4';
+    b.style.cursor=dataReady?'pointer':'not-allowed';
+  });
   const ov=document.getElementById('rpt-picker-overlay');
   ov.style.display='flex';
   document.body.style.overflow='hidden';
