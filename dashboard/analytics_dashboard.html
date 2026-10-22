@@ -569,91 +569,91 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 @keyframes orb2{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(-30px,40px) scale(0.9)}}
 @keyframes orb3{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(20px,30px) scale(1.05)}66%{transform:translate(-20px,-10px) scale(0.95)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@keyframes pulse-ring{0%{box-shadow:0 0 0 0 rgba(6,182,212,.4)}70%{box-shadow:0 0 0 14px rgba(6,182,212,0)}100%{box-shadow:0 0 0 0 rgba(6,182,212,0)}}
-@keyframes gridLine{0%{opacity:0}50%{opacity:1}100%{opacity:0}}
+@keyframes pulse-ring-lt{0%{box-shadow:0 0 0 0 rgba(6,182,212,.5)}70%{box-shadow:0 0 0 14px rgba(6,182,212,0)}100%{box-shadow:0 0 0 0 rgba(6,182,212,0)}}
 #authOverlay .stat-pill{animation:fadeUp .5s ease both}
 #authOverlay .stat-pill:nth-child(1){animation-delay:.1s}
 #authOverlay .stat-pill:nth-child(2){animation-delay:.2s}
 #authOverlay .stat-pill:nth-child(3){animation-delay:.3s}
 #authOverlay .stat-pill:nth-child(4){animation-delay:.4s}
 #authOverlay .card-in{animation:fadeUp .6s .2s ease both}
+@keyframes spin{to{transform:rotate(360deg)}}
 </style>
-<div id="authOverlay" style="position:fixed;inset:0;z-index:9999;font-family:'Inter','Segoe UI',system-ui,sans-serif;overflow:hidden;background:#060d1a">
-  <!-- Animated background orbs -->
+<div id="authOverlay" style="position:fixed;inset:0;z-index:9999;font-family:'Inter','Segoe UI',system-ui,sans-serif;overflow:hidden;background:#f0f5fb">
+  <!-- Animated background orbs (light pastel) -->
   <div style="position:absolute;inset:0;pointer-events:none">
-    <div style="position:absolute;top:-120px;left:-120px;width:550px;height:550px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.18) 0%,transparent 70%);animation:orb1 12s ease-in-out infinite"></div>
-    <div style="position:absolute;bottom:-100px;right:-100px;width:480px;height:480px;border-radius:50%;background:radial-gradient(circle,rgba(79,70,229,.15) 0%,transparent 70%);animation:orb2 15s ease-in-out infinite"></div>
-    <div style="position:absolute;top:40%;left:30%;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.1) 0%,transparent 70%);animation:orb3 18s ease-in-out infinite"></div>
-    <!-- subtle grid overlay -->
-    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.04" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="g" width="60" height="60" patternUnits="userSpaceOnUse"><path d="M60 0H0V60" fill="none" stroke="#fff" stroke-width=".5"/></pattern></defs><rect width="100%" height="100%" fill="url(#g)"/></svg>
+    <div style="position:absolute;top:-140px;left:-140px;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(6,182,212,.14) 0%,transparent 70%);animation:orb1 12s ease-in-out infinite"></div>
+    <div style="position:absolute;bottom:-120px;right:-120px;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.12) 0%,transparent 70%);animation:orb2 15s ease-in-out infinite"></div>
+    <div style="position:absolute;top:35%;left:28%;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(16,185,129,.09) 0%,transparent 70%);animation:orb3 18s ease-in-out infinite"></div>
+    <!-- subtle dot-grid overlay -->
+    <svg style="position:absolute;inset:0;width:100%;height:100%;opacity:.35" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="1" cy="1" r="1" fill="#cbd5e1"/></pattern></defs><rect width="100%" height="100%" fill="url(#dots)"/></svg>
   </div>
 
-  <!-- Main layout: left branding + right card -->
+  <!-- Main layout -->
   <div style="position:relative;z-index:1;display:flex;height:100%;align-items:stretch">
 
-    <!-- LEFT: full branding panel -->
+    <!-- LEFT: branding panel -->
     <div style="flex:1;display:flex;flex-direction:column;justify-content:space-between;padding:52px 64px;min-width:0">
       <!-- Top: logo -->
       <div style="display:flex;align-items:center;gap:14px;animation:fadeUp .5s ease both">
-        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#06b6d4,#0284c7);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;letter-spacing:-.02em;flex-shrink:0;animation:pulse-ring 2.5s 1s ease infinite">LR</div>
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#06b6d4,#0284c7);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:900;color:#fff;letter-spacing:-.02em;flex-shrink:0;animation:pulse-ring-lt 2.5s 1s ease infinite">LR</div>
         <div>
-          <div style="font-size:14px;font-weight:800;color:#fff;letter-spacing:.01em">LREKPL</div>
-          <div style="font-size:10px;color:rgba(255,255,255,.38);letter-spacing:.09em;text-transform:uppercase;margin-top:1px">CBG · Karnal, Haryana</div>
+          <div style="font-size:14px;font-weight:800;color:#0f172a;letter-spacing:.01em">LREKPL</div>
+          <div style="font-size:10px;color:#94a3b8;letter-spacing:.09em;text-transform:uppercase;margin-top:1px">CBG · Karnal, Haryana</div>
         </div>
       </div>
 
       <!-- Middle: hero text -->
-      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;max-width:540px;padding:40px 0 20px">
-        <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#06b6d4;margin-bottom:18px;animation:fadeUp .5s .1s ease both">Plant Intelligence Platform</div>
-        <div style="font-size:clamp(38px,4.5vw,58px);font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.05;margin-bottom:22px;animation:fadeUp .5s .15s ease both">
-          Turn plant data<br>into <span style="background:linear-gradient(135deg,#06b6d4 0%,#38bdf8 40%,#818cf8 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">decisions.</span>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center;max-width:560px;padding:40px 0 20px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#0891b2;margin-bottom:18px;animation:fadeUp .5s .1s ease both">Plant Intelligence Platform</div>
+        <div style="font-size:clamp(38px,4.5vw,58px);font-weight:900;color:#0f172a;letter-spacing:-.04em;line-height:1.05;margin-bottom:22px;animation:fadeUp .5s .15s ease both">
+          Turn plant data<br>into <span style="background:linear-gradient(135deg,#06b6d4 0%,#0ea5e9 45%,#6366f1 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">decisions.</span>
         </div>
-        <div style="font-size:14px;color:rgba(255,255,255,.45);line-height:1.8;animation:fadeUp .5s .2s ease both">
+        <div style="font-size:14px;color:#64748b;line-height:1.8;animation:fadeUp .5s .2s ease both">
           Real-time KPIs · Production · Feedstock · Finance<br>Digester Health · Trends · Lab Reports
         </div>
 
         <!-- Metric pills row -->
         <div style="display:flex;flex-wrap:wrap;gap:10px;margin-top:40px">
-          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:8px 16px;backdrop-filter:blur(8px)">
-            <div style="width:6px;height:6px;border-radius:50%;background:#10b981;flex-shrink:0"></div>
-            <span style="font-size:12px;font-weight:600;color:#fff">5.4 TPD CBG</span>
+          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:100px;padding:8px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            <div style="width:7px;height:7px;border-radius:50%;background:#10b981;flex-shrink:0"></div>
+            <span style="font-size:12px;font-weight:600;color:#1e293b">5.4 TPD CBG</span>
           </div>
-          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:8px 16px;backdrop-filter:blur(8px)">
-            <div style="width:6px;height:6px;border-radius:50%;background:#06b6d4;flex-shrink:0"></div>
-            <span style="font-size:12px;font-weight:600;color:#fff">22 Live Sheets</span>
+          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:100px;padding:8px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            <div style="width:7px;height:7px;border-radius:50%;background:#06b6d4;flex-shrink:0"></div>
+            <span style="font-size:12px;font-weight:600;color:#1e293b">22 Live Sheets</span>
           </div>
-          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:8px 16px;backdrop-filter:blur(8px)">
-            <div style="width:6px;height:6px;border-radius:50%;background:#818cf8;flex-shrink:0"></div>
-            <span style="font-size:12px;font-weight:600;color:#fff">6 KPI Dashboards</span>
+          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:100px;padding:8px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            <div style="width:7px;height:7px;border-radius:50%;background:#6366f1;flex-shrink:0"></div>
+            <span style="font-size:12px;font-weight:600;color:#1e293b">6 KPI Dashboards</span>
           </div>
-          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:100px;padding:8px 16px;backdrop-filter:blur(8px)">
-            <div style="width:6px;height:6px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
-            <span style="font-size:12px;font-weight:600;color:#fff">Daily Intelligence</span>
+          <div class="stat-pill" style="display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #e2e8f0;border-radius:100px;padding:8px 16px;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+            <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;flex-shrink:0"></div>
+            <span style="font-size:12px;font-weight:600;color:#1e293b">Daily Intelligence</span>
           </div>
         </div>
       </div>
 
       <!-- Bottom: tagline -->
-      <div style="font-size:11px;color:rgba(255,255,255,.2);letter-spacing:.04em;animation:fadeUp .5s .4s ease both">
+      <div style="font-size:11px;color:#94a3b8;letter-spacing:.04em;animation:fadeUp .5s .4s ease both">
         Powered by Microsoft Azure · GOBARdhan Initiative
       </div>
     </div>
 
-    <!-- RIGHT: glassmorphism sign-in card -->
+    <!-- RIGHT: clean white sign-in card -->
     <div style="width:460px;display:flex;align-items:center;justify-content:center;padding:40px;flex-shrink:0">
-      <div class="card-in" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:44px 40px;backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:0 24px 64px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.08)">
+      <div class="card-in" style="width:100%;background:#fff;border:1px solid #e2e8f0;border-radius:24px;padding:44px 40px;box-shadow:0 8px 40px rgba(15,23,42,.1),0 1px 3px rgba(15,23,42,.06)">
 
         <!-- Icon -->
-        <div style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#06b6d4,#0284c7);display:flex;align-items:center;justify-content:center;margin-bottom:32px;box-shadow:0 8px 24px rgba(6,182,212,.35)">
+        <div style="width:54px;height:54px;border-radius:16px;background:linear-gradient(135deg,#06b6d4,#0284c7);display:flex;align-items:center;justify-content:center;margin-bottom:32px;box-shadow:0 8px 24px rgba(6,182,212,.3)">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
         </div>
 
         <!-- Title -->
-        <div style="font-size:26px;font-weight:900;color:#fff;letter-spacing:-.04em;line-height:1.1;margin-bottom:8px">Good to see you.</div>
-        <div id="authStatus" style="font-size:13px;color:rgba(255,255,255,.45);line-height:1.6;margin-bottom:36px">Sign in with your LREKPL Microsoft account<br>to access plant analytics.</div>
+        <div style="font-size:26px;font-weight:900;color:#0f172a;letter-spacing:-.04em;line-height:1.1;margin-bottom:8px">Good to see you.</div>
+        <div id="authStatus" style="font-size:13px;color:#64748b;line-height:1.6;margin-bottom:36px">Sign in with your LREKPL Microsoft account<br>to access plant analytics.</div>
 
         <!-- Sign-in button -->
-        <button id="signInBtn" onclick="handleSignIn()" style="display:none;width:100%;padding:15px 20px;background:linear-gradient(135deg,#06b6d4 0%,#0284c7 100%);color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit;letter-spacing:-.01em;box-shadow:0 6px 20px rgba(6,182,212,.4);transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 10px 28px rgba(6,182,212,.5)'" onmouseout="this.style.transform='';this.style.boxShadow='0 6px 20px rgba(6,182,212,.4)'">
+        <button id="signInBtn" onclick="handleSignIn()" style="display:none;width:100%;padding:15px 20px;background:linear-gradient(135deg,#06b6d4 0%,#0284c7 100%);color:#fff;border:none;border-radius:12px;cursor:pointer;font-size:14px;font-weight:700;font-family:inherit;letter-spacing:-.01em;box-shadow:0 4px 14px rgba(6,182,212,.35);transition:all .2s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 10px 28px rgba(6,182,212,.45)'" onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(6,182,212,.35)'">
           <span style="display:flex;align-items:center;justify-content:center;gap:10px">
             <svg width="18" height="18" viewBox="0 0 21 21" fill="none"><rect x="1" y="1" width="9" height="9" fill="#f25022"/><rect x="11" y="1" width="9" height="9" fill="#7fba00"/><rect x="1" y="11" width="9" height="9" fill="#00a4ef"/><rect x="11" y="11" width="9" height="9" fill="#ffb900"/></svg>
             Sign in with Microsoft
@@ -662,17 +662,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
         <!-- Loading state -->
         <div id="authLoading" style="display:flex;align-items:center;gap:10px;padding:14px 0">
-          <div style="width:18px;height:18px;border:2px solid rgba(255,255,255,.2);border-top-color:#06b6d4;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0"></div>
-          <span style="font-size:13px;color:rgba(255,255,255,.5)">Checking authentication…</span>
+          <div style="width:18px;height:18px;border:2px solid #e2e8f0;border-top-color:#06b6d4;border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0"></div>
+          <span style="font-size:13px;color:#94a3b8">Checking authentication…</span>
         </div>
 
         <!-- Divider -->
-        <div style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);margin:28px 0"></div>
+        <div style="height:1px;background:#f1f5f9;margin:28px 0"></div>
 
         <!-- Footer -->
         <div style="display:flex;align-items:flex-start;gap:10px">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <div style="font-size:11px;color:rgba(255,255,255,.28);line-height:1.7">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="2" stroke-linecap="round" style="flex-shrink:0;margin-top:1px"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <div style="font-size:11px;color:#94a3b8;line-height:1.7">
             Access restricted to authorised LREKPL personnel only.<br>5.4 TPD CBG Plant · Karnal, Haryana
           </div>
         </div>
@@ -680,17 +680,12 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     </div>
   </div>
 </div>
-<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
 <script>
-// Show/hide loading vs button
 (function(){
-  const orig=window.handleSignIn
-  // Intercept authStatus updates to toggle loading spinner
   const obs=new MutationObserver(()=>{
-    const s=document.getElementById('authStatus')
     const b=document.getElementById('signInBtn')
     const l=document.getElementById('authLoading')
-    if(!s||!b||!l) return
+    if(!b||!l) return
     if(b.style.display!=='none'){ l.style.display='none' }
     else { l.style.display='flex' }
   })
