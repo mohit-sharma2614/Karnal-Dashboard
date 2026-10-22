@@ -6632,7 +6632,7 @@ function closeRptPicker(){
 }
 document.addEventListener('click',e=>{
   const ov=document.getElementById('rpt-picker-overlay');
-  if(ov&&ov.style.display==='flex'&&!e.target.closest('#rpt-picker-card'))closeRptPicker();
+  if(ov&&ov.style.display==='flex'&&!e.target.closest('#rpt-picker-card')&&!e.target.closest('#rpt-btn-wrap'))closeRptPicker();
 });
 function _switchToSection(sec){
   // Switch curSection before building report
