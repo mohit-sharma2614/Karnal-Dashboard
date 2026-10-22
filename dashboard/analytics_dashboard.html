@@ -6558,11 +6558,12 @@ function _rptBuildMonthPills(){
     const b=document.createElement('button');
     b.textContent=m;
     b.style.cssText='padding:4px 10px;border-radius:6px;border:1px solid #e2e8f0;background:'+(m===_rptSelMonth?'#0f172a':'#fff')+';color:'+(m===_rptSelMonth?'#fff':'#334155')+';font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;transition:all .12s';
-    b.onclick=()=>{
+    b.addEventListener('click',function(e){
+      e.stopPropagation(); // prevent bubble closing the modal
       _rptSelMonth=m; _rptSelDay='ALL';
       _rptBuildMonthPills();
       _rptUpdateLabel();
-    };
+    });
     wrap.appendChild(b);
   });
 }
@@ -6583,27 +6584,27 @@ function rptLoadDays(mo){
   _rptSelMonth=mo; _rptSelDay='ALL';
   const sel=document.getElementById('rpt-day-sel');
   if(!sel)return;
-  sel.innerHTML='<option value="ALL">— Day —</option>';
-  if(mo!=='ALL'&&D&&D.daily){
-    const days=Object.keys(D.daily).filter(k=>k.startsWith(mo+'-')||k.includes(' '+mo+' ')||(D.daily[k]&&D.daily[k].month===mo));
-    // Try to get days from daily data keys
-    const allDays=D.daily?Object.keys(D.daily).filter(d=>{
-      const row=D.daily[d];
-      return row&&(row.month===mo||(typeof d==='string'&&d.includes(mo)));
-    }):[];
-    const dayNums=[...new Set(allDays.map(d=>D.daily[d]&&D.daily[d].day).filter(Boolean))].sort((a,b)=>a-b);
-    if(dayNums.length){
-      dayNums.forEach(day=>{
+  sel.innerHTML='<option value="">— Day —</option>';
+  if(mo!=='ALL'&&D&&D.days){
+    // D.days keys are day strings; each has .mo property matching month name
+    const dayKeys=Object.keys(D.days)
+      .filter(d=>D.days[d]&&D.days[d].mo===mo)
+      .sort((a,b)=>parseInt(a)-parseInt(b));
+    dayKeys.forEach(d=>{
+      const o=document.createElement('option');
+      o.value=d; o.textContent=d;
+      sel.appendChild(o);
+    });
+    // fallback: 1-31 if no D.days data for this month
+    if(!dayKeys.length){
+      for(let i=1;i<=31;i++){
         const o=document.createElement('option');
-        o.value=day; o.textContent=day;
+        o.value=String(i); o.textContent=i;
         sel.appendChild(o);
-      });
-    } else {
-      // fallback: 1-31
-      for(let i=1;i<=31;i++){const o=document.createElement('option');o.value=i;o.textContent=i;sel.appendChild(o);}
+      }
     }
   }
-  sel.onchange=()=>{_rptSelDay=sel.value;_rptUpdateLabel();};
+  sel.onchange=()=>{_rptSelDay=sel.value; _rptUpdateLabel();};
   _rptUpdateLabel();
 }
 
@@ -6669,12 +6670,11 @@ function _switchToSection(sec){
   }
 }
 function _applyRptSelection(){
-  // Apply the picker's month/day selection to the dashboard filter state
   _rpP=_rptPickerPeriod;
   if(_rptPickerPeriod==='monthly'&&_rptSelMonth!=='ALL'){
     curMonth=_rptSelMonth; curDay='ALL';
-  } else if(_rptPickerPeriod==='daily'&&_rptSelMonth!=='ALL'&&_rptSelDay!=='ALL'){
-    curMonth=_rptSelMonth; curDay=String(_rptSelDay);
+  } else if(_rptPickerPeriod==='daily'&&_rptSelMonth!=='ALL'&&_rptSelDay!==''){
+    curMonth=_rptSelMonth; curDay=String(_rptSelDay); // curDay = day key from D.days
   } else if(_rptPickerPeriod==='yearly'){
     curMonth='ALL'; curDay='ALL';
   }
@@ -6682,7 +6682,7 @@ function _applyRptSelection(){
 function doViewReport(){
   if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
   if(_rptPickerPeriod==='monthly'&&_rptSelMonth==='ALL'){alert('Please select a month.');return;}
-  if(_rptPickerPeriod==='daily'&&(_rptSelMonth==='ALL'||_rptSelDay==='ALL')){alert('Please select a month and day.');return;}
+  if(_rptPickerPeriod==='daily'&&(_rptSelMonth==='ALL'||!_rptSelDay)){alert('Please select a month and day.');return;}
   _applyRptSelection();
   closeRptPicker();
   document.getElementById('rp-view').innerHTML=_buildRp(_rpP);
@@ -6692,7 +6692,7 @@ function doViewReport(){
 function doDownloadReport(){
   if(!D||!D.months||!D.months.length){alert('Data not loaded yet.');return;}
   if(_rptPickerPeriod==='monthly'&&_rptSelMonth==='ALL'){alert('Please select a month.');return;}
-  if(_rptPickerPeriod==='daily'&&(_rptSelMonth==='ALL'||_rptSelDay==='ALL')){alert('Please select a month and day.');return;}
+  if(_rptPickerPeriod==='daily'&&(_rptSelMonth==='ALL'||!_rptSelDay)){alert('Please select a month and day.');return;}
   _applyRptSelection();
   closeRptPicker();
   setTimeout(()=>exportReportPDF(),80);
