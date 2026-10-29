@@ -1646,6 +1646,12 @@ function loadSheet(id){
   // Save current section values before switching
   if(cur) drafts[cur.id]=Object.assign({},inp)
   cur=SHEETS.find(s=>s.id===id)
+  // Pre-warm header cache so first Save has no extra latency
+  if(cur && SHEET_META[cur.id] && COLUMN_NAME_MAP[cur.id] && typeof gGet==='function'){
+    const _m=SHEET_META[cur.id]
+    const _specs=Object.values(COLUMN_NAME_MAP[cur.id])
+    _specs.forEach(spec=>getColByName(_m.masterSheet,_m.hrow,spec).catch(()=>{}))
+  }
   // Restore draft values for this sheet (persist across section switches)
   inp=Object.assign({},drafts[id]||{})
   document.getElementById('saveBarEl').style.display='flex'
