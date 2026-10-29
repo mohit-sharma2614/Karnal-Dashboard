@@ -1717,140 +1717,264 @@ function recompute(){
 window.recompute=recompute
 
 // ══════════════════════════════════════════════════════════
-// COLUMN MAP — portal field key → Excel column number
-// Verified against master workbook header rows Sep 2026.
-// Only fields with a known column are listed; unmapped fields
-// (lab-only values used for in-browser calc) are not written.
-// Cal sheets use col B (2) for date; all others use col A (1).
 // ══════════════════════════════════════════════════════════
-const COLUMN_MAP = {
+// COLUMN NAME MAP — field_key → exact Master worksheet column header
+// '~N' suffix = Nth occurrence of that header name (1-based).
+// Resolver fetches the header row once per sheet per session and caches it.
+// ══════════════════════════════════════════════════════════
+const COLUMN_NAME_MAP = {
   D1: {
-    // Expected: ap_exp inserted at col 8; all cols after shift +1
-    cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, ap_exp:8,
-    total_feed_exp:9, fw_exp:10, rs_exp:11,
-    biogas_est:12, slurry_exp:13, sfom_exp:14, lfom_exp:15,
-    // Actual: ap_act inserted at col 26; feeding cols 16-25 shift +1, rest shift +2
-    cd_act:16, pm_act:17, poultry:18, csl_act:19, poultry_tons:20, poultry_tons_vs:21,
-    poultry_ts:22, poultry_vs:23,
-    gs_act:24, sg_act:25, ap_act:26, total_feed_act:27, total_feed_kl:28,
-    fw_act:29, rs_act:30, flow_mtr:31, planned_drain:32, drain:33,
-    biogas_est_act:34, rbg_psa:35, rbg_vent:36, rbg_total:37, cbg_prod:38, cbg_vent:39,
-    cbg_exp:41, cbg_exp_slot:42, biogas_per_hr:43, psa_eff_hr:44,
-    // BPP: ap_bpp inserted at col 50; all calcs after shift +3 vs original
-    cd_bpp:45, pm_bpp:46, gs_bpp:47, csl_bpp:48, sg_bpp:49, ap_bpp:50,
-    wv:51, sl_ht:52, olr:53, psa_eff:54,
-    remarks:55,
+    // Expected feed (cols 2-15)
+    cd_exp:'Cow dung (MT)/day', pm_exp:'Press mud (MT)/day',
+    poultry_exp:'Poultry waste (KL)/day', csl_exp:'CSL (KL)/day',
+    gs_exp:'Grain Syrup (KL)/day', sg_exp:'Spent Grain (ton/day)',
+    ap_exp:'Apple Pomace (MT/day)', total_feed_exp:'Total feed (MT/day)',
+    fw_exp:'Fresh water (m3)', rs_exp:'Recirculating slurry (m3)',
+    biogas_est:'Biogas Estimated (m3)', slurry_exp:'Total Slurry Expected (m3)',
+    sfom_exp:'SFOM (TONS)', lfom_exp:'LFOM (KL)',
+    // Actual feed (cols 16-33)
+    cd_act:'Cow dung (MT/day)', pm_act:'Press mud (MT/day)',
+    poultry:'Poultry (cu.m)/day',
+    poultry_tons:'Poultry (tons)/day considering 28% TS',
+    poultry_tons_vs:'Poultry (tons)/day considering VS in tons',
+    poultry_ts:'Poultry (TS %)/day', poultry_vs:'Poultry (VS %)/day',
+    csl_act:'CSL (KL/day)', gs_act:'Grain Syrup (KL/day) Actual',
+    sg_act:'Spent Grain (in tons) Actual', ap_act:'Apple Pomace (MT/day) Actual',
+    total_feed_act:'Total Feed (MT/day)', total_feed_kl:'Total Feed (KL/day)',
+    fw_act:'Fresh water (m3)~2', rs_act:'Recycle slurry (m3)',
+    flow_mtr:'Flow meter reading (m3)', planned_drain:'Planned Drain',
+    drain:'Actual Drain',
+    // Gas production (cols 34-45)
+    biogas_est_act:'Biogas Estimated (m3)~2',
+    rbg_psa:'Biogas Actual at Inlet of PSA (m3)',
+    rbg_vent:'Raw Biogas (Loss from Vent/Flare) (C)',
+    rbg_total:'Raw Biogas (Total Produce) (B+C)',
+    cbg_prod:'CBG (Kgs) produced', cbg_vent:'CBG (Kgs) Vent',
+    cbg_exp:'CBG Expected (Kgs)', cbg_exp_slot:'CBG Expected per slot (Kgs)',
+    biogas_per_hr:'Per hour Biogas generation (Kgs)', psa_eff_hr:'PSA efficiency',
+    // BPP / calculated (cols 46-56)
+    cd_bpp:'Cow_Dung_BPP', pm_bpp:'Pressmud_BPP', gs_bpp:'Grain_Syrup_BPP',
+    csl_bpp:'CSL_BPP', sg_bpp:'Spent_Grain_BPP', ap_bpp:'Apple_Pomace_BPP',
+    wv:'Working_Volume', sl_ht:'Slurry_Height', olr:'OLR_D1',
+    psa_eff:'PSA Efficiency %', remarks:'Remarks',
   },
   D2: {
-    // Expected: same as D1 (ap_exp at col 8)
-    cd_exp:2, pm_exp:3, poultry_exp:4, csl_exp:5, sg_exp:6, gs_exp:7, ap_exp:8,
-    total_feed_exp:9, fw_exp:10, rs_exp:11,
-    biogas_est:12, slurry_exp:13, sfom_exp:14, lfom_exp:15,
-    // Actual: same as D1 (ap_act at col 26)
-    cd_act:16, pm_act:17, poultry:18, csl_act:19, poultry_tons:20, poultry_tons_vs:21,
-    poultry_ts:22, poultry_vs:23,
-    gs_act:24, sg_act:25, ap_act:26, total_feed_act:27, total_feed_kl:28,
-    fw_act:29, rs_act:30, flow_mtr:31, planned_drain:32, drain:33,
-    biogas_est_act:34, rbg_psa:35, rbg_vent:36, rbg_total:37, cbg_prod:38, cbg_vent:39,
-    // D2 has extra col 41 'Biogas Estimated (m3)' not in D1; CBG Expected shifts to 42
-    biogas_est2:41, cbg_exp:42, cbg_exp_slot:43, biogas_per_hr:44, psa_eff_hr:45,
-    // BPP: ap_bpp at col 51 (D2 has one extra col vs D1 in Gas Prod section)
-    cd_bpp:46, pm_bpp:47, gs_bpp:48, csl_bpp:49, sg_bpp:50, ap_bpp:51,
-    wv:52, sl_ht:53, olr:54, psa_eff:55,
-    remarks:56,
+    // Same as D1 except olr → 'OLR_D2'
+    cd_exp:'Cow dung (MT)/day', pm_exp:'Press mud (MT)/day',
+    poultry_exp:'Poultry waste (KL)/day', csl_exp:'CSL (KL)/day',
+    gs_exp:'Grain Syrup (KL)/day', sg_exp:'Spent Grain (ton/day)',
+    ap_exp:'Apple Pomace (MT/day)', total_feed_exp:'Total feed (MT/day)',
+    fw_exp:'Fresh water (m3)', rs_exp:'Recirculating slurry (m3)',
+    biogas_est:'Biogas Estimated (m3)', slurry_exp:'Total Slurry Expected (m3)',
+    sfom_exp:'SFOM (TONS)', lfom_exp:'LFOM (KL)',
+    cd_act:'Cow dung (MT/day)', pm_act:'Press mud (MT/day)',
+    poultry:'Poultry (cu.m)/day',
+    poultry_tons:'Poultry (tons)/day considering 28% TS',
+    poultry_tons_vs:'Poultry (tons)/day considering VS in tons',
+    poultry_ts:'Poultry (TS %)/day', poultry_vs:'Poultry (VS %)/day',
+    csl_act:'CSL (KL/day)', gs_act:'Grain Syrup (KL/day) Actual',
+    sg_act:'Spent Grain (in tons) Actual', ap_act:'Apple Pomace (MT/day) Actual',
+    total_feed_act:'Total Feed (MT/day)', total_feed_kl:'Total Feed (KL/day)',
+    fw_act:'Fresh water (m3)~2', rs_act:'Recycle slurry (m3)',
+    flow_mtr:'Flow meter reading (m3)', planned_drain:'Planned Drain',
+    drain:'Actual Drain',
+    biogas_est_act:'Biogas Estimated (m3)~2',
+    rbg_psa:'Biogas Actual at Inlet of PSA (m3)',
+    rbg_vent:'Raw Biogas (Loss from Vent/Flare) (C)',
+    rbg_total:'Raw Biogas (Total Produce) (B+C)',
+    cbg_prod:'CBG (Kgs) produced', cbg_vent:'CBG (Kgs) Vent',
+    cbg_exp:'CBG Expected (Kgs)', cbg_exp_slot:'CBG Expected per slot (Kgs)',
+    biogas_per_hr:'Per hour Biogas generation (Kgs)', psa_eff_hr:'PSA efficiency',
+    cd_bpp:'Cow_Dung_BPP', pm_bpp:'Pressmud_BPP', gs_bpp:'Grain_Syrup_BPP',
+    csl_bpp:'CSL_BPP', sg_bpp:'Spent_Grain_BPP', ap_bpp:'Apple_Pomace_BPP',
+    wv:'Working_Volume', sl_ht:'Slurry_Height', olr:'OLR_D2',
+    psa_eff:'PSA Efficiency %', remarks:'Remarks',
   },
   PSA: {
-    // C9=Avg RBG Flow (auto formula), C15=Avg Flow (auto formula) — do NOT write
-    psa_hrs:2, psa_run_min:3, comp_hrs:4, psa_comp_diff:5,
-    rbg_d1:6, rbg_d2:7, rbg_total:8,
-    purified_gas:10,
-    cbg_d1:11, cbg_d2:12, cbg_tot:13,
-    cbg_den:14,
-    tot_disp:16,
-    veer_kg:17, adinath_kg:18, gail_kg:19, other1_kg:20, other2_kg:21, sps_kg:22,
-    ch4_pct:23, pcut_hrs:24, vent_hrs:25,
-    casc1:26, casc2:27, cbg_storage:28,
-    psa_remark:29,
+    psa_hrs:'PSA Running Time (in Hrs)',
+    psa_run_min:'PSA Running Time (in Mins)',
+    comp_hrs:'Compressor Running Time (in Hrs)',
+    psa_comp_diff:'PSA Compressor Running duration difference',
+    rbg_d1:'Raw Biogas Suction From Digester 01 (in m3)',
+    rbg_d2:'Raw Biogas Suction From Digester 02 (in m3)',
+    rbg_total:'Raw Biogas Suction From both Digester (in m3)',
+    purified_gas:'Total Purified Biogas (in m3)',
+    cbg_d1:'CBG Production From D1 (in Kg)',
+    cbg_d2:'CBG Production From D2 (in Kg)',
+    cbg_tot:'Total CBG Production (in Kg)',
+    cbg_den:'PSA Efficiency for the day',
+    tot_disp:'Total Dispatched',
+    veer_kg:'Total Dispatch To Veer',
+    adinath_kg:'Total Dispatch To Adinath',
+    gail_kg:'Total Dispatch To (KFS) Sonipat',
+    other1_kg:'Total Dispatch To (KSK) Sonipat',
+    other2_kg:'Total Dispatch To o.m Filling SONIPAT',
+    sps_kg:'Total Dispatch To S.P.S Yammuna Nagar',
+    ch4_pct:'CH4%', pcut_hrs:'Power Cut Time', vent_hrs:'Gas Venting Time',
+    casc1:'Cascade 1 Pressure', casc2:'Cascade 2 Pressure',
+    cbg_storage:'Approx. CBG in Storage (in Kgs)',
+    psa_remark:'Remark',
   },
-  // PHTEMP split into PH (Digester pH) and TEMP (Digester Temp) — same column layout
   PH: {
-    // D1: 3M=2, 6M=3, SL=4 | D2: 3M=5, 6M=6, SL=7 | Remarks=8
-    d1_ph_3m:2, d1_ph_6m:3, d1_ph_sl:4,
-    d2_ph_3m:5, d2_ph_6m:6, d2_ph_sl:7,
-    remarks:8,
+    d1_ph_3m:'3M', d1_ph_6m:'6M', d1_ph_sl:'Sludge Line',
+    d2_ph_3m:'3M~2', d2_ph_6m:'6M~2', d2_ph_sl:'Sludge Line~2',
+    remarks:'Remarks',
   },
   TEMP: {
-    d1_tmp_3m:2, d1_tmp_6m:3, d1_tmp_sl:4,
-    d2_tmp_3m:5, d2_tmp_6m:6, d2_tmp_sl:7,
-    remarks:8,
+    d1_tmp_3m:'3M', d1_tmp_6m:'6M', d1_tmp_sl:'Sludge Line',
+    d2_tmp_3m:'3M~2', d2_tmp_6m:'6M~2', d2_tmp_sl:'Sludge Line~2',
+    remarks:'Remarks',
   },
   TSVS: {
-    // D1: TS3M=2,VS3M=3,TS6M=4,VS6M=5,TSSL=6,VSSL=7 — D2: TS3M=8..VSSL=13 | Remarks=14
-    d1_ts_3m:2, d1_vs_3m:3, d1_ts_6m:4, d1_vs_6m:5, d1_ts_sl:6, d1_vs_sl:7,
-    d2_ts_3m:8, d2_vs_3m:9, d2_ts_6m:10,d2_vs_6m:11,d2_ts_sl:12,d2_vs_sl:13,
-    remarks:14,
+    d1_ts_3m:'TS%(3M)', d1_vs_3m:'VS%(3M)', d1_ts_6m:'TS%(6M)',
+    d1_vs_6m:'VS%(6M)', d1_ts_sl:'TS%(SL)', d1_vs_sl:'VS%(SL)',
+    d2_ts_3m:'TS%(3M)~2', d2_vs_3m:'VS%(3M)~2', d2_ts_6m:'TS%(6M)~2',
+    d2_vs_6m:'VS%(6M)~2', d2_ts_sl:'TS%(SL)~2', d2_vs_sl:'VS%(SL)~2',
+    remarks:'Remarks',
   },
   IAPA: {
-    // D1 Z1: PA=2,IA=3,TA=4,ratio=5 | D1 Z2: PA=6,IA=7,TA=8,ratio=9
-    // D2 Z1: PA=10,IA=11,TA=12,ratio=13 | D2 Z2: PA=14,IA=15,TA=16,ratio=17 | remark=18
-    d1_pa1:2,    d1_ia1:3,    d1_ta1:4,    d1_iapa1:5,
-    d1_pa2:6,    d1_ia2:7,    d1_ta2:8,    d1_iapa2:9,
-    d2_pa1:10,   d2_ia1:11,   d2_ta1:12,   d2_iapa1:13,
-    d2_pa2:14,   d2_ia2:15,   d2_ta2:16,   d2_iapa2:17,
-    iapa_remark:18,
+    d1_pa1:'PA(mg/L)',   d1_ia1:'IA(mg/L)',   d1_ta1:'TA',   d1_iapa1:'IA/PA',
+    d1_pa2:'PA(mg/L)~2', d1_ia2:'IA(mg/L)~2', d1_ta2:'TA~2', d1_iapa2:'IA/PA~2',
+    d2_pa1:'PA(mg/L)~3', d2_ia1:'IA(mg/L)~3', d2_ta1:'TA~3', d2_iapa1:'IA/PA~3',
+    d2_pa2:'PA(mg/L)~4', d2_ia2:'IA(mg/L)~4', d2_ta2:'TA~4', d2_iapa2:'IA/PA~4',
+    iapa_remark:'Remark',
   },
+  // Feedstock Supply (FS) → Feed_and_Balance, row 2 vendor sub-headers
   FS: {
-    // Feedstock Supply — date col 1; vendors in order
-    pw_lather:2, pw_narwal:3, pw_subhash:4, pw_gk:5, pw_dry:6, pw_nazim:7,
-    cd_gharaunda:8, cd_phoosgarh:9, cd_radhakrishna:10,
-    csl_sadasat:11, gs_rcv:12, csl_pantnagar:13, csl_virangam:14,
-    pm_sonipat:15, pm_malakpur:16, pm_ramala:17, pm_thana:18,
-    pm_tikuala:19, pm_shamli:20, pm_laknour:21, pm_balyan:22,
-    pm_singh:23, pm_naveen:24, pm_gs:25, pm_sbec:26,
-    pm_sahakumbri:27, pm_rathi:28, pm_devom:29, pm_vaibhav_ramala:30,
-    pm_unn:31,
-    carlsberg:32,
-    remarks:33,
+    pw_lather:'Lather', pw_narwal:'Narwal', pw_subhash:'Subhash',
+    pw_gk:'GK Hatchery', pw_dry:'Dry Poultry', pw_nazim:'Nazim',
+    cd_gharaunda:'Gharaunda', cd_phoosgarh:'Phoosgarh', cd_radhakrishna:'Radha Krishna',
+    csl_sadasat:'Sadasat', csl_pantnagar:'Pant Nagar', csl_virangam:'Virangam',
+    pm_sonipat:'Sonipat',
+    pm_malakpur:'Malakpur Sugar Mill, Baraut',
+    pm_ramala:'Ramala , Bhagpat_    vaibhav',
+    pm_thana:'Thana  Bhavan',
+    pm_tikuala:'Tikuala',
+    pm_shamli:'Shmali Sugar Mill-Naveen Contractor',
+    pm_laknour:'Laknour, Biogas plant- Vaibhav',
+    pm_balyan:'Balyan Tikuala',
+    pm_singh:'Singh Associate',
+    pm_naveen:'Naveen',
+    pm_gs:'G.S',
+    pm_sbec:'SBEC',
+    pm_sahakumbri:'Sahakumbri',
+    pm_rathi:'Rathi_kathuali Sugar Mill',
+    pm_unn:'Unn Sugar mill',
+    pm_devom:'Devom',
+    carlsberg:'Calsberg',
+    gs_rcv:'Grain Syrup',
   },
+  // Feed & Balance (FB) → Feed_and_Balance, fed (col 80-85) and balance (col 94-99) sections
+  // Received/cost totals are Excel formula cells — NOT written by portal
   FB: {
-    pm_rcv:2,  gs_rcv:3,   csl_rcv:4,  cd_rcv:5,  sg_rcv:6,
-    pm_cost:7, gs_cost:8,  csl_cost:9, cd_cost:10, sg_cost:11,
-    pm_fed:12, gs_fed:13,  csl_fed:14, cd_fed:15,  sg_fed:16,
-    fb_tot_fed:17,
-    fb_pm_bal:18, fb_gs_bal:19, fb_csl_bal:20, fb_cd_bal:21, fb_sg_bal:22,
-    remarks:23,
-    ap_cost:33,
+    cd_fed:'Cow Dung',   pm_fed:'Pressmud',   csl_fed:'CSL Feed',
+    gs_fed:'Grain Syrup', sg_fed:'Spent grain',
+    fb_cd_bal:'Cow Dung~2', fb_pm_bal:'Pressmud~2', fb_csl_bal:'CSL Feed~2',
+    fb_gs_bal:'Grain Syrup~2', fb_sg_bal:'Spent grain~2',
   },
-  // Cal sheets: Date=1, SampleName=2, Location=3, TS%=4, VS%=5, Qty=6, TS Tonnes=7(calc), VS Tonnes=8(calc), Remarks=9
-  // Verified against master workbook Oct 2026 — no Sr.No column; Date is col1.
-  PMCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
-  CDCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
-  GSCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
-  CSLCAL: { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
-  SGCAL:  { sample:2, loc:3, ts_pct:4, vs_pct:5, qty:6, ts_t:7, vs_t:8, remarks:9 },
+  // Cal sheets — append-mode, date in col B (col 1 = Sr.No auto)
+  PMCAL: {
+    sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    qty:'Quantity D1 (MT/KL)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+  },
+  CDCAL: {
+    sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    qty:'Quantity (MT/KL)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+  },
+  GSCAL: {
+    sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+  },
+  CSLCAL: {
+    sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    qty:'Quantity (MT/KL)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+  },
+  SGCAL: {
+    sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    qty:'Quantity (MT)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+  },
   MANURE: {
-    // Date=1, VehicleType=2, FarmerName=3, Type=4, Amount(Rs)=5, Month=6(auto from date), Remarks=7
-    // Verified against master Oct 2026 — no Sr.No column.
-    v_type:2, farmer:3, type:4, amount:5,
-    // month col (6) written automatically in save logic — not a form field
-    remarks:7,
+    v_type:'Vehicle Type', farmer:'Farmer Name', type:'Type',
+    amount:'Amount (₹)', remarks:'Remarks',
   },
   SALES: {
-    // Date=1 (header row3, data row4); Veer qty=2, Rs=3; Adinath qty=4, Rs=5; GAIL qty=6, Rs=7; SPS qty=8, Rs=9; Total kg=10, Total Rs=11
-    veer_qty:2, veer_rate:3, adinath_qty:4, adinath_rate:5,
-    gail_qty:6, gail_rate:7, sps_qty:8, sps_rate:9,
-    total_kg:10, total_rs:11,
+    veer_qty:'Veer Filling Station (KG)', veer_rate:'Veer Filling Station (Rs.)',
+    adinath_qty:'Adinath Auto (KG)', adinath_rate:'Adinath Auto (Rs.)',
+    gail_qty:'Gail via LREVPL (KG)', gail_rate:'Gail via LREVPL (Rs.)',
+    sps_qty:'SPS Bio Chem (KG)', sps_rate:'SPS Bio Chem (Rs.)',
+    total_kg:'Total Sale (KG)', total_rs:'Total Sale (Rs.)',
   },
   MAINT: {
-    // Date=1, Unit=2, Equipment=3, WorkType=4, Description=5, Vendor=6, Cost=7, Remarks=8
-    // Verified against master Oct 2026 — no Sr.No column.
-    unit:2, equipment:3, work_type:4, description:5, vendor:6, cost:7, remarks:8,
+    unit:'Digester / Unit', equipment:'Equipment / Area', work_type:'Type of Work',
+    description:'Description of Work', vendor:'Vendor / Done By',
+    cost:'Cost (₹)', remarks:'Remarks',
   },
   REVCOST: {
-    // Date=1, CBG Sale=2(auto), SFOM=3, LFOM=4, Feedstock=5(auto), Transport=6, Maint=7(auto), Elec/day=8, Manpow=9, EMI=10, Remarks=11
-    cbg_sale:2, sfom_sale:3, lfom_sale:4, feed_cost:5, transport_cost:6, maint_cost:7, elec_cost:8, remarks:11,
+    cbg_sale:'Total CBG Sale (Rs)', sfom_sale:'Total SFOM Sale (Rs)',
+    lfom_sale:'Total LFOM Sale (Rs)', feed_cost:'Feedstock Cost (Rs)',
+    transport_cost:'Transportation Cost (Rs)', maint_cost:'Maintenance Cost (Rs)',
+    elec_cost:'Electricity Cost (Rs/day)', remarks:'Remarks',
   },
-  // FIXED and EMI use month columns, not daily date rows — handled separately
+  // FIXED and EMI use month columns — handled separately, no name map needed
+}
+
+// Master sheet name and header row per portal sheet id
+const SHEET_META = {
+  D1:      { masterSheet:'D1',                    hrow:2 },
+  D2:      { masterSheet:'D2',                    hrow:2 },
+  PSA:     { masterSheet:'PSA Production',         hrow:2 },
+  PH:      { masterSheet:'Digester pH',            hrow:3 },
+  TEMP:    { masterSheet:'Digester Temp',           hrow:3 },
+  TSVS:    { masterSheet:'Digester TS-VS',          hrow:3 },
+  IAPA:    { masterSheet:'Digester IA-PA',          hrow:3 },
+  PMCAL:   { masterSheet:'Pressmud Cal.',           hrow:2 },
+  CDCAL:   { masterSheet:'Cow Dung Cal.',           hrow:2 },
+  GSCAL:   { masterSheet:'Rice Grain Syrup Cal.',   hrow:2 },
+  CSLCAL:  { masterSheet:'CSL Cal.',               hrow:2 },
+  SGCAL:   { masterSheet:'Dry Spent Grain Cal',    hrow:2 },
+  FS:      { masterSheet:'Feed_and_Balance',        hrow:2 },
+  FB:      { masterSheet:'Feed_and_Balance',        hrow:2 },
+  SALES:   { masterSheet:'Sales Detail',            hrow:3 },
+  MANURE:  { masterSheet:'Manure Sales',            hrow:2 },
+  MAINT:   { masterSheet:'Maintenance',             hrow:3 },
+  REVCOST: { masterSheet:'Daily Revenue & Costs',   hrow:3 },
+  APPCAL:  { masterSheet:'Apple Pomace Cal.',       hrow:2 },
+}
+
+// Header cache: { 'SheetName:hrow': { headerName: [col1, col2, ...] } }
+const _hdrCache = {}
+
+// Resolve a column header spec to a 1-based column number.
+// spec = exact header string, or 'Name~N' for the Nth occurrence.
+// Returns null if not found.
+async function getColByName(sheetName, hrow, spec) {
+  const cacheKey = `${sheetName}:${hrow}`
+  if(!_hdrCache[cacheKey]) {
+    const r = await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='${hrow}:${hrow}')`)
+    const vals = (r&&r.values&&r.values[0]) || []
+    const map = {}
+    vals.forEach((v, i) => {
+      if(v !== null && v !== undefined && v !== '') {
+        const name = String(v).trim()
+        if(!map[name]) map[name] = []
+        map[name].push(i + 1)
+      }
+    })
+    _hdrCache[cacheKey] = map
+  }
+  const map = _hdrCache[cacheKey]
+  const tildeIdx = spec.lastIndexOf('~')
+  let name, occ
+  if(tildeIdx > 0 && /^\d+$/.test(spec.slice(tildeIdx+1))) {
+    name = spec.slice(0, tildeIdx)
+    occ  = parseInt(spec.slice(tildeIdx+1), 10)
+  } else {
+    name = spec
+    occ  = 1
+  }
+  const cols = map[name]
+  if(!cols || cols.length < occ) { console.warn(`[col-name] "${name}"~${occ} not found in ${sheetName}`); return null }
+  return cols[occ - 1]
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1953,11 +2077,11 @@ async function getSession(){
 }
 // Cal sheet → D1 col, D2 col to read actual qty fed today
 const CAL_QTY_COLS = {
-  PMCAL:  { col: 16, label:'pm_act'  },  // Press mud actual (MT/day)
-  CDCAL:  { col: 15, label:'cd_act'  },  // Cow dung actual (MT/day)
-  CSLCAL: { col: 18, label:'csl_act' },  // CSL actual (KL/day)
-  GSCAL:  { col: 23, label:'gs_act'  },  // Grain Syrup actual (KL/day) — master C23
-  SGCAL:  { col: 24, label:'sg_act'  },  // Spent Grain actual (tons/day) — master C24
+  PMCAL:  { colName:'Press mud (MT/day)',           label:'pm_act'  },
+  CDCAL:  { colName:'Cow dung (MT/day)',             label:'cd_act'  },
+  CSLCAL: { colName:'CSL (KL/day)',                 label:'csl_act' },
+  GSCAL:  { colName:'Grain Syrup (KL/day) Actual',  label:'gs_act'  },
+  SGCAL:  { colName:'Spent Grain (in tons) Actual', label:'sg_act'  },
 }
 
 async function fetchFBPrevBal(ds){
@@ -1965,28 +2089,37 @@ async function fetchFBPrevBal(ds){
   keys.forEach(k=>{ inp['ob_'+k]=0; const el=document.getElementById('f_ob_'+k); if(el) el.value='Fetching…' })
   try{
     const serial=toExcelSerial(ds)
-    const d=await gGet(`/worksheets('${encodeURIComponent('Feed & Balance')}')/range(address='A3:V500')`)
-    const rows=(d&&d.values)||[]
-    let lastRow=null
-    for(const r of rows){
-      const v=r[0]; if(v===null||v===undefined) continue
+    const SN=encodeURIComponent('Feed_and_Balance')
+    // Step 1: find the last row before today (only fetch col A for efficiency)
+    const dateData=await gGet(`/worksheets('${SN}')/range(address='A3:A500')`)
+    const dateRows=(dateData&&dateData.values)||[]
+    let lastRowNum=null
+    for(let i=dateRows.length-1;i>=0;i--){
+      const v=dateRows[i][0]; if(v===null||v===undefined) continue
       let s=null
       if(typeof v==='number') s=Math.round(v)
       else if(typeof v==='string'){
         const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso) s=toExcelSerial(iso[1])
         const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy) s=toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)
       }
-      if(s!==null && s<serial) lastRow=r
+      if(s!==null && s<serial){ lastRowNum=3+i; break }
     }
-    // Balance cols: idx 17=PM, 18=GS, 19=CSL, 20=CD, 21=SG (0-based in the row array)
-    const balIdx={pm:17,gs:18,csl:19,cd:20,sg:21}
+    if(!lastRowNum){
+      keys.forEach(k=>{ inp['ob_'+k]=0; const el=document.getElementById('f_ob_'+k); if(el) el.value='0 (no prior data)' })
+      recompute(); return
+    }
+    // Step 2: fetch balance cols from that row
+    // Feed_and_Balance row 2: col 94=Cow Dung, 95=Pressmud, 96=CSL Feed, 97=Grain Syrup, 98=Spent grain
+    const balRange=`${colLetter(94)}${lastRowNum}:${colLetter(98)}${lastRowNum}`
+    const balData=await gGet(`/worksheets('${SN}')/range(address='${balRange}')`)
+    const balRow=(balData&&balData.values&&balData.values[0])||[]
+    const balMap={cd:balRow[0],pm:balRow[1],csl:balRow[2],gs:balRow[3],sg:balRow[4]}
     keys.forEach(k=>{
-      const val=lastRow ? (parseFloat(lastRow[balIdx[k]])||0) : 0
+      const val=parseFloat(balMap[k])||0
       inp['ob_'+k]=val
       const el=document.getElementById('f_ob_'+k)
       if(el) el.value=val
     })
-    if(!lastRow) keys.forEach(k=>{ const el=document.getElementById('f_ob_'+k); if(el) el.value='0 (no prior data)' })
     recompute()
   } catch(e){
     console.error('fetchFBPrevBal',e)
@@ -1997,15 +2130,16 @@ async function fetchFBPrevBal(ds){
 async function fetchCalQty(sheetId){
   const cfg = CAL_QTY_COLS[sheetId]; if(!cfg) return
   const serial = toExcelSerial(today())
-  // Find today's row in D1 and D2 (col A = date serial, dataStart=3)
+  const col = await getColByName('D1', 2, cfg.colName)
+  if(!col) return
   const [rowD1, rowD2] = await Promise.all([
     findRow('D1', serial, 3),
     findRow('D2', serial, 3),
   ])
   let total = 0
   const reads = []
-  if(rowD1) reads.push(gGet(`/worksheets('D1')/range(address='${colLetter(cfg.col)}${rowD1}')`))
-  if(rowD2) reads.push(gGet(`/worksheets('D2')/range(address='${colLetter(cfg.col)}${rowD2}')`))
+  if(rowD1) reads.push(gGet(`/worksheets('D1')/range(address='${colLetter(col)}${rowD1}')`))
+  if(rowD2) reads.push(gGet(`/worksheets('D2')/range(address='${colLetter(col)}${rowD2}')`))
   const results = await Promise.all(reads)
   results.forEach(r=>{ if(r&&r.values&&r.values[0]&&r.values[0][0]) total+=parseFloat(r.values[0][0])||0 })
   if(total>0){
@@ -2050,17 +2184,30 @@ window.handleSave = async ()=>{
 
   try{
     const serial=toExcelSerial(ds)
-    const colMap = COLUMN_MAP[cur.id] || {}
     const dateCol = isAppendSheet ? 2 : 1
     const dataStart = cur.dataStart || 3
+
+    // Resolve column numbers by name using the master header row.
+    // Falls back to empty map (nothing written) if sheet has no name map.
+    const meta = SHEET_META[cur.id] || {}
+    const masterSheet = meta.masterSheet || cur.sheet
+    const hrow = meta.hrow || 2
+    const nameMap = COLUMN_NAME_MAP[cur.id]
+    const colMap = {}
+    if(nameMap) {
+      await Promise.all(Object.entries(nameMap).map(async ([fk, spec]) => {
+        const col = await getColByName(masterSheet, hrow, spec)
+        if(col) colMap[fk] = col
+      }))
+    }
 
     const rowData={}
     rowData[dateCol] = serial  // always an Excel serial integer — no locale ambiguity
 
-    // Collect all fields with a known column mapping
+    // Collect all fields with a resolved column number
     cur.sections.forEach(sec=>sec.f.forEach(f=>{
       const col = colMap[f.k]
-      if(!col) return  // no column mapping — browser-calc only, not written
+      if(!col) return
       if(f.tp==='calc'){
         const el=document.getElementById('f_'+f.k)
         if(el&&el.value!=='') rowData[col]=parseFloat(el.value)
@@ -2070,23 +2217,28 @@ window.handleSave = async ()=>{
       }
     }))
 
-    // MANURE C7 = Month string (e.g. "Jan-2026") — auto-derived from the date picker.
+    // MANURE: Month string auto-derived from date picker
     if(cur.id === 'MANURE') {
-      const [y,m] = ds.split('-')
-      const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-      rowData[7] = `${MON[parseInt(m,10)-1]}-${y}`
+      const monthCol = await getColByName('Manure Sales', 2, 'Month')
+      if(monthCol) {
+        const [y,m] = ds.split('-')
+        const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        rowData[monthCol] = `${MON[parseInt(m,10)-1]}-${y}`
+      }
     }
 
-    // PSA C2 (psa_hrs) and C4 (comp_hrs) are time-formatted cells in Excel.
-    // Convert decimal hours → Excel time fraction (÷24) before writing.
-    // C5 (psa_comp_diff) is minutes → convert to time fraction (÷60÷24).
+    // PSA: time-formatted cells must be converted to Excel time fractions
+    // psa_hrs and comp_hrs: decimal hours ÷ 24; psa_comp_diff: minutes ÷ 60 ÷ 24
     if(cur.id === 'PSA') {
-      if(rowData[2]) rowData[2] = rowData[2] / 24
-      if(rowData[4]) rowData[4] = rowData[4] / 24
-      if(rowData[5]) rowData[5] = rowData[5] / 60 / 24
+      const psaHrsCol  = colMap['psa_hrs']
+      const compHrsCol = colMap['comp_hrs']
+      const diffCol    = colMap['psa_comp_diff']
+      if(psaHrsCol  && rowData[psaHrsCol])  rowData[psaHrsCol]  = rowData[psaHrsCol]  / 24
+      if(compHrsCol && rowData[compHrsCol]) rowData[compHrsCol] = rowData[compHrsCol] / 24
+      if(diffCol    && rowData[diffCol])    rowData[diffCol]    = rowData[diffCol]    / 60 / 24
     }
 
-    const sn=cur.sheet
+    const sn = masterSheet
 
     if(!sn){
       toast('This sheet has no direct save path — use the master workbook directly.',true)
