@@ -474,7 +474,7 @@ const PSA_BASIS = 275  // kg CBG per hour ideal
 const SHEETS = [
 
 // ─── DIGESTER 1 ───────────────────────────────────────────
-{id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1', hasDate:true, sections:[
+{id:'D1',label:'Digester 1',group:'Digesters',sheet:'D1', hasDate:true, track:true, sections:[
   // ── EXPECTED (Excel C2–C15) ──────────────────────────────
   {t:'Expected',f:[
     {k:'cd_exp',       l:'Cow Dung — Expected (MT/day)',         tp:'num'},
@@ -571,7 +571,7 @@ const SHEETS = [
 ]},
 
 // ─── DIGESTER 2 ───────────────────────────────────────────
-{id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2', hasDate:true, sections:[
+{id:'D2',label:'Digester 2',group:'Digesters',sheet:'D2', hasDate:true, track:true, sections:[
   // ── EXPECTED (Excel C2–C15) ──────────────────────────────
   {t:'Expected',f:[
     {k:'cd_exp',       l:'Cow Dung — Expected (MT/day)',         tp:'num'},
@@ -669,7 +669,7 @@ const SHEETS = [
 ]},
 
 // ─── PSA PRODUCTION ───────────────────────────────────────
-{id:'PSA',label:'PSA Production',group:'Operations',sheet:'PSA Production', hasDate:true, sections:[
+{id:'PSA',label:'PSA Production',group:'Operations',sheet:'PSA Production', hasDate:true, track:true, sections:[
   {t:'Running Hours',f:[
     {k:'psa_hrs',      l:'PSA Running Hours',                    tp:'num'},
     {k:'psa_run_min',  l:'PSA Run Time (Min)',                   tp:'num'},
@@ -717,7 +717,7 @@ const SHEETS = [
 
 // ─── pH ───────────────────────────────────────────────────
 // Separate sheet "Digester pH"; data starts row 4
-{id:'PH',label:'Digester pH',group:'Operations',sheet:'Digester pH', hasDate:true, dataStart:4, sections:[
+{id:'PH',label:'Digester pH',group:'Operations',sheet:'Digester pH', hasDate:true, dataStart:4, track:true, sections:[
   {t:'D1 pH',f:[
     {k:'d1_ph_3m',  l:'D1 pH @ 3M',    tp:'num'},
     {k:'d1_ph_6m',  l:'D1 pH @ 6M',    tp:'num'},
@@ -732,7 +732,7 @@ const SHEETS = [
 ]},
 // ─── TEMPERATURE ──────────────────────────────────────────
 // Separate sheet "Digester Temp"; data starts row 4
-{id:'TEMP',label:'Digester Temp',group:'Operations',sheet:'Digester Temp', hasDate:true, dataStart:4, sections:[
+{id:'TEMP',label:'Digester Temp',group:'Operations',sheet:'Digester Temp', hasDate:true, dataStart:4, track:true, sections:[
   {t:'D1 Temperature',f:[
     {k:'d1_tmp_3m', l:'D1 Temp @ 3M (°C)', tp:'num'},
     {k:'d1_tmp_6m', l:'D1 Temp @ 6M (°C)', tp:'num'},
@@ -748,7 +748,7 @@ const SHEETS = [
 
 // ─── TS-VS ────────────────────────────────────────────────
 // Sheet "Digester TS-VS"; data starts row 4
-{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'Digester TS-VS', hasDate:true, dataStart:4, sections:[
+{id:'TSVS',label:'TS-VS Analysis',group:'Operations',sheet:'Digester TS-VS', hasDate:true, dataStart:4, track:true, sections:[
   {t:'D1 TS% & VS%',f:[
     {k:'d1_ts_3m',  l:'D1 TS% @ 3M', tp:'num'},{k:'d1_vs_3m',  l:'D1 VS% @ 3M', tp:'num'},
     {k:'d1_ts_6m',  l:'D1 TS% @ 6M', tp:'num'},{k:'d1_vs_6m',  l:'D1 VS% @ 6M', tp:'num'},
@@ -764,7 +764,7 @@ const SHEETS = [
 
 // ─── IA-PA ────────────────────────────────────────────────
 // Sheet "Digester IA-PA"; data starts row 4
-{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'Digester IA-PA', hasDate:true, dataStart:4, sections:[
+{id:'IAPA',label:'IA-PA',group:'Operations',sheet:'Digester IA-PA', hasDate:true, dataStart:4, track:true, sections:[
   {t:'D1 Zones',f:[
     {k:'d1_ia1',   l:'D1 Zone 1 IA',           tp:'num'},
     {k:'d1_pa1',   l:'D1 Zone 1 PA',           tp:'num'},
@@ -789,7 +789,7 @@ const SHEETS = [
 ]},
 
 // ─── FEEDSTOCK SUPPLY ─────────────────────────────────────
-{id:'FS',label:'Feedstock Supply',group:'Feedstock',sheet:'Feedstock Supply', hasDate:true, sections:[
+{id:'FS',label:'Feedstock Supply',group:'Feedstock',sheet:'Feedstock Supply', hasDate:true, track:true, sections:[
   {t:'Poultry Wastewater Received (KL)',f:[
     {k:'pw_lather',  l:'Lather (KL)',           tp:'num'},
     {k:'pw_narwal',  l:'Narwal (KL)',            tp:'num'},
@@ -840,7 +840,7 @@ const SHEETS = [
 ]},
 
 // ─── FEED & BALANCE ───────────────────────────────────────
-{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance', hasDate:true, sections:[
+{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance', hasDate:true, track:true, sections:[
   {t:'Qty Received Today',f:[
     {k:'pm_rcv',  l:'PM Received (MT)',            tp:'num'},
     {k:'gs_rcv',  l:'Grain Syrup Received (KL)',   tp:'num'},
@@ -882,7 +882,7 @@ const SHEETS = [
 ]},
 
 // ─── CAL SHEETS ───────────────────────────────────────────
-{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal.', hasDate:true, sections:[
+{id:'PMCAL',label:'Pressmud Cal',group:'Lab / Cal',sheet:'Pressmud Cal.', hasDate:true, track:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -894,7 +894,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
-{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'Cow Dung Cal.', hasDate:true, sections:[
+{id:'CDCAL',label:'CD Cal',group:'Lab / Cal',sheet:'Cow Dung Cal.', hasDate:true, track:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -906,7 +906,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
-{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'Rice Grain Syrup Cal.', hasDate:true, sections:[
+{id:'GSCAL',label:'Grain Syrup Cal',group:'Lab / Cal',sheet:'Rice Grain Syrup Cal.', hasDate:true, track:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -917,7 +917,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',              tp:'txt'},
   ]},
 ]},
-{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:true, sections:[
+{id:'CSLCAL',label:'CSL Cal',group:'Lab / Cal',sheet:'CSL Cal.', hasDate:true, track:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -929,7 +929,7 @@ const SHEETS = [
     {k:'remarks',l:'Remarks',               tp:'txt'},
   ]},
 ]},
-{id:'SGCAL',label:'Spent Grain Cal',group:'Lab / Cal',sheet:'Dry Spent Grain Cal', hasDate:true, sections:[
+{id:'SGCAL',label:'Spent Grain Cal',group:'Lab / Cal',sheet:'Dry Spent Grain Cal', hasDate:true, track:true, sections:[
   {t:'Sample Details',f:[
     {k:'sample', l:'Sample Name / Batch',   tp:'txt'},
     {k:'loc',    l:'Sample Location',       tp:'txt'},
@@ -942,7 +942,7 @@ const SHEETS = [
 ]},
 
 // ─── MANURE SALES ─────────────────────────────────────────
-{id:'MANURE',label:'Manure Sales',group:'Sales',sheet:'Manure Sales', hasDate:true, sections:[
+{id:'MANURE',label:'Manure Sales',group:'Sales',sheet:'Manure Sales', hasDate:true, track:true, sections:[
   {t:'Sale Entry',f:[
     {k:'v_type',  l:'Vehicle Type',        tp:'sel', opts:['Tractor','Mini Truck','Truck','Other']},
     {k:'farmer',  l:'Farmer Name',         tp:'txt'},
@@ -956,7 +956,7 @@ const SHEETS = [
 
 // ─── SALES DETAIL ─────────────────────────────────────────
 // One summary row per day — qty & rate per customer written side by side
-{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, dataStart:5, sections:[
+{id:'SALES',label:'Sales Detail',group:'Sales',sheet:'Sales Detail', hasDate:true, dataStart:5, track:true, sections:[
   {t:'CBG Dispatch — Qty (kg) & Rate (₹/kg)',f:[
     {k:'veer_qty',    l:'Veer Gas — Qty (kg)',          tp:'num'},
     {k:'veer_rate',   l:'Veer Gas — Total Revenue (₹)', tp:'num'},
@@ -973,7 +973,7 @@ const SHEETS = [
 ]},
 
 // ─── MAINTENANCE ──────────────────────────────────────────
-{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, dataStart:5, sections:[
+{id:'MAINT',label:'Maintenance',group:'Maintenance',sheet:'Maintenance', hasDate:true, dataStart:5, track:true, sections:[
   {t:'Work Order',f:[
     {k:'unit',       l:'Unit / Area',       tp:'sel', opts:['D1','D2','PSA','Compressor','Utility','Civil','Electrical','Other']},
     {k:'equipment',  l:'Equipment',         tp:'txt'},
@@ -986,7 +986,7 @@ const SHEETS = [
 ]},
 
 // ─── FINANCE ──────────────────────────────────────────────
-{id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs', hasDate:true, sections:[
+{id:'REVCOST',label:'Daily Revenue & Costs',group:'Finance',sheet:'Daily Revenue & Costs', hasDate:true, track:true, sections:[
   {t:'Manual Entry',f:[
     {k:'transport_cost',l:'Transportation Cost (₹)', tp:'num'},
     {k:'elec_cost',  l:'Electricity Cost (₹/day)',  tp:'num'},
@@ -996,14 +996,14 @@ const SHEETS = [
     {k:'_note', l:'All other revenue & cost columns are auto-derived from Sales Detail, Feed & Balance, and other sheets.', tp:'info'},
   ]},
 ]},
-{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs', hasDate:false, sections:[
+{id:'FIXED',label:'Monthly Fixed Costs',group:'Finance',sheet:'Monthly Fixed Costs', hasDate:false, track:false, sections:[
   {t:'Monthly Electricity Entry',f:[
     {k:'month',      l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
     {k:'elec_kvah',  l:'Electricity Usage (kVAh)', tp:'num'},
     {k:'elec_bill',  l:'Electricity Bill (₹)',     tp:'num'},
   ]},
 ]},
-{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:null, hasDate:false, sections:[
+{id:'EMI',label:'EMI Tracker',group:'Finance',sheet:null, hasDate:false, track:false, sections:[
   {t:'EMI Payment',f:[
     {k:'month',    l:'Month', tp:'sel', opts:['January','February','March','April','May','June','July','August','September','October','November','December']},
     {k:'year',     l:'Year',           tp:'num'},
@@ -1014,14 +1014,14 @@ const SHEETS = [
 ]},
 
 // ─── CBG EXPECTED ─────────────────────────────────────────
-{id:'CBGEXP',label:'CBG Expected',group:'Operations',sheet:'CBG Expected', hasDate:true, dataStart:4, sections:[
+{id:'CBGEXP',label:'CBG Expected',group:'Operations',sheet:'CBG Expected', hasDate:true, dataStart:4, track:false, sections:[
   {t:'Note',f:[
     {k:'_note', l:'All columns in this sheet are auto-calculated from D1/D2 BPP values and PSA data. No manual entry required.', tp:'info'},
   ]},
 ]},
 
 // ─── DAILY PLANNER ────────────────────────────────────────
-{id:'PLANNER',label:'Daily Planner',group:'Operations',sheet:null, hasDate:false, sections:[
+{id:'PLANNER',label:'Daily Planner',group:'Operations',sheet:null, hasDate:false, track:false, sections:[
   {t:'Note',f:[
     {k:'_note', l:'Daily Feeding Planner is a formula-driven planning sheet. Enter feeding quantities in D1 and D2 sheets; this sheet calculates expected gas output and stock balances automatically.', tp:'info'},
   ]},
@@ -1256,7 +1256,7 @@ function buildSidebar(){
   const _curDay=window._activeDateStr||today
 
   // 3-day audit stats
-  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI'&&s.id!=='CBGEXP'&&s.id!=='PLANNER').map(s=>s.label)
+  const allTracked=SHEETS.filter(s=>s.track).map(s=>s.label)
   let totalSaved=0,totalPossible=allTracked.length*3
   const missAlerts=[]
   days.forEach(d=>{
@@ -1426,7 +1426,7 @@ function renderHome(resetDate=true){
   }
 
   // Today's completion ring
-  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI'&&s.id!=='CBGEXP'&&s.id!=='PLANNER')
+  const allTracked=SHEETS.filter(s=>s.track)
   const todayDone=allTracked.filter(s=>savedToday.has(s.label)).length
   const todayTotal=allTracked.length
   const todayPct=todayTotal>0?Math.round(todayDone/todayTotal*100):0
@@ -1573,7 +1573,7 @@ function renderAudit(){
     return d===today?s+' (Today)':s
   }
 
-  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI'&&s.id!=='CBGEXP'&&s.id!=='PLANNER')
+  const allTracked=SHEETS.filter(s=>s.track)
   let totalSaved=0,totalPending=0,totalMissing=0
   days.forEach((d,di)=>{
     const saved=_savedOnDate(d)
