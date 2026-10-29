@@ -1256,7 +1256,7 @@ function buildSidebar(){
   const _curDay=window._activeDateStr||today
 
   // 3-day audit stats
-  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI').map(s=>s.label)
+  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI'&&s.id!=='CBGEXP'&&s.id!=='PLANNER').map(s=>s.label)
   let totalSaved=0,totalPossible=allTracked.length*3
   const missAlerts=[]
   days.forEach(d=>{
@@ -1426,7 +1426,7 @@ function renderHome(resetDate=true){
   }
 
   // Today's completion ring
-  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI')
+  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI'&&s.id!=='CBGEXP'&&s.id!=='PLANNER')
   const todayDone=allTracked.filter(s=>savedToday.has(s.label)).length
   const todayTotal=allTracked.length
   const todayPct=todayTotal>0?Math.round(todayDone/todayTotal*100):0
@@ -1573,7 +1573,7 @@ function renderAudit(){
     return d===today?s+' (Today)':s
   }
 
-  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI')
+  const allTracked=SHEETS.filter(s=>s.id!=='FIXED'&&s.id!=='EMI'&&s.id!=='CBGEXP'&&s.id!=='PLANNER')
   let totalSaved=0,totalPending=0,totalMissing=0
   days.forEach((d,di)=>{
     const saved=_savedOnDate(d)
