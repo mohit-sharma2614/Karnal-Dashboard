@@ -840,7 +840,7 @@ const SHEETS = [
 ]},
 
 // ─── FEED & BALANCE ───────────────────────────────────────
-{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed & Balance', hasDate:true, track:true, sections:[
+{id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed_and_Balance', hasDate:true, track:true, sections:[
   {t:'Qty Received Today',f:[
     {k:'pm_rcv',  l:'PM Received (MT)',            tp:'num'},
     {k:'gs_rcv',  l:'Grain Syrup Received (KL)',   tp:'num'},
@@ -935,6 +935,19 @@ const SHEETS = [
     {k:'loc',    l:'Sample Location',       tp:'txt'},
     {k:'ts_pct', l:'TS%',                   tp:'num'},
     {k:'vs_pct', l:'VS%',                   tp:'num'},
+    {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
+    {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
+    {k:'remarks',l:'Remarks',               tp:'txt'},
+  ]},
+]},
+
+{id:'APPCAL',label:'Apple Pomace Cal',group:'Lab / Cal',sheet:'Apple Pomace Cal.', hasDate:true, track:true, sections:[
+  {t:'Sample Details',f:[
+    {k:'sample', l:'Sample Name',           tp:'txt'},
+    {k:'loc',    l:'Location',              tp:'txt'},
+    {k:'ts_pct', l:'TS%',                   tp:'num'},
+    {k:'vs_pct', l:'VS%',                   tp:'num'},
+    {k:'qty',    l:'Quantity (MT/KL)',       tp:'num'},
     {k:'ts_t',   l:'TS (Tonnes)',           tp:'calc', fn:'cal_ts_t'},
     {k:'vs_t',   l:'VS (Tonnes)',           tp:'calc', fn:'cal_vs_t'},
     {k:'remarks',l:'Remarks',               tp:'txt'},
@@ -1899,6 +1912,10 @@ const COLUMN_NAME_MAP = {
     sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
     qty:'Quantity (MT)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
   },
+  APPCAL: {
+    sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    qty:'Quantity (MT/KL)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+  },
   MANURE: {
     v_type:'Vehicle Type', farmer:'Farmer Name', type:'Type',
     amount:'Amount (₹)', remarks:'Remarks',
@@ -2114,12 +2131,22 @@ async function fetchFBPrevBal(ds){
       keys.forEach(k=>{ inp['ob_'+k]=0; const el=document.getElementById('f_ob_'+k); if(el) el.value='0 (no prior data)' })
       recompute(); return
     }
-    // Step 2: fetch balance cols from that row
-    // Feed_and_Balance row 2: col 94=Cow Dung, 95=Pressmud, 96=CSL Feed, 97=Grain Syrup, 98=Spent grain
-    const balRange=`${colLetter(94)}${lastRowNum}:${colLetter(98)}${lastRowNum}`
-    const balData=await gGet(`/worksheets('${SN}')/range(address='${balRange}')`)
-    const balRow=(balData&&balData.values&&balData.values[0])||[]
-    const balMap={cd:balRow[0],pm:balRow[1],csl:balRow[2],gs:balRow[3],sg:balRow[4]}
+    // Step 2: fetch balance cols from that row using column names
+    const hrow = SHEET_META.FB.hrow
+    const [cdCol,pmCol,cslCol,gsCol,sgCol] = await Promise.all([
+      getColByName('Feed_and_Balance', hrow, 'Cow Dung~2'),
+      getColByName('Feed_and_Balance', hrow, 'Pressmud~2'),
+      getColByName('Feed_and_Balance', hrow, 'CSL Feed~2'),
+      getColByName('Feed_and_Balance', hrow, 'Grain Syrup~2'),
+      getColByName('Feed_and_Balance', hrow, 'Spent grain~2'),
+    ])
+    const fetchCol = async (col) => {
+      if(!col) return 0
+      const r = await gGet(`/worksheets('${SN}')/range(address='${colLetter(col)}${lastRowNum}:${colLetter(col)}${lastRowNum}')`)
+      return (r&&r.values&&r.values[0]&&r.values[0][0]) || 0
+    }
+    const [cdV,pmV,cslV,gsV,sgV] = await Promise.all([fetchCol(cdCol),fetchCol(pmCol),fetchCol(cslCol),fetchCol(gsCol),fetchCol(sgCol)])
+    const balMap={cd:cdV,pm:pmV,csl:cslV,gs:gsV,sg:sgV}
     keys.forEach(k=>{
       const val=parseFloat(balMap[k])||0
       inp['ob_'+k]=val
@@ -2179,8 +2206,8 @@ window.handleSave = async ()=>{
   if(!cur){ toast('Select a sheet first',true); return }
 
   // Cal sheets all have hasDate:true now; isCalSheet marks them as append-mode (date→col B).
-  // MANURE and MAINT have a date picker and also use append mode (Sl.No in col 1, Date in col 2).
-  const isCalSheet   = ['PMCAL','GSCAL','CSLCAL','CDCAL','SGCAL'].includes(cur.id)
+  // MANURE, MAINT and Cal sheets use append mode — Date is in col 1 for all.
+  const isCalSheet   = ['PMCAL','GSCAL','CSLCAL','CDCAL','SGCAL','APPCAL'].includes(cur.id)
   const isAppendSheet = isCalSheet || ['MANURE','MAINT'].includes(cur.id)
   const ds = document.getElementById('dp')?.value || (isCalSheet ? today() : null)
   if(!ds||!isValidDate(ds)){ toast('Enter a valid date first',true); return }
@@ -2190,7 +2217,7 @@ window.handleSave = async ()=>{
 
   try{
     const serial=toExcelSerial(ds)
-    const dateCol = isAppendSheet ? 2 : 1
+    const dateCol = 1  // Date is always col 1 in all sheets
     const dataStart = cur.dataStart || 3
 
     // Resolve column numbers by name using the master header row.
@@ -2291,13 +2318,11 @@ window.handleSave = async ()=>{
 
     if(isAppendSheet){
       // Append sheets: always add a new row — multiple entries per day are allowed.
-      // Date is in col B (2); col A (1) holds auto Sl.No / Sr.No.
-      const d=await gGet(`/worksheets('${encodeURIComponent(sn)}')/range(address='B${dataStart}:B500')`)
+      // Date is in col A (1) for all append sheets.
+      const d=await gGet(`/worksheets('${encodeURIComponent(sn)}')/range(address='A${dataStart}:A500')`)
       const rows=(d&&d.values)||[]
       let last=dataStart-1
       for(let i=rows.length-1;i>=0;i--){ if(rows[i][0]!==null&&rows[i][0]!==''){ last=dataStart+i; break } }
-      // Auto-assign Sr.No in col A
-      rowData[1] = last - dataStart + 2
       rowNum = last+1
     } else {
       rowNum = await findRow(sn, serial, dataStart)
@@ -2333,11 +2358,9 @@ window.handleSave = async ()=>{
 
 async function appendSubmissionLog(dateSerial, sheetLabel, sessionId){
   const SL = encodeURIComponent('Submission Log')
-  const d  = await gGet(`/worksheets('${SL}')/range(address='A3:A202')`)
-  const rows = (d&&d.values)||[]
-  let last = 2
-  for(let i=rows.length-1;i>=0;i--){ if(rows[i][0]!==null&&rows[i][0]!==''){ last=3+i; break } }
-  const rowNum = last+1
+  // Use usedRange to find last row — no hardcoded cap
+  const used = await gGet(`/worksheets('${SL}')/usedRange(valuesOnly=true)`)
+  const rowNum = used&&used.rowCount ? used.rowCount + 2 : 3
   const accounts = _msal?.getAllAccounts()||[]
   const email = accounts[0]?.username||''
   const name  = _user||email
@@ -2345,6 +2368,8 @@ async function appendSubmissionLog(dateSerial, sheetLabel, sessionId){
   const ts    = `${now.getDate().toString().padStart(2,'0')}-${now.toLocaleString('en',{month:'short'})}-${now.getFullYear()} ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`
   await gPatch(`/worksheets('${SL}')/range(address='A${rowNum}:E${rowNum}')`,
     {values:[[dateSerial, sheetLabel, name, email, ts]]}, sessionId)
+  // Refresh in-memory _subLog so sidebar stays accurate after save
+  loadSubLog().catch(()=>{})
 }
 
 function colLetter(n){ let s=''; while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)} return s }
@@ -2573,11 +2598,20 @@ renderHome()
 // Load subLog for progress tracking, then refresh sidebar + home
 initMsal().then(()=>{
   updateAuthUI()
-  // Try to load submission log for progress tracking
-  gGet(`/worksheets('Submission%20Log')/range(address='A3:E300')`).then(d=>{
-    if(d&&d.values){ window._subLog=d.values; buildSidebar(); renderHome(false) }
-  }).catch(()=>{})
+  loadSubLog()
 }).catch(()=>{})
+
+async function loadSubLog(){
+  try{
+    // Get used range to find last row, then fetch last 200 rows from bottom
+    const used = await gGet(`/worksheets('Submission%20Log')/usedRange(valuesOnly=true)`)
+    if(!used||!used.rowCount) return
+    const lastRow = used.rowCount + 1  // usedRange is 0-indexed from row1; actual last row in sheet
+    const firstRow = Math.max(3, lastRow - 199)
+    const d = await gGet(`/worksheets('Submission%20Log')/range(address='A${firstRow}:E${lastRow}')`)
+    if(d&&d.values){ window._subLog=d.values; buildSidebar(); renderHome(false) }
+  }catch(e){}
+}
 
 // ═══════════════════════════════════════════════════════════════
 // UPLOAD WORKBOOK FEATURE  (v2 — all loopholes fixed)
@@ -2601,6 +2635,7 @@ const UPL_CFG = {
   'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
   'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
   'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
+  'Apple Pomace Cal.':     { cmKey:'APPCAL',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
   'Daily Revenue & Costs': { cmKey:'REVCOST', dateCol:1, dataStart:4, append:false },
   'Manure Sales':          { cmKey:'MANURE',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+vehicleType+farmer
   'Maintenance':           { cmKey:'MAINT',   dateCol:1, dataStart:4, append:true,  dupCols:[1,3,4]  }, // date+equipment+work_type
@@ -2944,14 +2979,19 @@ function renderUplPreview(){
     }
   }
 
-  // ── Fix 7: Manure Sales validation ──────────────────────────────────
+  // ── Fix 7: Manure Sales validation — use COLUMN_NAME_MAP to find vehicle type and type cols
   let manureWarnHtml = ''
   if(_uplParsed['Manure Sales']){
     const unknownVTypes = new Set()
     const unknownTypes  = new Set()
+    const manureCM = COLUMN_NAME_MAP['MANURE']
+    // Find column indices from COLUMN_MAP (upload uses 1-based index keys in rowData)
+    const cm = COLUMN_MAP[UPL_CFG['Manure Sales'].cmKey]
+    const vtCol = cm && cm['v_type']
+    const typeCol = cm && cm['type']
     _uplParsed['Manure Sales'].forEach(({rowData}) => {
-      const vt = String(rowData[3]||'').trim()
-      const mt = String(rowData[5]||'').trim()
+      const vt = String(rowData[vtCol]||'').trim()
+      const mt = String(rowData[typeCol]||'').trim()
       if(vt && !KNOWN_MANURE.vehicleTypes.includes(vt)) unknownVTypes.add(vt)
       if(mt && !KNOWN_MANURE.manureTypes.includes(mt))  unknownTypes.add(mt)
     })
@@ -3085,6 +3125,22 @@ async function submitUpload(){
     const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
     await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, uploadLabel, sid).catch(()=>{})
 
+    // Pre-resolve PSA time cols and Manure month col via column names (Fix 4/5)
+    let _psaTimeCols = null, _manureMonthCol = null
+    if(_uplParsed['PSA Production']){
+      const m = SHEET_META.PSA
+      const [hrs, chrs, diff] = await Promise.all([
+        getColByName(m.masterSheet, m.hrow, 'PSA Running Time (in Hrs)'),
+        getColByName(m.masterSheet, m.hrow, 'Compressor Running Time (in Hrs)'),
+        getColByName(m.masterSheet, m.hrow, 'Compressor Running Time (in Mins)'),
+      ])
+      _psaTimeCols = {hrs, chrs, diff}
+    }
+    if(_uplParsed['Manure Sales']){
+      const m = SHEET_META.MANURE
+      _manureMonthCol = await getColByName(m.masterSheet, m.hrow, 'Month')
+    }
+
     for(const [sName, rows] of Object.entries(_uplParsed)){
       const cfg = UPL_CFG[sName]
       const cm  = COLUMN_MAP[cfg.cmKey]
@@ -3134,7 +3190,6 @@ async function submitUpload(){
             for(let j=existRows.length-1; j>=0; j--){
               if(existRows[j][0]!=null && existRows[j][0]!==''){ last=cfg.dataStart+j; break }
             }
-            rowData[1] = last - cfg.dataStart + 2  // auto Sr.No
             rowNum = last + 1
           } else {
             rowNum = await findRow(sName, serial, cfg.dataStart)
@@ -3153,17 +3208,17 @@ async function submitUpload(){
             }
           }
 
-          // PSA: convert decimal hours → Excel time fraction
-          if(sName === 'PSA Production'){
-            if(rowData[2]) rowData[2] = rowData[2] / 24
-            if(rowData[4]) rowData[4] = rowData[4] / 24
-            if(rowData[5]) rowData[5] = rowData[5] / 60 / 24
+          // PSA: convert decimal hours/mins → Excel time fraction using resolved column numbers
+          if(sName === 'PSA Production' && _psaTimeCols){
+            if(_psaTimeCols.hrs  && rowData[_psaTimeCols.hrs])  rowData[_psaTimeCols.hrs]  = rowData[_psaTimeCols.hrs]  / 24
+            if(_psaTimeCols.chrs && rowData[_psaTimeCols.chrs]) rowData[_psaTimeCols.chrs] = rowData[_psaTimeCols.chrs] / 24
+            if(_psaTimeCols.diff && rowData[_psaTimeCols.diff]) rowData[_psaTimeCols.diff] = rowData[_psaTimeCols.diff] / 60 / 24
           }
-          // Manure: auto-derive Month string for col 6 (master col structure: Date=1,VType=2,Farmer=3,Type=4,Amount=5,Month=6)
-          if(sName === 'Manure Sales'){
+          // Manure: auto-derive Month string using resolved column number
+          if(sName === 'Manure Sales' && _manureMonthCol){
             const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
             const ds2 = fromExcelSerial(serial)
-            if(ds2){ const [y,m]=ds2.split('-'); rowData[6]=`${MON[parseInt(m,10)-1]}-${y}` }
+            if(ds2){ const [y,m]=ds2.split('-'); rowData[_manureMonthCol]=`${MON[parseInt(m,10)-1]}-${y}` }
           }
 
           const maxCol = Math.max(...Object.keys(rowData).map(Number), 10)
