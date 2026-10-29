@@ -2427,15 +2427,14 @@ function loadFeedstockRegistry(){
   try{
     const reg=JSON.parse(localStorage.getItem('FEEDSTOCK_REGISTRY')||'[]')
     reg.forEach(fs=>{
-      if(!fs||!fs.id||!fs.colIdx) return
-      // Merge into COLUMN_MAP for D1, D2, FS
-      const baseD1=56, baseD2=57
-      COLUMN_MAP['D1'][`${fs.id}_exp`]=baseD1+fs.colOffset
-      COLUMN_MAP['D1'][`${fs.id}_act`]=baseD1+fs.colOffset+1
-      COLUMN_MAP['D1'][`${fs.id}_bpp`]=baseD1+fs.colOffset+2
-      COLUMN_MAP['D2'][`${fs.id}_exp`]=baseD2+fs.colOffset
-      COLUMN_MAP['D2'][`${fs.id}_act`]=baseD2+fs.colOffset+1
-      COLUMN_MAP['D2'][`${fs.id}_bpp`]=baseD2+fs.colOffset+2
+      if(!fs||!fs.id) return
+      // Register header names so getColByName and buildCmFromHeaders can resolve these columns
+      COLUMN_NAME_MAP['D1'][`${fs.id}_exp`]=`${fs.id}_exp`
+      COLUMN_NAME_MAP['D1'][`${fs.id}_act`]=`${fs.id}_act`
+      COLUMN_NAME_MAP['D1'][`${fs.id}_bpp`]=`${fs.id}_bpp`
+      COLUMN_NAME_MAP['D2'][`${fs.id}_exp`]=`${fs.id}_exp`
+      COLUMN_NAME_MAP['D2'][`${fs.id}_act`]=`${fs.id}_act`
+      COLUMN_NAME_MAP['D2'][`${fs.id}_bpp`]=`${fs.id}_bpp`
     })
   }catch(e){ console.warn('loadFeedstockRegistry:',e) }
 }
@@ -2568,9 +2567,9 @@ async function registerFeedstock(data){
     reg.push({...data,colIdx:newColIdx,colOffset,registeredAt:new Date().toISOString()})
     localStorage.setItem('FEEDSTOCK_REGISTRY',JSON.stringify(reg))
 
-    // Merge into COLUMN_MAP
-    COLUMN_MAP['D1'][`${data.id}_exp`]=cols[0]; COLUMN_MAP['D1'][`${data.id}_act`]=cols[1]; COLUMN_MAP['D1'][`${data.id}_bpp`]=cols[2]
-    COLUMN_MAP['D2'][`${data.id}_exp`]=cols[0]; COLUMN_MAP['D2'][`${data.id}_act`]=cols[1]; COLUMN_MAP['D2'][`${data.id}_bpp`]=cols[2]
+    // Register header names in COLUMN_NAME_MAP so getColByName and buildCmFromHeaders can resolve them
+    COLUMN_NAME_MAP['D1'][`${data.id}_exp`]=`${data.id}_exp`; COLUMN_NAME_MAP['D1'][`${data.id}_act`]=`${data.id}_act`; COLUMN_NAME_MAP['D1'][`${data.id}_bpp`]=`${data.id}_bpp`
+    COLUMN_NAME_MAP['D2'][`${data.id}_exp`]=`${data.id}_exp`; COLUMN_NAME_MAP['D2'][`${data.id}_act`]=`${data.id}_act`; COLUMN_NAME_MAP['D2'][`${data.id}_bpp`]=`${data.id}_bpp`
 
     toast(`${data.name} registered — columns added at ${colLetter(cols[0])}–${colLetter(cols[2])}`)
     renderHome()
@@ -2617,7 +2616,7 @@ async function loadSubLog(){
 // UPLOAD WORKBOOK FEATURE  (v2 — all loopholes fixed)
 // ═══════════════════════════════════════════════════════════════
 
-// Excel sheet name → COLUMN_MAP key + parse config
+// Excel sheet name → COLUMN_NAME_MAP key + parse config
 // append:true  → multiple rows per date allowed (Cal/Manure/Maint)
 // dupKey:array → columns used for duplicate detection on append sheets (0-based in rowData cols)
 const UPL_CFG = {
@@ -2873,6 +2872,27 @@ async function loadUplFile(file){
   }
 }
 
+// Build fieldKey → 1-based col index from an uploaded sheet's header row.
+// nameMap: { fieldKey: 'Header Name' } or { fieldKey: 'Header Name~N' } for Nth occurrence.
+function buildCmFromHeaders(hrow, nameMap){
+  const hdrs = {}
+  hrow.forEach((h, i) => {
+    const s = String(h||'').trim()
+    if(!s) return
+    if(!hdrs[s]) hdrs[s] = []
+    hdrs[s].push(i + 1) // 1-based
+  })
+  const cm = {}
+  for(const [key, spec] of Object.entries(nameMap)){
+    const tilde = spec.indexOf('~')
+    const hdr = tilde >= 0 ? spec.slice(0, tilde) : spec
+    const n   = tilde >= 0 ? parseInt(spec.slice(tilde + 1)) : 1
+    const cols = hdrs[hdr]
+    if(cols && cols.length >= n) cm[key] = cols[n - 1]
+  }
+  return cm
+}
+
 function parseUplWorkbook(){
   _uplParsed   = {}
   _uplRejected = {}
@@ -2885,10 +2905,11 @@ function parseUplWorkbook(){
   for(const sName of _uplWb.SheetNames){
     const cfg = UPL_CFG[sName]
     if(!cfg) continue
-    const cm = COLUMN_MAP[cfg.cmKey]
-    if(!cm) continue
+    const nameMap = COLUMN_NAME_MAP[cfg.cmKey]
+    if(!nameMap) continue
     const ws = _uplWb.Sheets[sName]
     const all = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null})
+    const cm = buildCmFromHeaders(all[cfg.dataStart - 2] || [], nameMap)
     const dataRows = all.slice(cfg.dataStart - 1)
     const rows = []
     let rejected = 0
@@ -2984,11 +3005,12 @@ function renderUplPreview(){
   if(_uplParsed['Manure Sales']){
     const unknownVTypes = new Set()
     const unknownTypes  = new Set()
-    const manureCM = COLUMN_NAME_MAP['MANURE']
-    // Find column indices from COLUMN_MAP (upload uses 1-based index keys in rowData)
-    const cm = COLUMN_MAP[UPL_CFG['Manure Sales'].cmKey]
-    const vtCol = cm && cm['v_type']
-    const typeCol = cm && cm['type']
+    const manureCfg = UPL_CFG['Manure Sales']
+    const manureWS  = _uplWb.Sheets['Manure Sales']
+    const manureAll = XLSX.utils.sheet_to_json(manureWS, {header:1, raw:true, defval:null})
+    const cm = buildCmFromHeaders(manureAll[manureCfg.dataStart - 2] || [], COLUMN_NAME_MAP[manureCfg.cmKey])
+    const vtCol  = cm['v_type']
+    const typeCol = cm['type']
     _uplParsed['Manure Sales'].forEach(({rowData}) => {
       const vt = String(rowData[vtCol]||'').trim()
       const mt = String(rowData[typeCol]||'').trim()
@@ -3037,7 +3059,10 @@ function renderUplPreview(){
 
   // ── Per-sheet data preview ───────────────────────────────────────────
   for(const [sName, rows] of Object.entries(_uplParsed)){
-    const cm = COLUMN_MAP[UPL_CFG[sName].cmKey]
+    const _cfg2 = UPL_CFG[sName]
+    const _ws2  = _uplWb.Sheets[sName]
+    const _all2 = XLSX.utils.sheet_to_json(_ws2, {header:1, raw:true, defval:null})
+    const cm = buildCmFromHeaders(_all2[_cfg2.dataStart - 2] || [], COLUMN_NAME_MAP[_cfg2.cmKey])
     const keys = Object.keys(cm).slice(0,6)
     const showRows = rows.slice(0,10)
     html += `<div class="sec"><div class="sec-title-row">
@@ -3143,7 +3168,6 @@ async function submitUpload(){
 
     for(const [sName, rows] of Object.entries(_uplParsed)){
       const cfg = UPL_CFG[sName]
-      const cm  = COLUMN_MAP[cfg.cmKey]
       uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`)
 
       // Fix 4: for append sheets, pre-fetch existing keys (date+dupCols) to detect duplicates
