@@ -3626,7 +3626,7 @@ async function submitUpload(){
   const btn   = document.getElementById('uplSubmitBtn')
   const logEl = document.getElementById('uplProgress')
   if(btn) btn.disabled = true
-  if(logEl){ logEl.style.display='block'; logEl.innerHTML='' }
+  if(logEl){ logEl.style.display='block'; logEl.innerHTML=''; setTimeout(()=>logEl.scrollIntoView({behavior:'smooth',block:'start'}),50) }
 
   if(!_uplParsed || Object.keys(_uplParsed).length===0){
     uplLog('ERROR: No upload data — please re-select the file', true)
@@ -3698,7 +3698,7 @@ async function submitUpload(){
       try {
         const cacheKey = `${mSheet}:${meta.hrow}`
         if(!_hdrCache[cacheKey]){
-          const rh = await gGet(`/worksheets('${encodeURIComponent(mSheet)}')/range(address='${meta.hrow}:${meta.hrow}')`)
+          const rh = await gGet(`/worksheets('${encodeURIComponent(mSheet)}')/range(address='${meta.hrow}:${meta.hrow}')`, sid)
           const vals = (rh&&rh.values&&rh.values[0]) || []
           const hmap = {}
           vals.forEach((v,i)=>{ if(v!=null&&v!==''){const n=String(v).trim();if(!hmap[n])hmap[n]=[];hmap[n].push(i+1)} })
@@ -3820,10 +3820,28 @@ async function submitUpload(){
     const endLabel = `[UPLOAD ${status}] ${_uplFile.name} | ${dateRangeStr} | written:${totalWritten} skipped:${totalSkipped+totalDupSkipped} errors:${totalErrors}`
     await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, endLabel, sid).catch(()=>{})
 
+    // Big result banner — unmissable
+    if(logEl){
+      const ok = totalErrors === 0
+      const banner = document.createElement('div')
+      banner.style.cssText = `margin-top:10px;padding:12px 16px;border-radius:8px;font-weight:700;font-size:.9rem;text-align:center;background:${ok?'#dcfce7':'#fef2f2'};color:${ok?'#166534':'#991b1b'};border:1.5px solid ${ok?'#86efac':'#fca5a5'}`
+      banner.textContent = ok
+        ? `✅ Done — ${totalWritten} row${totalWritten===1?'':'s'} written to master workbook`
+        : `❌ ${totalErrors} error${totalErrors===1?'':'s'} — scroll up to see details. ${totalWritten} rows written.`
+      logEl.appendChild(banner)
+      banner.scrollIntoView({behavior:'smooth',block:'nearest'})
+    }
     if(totalErrors === 0) toast(`Transfer complete — ${totalWritten} row${totalWritten===1?'':'s'} written to master workbook`)
     else toast(`Transfer done with ${totalErrors} error${totalErrors===1?'':'s'} — see log`, true)
 
   } catch(e){
+    if(logEl){
+      const banner = document.createElement('div')
+      banner.style.cssText = 'margin-top:10px;padding:12px 16px;border-radius:8px;font-weight:700;font-size:.9rem;text-align:center;background:#fef2f2;color:#991b1b;border:1.5px solid #fca5a5'
+      banner.textContent = `❌ Upload failed: ${e.message}`
+      logEl.appendChild(banner)
+      banner.scrollIntoView({behavior:'smooth',block:'nearest'})
+    }
     // Fix 2: log failure state so partial writes are traceable
     uplLog(`Fatal: ${e.message}`, true)
     const sid2 = await getSession().catch(()=>null)
