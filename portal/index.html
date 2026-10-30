@@ -794,20 +794,30 @@ const SHEETS = [
 
 // ─── FEED & BALANCE ───────────────────────────────────────
 {id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed_and_Balance', hasDate:true, track:false, sections:[
+  {t:'Opening Balance (auto — prev day closing)',f:[
+    {k:'ob_cd',  l:'CD Opening Balance (MT)',      tp:'fetch'},
+    {k:'ob_pm',  l:'PM Opening Balance (MT)',      tp:'fetch'},
+    {k:'ob_csl', l:'CSL Opening Balance (KL)',     tp:'fetch'},
+    {k:'ob_gs',  l:'GS Opening Balance (KL)',      tp:'fetch'},
+    {k:'ob_sg',  l:'SG Opening Balance (MT)',      tp:'fetch'},
+    {k:'ob_ap',  l:'AP Opening Balance (MT)',      tp:'fetch'},
+  ]},
   {t:'Qty Fed (D1+D2 Combined)',f:[
     {k:'pm_fed',  l:'PM Fed (MT)',                 tp:'num'},
     {k:'gs_fed',  l:'Grain Syrup Fed (KL)',        tp:'num'},
     {k:'csl_fed', l:'CSL Fed (KL)',                tp:'num'},
     {k:'cd_fed',  l:'CD Fed (MT)',                 tp:'num'},
     {k:'sg_fed',  l:'Spent Grain Fed (MT)',        tp:'num'},
+    {k:'ap_fed',  l:'Apple Pomace Fed (MT)',       tp:'num'},
     {k:'tot_fed', l:'Total Feed (MT)',             tp:'calc', fn:'fb_tot_fed'},
   ]},
-  {t:'Closing Balance (enter from Excel)',f:[
+  {t:'Closing Balance',f:[
     {k:'fb_pm_bal',  l:'PM Closing Balance (MT)',  tp:'num'},
     {k:'fb_gs_bal',  l:'GS Closing Balance (KL)',  tp:'num'},
     {k:'fb_csl_bal', l:'CSL Closing Balance (KL)', tp:'num'},
     {k:'fb_cd_bal',  l:'CD Closing Balance (MT)',  tp:'num'},
     {k:'fb_sg_bal',  l:'SG Closing Balance (MT)',  tp:'num'},
+    {k:'fb_ap_bal',  l:'AP Closing Balance (MT)',  tp:'num'},
   ]},
   {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
 ]},
@@ -1106,7 +1116,7 @@ const FN = {
                       n(v.carlsberg)+n(v.gs_rcv),
 
   // Feed & Balance
-  fb_tot_fed:  (v) => n(v.pm_fed)+n(v.gs_fed)+n(v.csl_fed)+n(v.cd_fed)+n(v.sg_fed),
+  fb_tot_fed:  (v) => n(v.pm_fed)+n(v.gs_fed)+n(v.csl_fed)+n(v.cd_fed)+n(v.sg_fed)+n(v.ap_fed),
 
   // Manure: amount = qty_mt × rate (calc, written to col 6)
   manure_amount:(v) => n(v.qty_mt)*n(v.rate),
@@ -1631,6 +1641,7 @@ function loadSheet(id){
   document.getElementById('main').innerHTML=html
   recompute()
   if(CAL_QTY_COLS[id]) fetchCalQty(id)
+  if(id==='FB') fetchFBPrevBal(window._activeDateStr||today())
 }
 
 function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
@@ -2051,12 +2062,12 @@ const CAL_QTY_COLS = {
 }
 
 async function fetchFBPrevBal(ds){
-  const keys=['pm','gs','csl','cd','sg']
-  keys.forEach(k=>{ inp['ob_'+k]=0; const el=document.getElementById('f_ob_'+k); if(el) el.value='Fetching…' })
+  const keys=['cd','pm','csl','gs','sg','ap']
+  keys.forEach(k=>{ const el=document.getElementById('f_ob_'+k); if(el) el.value='Fetching…' })
   try{
     const serial=toExcelSerial(ds)
     const SN=encodeURIComponent('Feed_and_Balance')
-    // Step 1: find the last row before today (only fetch col A for efficiency)
+    // Step 1: find the last row with a date <= today (opening balance = that day's closing balance)
     const dateData=await gGet(`/worksheets('${SN}')/range(address='A3:A500')`)
     const dateRows=(dateData&&dateData.values)||[]
     let lastRowNum=null
@@ -2071,32 +2082,33 @@ async function fetchFBPrevBal(ds){
       if(s!==null && s<serial){ lastRowNum=3+i; break }
     }
     if(!lastRowNum){
-      keys.forEach(k=>{ inp['ob_'+k]=0; const el=document.getElementById('f_ob_'+k); if(el) el.value='0 (no prior data)' })
-      recompute(); return
+      keys.forEach(k=>{ const el=document.getElementById('f_ob_'+k); if(el) el.value='0 (no prior data)' })
+      return
     }
-    // Step 2: fetch balance cols from that row using column names
+    // Step 2: resolve balance column positions using verified ~N counts
     const hrow = SHEET_META.FB.hrow
-    const [cdCol,pmCol,cslCol,gsCol,sgCol] = await Promise.all([
-      getColByName('Feed_and_Balance', hrow, 'Cow Dung~2'),
-      getColByName('Feed_and_Balance', hrow, 'Pressmud~2'),
+    const [cdCol,pmCol,cslCol,gsCol,sgCol,apCol] = await Promise.all([
+      getColByName('Feed_and_Balance', hrow, 'Cow Dung~3'),
+      getColByName('Feed_and_Balance', hrow, 'Pressmud~3'),
       getColByName('Feed_and_Balance', hrow, 'CSL Feed~2'),
-      getColByName('Feed_and_Balance', hrow, 'Grain Syrup~2'),
-      getColByName('Feed_and_Balance', hrow, 'Spent grain~2'),
+      getColByName('Feed_and_Balance', hrow, 'Grain Syrup~5'),
+      getColByName('Feed_and_Balance', hrow, 'Spent grain~3'),
+      getColByName('Feed_and_Balance', hrow, 'Apple pomace~3'),
     ])
     const fetchCol = async (col) => {
       if(!col) return 0
       const r = await gGet(`/worksheets('${SN}')/range(address='${colLetter(col)}${lastRowNum}:${colLetter(col)}${lastRowNum}')`)
       return (r&&r.values&&r.values[0]&&r.values[0][0]) || 0
     }
-    const [cdV,pmV,cslV,gsV,sgV] = await Promise.all([fetchCol(cdCol),fetchCol(pmCol),fetchCol(cslCol),fetchCol(gsCol),fetchCol(sgCol)])
-    const balMap={cd:cdV,pm:pmV,csl:cslV,gs:gsV,sg:sgV}
+    const [cdV,pmV,cslV,gsV,sgV,apV] = await Promise.all([
+      fetchCol(cdCol),fetchCol(pmCol),fetchCol(cslCol),fetchCol(gsCol),fetchCol(sgCol),fetchCol(apCol)
+    ])
+    const balMap={cd:cdV,pm:pmV,csl:cslV,gs:gsV,sg:sgV,ap:apV}
     keys.forEach(k=>{
       const val=parseFloat(balMap[k])||0
-      inp['ob_'+k]=val
       const el=document.getElementById('f_ob_'+k)
       if(el) el.value=val
     })
-    recompute()
   } catch(e){
     console.error('fetchFBPrevBal',e)
     keys.forEach(k=>{ const el=document.getElementById('f_ob_'+k); if(el) el.value='Error' })
@@ -2354,6 +2366,7 @@ function onDateChange(){
   }
   if(dispEl) dispEl.textContent=`${fmtDisplay(ds)}  ·  serial ${serial}`
   recompute()
+  if(cur&&cur.id==='FB') fetchFBPrevBal(ds)
 }
 window.onDateChange=onDateChange
 function toast(msg,err=false){
