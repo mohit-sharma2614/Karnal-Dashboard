@@ -1593,13 +1593,29 @@ function renderAudit(){
       </div>`
     }).filter(Boolean).join('')
 
-    return `<div class="mr wb-row" style="grid-template-columns:${colTemplate};cursor:pointer" onclick="toggleAuditWb(${wi})">
+    // Workbook row: name area opens detail view; date cells also open detail for that date
+    const wbDateCells = days.map((d,di) => {
+      const saved = _savedOnDate(d)
+      const knownIds = wb.ids.filter(id => SHEETS.find(s=>s.id===id))
+      if(!knownIds.length) return `<div class="mr-cell"><div class="cell" style="color:var(--muted);font-size:.75rem">—</div></div>`
+      const savedIds = knownIds.filter(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) })
+      const allDone = savedIds.length===knownIds.length
+      const noneDone = savedIds.length===0
+      const isToday = d===today
+      const click = `onclick="event.stopPropagation();openWbDetail(${wi},'${d}')"`
+      if(allDone) return `<div class="mr-cell"><div class="cell done" ${click} style="cursor:pointer">Saved ✓</div></div>`
+      if(noneDone&&!isToday) return `<div class="mr-cell"><div class="cell miss" ${click} style="cursor:pointer">Missing !</div></div>`
+      const lbl = savedIds.length>0 ? `${savedIds.length}/${knownIds.length} done` : 'Pending →'
+      return `<div class="mr-cell"><div class="cell pend" ${click} style="cursor:pointer">${lbl}</div></div>`
+    }).join('')
+
+    return `<div class="mr wb-row" style="grid-template-columns:${colTemplate};cursor:pointer" onclick="openWbDetail(${wi})">
       <div class="mr-name">
-        <span style="margin-right:6px;font-size:.9rem;color:${wb.dot}">${arrow}</span>
+        <span style="margin-right:6px;font-size:.85rem;color:${wb.dot}">🔍</span>
         <div class="mr-dot" style="background:${wb.dot}"></div>
         <span class="mr-label">${wb.label}</span>
       </div>
-      ${wbCells}
+      ${wbDateCells}
     </div>
     ${isExpanded ? sheetRows : ''}`
   }).join('')
@@ -1609,7 +1625,7 @@ function renderAudit(){
       <div>
         <div class="ah-tag">3-Day Data Audit</div>
         <div class="ah-title">${dayLabel(days[0]).split(' · ')[0]} – ${dayLabel(days[days.length-1]).split(' · ')[0]}</div>
-        <div class="ah-sub">Click a workbook row to expand · Click any cell to enter data</div>
+        <div class="ah-sub">Click a workbook row to view all data · Click a date cell to view that date</div>
       </div>
       <div class="ah-stats">
         <div class="ah-stat"><div class="ah-stat-v" style="color:#16a34a">${totalSaved}</div><div class="ah-stat-l">Sheets saved</div></div>
@@ -1638,12 +1654,227 @@ function renderAudit(){
   </div>`
 }
 
-function toggleAuditWb(wi){
-  if(_auditExpanded.has(wi)) _auditExpanded.delete(wi)
-  else _auditExpanded.add(wi)
-  renderAudit()
+function openWbDetail(wi, selectedDate){
+  const days = _last3Days()
+  const date = selectedDate || days[days.length-1]
+  renderWbDetail(wi, date)
 }
-window.toggleAuditWb=toggleAuditWb
+window.openWbDetail = openWbDetail
+
+async function renderWbDetail(wbIdx, selectedDate){
+  const wb = WB_CARDS[wbIdx]
+  const days = _last3Days()
+  const todayStr = _todayStr()
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+
+  function dateLabel(d){
+    const dObj = new Date(d+'T00:00:00')
+    const dayN = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
+    const lbl = `${months[dObj.getMonth()]} ${dObj.getDate()} · ${dayN[dObj.getDay()]}`
+    return d===todayStr ? lbl+' (Today)' : lbl
+  }
+
+  const main = document.getElementById('main')
+  if(!main) return
+  const hb = document.getElementById('homeBtn'); if(hb){hb.style.display='flex'}
+  document.getElementById('saveBarEl').style.display='none'
+  main.style.padding='0'
+  cur = null
+
+  // Show loading state immediately
+  main.innerHTML = `<div class="home-scroll" style="padding:20px 16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap">
+      <span onclick="renderAudit()" style="cursor:pointer;color:#4f46e5;font-size:.82rem;font-weight:600">← Audit Matrix</span>
+      <span style="color:var(--muted)">›</span>
+      <span style="font-weight:700;font-size:.95rem;color:var(--fg)">${wb.label}</span>
+    </div>
+    <div style="text-align:center;padding:48px 16px;color:var(--muted)">
+      <div style="font-size:1.5rem;margin-bottom:8px">⏳</div>
+      <div style="font-size:.88rem">Loading data from SharePoint…</div>
+    </div>
+  </div>`
+
+  // Auth check
+  try{ await initMsal() }catch(e){}
+  const t = await getToken().catch(()=>null)
+  if(!t){
+    main.innerHTML = `<div class="home-scroll" style="padding:20px 16px">
+      <span onclick="renderAudit()" style="cursor:pointer;color:#4f46e5;font-size:.82rem;font-weight:600">← Audit Matrix</span>
+      <div style="color:#dc2626;padding:20px 0;font-size:.88rem">Not signed in — please sign in to view data.</div>
+    </div>`
+    return
+  }
+
+  const serial = toExcelSerial(selectedDate)
+  const APPEND_IDS = new Set(['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL','MANURE','MAINT'])
+
+  // Fetch data for all sheets in this workbook in parallel
+  const sheetData = {}
+  await Promise.all(wb.ids.map(async id => {
+    const sheet = SHEETS.find(s=>s.id===id)
+    if(!sheet) return
+    const meta = SHEET_META[id]||{}
+    const masterSheet = meta.masterSheet || sheet.sheet || id
+    const hrow = meta.hrow||2
+    const dataStart = sheet.dataStart||3
+    const nameMap = COLUMN_NAME_MAP[id]
+    if(!nameMap){ sheetData[id]={rows:[],fields:[]}; return }
+
+    try{
+      // Ensure header cache populated (one API call per sheet)
+      const cacheKey = `${masterSheet}:${hrow}`
+      if(!_hdrCache[cacheKey]){
+        const r = await gGet(`/worksheets('${encodeURIComponent(masterSheet)}')/range(address='${hrow}:${hrow}')`)
+        const vals = (r&&r.values&&r.values[0])||[]
+        const map = {}
+        vals.forEach((v,i)=>{ if(v!==null&&v!==undefined&&v!==''){ const n=String(v).trim(); if(!map[n]) map[n]=[]; map[n].push(i+1) } })
+        _hdrCache[cacheKey] = map
+      }
+      const hmap = _hdrCache[cacheKey]
+
+      // Resolve all fieldKey → column number
+      const colNums = {}
+      let maxCol = 1
+      for(const [fk,spec] of Object.entries(nameMap)){
+        const tildeIdx = spec.lastIndexOf('~')
+        let name,occ
+        if(tildeIdx>0&&/^\d+$/.test(spec.slice(tildeIdx+1))){ name=spec.slice(0,tildeIdx); occ=parseInt(spec.slice(tildeIdx+1),10) }
+        else{ name=spec; occ=1 }
+        const cols = hmap[name]
+        if(cols&&cols.length>=occ){ colNums[fk]=cols[occ-1]; if(cols[occ-1]>maxCol) maxCol=cols[occ-1] }
+      }
+
+      const enc = encodeURIComponent(masterSheet)
+
+      if(APPEND_IDS.has(id)){
+        // Find all rows matching this date (col A or B)
+        const dateColAddr = `B${dataStart}:B500`
+        const dateData = await gGet(`/worksheets('${enc}')/range(address='${dateColAddr}')`)
+        const dateVals = (dateData&&dateData.values)||[]
+        const matchRows = []
+        for(let i=0;i<dateVals.length;i++){
+          const v = dateVals[i][0]
+          if(v===null||v===undefined) continue
+          if(typeof v==='number'&&Math.round(v)===serial) matchRows.push(dataStart+i)
+          else if(typeof v==='string'){
+            const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso&&toExcelSerial(iso[1])===serial) matchRows.push(dataStart+i)
+            const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy&&toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)===serial) matchRows.push(dataStart+i)
+          }
+        }
+        if(!matchRows.length){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
+        const rows = await Promise.all(matchRows.map(async rn=>{
+          const rd = await gGet(`/worksheets('${enc}')/range(address='A${rn}:${colLetter(maxCol)}${rn}')`)
+          const vals = (rd&&rd.values&&rd.values[0])||[]
+          const row = {}
+          for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
+          return row
+        }))
+        sheetData[id] = {rows, fields:Object.keys(nameMap), append:true}
+      } else {
+        // Single date-row sheet
+        const rowNum = await findRow(masterSheet, serial, dataStart)
+        if(!rowNum){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
+        const rd = await gGet(`/worksheets('${enc}')/range(address='A${rowNum}:${colLetter(maxCol)}${rowNum}')`)
+        const vals = (rd&&rd.values&&rd.values[0])||[]
+        const row = {}
+        for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
+        sheetData[id] = {rows:[row], fields:Object.keys(nameMap), append:false}
+      }
+    }catch(e){
+      sheetData[id] = {rows:[], fields:Object.keys(nameMap), error:e.message}
+    }
+  }))
+
+  // Format a raw cell value for display
+  function fmtVal(v, fk, id){
+    if(v===null||v===undefined||v==='') return null
+    if(typeof v==='number'){
+      // PSA time conversions
+      if(id==='PSA'){
+        if(fk==='psa_hrs'||fk==='comp_hrs') return (Math.round(v*24*100)/100)+' hrs'
+        if(fk==='comp_min') return (Math.round(v*24*60*10)/10)+' min'
+        if(fk==='psa_comp_diff') return (Math.round(v*24*60*10)/10)+' min'
+      }
+      // Excel serial date (large number between ~40000–50000)
+      if(v>40000&&v<60000){ const ds=fromExcelSerial(Math.round(v)); return ds||v.toFixed(0) }
+      // Small fractions that are likely time values stored /24 — show as is
+      if(v>0&&v<1&&id!=='PSA') return v.toFixed(6)
+      // Regular numbers
+      return Number.isInteger(v)?v.toString():(Math.round(v*1000)/1000).toString()
+    }
+    return String(v)
+  }
+
+  // Get field label from SHEETS definition
+  function fieldLabel(fk, id){
+    const sheet = SHEETS.find(s=>s.id===id); if(!sheet) return fk
+    for(const sec of sheet.sections||[]){
+      const f = (sec.f||[]).find(x=>x.k===fk)
+      if(f) return f.l
+    }
+    return fk
+  }
+
+  // Render sheet cards
+  const sheetCards = wb.ids.map(id=>{
+    const sheet = SHEETS.find(s=>s.id===id); if(!sheet) return ''
+    const data = sheetData[id]
+    if(!data) return ''
+
+    let content = ''
+    if(data.error){
+      content = `<div style="color:#dc2626;font-size:.82rem;padding:8px 0">Error: ${data.error}</div>`
+    } else if(!data.rows.length){
+      content = `<div style="color:var(--muted);font-size:.82rem;font-style:italic;padding:8px 0">No data found for this date</div>`
+    } else {
+      content = data.rows.map((row, ri)=>{
+        const pairs = data.fields.filter(fk=>{
+          const v = fmtVal(row[fk], fk, id); return v!==null
+        }).map(fk=>{
+          const v = fmtVal(row[fk], fk, id)
+          return `<div style="display:flex;flex-direction:column;gap:2px">
+            <div style="font-size:.7rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;line-height:1.2">${fieldLabel(fk,id)}</div>
+            <div style="font-size:.88rem;font-weight:600;color:var(--fg)">${v}</div>
+          </div>`
+        }).join('')
+        const rowHdr = data.rows.length>1 ? `<div style="font-size:.75rem;color:var(--muted);font-weight:600;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">Entry ${ri+1}</div>` : ''
+        return `<div style="margin-bottom:${data.rows.length>1?'12px':'0'}">${rowHdr}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px 14px">${pairs||'<span style="color:var(--muted);font-size:.82rem">All fields empty</span>'}</div></div>`
+      }).join('')
+    }
+
+    const hasData = data.rows.length>0 && !data.error
+    const statusColor = data.error ? '#9333ea' : (hasData ? '#16a34a' : '#dc2626')
+    const statusBg = data.error ? '#faf5ff' : (hasData ? '#f0fdf4' : '#fef2f2')
+    const statusBorder = data.error ? '#d8b4fe' : (hasData ? '#bbf7d0' : '#fecaca')
+    const statusLbl = data.error ? 'Error' : (hasData ? `${data.rows.length} entr${data.rows.length===1?'y':'ies'}` : 'No data')
+
+    return `<div style="background:var(--surface,#fff);border:1px solid var(--border,#e4e4e7);border-radius:12px;padding:14px 16px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="font-weight:700;font-size:.9rem;color:var(--fg)">${sheet.label}</div>
+        <div style="font-size:.72rem;font-weight:600;color:${statusColor};background:${statusBg};border:1px solid ${statusBorder};padding:2px 8px;border-radius:99px;white-space:nowrap">${statusLbl}</div>
+      </div>
+      ${content}
+    </div>`
+  }).filter(Boolean).join('')
+
+  // Date tabs
+  const dateTabs = days.map(d=>{
+    const active = d===selectedDate
+    return `<div onclick="renderWbDetail(${wbIdx},'${d}')" style="padding:6px 14px;border-radius:6px;font-size:.82rem;font-weight:${active?'700':'500'};cursor:pointer;background:${active?wb.dot:'transparent'};color:${active?'#fff':'var(--muted)'};">${dateLabel(d)}</div>`
+  }).join('')
+
+  main.innerHTML = `<div class="home-scroll" style="padding:20px 16px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <span onclick="renderAudit()" style="cursor:pointer;color:#4f46e5;font-size:.82rem;font-weight:600">← Audit Matrix</span>
+      <span style="color:var(--muted)">›</span>
+      <span style="font-weight:700;font-size:.92rem;color:var(--fg)">${wb.label}</span>
+      <span style="font-size:.75rem;color:var(--muted);background:var(--bg2,#f4f4f8);padding:2px 8px;border-radius:99px;border:1px solid var(--border)">Read Only</span>
+    </div>
+    <div style="display:flex;gap:4px;margin-bottom:16px;background:var(--bg2,#f4f4f8);border-radius:8px;padding:4px;overflow-x:auto">${dateTabs}</div>
+    ${sheetCards || '<div style="color:var(--muted);text-align:center;padding:40px">No sheets configured for this workbook</div>'}
+  </div>`
+}
+window.renderWbDetail = renderWbDetail
 
 function loadSheet(id){
   const hb=document.getElementById('homeBtn'); if(hb){hb.style.display='flex'}
