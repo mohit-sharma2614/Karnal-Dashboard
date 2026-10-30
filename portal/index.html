@@ -1677,7 +1677,6 @@ function loadSheet(id){
   document.getElementById('main').innerHTML=html
   recompute()
   if(CAL_QTY_COLS[id]) fetchCalQty(id)
-  if(id==='FB') fetchFBPrevBal(today())
 }
 
 function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
@@ -1900,6 +1899,7 @@ const COLUMN_NAME_MAP = {
   },
   MANURE: {
     v_type:'Vehicle Type', farmer:'Farmer Name', type:'Type',
+    qty_mt:'Quantity (MT)', rate:'Rate (₹/MT)',
     amount:'Amount (₹)', remarks:'Remarks',
   },
   SALES: {
@@ -2615,8 +2615,8 @@ const UPL_CFG = {
   'Digester Temp':         { cmKey:'TEMP',    dateCol:1, dataStart:3, append:false },
   'Digester TS-VS':        { cmKey:'TSVS',    dateCol:1, dataStart:3, append:false },
   'Digester IA-PA':        { cmKey:'IAPA',    dateCol:1, dataStart:3, append:false },
-  'Feedstock Supply':      { cmKey:'FS',      dateCol:1, dataStart:3, append:false },
-  'Feed & Balance':        { cmKey:'FB',      dateCol:1, dataStart:3, append:false },
+  'Feedstock Supply':      { cmKey:'FS',      dateCol:1, dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
+  'Feed & Balance':        { cmKey:'FB',      dateCol:1, dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
   'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+sample+location
   'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
   'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
@@ -3156,13 +3156,14 @@ async function submitUpload(){
 
     for(const [sName, rows] of Object.entries(_uplParsed)){
       const cfg = UPL_CFG[sName]
+      const mSheet = cfg.masterSheet || sName  // master workbook worksheet name (may differ from input workbook sheet name)
       uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`)
 
       // Fix 4: for append sheets, pre-fetch existing keys (date+dupCols) to detect duplicates
       let existingKeys = new Set()
       if(cfg.append && cfg.dupCols){
         try {
-          const enc = encodeURIComponent(sName)
+          const enc = encodeURIComponent(mSheet)
           const dc  = cfg.dateCol
           // fetch date col + first 2 dup cols
           const endCol = Math.max(dc, ...cfg.dupCols)
@@ -3182,7 +3183,7 @@ async function submitUpload(){
         const {serial, dateStr, rowData} = rows[i]
 
         try {
-          const enc = encodeURIComponent(sName)
+          const enc = encodeURIComponent(mSheet)
           let rowNum
 
           if(cfg.append){
