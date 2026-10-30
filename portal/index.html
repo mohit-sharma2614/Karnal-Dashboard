@@ -2923,7 +2923,7 @@ function renderUplPreview(){
   const unknown = (_uplWb.SheetNames||[]).filter(s => !UPL_CFG[s])
 
   if(recognized.length === 0){
-    const rejTotal = Object.values(_uplRejected).reduce((a,b)=>a+b,0)
+    const rejTotal = Object.values(_uplRejected).filter(v=>typeof v==='number').reduce((a,b)=>a+b,0)
     previewEl.style.display = 'block'
     previewEl.innerHTML = `<div class="sec">
       <div class="sec-title-row"><span class="sec-title" style="color:var(--danger)">No recognised sheets found</span></div>
