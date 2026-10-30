@@ -206,7 +206,9 @@
     .mh-row{display:grid;background:#f9f9fb;border-bottom:1px solid #f0f0f0}
     .mh{padding:8px 12px;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#a1a1aa;text-align:center}
     .mh:first-child{text-align:left}
-    .mr{display:grid;border-bottom:1px solid #fafafa;align-items:center}
+    .mr{display:grid;border-bottom:1px solid #f0f0f0;align-items:center}
+    .wb-row:hover{background:#f9f9ff}
+    .mr-sheet{border-bottom:1px solid #f4f4f4}
     .mr-name{padding:9px 12px;display:flex;align-items:center;gap:8px}
     .mr-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
     .mr-label{font-size:12.5px;font-weight:600;color:#3f3f46}
@@ -1153,12 +1155,12 @@ let cur=null, inp={}, drafts={}
 
 // Workbook card definitions (group SHEETS into 6 cards)
 const WB_CARDS = [
-  { label:'Production RBG',   sub:'Digesters',              grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
-  { label:'Lab / Cal',        sub:'Calibrations',           grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL'] },
-  { label:'Digester Health',  sub:'pH · Temp · TS-VS · IA', grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
-  { label:'Feed & Balance',   sub:'Fed Qty · Balance',       grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FB'] },
-  { label:'Sales & Finance',  sub:'Revenue · Sales',        grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES'] },
-  { label:'CBG Production',   sub:'PSA · Plans',            grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA','CBGEXP','PLANNER','MAINT','FIXED','EMI'] },
+  { label:'Production RBG Workbook',    sub:'D1 · D2',                          grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
+  { label:'Lab Workbook',               sub:'Pressmud · CD · GS · CSL · SG · AP', grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL'] },
+  { label:'Digester Health Workbook',   sub:'pH · Temp · TS-VS · IA-PA',        grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
+  { label:'Feed & Balance Workbook',    sub:'Fed Qty · Closing Balance',         grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FB'] },
+  { label:'Sales & Finance Workbook',   sub:'Revenue · Manure · Sales',          grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES'] },
+  { label:'CBG Production Workbook',    sub:'PSA · Expected · Planner · Maint',  grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA','CBGEXP','PLANNER','MAINT','FIXED','EMI'] },
 ]
 
 function _sheetLabel(id){ const s=SHEETS.find(x=>x.id===id); return s?s.label:id }
@@ -1507,6 +1509,25 @@ function renderHome(resetDate=true){
   </div>`
 }
 
+// tracks which workbook rows are expanded in the audit matrix
+const _auditExpanded = new Set()
+
+function _auditCellHtml(sheetIds, d, isToday, colTemplate){
+  const saved = _savedOnDate(d)
+  // only count sheets that exist in SHEETS (tracked or not)
+  const knownIds = sheetIds.filter(id => SHEETS.find(s=>s.id===id))
+  if(!knownIds.length) return `<div class="mr-cell"><div class="cell" style="color:var(--muted);font-size:.75rem">—</div></div>`
+  const savedIds = knownIds.filter(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) })
+  const allDone = savedIds.length===knownIds.length
+  const noneDone = savedIds.length===0
+  const firstId = knownIds[0]
+  const click = `onclick="selectPortalDate('${d}');loadSheet('${firstId}')"`
+  if(allDone) return `<div class="mr-cell"><div class="cell done" ${click} style="cursor:pointer">Saved ✓</div></div>`
+  if(noneDone&&!isToday) return `<div class="mr-cell"><div class="cell miss" ${click} style="cursor:pointer">Missing !</div></div>`
+  const lbl = savedIds.length>0 ? `${savedIds.length}/${knownIds.length} done` : 'Pending →'
+  return `<div class="mr-cell"><div class="cell pend" ${click} style="cursor:pointer">${lbl}</div></div>`
+}
+
 function renderAudit(){
   const main=document.getElementById('main')
   if(!main) return
@@ -1525,48 +1546,70 @@ function renderAudit(){
     return d===today?s+' (Today)':s
   }
 
-  const allTracked=SHEETS.filter(s=>s.track)
+  // Stats: count all sheets across all workbooks (all, not just tracked)
   let totalSaved=0,totalPending=0,totalMissing=0
   days.forEach((d,di)=>{
     const saved=_savedOnDate(d)
-    allTracked.forEach(s=>{
-      if(saved.has(s.label)) totalSaved++
-      else if(di===days.length-1) totalPending++
-      else totalMissing++
+    const isToday=d===today
+    WB_CARDS.forEach(wb=>{
+      wb.ids.forEach(id=>{
+        const s=SHEETS.find(x=>x.id===id); if(!s) return
+        if(saved.has(s.label)) totalSaved++
+        else if(isToday) totalPending++
+        else totalMissing++
+      })
     })
   })
 
-  const cols=days.length+1
-  const colTemplate=`140px ${days.map(()=>'1fr').join(' ')}`
+  const colTemplate=`180px ${days.map(()=>'1fr').join(' ')}`
 
-  const matrixRows=WB_CARDS.map(wb=>{
-    const trackedIds=wb.ids.filter(id=>allTracked.find(s=>s.id===id))
-    if(!trackedIds.length) return ''
-    const cells=days.map((d,di)=>{
-      const saved=_savedOnDate(d)
-      const allDone=trackedIds.every(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) })
-      const noneDone=trackedIds.every(id=>{ const s=SHEETS.find(x=>x.id===id); return !s||!saved.has(s.label) })
-      const isToday=d===today
-      const firstId=trackedIds[0]
-      const click=`onclick="selectPortalDate('${d}');loadSheet('${firstId}')"`
-      if(allDone) return `<div class="mr-cell"><div class="cell done" ${click} style="cursor:pointer">Saved ✓</div></div>`
-      if(noneDone&&!isToday) return `<div class="mr-cell"><div class="cell miss" ${click} style="cursor:pointer">Missing !</div></div>`
-      const doneCount=trackedIds.filter(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) }).length
-      const lbl=doneCount>0?`${doneCount}/${trackedIds.length} done`:'Pending →'
-      return `<div class="mr-cell"><div class="cell pend" ${click} style="cursor:pointer">${lbl}</div></div>`
+  const matrixRows=WB_CARDS.map((wb,wi)=>{
+    const isExpanded=_auditExpanded.has(wi)
+    const arrow=isExpanded?'▾':'▸'
+
+    // Workbook summary row
+    const wbCells=days.map(d=>{
+      return _auditCellHtml(wb.ids, d, d===today, colTemplate)
     }).join('')
-    return `<div class="mr" style="grid-template-columns:${colTemplate}">
-      <div class="mr-name"><div class="mr-dot" style="background:${wb.dot}"></div><span class="mr-label">${wb.label}</span></div>
-      ${cells}
-    </div>`
-  }).filter(Boolean).join('')
+
+    // Individual sheet rows (shown when expanded)
+    const sheetRows=wb.ids.map(id=>{
+      const s=SHEETS.find(x=>x.id===id); if(!s) return ''
+      const sheetCells=days.map(d=>{
+        const saved=_savedOnDate(d)
+        const isSaved=saved.has(s.label)
+        const isToday=d===today
+        const click=`onclick="selectPortalDate('${d}');loadSheet('${id}')"`
+        if(isSaved) return `<div class="mr-cell"><div class="cell done" ${click} style="cursor:pointer;font-size:.78rem">Saved ✓</div></div>`
+        if(!isToday) return `<div class="mr-cell"><div class="cell miss" ${click} style="cursor:pointer;font-size:.78rem">Missing !</div></div>`
+        return `<div class="mr-cell"><div class="cell pend" ${click} style="cursor:pointer;font-size:.78rem">Pending →</div></div>`
+      }).join('')
+      return `<div class="mr mr-sheet" style="grid-template-columns:${colTemplate};background:var(--bg2,#f8f8fb)">
+        <div class="mr-name" style="padding-left:28px;font-size:.82rem;color:var(--fg2,#555)">
+          <div class="mr-dot" style="background:${wb.dot};opacity:.5;width:7px;height:7px"></div>
+          <span class="mr-label" style="font-weight:500">${s.label}</span>
+        </div>
+        ${sheetCells}
+      </div>`
+    }).filter(Boolean).join('')
+
+    return `<div class="mr wb-row" style="grid-template-columns:${colTemplate};cursor:pointer" onclick="toggleAuditWb(${wi})">
+      <div class="mr-name">
+        <span style="margin-right:6px;font-size:.9rem;color:${wb.dot}">${arrow}</span>
+        <div class="mr-dot" style="background:${wb.dot}"></div>
+        <span class="mr-label">${wb.label}</span>
+      </div>
+      ${wbCells}
+    </div>
+    ${isExpanded ? sheetRows : ''}`
+  }).join('')
 
   main.innerHTML=`<div class="home-scroll">
     <div class="audit-header">
       <div>
         <div class="ah-tag">3-Day Data Audit</div>
         <div class="ah-title">${dayLabel(days[0]).split(' · ')[0]} – ${dayLabel(days[days.length-1]).split(' · ')[0]}</div>
-        <div class="ah-sub">Click any cell to open that sheet for that date</div>
+        <div class="ah-sub">Click a workbook row to expand · Click any cell to enter data</div>
       </div>
       <div class="ah-stats">
         <div class="ah-stat"><div class="ah-stat-v" style="color:#16a34a">${totalSaved}</div><div class="ah-stat-l">Sheets saved</div></div>
@@ -1594,6 +1637,13 @@ function renderAudit(){
     </div>
   </div>`
 }
+
+function toggleAuditWb(wi){
+  if(_auditExpanded.has(wi)) _auditExpanded.delete(wi)
+  else _auditExpanded.add(wi)
+  renderAudit()
+}
+window.toggleAuditWb=toggleAuditWb
 
 function loadSheet(id){
   const hb=document.getElementById('homeBtn'); if(hb){hb.style.display='flex'}
