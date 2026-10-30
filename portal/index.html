@@ -3275,10 +3275,10 @@ function parseUplWorkbook(){
   _uplParsed   = {}
   _uplRejected = {}
 
-  // Fix 6: accept dates within [today-60, today+7]
+  // Accept dates within [today-60, today] — no future dates
   const now     = new Date()
   const minSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 60))
-  const maxSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 7))
+  const maxSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
 
   for(const sName of _uplWb.SheetNames){
     const cfg = UPL_CFG[sName]
@@ -3453,7 +3453,7 @@ function renderUplPreview(){
     const _ws2  = _uplWb.Sheets[sName]
     const _all2 = XLSX.utils.sheet_to_json(_ws2, {header:1, raw:true, defval:null})
     const cm = buildCmFromHeaders(_all2[_cfg2.dataStart - 2] || [], COLUMN_NAME_MAP[_cfg2.cmKey])
-    const keys = Object.keys(cm).slice(0,6)
+    const keys = Object.keys(cm)
     const showRows = rows.length > 10 ? rows.slice(-10) : rows
     const hiddenCount = rows.length - showRows.length
     html += `<div class="sec"><div class="sec-title-row">
@@ -3567,17 +3567,8 @@ async function submitUpload(){
     const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
     await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, uploadLabel, sid).catch(()=>{})
 
-    // Pre-resolve PSA time cols and Manure month col via column names (Fix 4/5)
-    let _psaTimeCols = null, _manureMonthCol = null
-    if(_uplParsed['PSA Production']){
-      const m = SHEET_META.PSA
-      const [hrs, chrs, diff] = await Promise.all([
-        getColByName(m.masterSheet, m.hrow, 'PSA Running Time (in Hrs)'),
-        getColByName(m.masterSheet, m.hrow, 'Compressor Running Time (in Hrs)'),
-        getColByName(m.masterSheet, m.hrow, 'Compressor Running Time (in Mins)'),
-      ])
-      _psaTimeCols = {hrs, chrs, diff}
-    }
+    // Pre-resolve Manure month col via column names
+    let _manureMonthCol = null
     if(_uplParsed['Manure Sales']){
       const m = SHEET_META.MANURE
       _manureMonthCol = await getColByName(m.masterSheet, m.hrow, 'Month')
@@ -3650,12 +3641,9 @@ async function submitUpload(){
             }
           }
 
-          // PSA: convert decimal hours/mins → Excel time fraction using resolved column numbers
-          if(sName === 'PSA Production' && _psaTimeCols){
-            if(_psaTimeCols.hrs  && rowData[_psaTimeCols.hrs])  rowData[_psaTimeCols.hrs]  = rowData[_psaTimeCols.hrs]  / 24
-            if(_psaTimeCols.chrs && rowData[_psaTimeCols.chrs]) rowData[_psaTimeCols.chrs] = rowData[_psaTimeCols.chrs] / 24
-            if(_psaTimeCols.diff && rowData[_psaTimeCols.diff]) rowData[_psaTimeCols.diff] = rowData[_psaTimeCols.diff] / 60 / 24
-          }
+          // PSA: source Input Workbook already stores hrs/mins as Excel time fractions (÷24).
+          // No conversion needed — values pass through as-is to master workbook.
+          // (The manual entry form DOES convert: user types hours → ÷24. Upload does NOT.)
           // Manure: auto-derive Month string using resolved column number
           if(sName === 'Manure Sales' && _manureMonthCol){
             const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
