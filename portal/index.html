@@ -3634,6 +3634,8 @@ async function submitUpload(){
     if(btn){ btn.disabled=false }
     return
   }
+  // Diagnostic: show what was parsed
+  uplLog(`Sheets to upload: ${Object.entries(_uplParsed).map(([k,v])=>`${k}(${v.length} rows)`).join(', ')}`)
 
   uplLog('Authenticating…')
   let t
@@ -3673,7 +3675,7 @@ async function submitUpload(){
   try {
     uplLog('Opening workbook session…')
     const sid = await getSession()
-    uplLog(sid ? 'Session opened ✓' : 'No session (will write without session)')
+    uplLog(sid ? `Session opened ✓ (${sid.substring(0,12)}…)` : 'No session (will write without session) ⚠️')
 
     // Fix 2 + Fix 3: write UPLOAD START to submission log before touching any sheet
     const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
@@ -3712,7 +3714,9 @@ async function submitUpload(){
           const cols = hmap[name]
           if(cols&&cols.length>=occ) masterCols[fk] = cols[occ-1]
         }
-        uplLog(`  (${Object.keys(masterCols).length}/${Object.keys(nameMap).length} fields mapped in master)`)
+        const mappedFields = Object.keys(masterCols).length
+        const totalFields = Object.keys(nameMap).length
+        uplLog(`  Headers read ✓ — ${mappedFields}/${totalFields} fields mapped${mappedFields===0?' ⚠️ 0 FIELDS — header mismatch!':''}`)
       } catch(e){
         uplLog(`  ERROR resolving master columns for ${mSheet}: ${e.message} — skipping sheet`, true)
         totalErrors += rows.length; continue
