@@ -3082,24 +3082,24 @@ async function loadSubLog(){
 // append:true  → multiple rows per date allowed (Cal/Manure/Maint)
 // dupKey:array → columns used for duplicate detection on append sheets (0-based in rowData cols)
 const UPL_CFG = {
-  'D1':                    { cmKey:'D1',      dateCol:1, dataStart:3, append:false },
-  'D2':                    { cmKey:'D2',      dateCol:1, dataStart:3, append:false },
-  'PSA Production':        { cmKey:'PSA',     dateCol:1, dataStart:3, append:false },
-  'Digester pH':           { cmKey:'PH',      dateCol:1, dataStart:3, append:false },
-  'Digester Temp':         { cmKey:'TEMP',    dateCol:1, dataStart:3, append:false },
-  'Digester TS-VS':        { cmKey:'TSVS',    dateCol:1, dataStart:3, append:false },
-  'Digester IA-PA':        { cmKey:'IAPA',    dateCol:1, dataStart:3, append:false },
-  'Feed_and_Balance':      { cmKey:'FB',      dateCol:1, dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
-  'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+sample+location
-  'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
-  'Cow Dung Cal.':         { cmKey:'CDCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
-  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
-  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
-  'Apple Pomace Cal.':     { cmKey:'APPCAL',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
-  'Daily Revenue & Costs': { cmKey:'REVCOST', dateCol:1, dataStart:4, append:false },
-  'Manure Sales':          { cmKey:'MANURE',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+vehicleType+farmer
-  'Maintenance':           { cmKey:'MAINT',   dateCol:1, dataStart:4, append:true,  dupCols:[1,3,4]  }, // date+equipment+work_type
-  'Sales Detail':          { cmKey:'SALES',   dateCol:1, dataStart:4, append:false },
+  'D1':                    { cmKey:'D1',      dataStart:3, append:false },
+  'D2':                    { cmKey:'D2',      dataStart:3, append:false },
+  'PSA Production':        { cmKey:'PSA',     dataStart:3, append:false },
+  'Digester pH':           { cmKey:'PH',      dataStart:3, append:false },
+  'Digester Temp':         { cmKey:'TEMP',    dataStart:3, append:false },
+  'Digester TS-VS':        { cmKey:'TSVS',    dataStart:3, append:false },
+  'Digester IA-PA':        { cmKey:'IAPA',    dataStart:3, append:false },
+  'Feed_and_Balance':      { cmKey:'FB',      dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
+  'Pressmud Cal.':         { cmKey:'PMCAL',   dataStart:3, append:true,  dupKeys:['sample','loc'] },
+  'CSL Cal.':              { cmKey:'CSLCAL',  dataStart:3, append:true,  dupKeys:['sample','loc'] },
+  'Cow Dung Cal.':         { cmKey:'CDCAL',   dataStart:3, append:true,  dupKeys:['sample','loc'] },
+  'Rice Grain Syrup Cal.': { cmKey:'GSCAL',   dataStart:3, append:true,  dupKeys:['sample','loc'] },
+  'Dry Spent Grain Cal':   { cmKey:'SGCAL',   dataStart:3, append:true,  dupKeys:['sample','loc'] },
+  'Apple Pomace Cal.':     { cmKey:'APPCAL',  dataStart:3, append:true,  dupKeys:['sample','loc'] },
+  'Daily Revenue & Costs': { cmKey:'REVCOST', dataStart:4, append:false },
+  'Manure Sales':          { cmKey:'MANURE',  dataStart:3, append:true,  dupKeys:['v_type','farmer'] },
+  'Maintenance':           { cmKey:'MAINT',   dataStart:4, append:true,  dupKeys:['equipment','work_type'] },
+  'Sales Detail':          { cmKey:'SALES',   dataStart:4, append:false },
 }
 
 // Fix 7: Known valid values for Manure Sales validation
@@ -3391,7 +3391,7 @@ function parseUplWorkbook(){
 
     for(const row of dataRows){
       if(!row || row.length === 0) continue
-      const rawDate = row[cfg.dateCol - 1]
+      const rawDate = row[0]  // date always in col A (index 0) of input workbook
       if(rawDate == null || rawDate === '') continue
       let serial
       if(typeof rawDate === 'number' && rawDate > 40000 && rawDate < 50000){
@@ -3411,10 +3411,12 @@ function parseUplWorkbook(){
 
       const dateStr = fromExcelSerial(serial)
       if(!dateStr) continue
-      const rowData = {[cfg.dateCol]: serial}
+      // Store rowData by FIELD KEY (not input col number) so submitUpload can
+      // resolve the MASTER column position independently via getColByName.
+      const rowData = {}
       for(const [key, col] of Object.entries(cm)){
         const v = row[col - 1]
-        if(v != null && v !== '') rowData[col] = v
+        if(v != null && v !== '') rowData[key] = v
       }
       rows.push({serial, dateStr, rowData})
     }
@@ -3497,8 +3499,8 @@ function renderUplPreview(){
     const vtCol  = cm['v_type']
     const typeCol = cm['type']
     _uplParsed['Manure Sales'].forEach(({rowData}) => {
-      const vt = String(rowData[vtCol]||'').trim()
-      const mt = String(rowData[typeCol]||'').trim()
+      const vt = String(rowData['v_type']||'').trim()
+      const mt = String(rowData['type']||'').trim()
       if(vt && !KNOWN_MANURE.vehicleTypes.includes(vt)) unknownVTypes.add(vt)
       if(mt && !KNOWN_MANURE.manureTypes.includes(mt))  unknownTypes.add(mt)
     })
@@ -3564,7 +3566,7 @@ function renderUplPreview(){
     const PSA_HRS_KEYS = new Set(['psa_hrs','comp_hrs'])
     showRows.forEach(({dateStr,rowData})=>{
       html += `<tr><td>${dateStr}</td>${keys.map(k=>{
-        let v = rowData[cm[k]]
+        let v = rowData[k]
         if(v == null) return `<td>—</td>`
         if(PSA_HRS_KEYS.has(k) && typeof v === 'number'){
           // convert Excel time fraction → hours for display
@@ -3686,28 +3688,38 @@ async function submitUpload(){
 
     for(const [sName, rows] of Object.entries(_uplParsed)){
       const cfg = UPL_CFG[sName]
-      const mSheet = cfg.masterSheet || sName  // master workbook worksheet name (may differ from input workbook sheet name)
+      const mSheet = cfg.masterSheet || sName
+      const meta = SHEET_META[cfg.cmKey]
+      const nameMap = COLUMN_NAME_MAP[cfg.cmKey]
       uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`)
 
-      // Fix 4: for append sheets, pre-fetch existing keys (date+dupCols) to detect duplicates
-      let existingKeys = new Set()
-      if(cfg.append && cfg.dupCols){
-        try {
-          const enc = encodeURIComponent(mSheet)
-          const dc  = cfg.dateCol
-          // fetch date col + first 2 dup cols
-          const endCol = Math.max(dc, ...cfg.dupCols)
-          const d = await gGet(`/worksheets('${enc}')/range(address='${colLetter(1)}${cfg.dataStart}:${colLetter(endCol)}600')`)
-          const existRows = (d&&d.values)||[]
-          for(const er of existRows){
-            const dateV = er[dc-1]
-            if(dateV==null || dateV==='') continue
-            const key = [dateV, ...cfg.dupCols.filter(c=>c!==dc).map(c=>String(er[c-1]||'').trim().toLowerCase())].join('|')
-            existingKeys.add(key)
-          }
-          uplLog(`  (loaded ${existingKeys.size} existing keys for dup-check)`)
-        } catch(e){ uplLog(`  (dup-check pre-fetch failed: ${e.message} — will append all)`) }
+      // Resolve MASTER column positions for every field key (one cached gGet per sheet)
+      let masterCols = {}  // { fieldKey: 1-based master col num }
+      try {
+        const cacheKey = `${mSheet}:${meta.hrow}`
+        if(!_hdrCache[cacheKey]){
+          const rh = await gGet(`/worksheets('${encodeURIComponent(mSheet)}')/range(address='${meta.hrow}:${meta.hrow}')`)
+          const vals = (rh&&rh.values&&rh.values[0]) || []
+          const hmap = {}
+          vals.forEach((v,i)=>{ if(v!=null&&v!==''){const n=String(v).trim();if(!hmap[n])hmap[n]=[];hmap[n].push(i+1)} })
+          _hdrCache[cacheKey] = hmap
+        }
+        const hmap = _hdrCache[cacheKey]
+        for(const [fk, spec] of Object.entries(nameMap)){
+          const ti = spec.lastIndexOf('~')
+          const name = ti>0&&/^\d+$/.test(spec.slice(ti+1)) ? spec.slice(0,ti) : spec
+          const occ  = ti>0&&/^\d+$/.test(spec.slice(ti+1)) ? parseInt(spec.slice(ti+1)) : 1
+          const cols = hmap[name]
+          if(cols&&cols.length>=occ) masterCols[fk] = cols[occ-1]
+        }
+        uplLog(`  (${Object.keys(masterCols).length}/${Object.keys(nameMap).length} fields mapped in master)`)
+      } catch(e){
+        uplLog(`  ERROR resolving master columns for ${mSheet}: ${e.message} — skipping sheet`, true)
+        totalErrors += rows.length; continue
       }
+
+      // For append sheets: track within-batch dup keys by field key values
+      const batchKeys = new Set()
 
       for(let i=0; i<rows.length; i++){
         const {serial, dateStr, rowData} = rows[i]
@@ -3717,17 +3729,17 @@ async function submitUpload(){
           let rowNum
 
           if(cfg.append){
-            // Fix 4: check duplicate by date+sample+location key
-            if(cfg.dupCols){
-              const key = [serial, ...cfg.dupCols.filter(c=>c!==cfg.dateCol).map(c=>String(rowData[c]||'').trim().toLowerCase())].join('|')
-              if(existingKeys.has(key)){
-                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip (${String(rowData[cfg.dupCols[1]]||'').slice(0,20)})`)
+            // Within-batch dup detection using field keys
+            if(cfg.dupKeys){
+              const key = [serial, ...cfg.dupKeys.map(k=>String(rowData[k]||'').trim().toLowerCase())].join('|')
+              if(batchKeys.has(key)){
+                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip`)
                 totalDupSkipped++; continue
               }
-              existingKeys.add(key) // prevent dup within same upload batch
+              batchKeys.add(key)
             }
-            const dc = cfg.dateCol
-            const d = await gGet(`/worksheets('${enc}')/range(address='${colLetter(dc)}${cfg.dataStart}:${colLetter(dc)}600')`)
+            // Find last used row in master (scan col A up to 600)
+            const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`)
             const existRows = (d&&d.values)||[]
             let last = cfg.dataStart - 1
             for(let j=existRows.length-1; j>=0; j--){
@@ -3735,13 +3747,13 @@ async function submitUpload(){
             }
             rowNum = last + 1
           } else {
-            rowNum = await findRow(sName, serial, cfg.dataStart)
+            rowNum = await findRow(mSheet, serial, cfg.dataStart)
             if(rowNum && mode === 'skip'){
               uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Skipped (row ${rowNum} exists)`)
               totalSkipped++; continue
             }
             if(!rowNum){
-              const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A400')`)
+              const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`)
               const existRows = (d&&d.values)||[]
               let last = cfg.dataStart - 1
               for(let j=existRows.length-1; j>=0; j--){
@@ -3751,19 +3763,23 @@ async function submitUpload(){
             }
           }
 
-          // PSA: source Input Workbook already stores hrs/mins as Excel time fractions (÷24).
-          // No conversion needed — values pass through as-is to master workbook.
-          // (The manual entry form DOES convert: user types hours → ÷24. Upload does NOT.)
-          // Manure: auto-derive Month string using resolved column number
+          // Build values array at MASTER column positions
+          const colNums = Object.values(masterCols).filter(Boolean)
+          const maxCol = colNums.length ? Math.max(...colNums, 1) : 10
+          const values = Array(maxCol).fill(null)
+          values[0] = serial  // date always in col A of master
+          for(const [fk, mc] of Object.entries(masterCols)){
+            if(rowData[fk] != null) values[mc - 1] = rowData[fk]
+          }
+
+          // Manure: auto-derive Month string at master month column
           if(sName === 'Manure Sales' && _manureMonthCol){
             const MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
             const ds2 = fromExcelSerial(serial)
-            if(ds2){ const [y,m]=ds2.split('-'); rowData[_manureMonthCol]=`${MON[parseInt(m,10)-1]}-${y}` }
+            if(ds2 && _manureMonthCol <= maxCol){
+              const [y,m]=ds2.split('-'); values[_manureMonthCol-1]=`${MON[parseInt(m,10)-1]}-${y}`
+            }
           }
-
-          const maxCol = Math.max(...Object.keys(rowData).map(Number), 10)
-          const values = Array(maxCol).fill(null)
-          for(const [c,v] of Object.entries(rowData)) values[parseInt(c)-1] = v??null
 
           const range = `A${rowNum}:${colLetter(maxCol)}${rowNum}`
           const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values]}, sid)
@@ -3780,7 +3796,7 @@ async function submitUpload(){
           totalErrors++
         }
       }
-      sheetsWritten.push(sName)  // Fix 2: record this sheet completed
+      sheetsWritten.push(sName)
 
       // Write audit log entries for any last-3-days dates in this upload
       // so the audit matrix shows "Saved" instead of "Missing!" for uploaded dates
