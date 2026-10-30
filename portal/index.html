@@ -1786,16 +1786,46 @@ const COLUMN_NAME_MAP = {
     iapa_remark:'Remark',
   },
   // FS removed — Feedstock Supply merged into Feed_and_Balance; upload only via FB
-  // Feed & Balance (FB) → Feed_and_Balance (hrow=2)
-  // Total cols (8,15,19,23,27,31,48,65,67,69,72,75,77,79,86,93) have NULL header — cannot write by name
-  // Portal writes only to named columns: Fed section (cols 80-85) and Balance section (cols 94-99)
+  // Feed & Balance (FB) → Feed_and_Balance (hrow=2) — full 99-col mapping
+  // Covers: vendor received (cols 1-77) + fed (cols 80-85) + balance (cols 94-99)
+  // Total/blank cols (8,15,19,23,27,31,48,65,67,69,72,75,77,79,86,93) have NULL header — skipped
   FB: {
-    // Fed section (cols 80-85) — named headers
-    cd_fed:'Cow Dung',   pm_fed:'Pressmud',   csl_fed:'CSL Feed',
-    gs_fed:'Grain Syrup', sg_fed:'Spent grain', ap_fed:'Apple pomace',
-    // Balance section (cols 94-99) — named headers (2nd occurrence of same names)
-    fb_cd_bal:'Cow Dung~2', fb_pm_bal:'Pressmud~2', fb_csl_bal:'CSL Feed~2',
-    fb_gs_bal:'Grain Syrup~2', fb_sg_bal:'Spent grain~2', fb_ap_bal:'Apple pomace~2',
+    // Poultry Wastewater received (cols 1-6)
+    pw_lather:'Lather', pw_narwal:'Narwal', pw_subhash:'Subhash',
+    pw_gk:'GK Hatchery', pw_dry:'Dry Poultry', pw_nazim:'Nazim',
+    // Cow Dung received (cols 15-17)
+    cd_gharaunda:'Gharaunda', cd_phoosgarh:'Phoosgarh', cd_radhakrishna:'Radha Krishna',
+    // CSL received (cols 23-25)
+    csl_sadasat:'Sadasat', csl_pantnagar:'Pant Nagar', csl_virangam:'Virangam',
+    // Pressmud received (cols 31-46)
+    pm_sonipat:'Sonipat',
+    pm_malakpur:'Malakpur Sugar Mill, Baraut',
+    pm_ramala:'Ramala , Bhagpat_    vaibhav',
+    pm_thana:'Thana  Bhavan',
+    pm_tikuala:'Tikuala',
+    pm_shamli:'Shmali Sugar Mill-Naveen Contractor',
+    pm_laknour:'Laknour, Biogas plant- Vaibhav',
+    pm_balyan:'Balyan Tikuala',
+    pm_singh:'Singh Associate',
+    pm_naveen:'Naveen',
+    pm_gs:'G.S',
+    pm_sbec:'SBEC',
+    pm_sahakumbri:'Sahakumbri',
+    pm_rathi:'Rathi_kathuali Sugar Mill',
+    pm_unn:'Unn Sugar mill',
+    pm_devom:'Devom',
+    // Spent Grain received (col 65)
+    carlsberg:'Calsberg',
+    // Grain Syrup received (cols 69-70)
+    gs_rcv:'Grain Syrup', gs_shreeji:'Shreeji',
+    // Apple Pomace received (col 75)
+    ap_aaditya:'Aaditya Solar',
+    // Fed section (cols 80-85)
+    cd_fed:'Cow Dung', pm_fed:'Pressmud', csl_fed:'CSL Feed',
+    gs_fed:'Grain Syrup~3', sg_fed:'Spent grain', ap_fed:'Apple pomace',
+    // Balance section (cols 94-99)
+    fb_cd_bal:'Cow Dung~3', fb_pm_bal:'Pressmud~3', fb_csl_bal:'CSL Feed~2',
+    fb_gs_bal:'Grain Syrup~5', fb_sg_bal:'Spent grain~3', fb_ap_bal:'Apple pomace~3',
   },
   // Cal sheets — append-mode, date in col B (col 1 = Sr.No auto)
   PMCAL: {
