@@ -1578,11 +1578,13 @@ function renderAudit(){
       const allDone=trackedIds.every(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) })
       const noneDone=trackedIds.every(id=>{ const s=SHEETS.find(x=>x.id===id); return !s||!saved.has(s.label) })
       const isToday=d===today
-      if(allDone) return `<div class="mr-cell"><div class="cell done">Saved ✓</div></div>`
-      if(noneDone&&!isToday) return `<div class="mr-cell"><div class="cell miss">Missing !</div></div>`
+      const firstId=trackedIds[0]
+      const click=`onclick="selectPortalDate('${d}');loadSheet('${firstId}')"`
+      if(allDone) return `<div class="mr-cell"><div class="cell done" ${click} style="cursor:pointer">Saved ✓</div></div>`
+      if(noneDone&&!isToday) return `<div class="mr-cell"><div class="cell miss" ${click} style="cursor:pointer">Missing !</div></div>`
       const doneCount=trackedIds.filter(id=>{ const s=SHEETS.find(x=>x.id===id); return s&&saved.has(s.label) }).length
       const lbl=doneCount>0?`${doneCount}/${trackedIds.length} done`:'Pending →'
-      return `<div class="mr-cell"><div class="cell pend">${lbl}</div></div>`
+      return `<div class="mr-cell"><div class="cell pend" ${click} style="cursor:pointer">${lbl}</div></div>`
     }).join('')
     return `<div class="mr" style="grid-template-columns:${colTemplate}">
       <div class="mr-name"><div class="mr-dot" style="background:${wb.dot}"></div><span class="mr-label">${wb.label}</span></div>
@@ -2567,6 +2569,9 @@ window.showFeedstockWizard=showFeedstockWizard
 window.renderHome=renderHome
 window.renderAudit=renderAudit
 window.selectPortalDate=selectPortalDate
+window.loadSheet=loadSheet
+window.validateFsStep=validateFsStep
+window.registerFeedstock=registerFeedstock
 window.buildSidebar=buildSidebar
 window.renderFsStep=renderFsStep
 
