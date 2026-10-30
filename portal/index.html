@@ -3420,7 +3420,7 @@ function renderUplPreview(){
   const rejEntries = Object.entries(_uplRejected).filter(([s,c])=>typeof c==='number')
   if(rejEntries.length){
     rejHtml = `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem">
-      <strong style="color:var(--danger)">Rows rejected (dates outside ±60-day window):</strong>
+      <strong style="color:var(--danger)">Rows rejected (dates outside last 60 days or future):</strong>
       ${rejEntries.map(([s,c])=>`<span style="margin-left:10px">${s}: <b>${c}</b></span>`).join('')}
     </div>`
   }
