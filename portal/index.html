@@ -3393,19 +3393,20 @@ function renderUplPreview(){
     const _all2 = XLSX.utils.sheet_to_json(_ws2, {header:1, raw:true, defval:null})
     const cm = buildCmFromHeaders(_all2[_cfg2.dataStart - 2] || [], COLUMN_NAME_MAP[_cfg2.cmKey])
     const keys = Object.keys(cm).slice(0,6)
-    const showRows = rows.slice(0,10)
+    const showRows = rows.length > 10 ? rows.slice(-10) : rows
+    const hiddenCount = rows.length - showRows.length
     html += `<div class="sec"><div class="sec-title-row">
       <span class="sec-title">${sName}</span>
       <span style="font-size:.8rem;color:var(--muted)">${rows.length} rows</span></div>
       <div style="overflow-x:auto"><table class="upl-tbl"><thead><tr>
         <th>Date</th>${keys.map(k=>`<th>${k}</th>`).join('')}
       </tr></thead><tbody>`
+    if(hiddenCount > 0) html += `<tr><td colspan="${keys.length+1}" style="text-align:center;color:var(--muted);font-style:italic">… ${hiddenCount} earlier rows not shown (last 10 of ${rows.length})</td></tr>`
     showRows.forEach(({dateStr,rowData})=>{
       html += `<tr><td>${dateStr}</td>${keys.map(k=>{
         const v = rowData[cm[k]]; return `<td>${v!=null?v:'—'}</td>`
       }).join('')}</tr>`
     })
-    if(rows.length > 10) html += `<tr><td colspan="${keys.length+1}" style="text-align:center;color:var(--muted);font-style:italic">… ${rows.length} rows total (first 10 shown)</td></tr>`
     html += `</tbody></table></div></div>`
   }
 
