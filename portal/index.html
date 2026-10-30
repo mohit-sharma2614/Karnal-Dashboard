@@ -1423,7 +1423,7 @@ function renderHome(resetDate=true){
     const g=s.group; groupTotal[g]=(groupTotal[g]||0)+1
     if(savedToday.has(s.label)) groupDone[g]=(groupDone[g]||0)+1
   })
-  const grpEntries=Object.entries(groupTotal).slice(0,4)
+  const grpEntries=Object.entries(groupTotal)
   function grpColor(done,total){ const pct=total>0?done/total:0; return pct>=0.8?'#22c55e':pct>=0.4?'#f59e0b':'#f59e0b' }
   function grpPillSty(done,total){ const pct=total>0?done/total:0; return pct>=0.8?'background:#f0fdf4;color:#16a34a':'background:#fffbeb;color:#b45309' }
 
