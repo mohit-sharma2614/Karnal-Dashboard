@@ -1611,7 +1611,7 @@ function loadSheet(id){
   if(cur.hasDate){
     const _sheetDate=window._activeDateStr||today()
     html+=`<div class="date-row"><label>Date</label>
-      <input type="date" id="dp" value="${_sheetDate}" max="${today()}" oninput="onDateChange()"/>
+      <input type="date" id="dp" value="${_sheetDate}" max="2026-12-31" min="2026-01-01" oninput="onDateChange()"/>
       <span id="dp-display" style="font-size:.83rem;font-weight:600;color:var(--accent)">${fmtDisplay(_sheetDate)}</span>
       <span id="dp-err" style="font-size:.77rem;color:#e53935;display:none">Invalid date</span></div>`
   }
@@ -1642,6 +1642,10 @@ function loadSheet(id){
   recompute()
   if(CAL_QTY_COLS[id]) fetchCalQty(id)
   if(id==='FB') fetchFBPrevBal(window._activeDateStr||today())
+  // Load existing data if on a past date (not append sheets)
+  const _appendIds2=['PMCAL','GSCAL','CSLCAL','CDCAL','SGCAL','APPCAL','MANURE','MAINT']
+  const _loadDate=window._activeDateStr||today()
+  if(cur&&cur.hasDate&&!_appendIds2.includes(id)&&COLUMN_NAME_MAP[id]) fetchExistingRow(id,_loadDate)
 }
 
 function onInp(k,v){ inp[k]=v===''?null:(isNaN(v)?v:parseFloat(v)); recompute() }
@@ -2349,13 +2353,7 @@ function onDateChange(){
     if(dispEl) dispEl.textContent=''
     return
   }
-  if(ds < today()){
-    if(errEl){ errEl.textContent='Past dates are not allowed. Only today\'s data can be entered.'; errEl.style.display='inline' }
-    if(dispEl) dispEl.textContent=''
-    if(el) el.value = today()
-    setTimeout(()=>{ if(errEl) errEl.style.display='none'; onDateChange() }, 2000)
-    return
-  }
+  // Past dates allowed — will load existing data if available
   if(errEl) errEl.style.display='none'
   const serial = toExcelSerial(ds)
   const roundtrip = fromExcelSerial(serial)
@@ -2367,8 +2365,77 @@ function onDateChange(){
   if(dispEl) dispEl.textContent=`${fmtDisplay(ds)}  ·  serial ${serial}`
   recompute()
   if(cur&&cur.id==='FB') fetchFBPrevBal(ds)
+  // Load existing row data for date-row sheets (not append sheets)
+  const _appendIds=['PMCAL','GSCAL','CSLCAL','CDCAL','SGCAL','APPCAL','MANURE','MAINT']
+  if(cur&&cur.hasDate&&!_appendIds.includes(cur.id)) fetchExistingRow(cur.id,ds)
 }
 window.onDateChange=onDateChange
+
+// ── Load existing row data into form when date is selected ───────────────────
+async function fetchExistingRow(sheetId, dateStr){
+  if(!dateStr||!isValidDate(dateStr)) return
+  if(!COLUMN_NAME_MAP[sheetId]) return
+  const meta=SHEET_META[sheetId]||{}
+  const masterSheet=meta.masterSheet||(SHEETS.find(s=>s.id===sheetId)||{}).sheet||sheetId
+  const hrow=meta.hrow||2
+  const dataStart=(SHEETS.find(s=>s.id===sheetId)||{}).dataStart||3
+  try{
+    const t=await getToken().catch(()=>null); if(!t) return
+    const serial=toExcelSerial(dateStr)
+    const rowNum=await findRow(masterSheet,serial,dataStart)
+    if(!rowNum) return  // no existing data for this date — keep fields at 0
+    // Ensure header cache is populated
+    const cacheKey=`${masterSheet}:${hrow}`
+    if(!_hdrCache[cacheKey]){
+      const r=await gGet(`/worksheets('${encodeURIComponent(masterSheet)}')/range(address='${hrow}:${hrow}')`)
+      const vals=(r&&r.values&&r.values[0])||[]
+      const map={}
+      vals.forEach((v,i)=>{
+        if(v!==null&&v!==undefined&&v!==''){
+          const name=String(v).trim()
+          if(!map[name]) map[name]=[]
+          map[name].push(i+1)
+        }
+      })
+      _hdrCache[cacheKey]=map
+    }
+    const hmap=_hdrCache[cacheKey]
+    // Resolve all field column numbers
+    const nameMap=COLUMN_NAME_MAP[sheetId]
+    const colNums={}
+    let maxCol=1
+    for(const [fk,spec] of Object.entries(nameMap)){
+      const tildeIdx=spec.lastIndexOf('~')
+      let name,occ
+      if(tildeIdx>0&&/^\d+$/.test(spec.slice(tildeIdx+1))){ name=spec.slice(0,tildeIdx); occ=parseInt(spec.slice(tildeIdx+1),10) }
+      else { name=spec; occ=1 }
+      const cols=hmap[name]
+      if(cols&&cols.length>=occ){ colNums[fk]=cols[occ-1]; if(cols[occ-1]>maxCol) maxCol=cols[occ-1] }
+    }
+    // Read entire row up to maxCol
+    const enc=encodeURIComponent(masterSheet)
+    const rowData=await gGet(`/worksheets('${enc}')/range(address='A${rowNum}:${colLetter(maxCol)}${rowNum}')`)
+    if(!rowData||!rowData.values||!rowData.values[0]) return
+    const rowVals=rowData.values[0]
+    // Populate form fields
+    let loaded=0
+    for(const [fk,colNum] of Object.entries(colNums)){
+      const el=document.getElementById('f_'+fk)
+      if(!el||el.readOnly) continue
+      const v=rowVals[colNum-1]
+      if(v===null||v===undefined||v==='') continue
+      // PSA time fields stored as Excel fraction → convert to hours
+      const fieldDef=(SHEETS.find(s=>s.id===sheetId)||{sections:[]}).sections.flatMap(s=>s.f).find(f=>f.k===fk)
+      let displayVal=v
+      if(fieldDef&&fieldDef.tp==='time'&&typeof v==='number'){ displayVal=Math.round(v*24*60)/60 }
+      el.value=displayVal
+      inp[fk]=typeof displayVal==='number'?displayVal:parseFloat(displayVal)||displayVal
+      loaded++
+    }
+    if(loaded>0){ recompute(); toast(`Loaded ${dateStr} — ${loaded} field${loaded===1?'':'s'} populated`) }
+  }catch(e){ console.error('[fetchExistingRow]',e) }
+}
+window.fetchExistingRow=fetchExistingRow
 function toast(msg,err=false){
   const t=document.getElementById('toast')
   t.textContent=msg; t.className=err?'err':''; t.style.display='block'
