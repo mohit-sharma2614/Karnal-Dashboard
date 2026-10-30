@@ -2932,6 +2932,16 @@ function parseUplWorkbook(){
       rows.push({serial, dateStr, rowData})
     }
     if(rows.length > 0) _uplParsed[sName] = rows
+    else {
+      // Track WHY this recognised sheet produced 0 rows — for visibility in preview
+      const reason = dataRows.filter(r=>r&&r.length>0).length === 0
+        ? 'empty sheet'
+        : rejected > 0
+          ? `all ${rejected} rows outside date window (last 60 days)`
+          : 'no valid dates found'
+      _uplRejected[sName] = _uplRejected[sName] || 0
+      _uplRejected[`__reason__${sName}`] = reason
+    }
     if(rejected > 0) _uplRejected[sName] = rejected
   }
 }
@@ -3043,6 +3053,8 @@ function renderUplPreview(){
   }
   html += `</div>`
   if(unknown.length > 0) html += `<div style="margin-top:10px;font-size:.83rem;color:var(--muted)">Sheets skipped (not in schema): ${unknown.join(', ')}</div>`
+  const zeroRows = _uplWb.SheetNames.filter(s => UPL_CFG[s] && !_uplParsed[s])
+  if(zeroRows.length > 0) html += `<div style="margin-top:8px;font-size:.83rem;color:var(--danger)">⚠ Recognised but 0 rows written: ${zeroRows.map(s=>{const r=_uplRejected[`__reason__${s}`]; return `<strong>${s}</strong>${r?` (${r})`:''}`}).join(', ')}</div>`
   html += `</div>`
 
   // ── Per-sheet data preview ───────────────────────────────────────────
