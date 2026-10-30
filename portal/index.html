@@ -1401,7 +1401,17 @@ function renderHome(resetDate=true){
     const recents=[...window._subLog].reverse().filter(r=>r&&r[1]&&typeof r[0]==='number'&&!String(r[1]).startsWith('[UPLOAD')).slice(0,4)
     actHtml=recents.map(r=>{
       const lbl=r[1]||''; const name=r[2]||'User'; const email=r[3]||''
-      const ts=r[4]||''
+      // r[4] may be an Excel date-time serial (e.g. 46325.702) or an ISO string
+      let ts=r[4]||''
+      if(typeof ts==='number'){
+        // Convert Excel serial to HH:MM  (integer part = date, decimal = time fraction)
+        const totalMins=Math.round((ts%1)*24*60)
+        const hh=String(Math.floor(totalMins/60)).padStart(2,'0')
+        const mm=String(totalMins%60).padStart(2,'0')
+        ts=`${hh}:${mm}`
+      } else {
+        ts=String(ts).slice(11,16) // "2026-10-30T16:52:..." → "16:52"
+      }
       const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()
       const gradIdx=Math.abs(email.charCodeAt(0)||0)%4
       const grads=['linear-gradient(135deg,#4f46e5,#7c3aed)','linear-gradient(135deg,#f97316,#ef4444)','linear-gradient(135deg,#10b981,#059669)','linear-gradient(135deg,#f59e0b,#d97706)']
@@ -1409,7 +1419,7 @@ function renderHome(resetDate=true){
         <div class="ai-av" style="background:${grads[gradIdx]}">${initials}</div>
         <div class="ai-body"><div class="ai-text"><strong>${name}</strong> saved ${lbl}</div></div>
         <span class="ai-badge" style="background:#f0fdf4;color:#16a34a">Saved</span>
-        <span class="ai-time">${ts?String(ts).slice(0,16):''}</span>
+        <span class="ai-time">${ts}</span>
       </div>`
     }).join('')
     if(!actHtml) actHtml=`<div style="padding:14px 13px;font-size:11px;color:#a1a1aa">No activity yet today.</div>`
