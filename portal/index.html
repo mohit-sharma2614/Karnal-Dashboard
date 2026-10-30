@@ -3167,6 +3167,9 @@ function uplLog(msg, isErr=false){
 }
 
 async function submitUpload(){
+  if(!_uplParsed || Object.keys(_uplParsed).length===0){
+    toast('No upload data — please select and parse a file first', true); return
+  }
   await initMsal()
   const t = await getToken()
   if(!t){ toast('Sign in first', true); return }
@@ -3314,6 +3317,19 @@ async function submitUpload(){
         }
       }
       sheetsWritten.push(sName)  // Fix 2: record this sheet completed
+
+      // Write audit log entries for any last-3-days dates in this upload
+      // so the audit matrix shows "Saved" instead of "Missing!" for uploaded dates
+      if(totalWritten > 0){
+        const sheetLabel = SHEETS.find(s=>s.id===cfg.cmKey)?.label || sName
+        const last3 = _last3Days()
+        const uploadedDates = new Set(rows.map(r=>r.dateStr))
+        for(const d of last3){
+          if(uploadedDates.has(d)){
+            await appendSubmissionLog(toExcelSerial(d), sheetLabel, sid).catch(()=>{})
+          }
+        }
+      }
     }
 
     uplLog(``)
