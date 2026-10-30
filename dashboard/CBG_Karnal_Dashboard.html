@@ -622,13 +622,12 @@ async function loadData() {
   const mCol   = month + 4  // col D=Jan(4)…O=Dec(15)
 
   try {
-    const [rowD1, rowD2, rowPSA, rowRC, rowFB, rowFS, rowPH, rowTMP, rowTSVS, rowIAPA] = await Promise.all([
+    const [rowD1, rowD2, rowPSA, rowRC, rowFAB, rowPH, rowTMP, rowTSVS, rowIAPA] = await Promise.all([
       findRow('D1',                   serial, 3),
       findRow('D2',                   serial, 3),
       findRow('PSA Production',       serial, 3),
       findRow('Daily Revenue & Costs',serial, 4),
-      findRow('Feed & Balance',       serial, 4),
-      findRow('Feedstock Supply',     serial, 4),
+      findRow('feed_and_balance',     serial, 4),
       findLatestRow('Digester pH',    serial, 4),
       findLatestRow('Digester Temp',  serial, 4),
       findLatestRow('Digester TS-VS', serial, 4),
@@ -638,11 +637,11 @@ async function loadData() {
     const [d1, d2, psa, rc, fb, fs, ph, tmp, tsvs, iapa,
            subRaw, fixRaw, maintRaw, manureRaw, salesRaw,
            pmCalRaw, cdCalRaw, gsCalRaw, cslCalRaw, sgCalRaw] = await Promise.all([
-      rowD1   ? readRow('D1',                    rowD1,  52) : Promise.resolve([]),
-      rowD2   ? readRow('D2',                    rowD2,  53) : Promise.resolve([]),
+      rowD1   ? readRow('D1',                    rowD1,  56) : Promise.resolve([]),
+      rowD2   ? readRow('D2',                    rowD2,  56) : Promise.resolve([]),
       rowPSA  ? readRow('PSA Production',        rowPSA, 29) : Promise.resolve([]),
       rowRC   ? readRow('Daily Revenue & Costs', rowRC,  11) : Promise.resolve([]),
-      rowFB   ? readRow('Feed & Balance',        rowFB,  23) : Promise.resolve([]),
+      rowFAB  ? readRow('Feed_and_Balance',      rowFAB, 99) : Promise.resolve([]),
       rowFS   ? readRow('Feedstock Supply',      rowFS,  33) : Promise.resolve([]),
       rowPH   ? readRow('Digester pH',           rowPH,   8) : Promise.resolve([]),
       rowTMP  ? readRow('Digester Temp',         rowTMP,  8) : Promise.resolve([]),
@@ -1027,14 +1026,14 @@ function renderProduction() {
   const d1Pend = isPending('Digester 1'), d2Pend = isPending('Digester 2'), psaPend = isPending('PSA Production')
 
   // CBG totals — show '—' when source sheet is pending (not just zero)
-  const cbgD1Raw = !d1Pend && d1[35]!==undefined && d1[35]!=='' ? n(d1[35]) : null
-  const cbgD2Raw = !d2Pend && d2[35]!==undefined && d2[35]!=='' ? n(d2[35]) : null
+  const cbgD1Raw = !d1Pend && d1[37]!==undefined && d1[37]!=='' ? n(d1[37]) : null
+  const cbgD2Raw = !d2Pend && d2[37]!==undefined && d2[37]!=='' ? n(d2[37]) : null
   const cbgTot   = (cbgD1Raw !== null || cbgD2Raw !== null) ? (cbgD1Raw||0)+(cbgD2Raw||0) : null
   const cbgD1Disp = cbgD1Raw !== null ? fmt(cbgD1Raw) : '—'
   const cbgD2Disp = cbgD2Raw !== null ? fmt(cbgD2Raw) : '—'
   const cbgTotDisp = cbgTot !== null ? fmt(cbgTot) : '—'
 
-  const olr1  = d1[49], olr2 = d2[50]
+  const olr1  = d1[53], olr2 = d2[53]
   const _psa1 = psa[1]
   const psaHrs = (_psa1 === '' || _psa1 === null || _psa1 === undefined)
     ? null
@@ -1043,8 +1042,8 @@ function renderProduction() {
   const cbgCls = cbgTot===null?'w':cbgTot>=tgt*.9?'g':cbgTot>=tgt*.7?'a':cbgTot>0?'r':'w'
 
   // Total BPP — show '—' when sheet pending (sum of zeros is misleading)
-  const bppD1Tot = d1Pend ? '—' : fv(n(d1[42])+n(d1[43])+n(d1[44])+n(d1[45])+n(d1[46]))
-  const bppD2Tot = d2Pend ? '—' : fv(n(d2[43])+n(d2[44])+n(d2[45])+n(d2[46])+n(d2[47]))
+  const bppD1Tot = d1Pend ? '—' : fv(n(d1[45])+n(d1[46])+n(d1[47])+n(d1[48])+n(d1[49]))
+  const bppD2Tot = d2Pend ? '—' : fv(n(d2[45])+n(d2[46])+n(d2[47])+n(d2[48])+n(d2[49]))
 
   const summary = `<div class="kpi-grid">
     ${kpi('Total CBG Today', cbgTotDisp, 'kg', cbgCls, `Target ${tgt.toLocaleString('en-IN')} kg/day`)}
@@ -1057,55 +1056,55 @@ function renderProduction() {
 
   const d1tbl = dataTable([
     {head:'Digester 1 — Gas Production'},
-    {label:'Biogas Estimated — BPP (K)',    unit:'m³',  val:fv(d1[10])},
-    {label:'Biogas Estimated — BPP (AF)',  unit:'m³',  val:fi(d1[31])},
-    {label:'Raw Biogas at PSA Inlet (B)',  unit:'m³',  val:fi(d1[32])},
-    {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d1[33])},
-    {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d1[34])},
-    {label:'CBG Produced',                 unit:'kg',  val:fi(d1[35])},
-    {label:'CBG Vent',                     unit:'kg',  val:fi(d1[36])},
-    {label:'CBG Expected',                 unit:'kg',  val:fi(d1[38])},
-    {label:'CBG Expected per Slot',        unit:'kg',  val:fv(d1[39])},
-    {label:'Per Hour Biogas Generation',   unit:'kg',  val:fv(d1[40])},
-    {label:'PSA Efficiency (hr basis)',    unit:'',    val:fv(d1[41])},
+    {label:'Biogas Estimated — BPP (K)',    unit:'m³',  val:fv(d1[11])},
+    {label:'Biogas Estimated — BPP (AF)',  unit:'m³',  val:fi(d1[33])},
+    {label:'Raw Biogas at PSA Inlet (B)',  unit:'m³',  val:fi(d1[34])},
+    {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d1[35])},
+    {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d1[36])},
+    {label:'CBG Produced',                 unit:'kg',  val:fi(d1[37])},
+    {label:'CBG Vent',                     unit:'kg',  val:fi(d1[38])},
+    {label:'CBG Expected',                 unit:'kg',  val:fi(d1[41])},
+    {label:'CBG Expected per Slot',        unit:'kg',  val:fv(d1[42])},
+    {label:'Per Hour Biogas Generation',   unit:'kg',  val:fv(d1[43])},
+    {label:'PSA Efficiency (hr basis)',    unit:'',    val:fv(d1[44])},
     {head:'Digester 1 — BPP & Calculations'},
-    {label:'CD BPP',                       unit:'m³',  val:fv(d1[42])},
-    {label:'PM BPP',                       unit:'m³',  val:fv(d1[43])},
-    {label:'GS BPP',                       unit:'m³',  val:fv(d1[44])},
-    {label:'CSL BPP',                      unit:'m³',  val:fv(d1[45])},
-    {label:'SG BPP',                       unit:'m³',  val:fv(d1[46])},
+    {label:'CD BPP',                       unit:'m³',  val:fv(d1[45])},
+    {label:'PM BPP',                       unit:'m³',  val:fv(d1[46])},
+    {label:'GS BPP',                       unit:'m³',  val:fv(d1[47])},
+    {label:'CSL BPP',                      unit:'m³',  val:fv(d1[48])},
+    {label:'SG BPP',                       unit:'m³',  val:fv(d1[49])},
     {label:'Total BPP',                    unit:'m³',  val:bppD1Tot},
-    {label:'Working Volume',               unit:'m³',  val:fv(d1[47])},
-    {label:'Slurry Height',                unit:'m',   val:fv(d1[48])},
-    {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d1[49])},
-    {label:'PSA Efficiency %',             unit:'%',   val:fv(d1[50])},
+    {label:'Working Volume',               unit:'m³',  val:fv(d1[51])},
+    {label:'Slurry Height',                unit:'m',   val:fv(d1[52])},
+    {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d1[53])},
+    {label:'PSA Efficiency %',             unit:'%',   val:fv(d1[54])},
   ])
 
   const d2tbl = dataTable([
     {head:'Digester 2 — Gas Production'},
-    {label:'Biogas Estimated — BPP (K)',    unit:'m³',  val:fv(d2[10])},
-    {label:'Biogas Estimated — BPP (AF)',  unit:'m³',  val:fi(d2[31])},
-    {label:'Raw Biogas at PSA Inlet (B)',  unit:'m³',  val:fi(d2[32])},
-    {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d2[33])},
-    {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d2[34])},
-    {label:'CBG Produced',                 unit:'kg',  val:fi(d2[35])},
-    {label:'CBG Vent',                     unit:'kg',  val:fi(d2[36])},
-    {label:'Biogas Estimated (m³) — D2',   unit:'m³',  val:fi(d2[38])},
-    {label:'CBG Expected',                 unit:'kg',  val:fi(d2[39])},
-    {label:'CBG Expected per Slot',        unit:'kg',  val:fv(d2[40])},
-    {label:'Per Hour Biogas Generation',   unit:'kg',  val:fv(d2[41])},
-    {label:'PSA Efficiency (hr basis)',    unit:'',    val:fv(d2[42])},
+    {label:'Biogas Estimated — BPP (K)',    unit:'m³',  val:fv(d2[11])},
+    {label:'Biogas Estimated — BPP (AF)',  unit:'m³',  val:fi(d2[33])},
+    {label:'Raw Biogas at PSA Inlet (B)',  unit:'m³',  val:fi(d2[34])},
+    {label:'Raw Biogas Vent / Flare',       unit:'m³',  val:fi(d2[35])},
+    {label:'Raw Biogas Total (B+C)',        unit:'m³',  val:fi(d2[36])},
+    {label:'CBG Produced',                 unit:'kg',  val:fi(d2[37])},
+    {label:'CBG Vent',                     unit:'kg',  val:fi(d2[38])},
+    {label:'Biogas Estimated (m³) — D2',   unit:'m³',  val:fi(d2[40])},
+    {label:'CBG Expected',                 unit:'kg',  val:fi(d2[41])},
+    {label:'CBG Expected per Slot',        unit:'kg',  val:fv(d2[42])},
+    {label:'Per Hour Biogas Generation',   unit:'kg',  val:fv(d2[43])},
+    {label:'PSA Efficiency (hr basis)',    unit:'',    val:fv(d2[44])},
     {head:'Digester 2 — BPP & Calculations'},
-    {label:'CD BPP',                       unit:'m³',  val:fv(d2[43])},
-    {label:'PM BPP',                       unit:'m³',  val:fv(d2[44])},
-    {label:'GS BPP',                       unit:'m³',  val:fv(d2[45])},
-    {label:'CSL BPP',                      unit:'m³',  val:fv(d2[46])},
-    {label:'SG BPP',                       unit:'m³',  val:fv(d2[47])},
+    {label:'CD BPP',                       unit:'m³',  val:fv(d2[45])},
+    {label:'PM BPP',                       unit:'m³',  val:fv(d2[46])},
+    {label:'GS BPP',                       unit:'m³',  val:fv(d2[47])},
+    {label:'CSL BPP',                      unit:'m³',  val:fv(d2[48])},
+    {label:'SG BPP',                       unit:'m³',  val:fv(d2[49])},
     {label:'Total BPP',                    unit:'m³',  val:bppD2Tot},
-    {label:'Working Volume',               unit:'m³',  val:fv(d2[48])},
-    {label:'Slurry Height',                unit:'m',   val:fv(d2[49])},
-    {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d2[50])},
-    {label:'PSA Efficiency %',             unit:'%',   val:fv(d2[51])},
+    {label:'Working Volume',               unit:'m³',  val:fv(d2[51])},
+    {label:'Slurry Height',                unit:'m',   val:fv(d2[52])},
+    {label:'OLR',                          unit:'kg VS/m³/day', val:fv(d2[53])},
+    {label:'PSA Efficiency %',             unit:'%',   val:fv(d2[54])},
   ])
 
   const psatbl = dataTable([
@@ -1148,8 +1147,8 @@ function renderProduction() {
   }
 
   const prodRemarks = remarksBox([
-    {sheet:'D1',            val: d1[51]},
-    {sheet:'D2',            val: d2[52]},
+    {sheet:'D1',            val: d1[55]},
+    {sheet:'D2',            val: d2[55]},
     {sheet:'PSA Production',val: psa[28]},
   ])
 
@@ -1218,27 +1217,27 @@ function renderFeedstock() {
 
   const fbTbl = dataTable([
     {head:'Feed & Balance — Today'},
-    {label:'Pressmud In',         unit:'MT',  val:fv(fb[1],2)},
-    {label:'Grain Syrup In',      unit:'KL',  val:fv(fb[2],2)},
-    {label:'CSL In',              unit:'KL',  val:fv(fb[3],2)},
-    {label:'Cow Dung In',         unit:'MT',  val:fv(fb[4],2)},
-    {label:'Spent Grain In',      unit:'MT',  val:fv(fb[5],2)},
-    {label:'Pressmud Cost',       unit:'₹',   val:fmtR(fb[6])},
-    {label:'Grain Syrup Cost',    unit:'₹',   val:fmtR(fb[7])},
-    {label:'CSL Cost',            unit:'₹',   val:fmtR(fb[8])},
-    {label:'Cow Dung Cost',       unit:'₹',   val:fmtR(fb[9])},
-    {label:'Spent Grain Cost',    unit:'₹',   val:fmtR(fb[10])},
-    {label:'Pressmud Feed',       unit:'MT',  val:fv(fb[11],2)},
-    {label:'Grain Syrup Feed',    unit:'KL',  val:fv(fb[12],2)},
-    {label:'CSL Feed',            unit:'KL',  val:fv(fb[13],2)},
-    {label:'Cow Dung Feed',       unit:'MT',  val:fv(fb[14],2)},
-    {label:'Spent Grain Feed',    unit:'MT',  val:fv(fb[15],2)},
-    {label:'Total Feed',          unit:'MT',  val:fv(fb[16],2)},
-    {label:'Pressmud Balance',    unit:'MT',  val:fv(fb[17],2)},
-    {label:'Grain Syrup Balance', unit:'KL',  val:fv(fb[18],2)},
-    {label:'CSL Balance',         unit:'KL',  val:fv(fb[19],2)},
-    {label:'Cow Dung Balance',    unit:'MT',  val:fv(fb[20],2)},
-    {label:'Spent Grain Balance', unit:'MT',  val:fv(fb[21],2)},
+    {label:'Pressmud In',         unit:'MT',  val:fv(fb[47],2)},
+    {label:'Grain Syrup In',      unit:'KL',  val:fv(fb[71],2)},
+    {label:'CSL In',              unit:'KL',  val:fv(fb[26],2)},
+    {label:'Cow Dung In',         unit:'MT',  val:fv(fb[18],2)},
+    {label:'Spent Grain In',      unit:'MT',  val:fv(fb[66],2)},
+    {label:'Pressmud Cost',       unit:'₹',   val:fmtR(fb[64])},
+    {label:'Grain Syrup Cost',    unit:'₹',   val:fmtR(fb[74])},
+    {label:'CSL Cost',            unit:'₹',   val:fmtR(fb[30])},
+    {label:'Cow Dung Cost',       unit:'₹',   val:fmtR(fb[22])},
+    {label:'Spent Grain Cost',    unit:'₹',   val:fmtR(fb[68])},
+    {label:'Pressmud Feed',       unit:'MT',  val:fv(fb[80],2)},
+    {label:'Grain Syrup Feed',    unit:'KL',  val:fv(fb[82],2)},
+    {label:'CSL Feed',            unit:'KL',  val:fv(fb[81],2)},
+    {label:'Cow Dung Feed',       unit:'MT',  val:fv(fb[79],2)},
+    {label:'Spent Grain Feed',    unit:'MT',  val:fv(fb[83],2)},
+    {label:'Total Feed',          unit:'MT',  val:fv(fb[85],2)},
+    {label:'Pressmud Balance',    unit:'MT',  val:fv(fb[94],2)},
+    {label:'Grain Syrup Balance', unit:'KL',  val:fv(fb[96],2)},
+    {label:'CSL Balance',         unit:'KL',  val:fv(fb[95],2)},
+    {label:'Cow Dung Balance',    unit:'MT',  val:fv(fb[93],2)},
+    {label:'Spent Grain Balance', unit:'MT',  val:fv(fb[97],2)},
   ])
 
   // Feedstock Supply — sum by category
@@ -1420,7 +1419,7 @@ function renderFinance() {
 // ── DIGESTER HEALTH TAB ───────────────────────────────────
 function renderHealth() {
   const {d1,d2} = _D
-  const o1 = parseFloat(d1[49]), o2 = parseFloat(d2[50])
+  const o1 = parseFloat(d1[53]), o2 = parseFloat(d2[53])
   const warnParts = []
   if (o1 >= 5)           warnParts.push(`D1 overloaded: ${o1.toFixed(2)}`)
   else if (o1 >= 4)      warnParts.push(`D1 elevated: ${o1.toFixed(2)}`)
@@ -1434,18 +1433,18 @@ function renderHealth() {
 
   const d1tbl = dataTable([
     {head:'Digester 1 — Health'},
-    {label:'Slurry Height',   unit:'m',             val:fv(d1[48])},
-    {label:'Working Volume',  unit:'m³',            val:fv(d1[47])},
-    {label:'OLR',             unit:'kg VS/m³/day',  val:fv(d1[49])},
-    {label:'PSA Efficiency',  unit:'%',             val:fv(d1[50])},
+    {label:'Slurry Height',   unit:'m',             val:fv(d1[52])},
+    {label:'Working Volume',  unit:'m³',            val:fv(d1[51])},
+    {label:'OLR',             unit:'kg VS/m³/day',  val:fv(d1[53])},
+    {label:'PSA Efficiency',  unit:'%',             val:fv(d1[54])},
   ])
 
   const d2tbl = dataTable([
     {head:'Digester 2 — Health'},
-    {label:'Slurry Height',   unit:'m',             val:fv(d2[49])},
-    {label:'Working Volume',  unit:'m³',            val:fv(d2[48])},
-    {label:'OLR',             unit:'kg VS/m³/day',  val:fv(d2[50])},
-    {label:'PSA Efficiency',  unit:'%',             val:fv(d2[51])},
+    {label:'Slurry Height',   unit:'m',             val:fv(d2[52])},
+    {label:'Working Volume',  unit:'m³',            val:fv(d2[51])},
+    {label:'OLR',             unit:'kg VS/m³/day',  val:fv(d2[53])},
+    {label:'PSA Efficiency',  unit:'%',             val:fv(d2[54])},
   ])
 
   const {ph, tmp, tsvs, iapa, calData} = _D

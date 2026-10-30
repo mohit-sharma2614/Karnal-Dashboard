@@ -82,8 +82,8 @@ rowData[4] = value
 | TEMP | Digester Temp | true |
 | TSVS | Digester TS-VS | true |
 | IAPA | Digester IA-PA | true |
-| FS | Feedstock Supply | true |
-| FB | Feed_and_Balance | true |
+| FS | Feedstock Supply | true | ⚠️ Tab does NOT exist in master — form saves will 404 |
+| FB | Feed_and_Balance | true | FS and FB share this same Excel tab |
 | PMCAL | Pressmud Cal. | true |
 | CDCAL | Cow Dung Cal. | true |
 | GSCAL | Rice Grain Syrup Cal. | true |
@@ -130,14 +130,53 @@ Operators fill Input Workbooks daily. Portal should read/write Input Workbooks (
 
 ---
 
+## Schema Verification — Last Run: 2026-10-29
+
+Verified by running `verify_schema.py` against live Master Workbook.
+**Result: 263 fields verified OK | 0 MISSING | 0 WRONG OCCURRENCE | 0 SHEET ERRORS**
+
+| Portal ID | Master Sheet | Input Workbook | Fields | Result |
+|---|---|---|---|---|
+| D1 | D1 | `Production_RBG_Workbook.xlsx` | 53 | PASS |
+| D2 | D2 | `Production_RBG_Workbook.xlsx` | 53 | PASS |
+| PSA | PSA Production | `CBG_Production_Compressor_Workbook.xlsx` | 26 | PASS |
+| PH | Digester pH | `Digester_Health_Workbook.xlsx` | 7 | PASS |
+| TEMP | Digester Temp | `Digester_Health_Workbook.xlsx` | 7 | PASS |
+| TSVS | Digester TS-VS | `Digester_Health_Workbook.xlsx` | 13 | PASS |
+| IAPA | Digester IA-PA | `Digester_Health_Workbook.xlsx` | 17 | PASS |
+| PMCAL | Pressmud Cal. | `Lab_Workbook.xlsx` | 8 | PASS |
+| CDCAL | Cow Dung Cal. | `Lab_Workbook.xlsx` | 8 | PASS |
+| GSCAL | Rice Grain Syrup Cal. | `Lab_Workbook.xlsx` | 7 | PASS |
+| CSLCAL | CSL Cal. | `Lab_Workbook.xlsx` | 8 | PASS |
+| SGCAL | Dry Spent Grain Cal | `Lab_Workbook.xlsx` | 8 | PASS |
+| APPCAL | Apple Pomace Cal. | `Lab_Workbook.xlsx` | 8 | PASS |
+| FB | Feed_and_Balance | `Feed_Cost_Procurement_Balance_Workbook.xlsx` | 10 | PASS |
+| FS | Feed_and_Balance | `Feed_Cost_Procurement_Balance_Workbook.xlsx` (Copy of Sheet1) | — | TAB MISSING |
+| SALES | Sales Detail | `Sales_Finance_Workbook.xlsx` | 10 | PASS |
+| MANURE | Manure Sales | `Sales_Finance_Workbook.xlsx` | 5 | PASS |
+| MAINT | Maintenance | `Sales_Finance_Workbook.xlsx` | 7 | PASS |
+| REVCOST | Daily Revenue & Costs | `Sales_Finance_Workbook.xlsx` | 8 | PASS |
+
+**FS (Feedstock Supply)** — skipped, tab does not exist in Master Workbook.
+
+**Feed_and_Balance extra columns found in actual sheet (not in FB COLUMN_NAME_MAP):**
+- col 85: `Apple pomace` (Fed section — not mapped in FB, portal doesn't write it yet)
+- col 71/74: `Shreeji` (Grain Syrup vendor — not in FS map)
+- col 76/78: `Aaditya Solar` (vendor — not in FS map)
+- Received/cost columns (col 87–92): `Cow Dung`, `Pressmud`, `CSL`, `Grain Syrup`, `Spent grain`, `Apple pomace` — these are formula cells, intentionally not written by portal
+
+---
+
 ## Known Issues / Pending Work
 
-1. **Fix 9**: Feedstock Wizard `COLUMN_MAP` migration — still uses old index-based map, needs `getColByName`
-2. **Fix 10**: Delete `COLUMN_MAP` entirely after Fix 9
-3. **Input Workbook fileIds**: Add each workbook's SharePoint fileId to `CONFIG`
-4. **FS sheet**: `Feedstock Supply` tab does not exist in master workbook — portal FS form will 404 until tab is created and data migrated from `Feed_Cost_Procurement_Balance_Workbook.xlsx → Copy of Sheet1` (822 rows)
-5. **Oct 2026 data migration**: D1, D2, Feed & Balance, PSA not yet migrated
-6. **Dashboard column-name migration**: Not started — dashboard still uses hardcoded indices
+1. **Input Workbook fileIds**: Add each workbook's SharePoint fileId to `CONFIG`
+2. **FS sheet**: `Feedstock Supply` tab does NOT exist in master workbook — portal FS form will 404 until tab is created. Source: `Z:\CBG_KARNAL\SOURCE_DATA\Feedstock Supply Sheet_LREKPL.xlsx` (184 rows). `FS` and `FB` both use `Feed_and_Balance` tab in SHEET_META.
+3. **Oct 2026 data migration**: D1, D2, Feed & Balance, PSA not yet migrated
+4. **Dashboard column-name migration**: Not started — dashboard still uses hardcoded indices
+5. **Feedstock Supply tab**: Must create tab in master + migrate 184 rows before FS form works
+
+## Completed
+- Fix 9+10: `COLUMN_MAP` eliminated — `buildCmFromHeaders()` introduced, all upload/preview/wizard code migrated to `COLUMN_NAME_MAP` ✅
 
 ---
 

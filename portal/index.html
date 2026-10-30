@@ -1882,19 +1882,23 @@ const COLUMN_NAME_MAP = {
     pm_devom:'Devom',
     carlsberg:'Calsberg',
     gs_rcv:'Grain Syrup',
+    gs_shreeji:'Shreeji',
+    ap_aaditya:'Aaditya Solar',
   },
   // Feed & Balance (FB) → Feed_and_Balance, fed (col 80-85) and balance (col 94-99) sections
   // Received/cost totals are Excel formula cells — NOT written by portal
   FB: {
     cd_fed:'Cow Dung',   pm_fed:'Pressmud',   csl_fed:'CSL Feed',
-    gs_fed:'Grain Syrup', sg_fed:'Spent grain',
+    gs_fed:'Grain Syrup', sg_fed:'Spent grain', ap_fed:'Apple pomace',
     fb_cd_bal:'Cow Dung~2', fb_pm_bal:'Pressmud~2', fb_csl_bal:'CSL Feed~2',
-    fb_gs_bal:'Grain Syrup~2', fb_sg_bal:'Spent grain~2',
+    fb_gs_bal:'Grain Syrup~2', fb_sg_bal:'Spent grain~2', fb_ap_bal:'Apple pomace~2',
   },
   // Cal sheets — append-mode, date in col B (col 1 = Sr.No auto)
   PMCAL: {
     sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
-    qty:'Quantity D1 (MT/KL)', ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
+    avg_ts:'Average TS%', avg_vs:'Average VS%',
+    qty:'Quantity D1 (MT/KL)', qty_d2:'Quantity D2 (MT/KL)',
+    ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
   },
   CDCAL: {
     sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
@@ -1902,6 +1906,7 @@ const COLUMN_NAME_MAP = {
   },
   GSCAL: {
     sample:'Sample Name', loc:'Location', ts_pct:'TS %', vs_pct:'VS %',
+    qty:'Quantity (KL)',
     ts_t:'TS (Tonnes)', vs_t:'VS (Tonnes)', remarks:'Remarks',
   },
   CSLCAL: {
@@ -1936,7 +1941,10 @@ const COLUMN_NAME_MAP = {
     cbg_sale:'Total CBG Sale (Rs)', sfom_sale:'Total SFOM Sale (Rs)',
     lfom_sale:'Total LFOM Sale (Rs)', feed_cost:'Feedstock Cost (Rs)',
     transport_cost:'Transportation Cost (Rs)', maint_cost:'Maintenance Cost (Rs)',
-    elec_cost:'Electricity Cost (Rs/day)', remarks:'Remarks',
+    elec_cost:'Electricity Cost (Rs/day)',
+    manpower_cost:'Manpower Cost (Rs)',
+    loan_emi:'Loan EMI (Rs)',
+    remarks:'Remarks',
   },
   // FIXED and EMI use month columns — handled separately, no name map needed
 }
