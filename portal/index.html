@@ -3530,9 +3530,20 @@ function renderUplPreview(){
         <th>Date</th>${keys.map(k=>`<th>${k}</th>`).join('')}
       </tr></thead><tbody>`
     if(hiddenCount > 0) html += `<tr><td colspan="${keys.length+1}" style="text-align:center;color:var(--muted);font-style:italic">… ${hiddenCount} earlier rows not shown (last 10 of ${rows.length})</td></tr>`
+    // PSA time-fraction keys: stored as hrs÷24 in Excel, display as hours
+    const PSA_HRS_KEYS = new Set(['psa_hrs','comp_hrs'])
     showRows.forEach(({dateStr,rowData})=>{
       html += `<tr><td>${dateStr}</td>${keys.map(k=>{
-        const v = rowData[cm[k]]; return `<td>${v!=null?v:'—'}</td>`
+        let v = rowData[cm[k]]
+        if(v == null) return `<td>—</td>`
+        if(PSA_HRS_KEYS.has(k) && typeof v === 'number'){
+          // convert Excel time fraction → hours for display
+          v = (Math.round(v * 24 * 100) / 100) + ' hrs'
+        } else if(typeof v === 'number' && !Number.isInteger(v)){
+          // round long floats to 4 dp for readability
+          v = Math.round(v * 10000) / 10000
+        }
+        return `<td>${v}</td>`
       }).join('')}</tr>`
     })
     html += `</tbody></table></div></div>`
