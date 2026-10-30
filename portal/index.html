@@ -1708,9 +1708,9 @@ async function renderWbDetail(wbIdx, selectedDate){
   const serial = toExcelSerial(selectedDate)
   const APPEND_IDS = new Set(['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL','MANURE','MAINT'])
 
-  // Fetch data for all sheets in this workbook in parallel
+  // Fetch data for all sheets sequentially to avoid 503 throttling from Graph API
   const sheetData = {}
-  await Promise.all(wb.ids.map(async id => {
+  for(const id of wb.ids){ await (async id => {
     const sheet = SHEETS.find(s=>s.id===id)
     if(!sheet) return
     const meta = SHEET_META[id]||{}
@@ -1762,13 +1762,14 @@ async function renderWbDetail(wbIdx, selectedDate){
           }
         }
         if(!matchRows.length){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
-        const rows = await Promise.all(matchRows.map(async rn=>{
+        const rows = []
+        for(const rn of matchRows){
           const rd = await gGet(`/worksheets('${enc}')/range(address='A${rn}:${colLetter(maxCol)}${rn}')`)
           const vals = (rd&&rd.values&&rd.values[0])||[]
           const row = {}
           for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
-          return row
-        }))
+          rows.push(row)
+        }
         sheetData[id] = {rows, fields:Object.keys(nameMap), append:true}
       } else {
         // Single date-row sheet
@@ -1783,7 +1784,7 @@ async function renderWbDetail(wbIdx, selectedDate){
     }catch(e){
       sheetData[id] = {rows:[], fields:Object.keys(nameMap), error:e.message}
     }
-  }))
+  })(id) }
 
   // Format a raw cell value for display
   function fmtVal(v, fk, id){
@@ -2325,9 +2326,14 @@ window.handleSignIn = async ()=>{
 // ── Graph API helpers ─────────────────────────────────────────────────────────
 function wbUrl(){ return `https://graph.microsoft.com/v1.0/drives/${CONFIG.driveId}/items/${CONFIG.fileId}/workbook` }
 
-async function gGet(path){
+async function gGet(path, _retry=0){
   const t=await getToken(); if(!t) return null
   const r=await fetch(wbUrl()+path,{headers:{Authorization:`Bearer ${t}`}})
+  if((r.status===503||r.status===429)&&_retry<3){
+    const wait=(_retry+1)*1200  // 1.2s, 2.4s, 3.6s
+    await new Promise(res=>setTimeout(res,wait))
+    return gGet(path,_retry+1)
+  }
   return r.json()
 }
 async function gPatch(path,body,sessionId){
