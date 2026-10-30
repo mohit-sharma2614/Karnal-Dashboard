@@ -1827,24 +1827,64 @@ async function renderWbDetail(wbIdx, selectedDate){
     const data = sheetData[id]
     if(!data) return ''
 
+    // Build ordered field list from SHEETS sections (preserves section grouping + order)
+    const sheetSections = sheet.sections||[]
+    const allSheetFields = sheetSections.flatMap(sec=>
+      (sec.f||[]).filter(f=>f.tp!=='info'&&f.tp!=='fetch').map(f=>({k:f.k,l:f.l,sec:sec.t}))
+    )
+    // Fall back to COLUMN_NAME_MAP keys if sheet has no sections defined
+    const displayFields = allSheetFields.length > 0 ? allSheetFields : data.fields.map(k=>({k,l:fieldLabel(k,id),sec:null}))
+
     let content = ''
     if(data.error){
       content = `<div style="color:#dc2626;font-size:.82rem;padding:8px 0">Error: ${data.error}</div>`
     } else if(!data.rows.length){
-      content = `<div style="color:var(--muted);font-size:.82rem;font-style:italic;padding:8px 0">No data found for this date</div>`
+      // Show all field labels with — so the user can see the full structure
+      const emptyCols = displayFields.map(f=>
+        `<div style="display:flex;flex-direction:column;gap:2px">
+          <div style="font-size:.7rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;line-height:1.2">${f.l}</div>
+          <div style="font-size:.88rem;color:var(--muted)">—</div>
+        </div>`
+      ).join('')
+      content = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px 14px">${emptyCols}</div>`
     } else {
       content = data.rows.map((row, ri)=>{
-        const pairs = data.fields.filter(fk=>{
-          const v = fmtVal(row[fk], fk, id); return v!==null
-        }).map(fk=>{
-          const v = fmtVal(row[fk], fk, id)
-          return `<div style="display:flex;flex-direction:column;gap:2px">
-            <div style="font-size:.7rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;line-height:1.2">${fieldLabel(fk,id)}</div>
-            <div style="font-size:.88rem;font-weight:600;color:var(--fg)">${v}</div>
-          </div>`
-        }).join('')
-        const rowHdr = data.rows.length>1 ? `<div style="font-size:.75rem;color:var(--muted);font-weight:600;margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">Entry ${ri+1}</div>` : ''
-        return `<div style="margin-bottom:${data.rows.length>1?'12px':'0'}">${rowHdr}<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px 14px">${pairs||'<span style="color:var(--muted);font-size:.82rem">All fields empty</span>'}</div></div>`
+        // Group by section
+        let innerHtml = ''
+        if(sheetSections.length > 0){
+          sheetSections.forEach(sec=>{
+            const secFields = (sec.f||[]).filter(f=>f.tp!=='info'&&f.tp!=='fetch')
+            if(!secFields.length) return
+            const cells = secFields.map(f=>{
+              const v = fmtVal(row[f.k], f.k, id)
+              const valHtml = v!==null
+                ? `<div style="font-size:.88rem;font-weight:600;color:var(--fg)">${v}</div>`
+                : `<div style="font-size:.88rem;color:var(--muted)">—</div>`
+              return `<div style="display:flex;flex-direction:column;gap:2px">
+                <div style="font-size:.7rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;line-height:1.2">${f.l}</div>
+                ${valHtml}
+              </div>`
+            }).join('')
+            innerHtml += `<div style="margin-bottom:10px">
+              <div style="font-size:.72rem;font-weight:700;color:var(--accent,#4f46e5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;padding-bottom:3px;border-bottom:1px solid var(--border)">${sec.t}</div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px 14px">${cells}</div>
+            </div>`
+          })
+        } else {
+          const cells = displayFields.map(f=>{
+            const v = fmtVal(row[f.k], f.k, id)
+            const valHtml = v!==null
+              ? `<div style="font-size:.88rem;font-weight:600;color:var(--fg)">${v}</div>`
+              : `<div style="font-size:.88rem;color:var(--muted)">—</div>`
+            return `<div style="display:flex;flex-direction:column;gap:2px">
+              <div style="font-size:.7rem;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.04em;line-height:1.2">${f.l}</div>
+              ${valHtml}
+            </div>`
+          }).join('')
+          innerHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px 14px">${cells}</div>`
+        }
+        const rowHdr = data.rows.length>1 ? `<div style="font-size:.75rem;color:var(--muted);font-weight:600;margin-bottom:8px;padding-bottom:4px;border-bottom:2px solid var(--border)">Entry ${ri+1}</div>` : ''
+        return `<div style="margin-bottom:${data.rows.length>1?'16px':'0'}">${rowHdr}${innerHtml}</div>`
       }).join('')
     }
 
