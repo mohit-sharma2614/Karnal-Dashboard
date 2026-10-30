@@ -1747,8 +1747,8 @@ async function renderWbDetail(wbIdx, selectedDate){
 
     try{
       const enc = encodeURIComponent(masterSheet)
-      // Single call: get entire sheet content
-      const rangeData = await gGet(`/worksheets('${enc}')/usedRange`, readSid)
+      // Single call: values only (skip formulas/formats to reduce payload)
+      const rangeData = await gGet(`/worksheets('${enc}')/usedRange?$select=values`, readSid)
       const allRows = (rangeData&&rangeData.values)||[]
 
       // Build header map from hrow (1-based row → 0-based array index)
@@ -2400,19 +2400,32 @@ async function gGet(path, sessionId, _retry=0){
   const hdrs={Authorization:`Bearer ${t}`}
   if(sessionId) hdrs['workbook-session-id']=sessionId
   const r=await fetch(wbUrl()+path,{headers:hdrs})
-  if((r.status===503||r.status===429)&&_retry<3){
-    const wait=(_retry+1)*1200
+  if((r.status===503||r.status===429)&&_retry<5){
+    const wait=(_retry+1)*2000  // 2s, 4s, 6s, 8s, 10s
     await new Promise(res=>setTimeout(res,wait))
     return gGet(path,sessionId,_retry+1)
   }
   return r.json()
 }
-async function getReadSession(){
+async function getReadSession(_retry=0){
   const t=await getToken(); if(!t) return null
   try{
     const r=await fetch(wbUrl()+'/createSession',{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({persistChanges:false})})
-    const d=await r.json(); return d.id||null
-  }catch(e){ return null }
+    if((r.status===503||r.status===429)&&_retry<4){
+      await new Promise(res=>setTimeout(res,(_retry+1)*2000))
+      return getReadSession(_retry+1)
+    }
+    const d=await r.json()
+    if(d.id){
+      // Wait for workbook to fully load on Graph's server before making data requests
+      await new Promise(res=>setTimeout(res,800))
+      return d.id
+    }
+    return null
+  }catch(e){
+    if(_retry<2){ await new Promise(res=>setTimeout(res,2000)); return getReadSession(_retry+1) }
+    return null
+  }
 }
 async function gPatch(path,body,sessionId){
   const t=await getToken(); if(!t) return null
