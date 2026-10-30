@@ -674,6 +674,7 @@ const SHEETS = [
     {k:'psa_hrs',      l:'PSA Running Hours',                    tp:'num'},
     {k:'psa_run_min',  l:'PSA Run Time (Min)',                   tp:'num'},
     {k:'comp_hrs',     l:'Compressor Hours',                     tp:'num'},
+    {k:'comp_min',     l:'Compressor Run Time (Min)',            tp:'num'},
     {k:'psa_comp_diff',l:'PSA–Comp Difference (Min)',            tp:'calc', fn:'psa_comp_diff'},
     {k:'pcut_hrs',     l:'Power Cut Duration (hrs)',             tp:'num'},
     {k:'vent_hrs',     l:'Vent Time (hrs)',                      tp:'num'},
@@ -685,11 +686,13 @@ const SHEETS = [
     {k:'ch4_pct',   l:'CH4% at Inlet',                tp:'num'},
   ]},
   {t:'CBG Production',f:[
+    {k:'pur_d1',       l:'Purified Biogas D1 (m³)',       tp:'num'},
+    {k:'pur_d2',       l:'Purified Biogas D2 (m³)',       tp:'num'},
+    {k:'purified_gas', l:'Total Purified Biogas (m³)',    tp:'num'},
     {k:'cbg_d1',       l:'CBG from D1 (kg)',              tp:'num'},
     {k:'cbg_d2',       l:'CBG from D2 (kg)',              tp:'num'},
     {k:'cbg_tot',      l:'Total CBG Purified (kg)',       tp:'calc', fn:'cbg_tot'},
     {k:'cbg_den',      l:'CBG Density (kg/m³)',           tp:'num'},
-    {k:'purified_gas', l:'Total Purified Gas (m³)',       tp:'num'},
   ]},
   {t:'Customer Dispatch (kg)',f:[
     {k:'veer_kg',    l:'Dispatch — Veer (kg)',             tp:'num'},
@@ -1755,15 +1758,18 @@ const COLUMN_NAME_MAP = {
     psa_hrs:'PSA Running Time (in Hrs)',
     psa_run_min:'PSA Running Time (in Mins)',
     comp_hrs:'Compressor Running Time (in Hrs)',
+    comp_min:'Compressor Running Time (in Mins)',
     psa_comp_diff:'PSA Compressor Running duration difference',
     rbg_d1:'Raw Biogas Suction From Digester 01 (in m3)',
     rbg_d2:'Raw Biogas Suction From Digester 02 (in m3)',
     rbg_total:'Raw Biogas Suction From both Digester (in m3)',
+    pur_d1:'Purified Biogas From Digester 01 (in m3)',
+    pur_d2:'Purified Biogas From Digester 02 (in m3)',
     purified_gas:'Total Purified Biogas (in m3)',
     cbg_d1:'CBG Production From D1 (in Kg)',
     cbg_d2:'CBG Production From D2 (in Kg)',
     cbg_tot:'Total CBG Production (in Kg)',
-    cbg_den:'PSA Efficiency for the day',
+    cbg_den:'Density for the day',
     tot_disp:'Total Dispatched',
     veer_kg:'Total Dispatch To Veer',
     adinath_kg:'Total Dispatch To Adinath',
@@ -2219,13 +2225,17 @@ window.handleSave = async ()=>{
     }
 
     // PSA: time-formatted cells must be converted to Excel time fractions
-    // psa_hrs and comp_hrs: decimal hours ÷ 24; psa_comp_diff: minutes ÷ 60 ÷ 24
+    // hrs fields: decimal hours ÷ 24; min fields: decimal minutes ÷ 60 ÷ 24; diff: minutes ÷ 60 ÷ 24
     if(cur.id === 'PSA') {
       const psaHrsCol  = colMap['psa_hrs']
       const compHrsCol = colMap['comp_hrs']
+      const compMinCol = colMap['comp_min']
       const diffCol    = colMap['psa_comp_diff']
       if(psaHrsCol  && rowData[psaHrsCol])  rowData[psaHrsCol]  = rowData[psaHrsCol]  / 24
       if(compHrsCol && rowData[compHrsCol]) rowData[compHrsCol] = rowData[compHrsCol] / 24
+      // psa_run_min stored as plain integer in master (upload doesn't convert it)
+      // comp_min stored as time fraction (upload converts it ÷60÷24)
+      if(compMinCol && rowData[compMinCol]) rowData[compMinCol] = rowData[compMinCol] / 60 / 24
       if(diffCol    && rowData[diffCol])    rowData[diffCol]    = rowData[diffCol]    / 60 / 24
     }
 
@@ -2423,10 +2433,11 @@ async function fetchExistingRow(sheetId, dateStr){
       if(!el||el.readOnly) continue
       const v=rowVals[colNum-1]
       if(v===null||v===undefined||v==='') continue
-      // PSA time fields: psa_hrs/comp_hrs stored as hours÷24, read back as hours
+      // PSA time fields: psa_hrs/comp_hrs stored as hours÷24; comp_min stored as mins÷60÷24; psa_run_min plain integer
       let displayVal=v
       if(sheetId==='PSA'&&typeof v==='number'){
         if(fk==='psa_hrs'||fk==='comp_hrs') displayVal=Math.round(v*24*1000)/1000
+        else if(fk==='comp_min') displayVal=Math.round(v*24*60*10)/10
       }
       el.value=displayVal
       inp[fk]=typeof displayVal==='number'?displayVal:parseFloat(displayVal)||displayVal
