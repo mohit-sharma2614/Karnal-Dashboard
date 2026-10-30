@@ -1708,7 +1708,10 @@ async function renderWbDetail(wbIdx, selectedDate){
   const serial = toExcelSerial(selectedDate)
   const APPEND_IDS = new Set(['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL','MANURE','MAINT'])
 
-  // Fetch data for all sheets sequentially to avoid 503 throttling from Graph API
+  // Open a read-only session: keeps workbook open on Graph's server, eliminates cold-open throttling
+  const readSid = await getReadSession()
+
+  // Fetch data for all sheets sequentially (session alone handles most throttling; sequential is a safety net)
   const sheetData = {}
   for(const id of wb.ids){ await (async id => {
     const sheet = SHEETS.find(s=>s.id===id)
@@ -1724,7 +1727,7 @@ async function renderWbDetail(wbIdx, selectedDate){
       // Ensure header cache populated (one API call per sheet)
       const cacheKey = `${masterSheet}:${hrow}`
       if(!_hdrCache[cacheKey]){
-        const r = await gGet(`/worksheets('${encodeURIComponent(masterSheet)}')/range(address='${hrow}:${hrow}')`)
+        const r = await gGet(`/worksheets('${encodeURIComponent(masterSheet)}')/range(address='${hrow}:${hrow}')`, readSid)
         const vals = (r&&r.values&&r.values[0])||[]
         const map = {}
         vals.forEach((v,i)=>{ if(v!==null&&v!==undefined&&v!==''){ const n=String(v).trim(); if(!map[n]) map[n]=[]; map[n].push(i+1) } })
@@ -1749,7 +1752,7 @@ async function renderWbDetail(wbIdx, selectedDate){
       if(APPEND_IDS.has(id)){
         // Find all rows matching this date (col A or B)
         const dateColAddr = `B${dataStart}:B500`
-        const dateData = await gGet(`/worksheets('${enc}')/range(address='${dateColAddr}')`)
+        const dateData = await gGet(`/worksheets('${enc}')/range(address='${dateColAddr}')`, readSid)
         const dateVals = (dateData&&dateData.values)||[]
         const matchRows = []
         for(let i=0;i<dateVals.length;i++){
@@ -1764,7 +1767,7 @@ async function renderWbDetail(wbIdx, selectedDate){
         if(!matchRows.length){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
         const rows = []
         for(const rn of matchRows){
-          const rd = await gGet(`/worksheets('${enc}')/range(address='A${rn}:${colLetter(maxCol)}${rn}')`)
+          const rd = await gGet(`/worksheets('${enc}')/range(address='A${rn}:${colLetter(maxCol)}${rn}')`, readSid)
           const vals = (rd&&rd.values&&rd.values[0])||[]
           const row = {}
           for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
@@ -1772,10 +1775,12 @@ async function renderWbDetail(wbIdx, selectedDate){
         }
         sheetData[id] = {rows, fields:Object.keys(nameMap), append:true}
       } else {
-        // Single date-row sheet
+        // Single date-row sheet — findRow uses its own gGet internally; pass session via _wbReadSid global
+        window._wbReadSid = readSid
         const rowNum = await findRow(masterSheet, serial, dataStart)
+        window._wbReadSid = null
         if(!rowNum){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
-        const rd = await gGet(`/worksheets('${enc}')/range(address='A${rowNum}:${colLetter(maxCol)}${rowNum}')`)
+        const rd = await gGet(`/worksheets('${enc}')/range(address='A${rowNum}:${colLetter(maxCol)}${rowNum}')`, readSid)
         const vals = (rd&&rd.values&&rd.values[0])||[]
         const row = {}
         for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
@@ -2326,15 +2331,24 @@ window.handleSignIn = async ()=>{
 // ── Graph API helpers ─────────────────────────────────────────────────────────
 function wbUrl(){ return `https://graph.microsoft.com/v1.0/drives/${CONFIG.driveId}/items/${CONFIG.fileId}/workbook` }
 
-async function gGet(path, _retry=0){
+async function gGet(path, sessionId, _retry=0){
   const t=await getToken(); if(!t) return null
-  const r=await fetch(wbUrl()+path,{headers:{Authorization:`Bearer ${t}`}})
+  const hdrs={Authorization:`Bearer ${t}`}
+  if(sessionId) hdrs['workbook-session-id']=sessionId
+  const r=await fetch(wbUrl()+path,{headers:hdrs})
   if((r.status===503||r.status===429)&&_retry<3){
-    const wait=(_retry+1)*1200  // 1.2s, 2.4s, 3.6s
+    const wait=(_retry+1)*1200
     await new Promise(res=>setTimeout(res,wait))
-    return gGet(path,_retry+1)
+    return gGet(path,sessionId,_retry+1)
   }
   return r.json()
+}
+async function getReadSession(){
+  const t=await getToken(); if(!t) return null
+  try{
+    const r=await fetch(wbUrl()+'/createSession',{method:'POST',headers:{Authorization:`Bearer ${t}`,'Content-Type':'application/json'},body:JSON.stringify({persistChanges:false})})
+    const d=await r.json(); return d.id||null
+  }catch(e){ return null }
 }
 async function gPatch(path,body,sessionId){
   const t=await getToken(); if(!t) return null
@@ -2435,7 +2449,7 @@ async function fetchCalQty(sheetId){
 }
 
 async function findRow(sheetName, serial, dataStart=3){
-  const d=await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStart}:A400')`)
+  const d=await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStart}:A400')`, window._wbReadSid||null)
   const rows=(d&&d.values)||[]
   for(let i=0;i<rows.length;i++){
     const v=rows[i][0]; if(v===null||v===undefined) continue
