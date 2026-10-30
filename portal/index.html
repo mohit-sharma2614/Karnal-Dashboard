@@ -367,24 +367,44 @@
 
     /* ── File selected state ── */
     .upl-file-selected{
-      display:flex;align-items:center;gap:14px;
+      display:flex;align-items:center;gap:12px;
       background:var(--surface);
-      border:2px solid var(--accent2);border-radius:12px;padding:14px 18px;
+      border:2px solid var(--accent2);border-radius:10px;padding:10px 14px;
     }
     .upl-file-sel-icon{
-      width:42px;height:42px;border-radius:10px;flex-shrink:0;
+      width:34px;height:34px;border-radius:8px;flex-shrink:0;
       background:rgba(37,99,235,.1);display:flex;align-items:center;justify-content:center;
     }
     .upl-file-sel-meta{flex:1;min-width:0;}
-    .upl-file-sel-name{font-size:.87rem;font-weight:700;color:var(--text);
+    .upl-file-sel-name{font-size:.85rem;font-weight:700;color:var(--text);
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-    .upl-file-sel-hint{font-size:.73rem;color:var(--muted);margin-top:3px;}
+    .upl-file-sel-hint{font-size:.72rem;color:var(--muted);margin-top:2px;display:flex;align-items:center;gap:6px;}
     .upl-file-sel-change{
-      flex-shrink:0;padding:6px 14px;border:1.5px solid var(--border);border-radius:7px;
-      background:none;color:var(--muted);font-size:.76rem;font-weight:500;cursor:pointer;
+      flex-shrink:0;padding:5px 12px;border:1.5px solid var(--border);border-radius:7px;
+      background:none;color:var(--muted);font-size:.74rem;font-weight:500;cursor:pointer;
       transition:border-color .12s,color .12s;
     }
     .upl-file-sel-change:hover{border-color:var(--accent);color:var(--accent);}
+    /* Spinner for processing state */
+    @keyframes upl-spin{to{transform:rotate(360deg)}}
+    .upl-spinner{
+      width:12px;height:12px;border:2px solid var(--border);
+      border-top-color:var(--accent);border-radius:50%;
+      animation:upl-spin .7s linear infinite;flex-shrink:0;
+    }
+    /* Loading skeleton inside preview area */
+    .upl-parse-loading{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      padding:32px 20px;gap:10px;
+    }
+    .upl-parse-loading .upl-spinner{width:22px;height:22px;border-width:3px;}
+    .upl-parse-msg{font-size:.85rem;color:var(--muted);font-weight:500;}
+    .upl-parse-steps{display:flex;gap:0;margin-top:6px;}
+    .upl-parse-step{font-size:.72rem;padding:3px 10px;border:1px solid var(--border);color:var(--muted);background:var(--surface);}
+    .upl-parse-step:first-child{border-radius:6px 0 0 6px;}
+    .upl-parse-step:last-child{border-radius:0 6px 6px 0;border-left:none;}
+    .upl-parse-step.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+    .upl-parse-step.done{background:var(--success);border-color:var(--success);color:#fff;}
 
     /* ── Right column ── */
     .upl-right-col{display:flex;flex-direction:column;gap:14px;}
@@ -3200,7 +3220,7 @@ function showUploadView(){
       </div>
     </div>
 
-    <div id="uplPreview" style="display:none;margin-top:20px;"></div>`
+    <div id="uplPreview" style="display:none;margin-top:10px;"></div>`
 }
 
 function onUplDrop(e){
@@ -3216,33 +3236,80 @@ function onUplFileSelect(inp){
 
 async function loadUplFile(file){
   _uplFile = file
-  // Replace drop zone with file-selected card
+  const kb = Math.round(file.size/1024)
+  const sizeStr = kb > 1024 ? `${(kb/1024).toFixed(1)} MB` : `${kb} KB`
+
+  // Replace drop zone with compact file-selected card
   const dz = document.getElementById('uplDropZone')
   if(dz){
-    const kb = Math.round(file.size/1024)
-    const sizeStr = kb > 1024 ? `${(kb/1024).toFixed(1)} MB` : `${kb} KB`
-    dz.outerHTML = `<div class="upl-file-selected">
+    dz.outerHTML = `<div class="upl-file-selected" id="uplFileCard">
       <div class="upl-file-sel-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
           <polyline points="14 2 14 8 20 8"/>
         </svg>
       </div>
       <div class="upl-file-sel-meta">
         <div class="upl-file-sel-name">${file.name}</div>
-        <div class="upl-file-sel-hint">${sizeStr} &nbsp;·&nbsp; Reading sheets…</div>
+        <div class="upl-file-sel-hint" id="uplFileHint">
+          <span class="upl-spinner"></span>
+          <span id="uplFileHintText">${sizeStr} · Reading file…</span>
+        </div>
       </div>
       <button class="upl-file-sel-change" onclick="showUploadView()">Change</button>
     </div>`
   }
+
+  // Show loading skeleton in preview area immediately
+  const previewEl = document.getElementById('uplPreview')
+  if(previewEl){
+    previewEl.style.display = 'block'
+    previewEl.innerHTML = `<div class="upl-parse-loading">
+      <div class="upl-spinner"></div>
+      <div class="upl-parse-msg" id="uplParseMsg">Reading file…</div>
+      <div class="upl-parse-steps">
+        <div class="upl-parse-step active" id="uplPStep1">1 · Read</div>
+        <div class="upl-parse-step" id="uplPStep2">2 · Parse</div>
+        <div class="upl-parse-step" id="uplPStep3">3 · Preview</div>
+      </div>
+    </div>`
+  }
+
   // Advance stepper to step 2
   const s1=document.getElementById('uplStep1'), s2=document.getElementById('uplStep2')
   if(s1){s1.classList.remove('active');s1.classList.add('done')}
   if(s2){s2.classList.add('active')}
+
+  function setParseStep(msg, stepIdx){
+    const msgEl=document.getElementById('uplParseMsg')
+    const hintEl=document.getElementById('uplFileHintText')
+    if(msgEl) msgEl.textContent=msg
+    if(hintEl) hintEl.textContent=`${sizeStr} · ${msg}`
+    for(let i=1;i<=3;i++){
+      const el=document.getElementById(`uplPStep${i}`)
+      if(!el) continue
+      el.className='upl-parse-step'+(i<stepIdx?' done':i===stepIdx?' active':'')
+    }
+  }
+
   try {
+    // Step 1: read array buffer
     const buf = await file.arrayBuffer()
+    setParseStep('Parsing sheets…', 2)
+    // Yield to browser so UI updates before heavy XLSX parse
+    await new Promise(r=>setTimeout(r,0))
     _uplWb = XLSX.read(buf, {type:'array', raw:true})
+    setParseStep('Building preview…', 3)
+    await new Promise(r=>setTimeout(r,0))
     parseUplWorkbook()
+    // Update hint to done
+    const hintEl=document.getElementById('uplFileHint')
+    if(hintEl){
+      const sheetCount=Object.keys(_uplParsed).length
+      const totalRows=Object.values(_uplParsed).reduce((a,r)=>a+r.length,0)
+      hintEl.innerHTML=`<span style="color:var(--success);font-size:.85rem">✓</span>
+        <span>${sizeStr} · ${sheetCount} sheet${sheetCount===1?'':'s'} · ${totalRows} row${totalRows===1?'':'s'} ready</span>`
+    }
     renderUplPreview()
   } catch(e) {
     toast(`Failed to read file: ${e.message}`, true)
@@ -3496,6 +3563,8 @@ function renderUplPreview(){
 
   previewEl.style.display = 'block'
   previewEl.innerHTML = html
+  // Scroll so user sees the top of the preview immediately
+  previewEl.scrollIntoView({behavior:'smooth', block:'start'})
 }
 
 function uplLog(msg, isErr=false){
