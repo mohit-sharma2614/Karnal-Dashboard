@@ -1919,7 +1919,6 @@ const SHEET_META = {
   MANURE:  { masterSheet:'Manure Sales',            hrow:2 },
   MAINT:   { masterSheet:'Maintenance',             hrow:3 },
   REVCOST: { masterSheet:'Daily Revenue & Costs',   hrow:3 },
-  APPCAL:  { masterSheet:'Apple Pomace Cal.',       hrow:2 },
 }
 
 // Header cache: { 'SheetName:hrow': { headerName: [col1, col2, ...] } }
@@ -2424,10 +2423,11 @@ async function fetchExistingRow(sheetId, dateStr){
       if(!el||el.readOnly) continue
       const v=rowVals[colNum-1]
       if(v===null||v===undefined||v==='') continue
-      // PSA time fields stored as Excel fraction → convert to hours
-      const fieldDef=(SHEETS.find(s=>s.id===sheetId)||{sections:[]}).sections.flatMap(s=>s.f).find(f=>f.k===fk)
+      // PSA time fields: psa_hrs/comp_hrs stored as hours÷24, read back as hours
       let displayVal=v
-      if(fieldDef&&fieldDef.tp==='time'&&typeof v==='number'){ displayVal=Math.round(v*24*60)/60 }
+      if(sheetId==='PSA'&&typeof v==='number'){
+        if(fk==='psa_hrs'||fk==='comp_hrs') displayVal=Math.round(v*24*1000)/1000
+      }
       el.value=displayVal
       inp[fk]=typeof displayVal==='number'?displayVal:parseFloat(displayVal)||displayVal
       loaded++
