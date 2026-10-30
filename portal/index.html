@@ -1154,13 +1154,14 @@ let cur=null, inp={}, drafts={}
 // ── Sidebar & home/audit views ────────────────────────────────────────────────
 
 // Workbook card definitions (group SHEETS into 6 cards)
+// WB_CARDS maps to actual Input Workbook files (Z:\CBG_KARNAL\INPUT_WORKBOOKS\)
 const WB_CARDS = [
-  { label:'Production RBG Workbook',    sub:'D1 · D2',                          grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
-  { label:'Lab Workbook',               sub:'Pressmud · CD · GS · CSL · SG · AP', grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL'] },
-  { label:'Digester Health Workbook',   sub:'pH · Temp · TS-VS · IA-PA',        grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
-  { label:'Feed & Balance Workbook',    sub:'Fed Qty · Closing Balance',         grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FB'] },
-  { label:'Sales & Finance Workbook',   sub:'Revenue · Manure · Sales',          grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES'] },
-  { label:'CBG Production Workbook',    sub:'PSA · Expected · Planner · Maint',  grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA','CBGEXP','PLANNER','MAINT','FIXED','EMI'] },
+  { label:'Production RBG Workbook',     sub:'D1 · D2',                                    grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
+  { label:'CBG Production Workbook',     sub:'PSA Production',                              grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA'] },
+  { label:'Digester Health Workbook',    sub:'pH · Temp · TS-VS · IA-PA',                  grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
+  { label:'Feed & Balance Workbook',     sub:'Fed Qty · Closing Balance',                   grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FB'] },
+  { label:'Lab Workbook',                sub:'Pressmud · CD · GS · CSL · SG · AP',          grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL'] },
+  { label:'Sales & Finance Workbook',    sub:'Revenue · Manure · Sales · Fixed · Maint · EMI', grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES','FIXED','MAINT','EMI'] },
 ]
 
 function _sheetLabel(id){ const s=SHEETS.find(x=>x.id===id); return s?s.label:id }
