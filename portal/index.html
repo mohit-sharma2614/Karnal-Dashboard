@@ -788,55 +788,9 @@ const SHEETS = [
   {t:'Remarks',f:[{k:'iapa_remark',l:'Remark',tp:'txt'}]},
 ]},
 
-// ─── FEEDSTOCK SUPPLY ─────────────────────────────────────
-{id:'FS',label:'Feedstock Supply',group:'Feedstock',sheet:'Feedstock Supply', hasDate:true, track:true, sections:[
-  {t:'Poultry Wastewater Received (KL)',f:[
-    {k:'pw_lather',  l:'Lather (KL)',           tp:'num'},
-    {k:'pw_narwal',  l:'Narwal (KL)',            tp:'num'},
-    {k:'pw_subhash', l:'Subhash (KL)',           tp:'num'},
-    {k:'pw_gk',      l:'GK Hatchery (KL)',       tp:'num'},
-    {k:'pw_dry',     l:'Dry Poultry (KL)',       tp:'num'},
-    {k:'pw_nazim',   l:'Nazim (KL)',             tp:'num'},
-    {k:'pw_total',   l:'Total Poultry (KL)',     tp:'calc', fn:'pw_total'},
-  ]},
-  {t:'Cow Dung Received (kg)',f:[
-    {k:'cd_gharaunda',    l:'Gharaunda',         tp:'num'},
-    {k:'cd_phoosgarh',   l:'Phoosgarh',         tp:'num'},
-    {k:'cd_radhakrishna', l:'Radha Krishna',    tp:'num'},
-    {k:'cd_total',        l:'Total CD (kg)',     tp:'calc', fn:'cd_total'},
-  ]},
-  {t:'CSL Received (KL)',f:[
-    {k:'csl_sadasat',  l:'Sadasat',             tp:'num'},
-    {k:'csl_pantnagar',l:'Pant Nagar',           tp:'num'},
-    {k:'csl_virangam', l:'Virangam',            tp:'num'},
-    {k:'csl_total',    l:'Total CSL (KL)',       tp:'calc', fn:'csl_total'},
-  ]},
-  {t:'Pressmud Received (kg)',f:[
-    {k:'pm_sonipat',   l:'Sonipat',             tp:'num'},
-    {k:'pm_malakpur',  l:'Malakpur Sugar Mill, Baraut',  tp:'num'},
-    {k:'pm_ramala',    l:'Ramala, Bhagpat (Vaibhav)',    tp:'num'},
-    {k:'pm_thana',     l:'Thana Bhavan',        tp:'num'},
-    {k:'pm_tikuala',   l:'Tikuala',             tp:'num'},
-    {k:'pm_shamli',    l:'Shamli Sugar Mill (Naveen)',    tp:'num'},
-    {k:'pm_laknour',   l:'Laknour Biogas (Vaibhav)',     tp:'num'},
-    {k:'pm_balyan',    l:'Balyan Tikuala',      tp:'num'},
-    {k:'pm_singh',     l:'Singh Associates',    tp:'num'},
-    {k:'pm_naveen',    l:'Naveen',              tp:'num'},
-    {k:'pm_gs',        l:'G.S.',                tp:'num'},
-    {k:'pm_sbec',      l:'SBEC',               tp:'num'},
-    {k:'pm_sahakumbri',l:'Sahakumbri',          tp:'num'},
-    {k:'pm_rathi',          l:'Rathi (Kathuali Sugar Mill)',  tp:'num'},
-    {k:'pm_unn',            l:'Unn Sugar Mill',              tp:'num'},
-    {k:'pm_devom',          l:'Devom',                       tp:'num'},
-    {k:'pm_total',          l:'Total PM (kg)',                tp:'calc', fn:'pm_total'},
-  ]},
-  {t:'Other Feedstock',f:[
-    {k:'carlsberg',    l:'Carlsberg (kg)',       tp:'num'},
-    {k:'gs_rcv',       l:'Grain Syrup (KL)',    tp:'num'},
-    {k:'total_day',    l:'Total/Day (kg)',       tp:'calc', fn:'fs_total_day'},
-  ]},
-  {t:'Remarks',f:[{k:'remarks',l:'Remarks',tp:'txt'}]},
-]},
+// ─── FEEDSTOCK SUPPLY — REMOVED ───────────────────────────
+// Feedstock Supply sheet merged into Feed_and_Balance (99-col).
+// Vendor received data comes via Input Workbook upload only — no manual form.
 
 // ─── FEED & BALANCE ───────────────────────────────────────
 {id:'FB',label:'Feed & Balance',group:'Feedstock',sheet:'Feed_and_Balance', hasDate:true, track:false, sections:[
@@ -1189,7 +1143,7 @@ const WB_CARDS = [
   { label:'Production RBG',   sub:'Digesters',              grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
   { label:'Lab / Cal',        sub:'Calibrations',           grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL'] },
   { label:'Digester Health',  sub:'pH · Temp · TS-VS · IA', grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
-  { label:'Feedstock Supply', sub:'Supply & Balance',       grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FS'] },
+  { label:'Feed & Balance',   sub:'Fed Qty · Balance',       grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FB'] },
   { label:'Sales & Finance',  sub:'Revenue · Sales',        grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES'] },
   { label:'CBG Production',   sub:'PSA · Plans',            grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA','CBGEXP','PLANNER','MAINT','FIXED','EMI'] },
 ]
@@ -2615,7 +2569,6 @@ const UPL_CFG = {
   'Digester Temp':         { cmKey:'TEMP',    dateCol:1, dataStart:3, append:false },
   'Digester TS-VS':        { cmKey:'TSVS',    dateCol:1, dataStart:3, append:false },
   'Digester IA-PA':        { cmKey:'IAPA',    dateCol:1, dataStart:3, append:false },
-  'Feedstock Supply':      { cmKey:'FS',      dateCol:1, dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
   'Feed & Balance':        { cmKey:'FB',      dateCol:1, dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
   'Pressmud Cal.':         { cmKey:'PMCAL',   dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  }, // date+sample+location
   'CSL Cal.':              { cmKey:'CSLCAL',  dateCol:1, dataStart:3, append:true,  dupCols:[1,2,3]  },
@@ -2637,7 +2590,7 @@ const KNOWN_MANURE = {
 
 // Date-row sheets — used for gap cross-check (Fix 1)
 const DATE_ROW_SHEETS = new Set(['D1','D2','PSA Production','Digester pH','Digester Temp',
-  'Digester TS-VS','Digester IA-PA','Feedstock Supply','Feed & Balance',
+  'Digester TS-VS','Digester IA-PA','Feed & Balance',
   'Daily Revenue & Costs','Sales Detail'])
 
 let _uplWb       = null   // SheetJS workbook
@@ -2769,10 +2722,10 @@ function showUploadView(){
             <div class="upl-dept-row">
               <div class="upl-dept-dot" style="background:#f59e0b"></div>
               <div class="upl-dept-info">
-                <div class="upl-dept-name">Feedstock supply</div>
-                <div class="upl-dept-sheets">Feedstock Supply · Feed &amp; Balance</div>
+                <div class="upl-dept-name">Feedstock</div>
+                <div class="upl-dept-sheets">Feed &amp; Balance</div>
               </div>
-              <div class="upl-dept-count">2</div>
+              <div class="upl-dept-count">1</div>
             </div>
             <div class="upl-dept-row">
               <div class="upl-dept-dot" style="background:#ef4444"></div>
