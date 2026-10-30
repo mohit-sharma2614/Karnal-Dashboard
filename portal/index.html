@@ -3167,23 +3167,44 @@ function uplLog(msg, isErr=false){
 }
 
 async function submitUpload(){
+  // Show progress bar immediately so any error is visible
+  const btn   = document.getElementById('uplSubmitBtn')
+  const logEl = document.getElementById('uplProgress')
+  if(btn) btn.disabled = true
+  if(logEl){ logEl.style.display='block'; logEl.innerHTML='' }
+
   if(!_uplParsed || Object.keys(_uplParsed).length===0){
-    toast('No upload data — please select and parse a file first', true); return
+    uplLog('ERROR: No upload data — please re-select the file', true)
+    toast('No upload data — please select and parse a file first', true)
+    if(btn){ btn.disabled=false }
+    return
   }
-  await initMsal()
-  const t = await getToken()
-  if(!t){ toast('Sign in first', true); return }
+
+  uplLog('Authenticating…')
+  let t
+  try{
+    await initMsal()
+    t = await getToken()
+  } catch(authErr){
+    uplLog(`Auth error: ${authErr.message}`, true)
+    toast(`Authentication failed: ${authErr.message}`, true)
+    if(btn){ btn.disabled=false }
+    return
+  }
+  if(!t){
+    uplLog('ERROR: Not signed in — please sign in and try again', true)
+    toast('Sign in first', true)
+    if(btn){ btn.disabled=false }
+    return
+  }
+  uplLog('Authenticated ✓')
 
   // Advance stepper to step 3
   const s2=document.getElementById('uplStep2'), s3=document.getElementById('uplStep3')
   if(s2){s2.classList.remove('active');s2.classList.add('done')}
   if(s3){s3.classList.add('active')}
 
-  const btn      = document.getElementById('uplSubmitBtn')
-  const mode     = document.getElementById('uplConflictMode')?.value || 'overwrite'
-  const logEl    = document.getElementById('uplProgress')
-  if(btn) btn.disabled = true
-  if(logEl){ logEl.style.display='block'; logEl.innerHTML='' }
+  const mode = document.getElementById('uplConflictMode')?.value || 'overwrite'
 
   let totalWritten=0, totalSkipped=0, totalDupSkipped=0, totalErrors=0
   const sheetsWritten = []  // Fix 2: track partial state
@@ -3195,7 +3216,9 @@ async function submitUpload(){
     : 'no dates'
 
   try {
+    uplLog('Opening workbook session…')
     const sid = await getSession()
+    uplLog(sid ? 'Session opened ✓' : 'No session (will write without session)')
 
     // Fix 2 + Fix 3: write UPLOAD START to submission log before touching any sheet
     const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
