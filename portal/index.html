@@ -1355,7 +1355,7 @@ function renderHome(resetDate=true){
   // Activity feed from subLog
   let actHtml=''
   if(window._subLog&&window._subLog.length>0){
-    const recents=[...window._subLog].reverse().filter(r=>r&&r[1]&&!String(r[1]).startsWith('[UPLOAD')).slice(0,4)
+    const recents=[...window._subLog].reverse().filter(r=>r&&r[1]&&typeof r[0]==='number'&&!String(r[1]).startsWith('[UPLOAD')).slice(0,4)
     actHtml=recents.map(r=>{
       const lbl=r[1]||''; const name=r[2]||'User'; const email=r[3]||''
       const ts=r[4]||''
