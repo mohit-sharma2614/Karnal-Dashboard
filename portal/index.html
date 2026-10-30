@@ -828,7 +828,6 @@ const SHEETS = [
     {k:'pm_rathi',          l:'Rathi (Kathuali Sugar Mill)',  tp:'num'},
     {k:'pm_unn',            l:'Unn Sugar Mill',              tp:'num'},
     {k:'pm_devom',          l:'Devom',                       tp:'num'},
-    {k:'pm_vaibhav_ramala', l:'Vaibhav Ramala (PM)',         tp:'num'},
     {k:'pm_total',          l:'Total PM (kg)',                tp:'calc', fn:'pm_total'},
   ]},
   {t:'Other Feedstock',f:[
@@ -1164,14 +1163,13 @@ const FN = {
   csl_total:   (v) => n(v.csl_sadasat)+n(v.csl_pantnagar)+n(v.csl_virangam),
   pm_total:    (v) => n(v.pm_sonipat)+n(v.pm_malakpur)+n(v.pm_ramala)+n(v.pm_thana)+n(v.pm_tikuala)+
                       n(v.pm_shamli)+n(v.pm_laknour)+n(v.pm_balyan)+n(v.pm_singh)+n(v.pm_naveen)+
-                      n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom)+
-                      n(v.pm_vaibhav_ramala),
+                      n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom),
   fs_total_day:(v) => n(v.pw_lather)+n(v.pw_narwal)+n(v.pw_subhash)+n(v.pw_gk)+n(v.pw_dry)+n(v.pw_nazim)+
                       n(v.cd_gharaunda)+n(v.cd_phoosgarh)+n(v.cd_radhakrishna)+
                       n(v.pm_sonipat)+n(v.pm_malakpur)+n(v.pm_ramala)+n(v.pm_thana)+n(v.pm_tikuala)+
                       n(v.pm_shamli)+n(v.pm_laknour)+n(v.pm_balyan)+n(v.pm_singh)+n(v.pm_naveen)+
                       n(v.pm_gs)+n(v.pm_sbec)+n(v.pm_sahakumbri)+n(v.pm_rathi)+n(v.pm_unn)+n(v.pm_devom)+
-                      n(v.pm_vaibhav_ramala)+n(v.carlsberg)+n(v.gs_rcv),
+                      n(v.carlsberg)+n(v.gs_rcv),
 
   // Feed & Balance
   fb_tot_cost: (v) => n(v.pm_cost)+n(v.gs_cost)+n(v.csl_cost)+n(v.cd_cost)+n(v.sg_cost),
@@ -1215,9 +1213,9 @@ let cur=null, inp={}, drafts={}
 // Workbook card definitions (group SHEETS into 6 cards)
 const WB_CARDS = [
   { label:'Production RBG',   sub:'Digesters',              grad:'linear-gradient(135deg,#4f46e5,#6d28d9)', dot:'#4f46e5', ids:['D1','D2'] },
-  { label:'Lab / Cal',        sub:'Calibrations',           grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL'] },
+  { label:'Lab / Cal',        sub:'Calibrations',           grad:'linear-gradient(135deg,#ea580c,#dc2626)', dot:'#f97316', ids:['PMCAL','CDCAL','GSCAL','CSLCAL','SGCAL','APPCAL'] },
   { label:'Digester Health',  sub:'pH · Temp · TS-VS · IA', grad:'linear-gradient(135deg,#059669,#0891b2)', dot:'#10b981', ids:['PH','TEMP','TSVS','IAPA'] },
-  { label:'Feedstock Supply', sub:'Supply & Balance',       grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FS','FB'] },
+  { label:'Feedstock Supply', sub:'Supply & Balance',       grad:'linear-gradient(135deg,#d97706,#b45309)', dot:'#f59e0b', ids:['FS'] },
   { label:'Sales & Finance',  sub:'Revenue · Sales',        grad:'linear-gradient(135deg,#dc2626,#9f1239)', dot:'#ef4444', ids:['REVCOST','MANURE','SALES'] },
   { label:'CBG Production',   sub:'PSA · Plans',            grad:'linear-gradient(135deg,#0891b2,#0e7490)', dot:'#06b6d4', ids:['PSA','CBGEXP','PLANNER','MAINT','FIXED','EMI'] },
 ]
@@ -1885,11 +1883,14 @@ const COLUMN_NAME_MAP = {
     gs_shreeji:'Shreeji',
     ap_aaditya:'Aaditya Solar',
   },
-  // Feed & Balance (FB) → Feed_and_Balance, fed (col 80-85) and balance (col 94-99) sections
-  // Received/cost totals are Excel formula cells — NOT written by portal
+  // Feed & Balance (FB) → Feed_and_Balance (hrow=2)
+  // Total cols (8,15,19,23,27,31,48,65,67,69,72,75,77,79,86,93) have NULL header — cannot write by name
+  // Portal writes only to named columns: Fed section (cols 80-85) and Balance section (cols 94-99)
   FB: {
+    // Fed section (cols 80-85) — named headers
     cd_fed:'Cow Dung',   pm_fed:'Pressmud',   csl_fed:'CSL Feed',
     gs_fed:'Grain Syrup', sg_fed:'Spent grain', ap_fed:'Apple pomace',
+    // Balance section (cols 94-99) — named headers (2nd occurrence of same names)
     fb_cd_bal:'Cow Dung~2', fb_pm_bal:'Pressmud~2', fb_csl_bal:'CSL Feed~2',
     fb_gs_bal:'Grain Syrup~2', fb_sg_bal:'Spent grain~2', fb_ap_bal:'Apple pomace~2',
   },
