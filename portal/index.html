@@ -2328,6 +2328,7 @@ async function getColByName(sheetName, hrow, spec) {
   if(!_hdrCache[cacheKey]) {
     const r = await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='${hrow}:${hrow}')`)
     const vals = (r&&r.values&&r.values[0]) || []
+    // r may be null if token missing — getColByName returns null gracefully
     const map = {}
     vals.forEach((v, i) => {
       if(v !== null && v !== undefined && v !== '') {
@@ -2468,11 +2469,16 @@ async function getReadSession(_retry=0){
     return null
   }
 }
-async function gPatch(path,body,sessionId){
-  const t=await getToken(); if(!t) return null
+async function gPatch(path,body,sessionId,_retry=0){
+  const t=await getToken(); if(!t) throw new Error('Not signed in')
   const hdrs={Authorization:`Bearer ${t}`,'Content-Type':'application/json'}
   if(sessionId) hdrs['workbook-session-id']=sessionId
   const r=await fetch(wbUrl()+path,{method:'PATCH',headers:hdrs,body:JSON.stringify(body)})
+  if((r.status===503||r.status===429)&&_retry<4){
+    await new Promise(res=>setTimeout(res,(_retry+1)*2000))
+    return gPatch(path,body,sessionId,_retry+1)
+  }
+  if(!r.ok) throw new Error(`Graph PATCH ${r.status}: ${r.statusText||'Error'}`)
   return r.json()
 }
 async function getSession(){
