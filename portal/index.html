@@ -1732,85 +1732,88 @@ async function renderWbDetail(wbIdx, selectedDate){
   // Open a read-only session: keeps workbook open on Graph's server, eliminates cold-open throttling
   const readSid = await getReadSession()
 
-  // Fetch data for all sheets sequentially (session alone handles most throttling; sequential is a safety net)
+  // ONE API call per sheet: fetch usedRange and parse everything in JS.
+  // This eliminates the multi-call pipeline (header + date-scan + row fetch) that caused 503 throttling.
   const sheetData = {}
-  for(const id of wb.ids){ await (async id => {
+  for(const id of wb.ids){
     const sheet = SHEETS.find(s=>s.id===id)
-    if(!sheet) return
+    if(!sheet) continue
     const meta = SHEET_META[id]||{}
     const masterSheet = meta.masterSheet || sheet.sheet || id
     const hrow = meta.hrow||2
     const dataStart = sheet.dataStart||3
     const nameMap = COLUMN_NAME_MAP[id]
-    if(!nameMap){ sheetData[id]={rows:[],fields:[]}; return }
+    if(!nameMap){ sheetData[id]={rows:[],fields:[]}; continue }
 
     try{
-      // Ensure header cache populated (one API call per sheet)
-      const cacheKey = `${masterSheet}:${hrow}`
-      if(!_hdrCache[cacheKey]){
-        const r = await gGet(`/worksheets('${encodeURIComponent(masterSheet)}')/range(address='${hrow}:${hrow}')`, readSid)
-        const vals = (r&&r.values&&r.values[0])||[]
-        const map = {}
-        vals.forEach((v,i)=>{ if(v!==null&&v!==undefined&&v!==''){ const n=String(v).trim(); if(!map[n]) map[n]=[]; map[n].push(i+1) } })
-        _hdrCache[cacheKey] = map
-      }
-      const hmap = _hdrCache[cacheKey]
+      const enc = encodeURIComponent(masterSheet)
+      // Single call: get entire sheet content
+      const rangeData = await gGet(`/worksheets('${enc}')/usedRange`, readSid)
+      const allRows = (rangeData&&rangeData.values)||[]
 
-      // Resolve all fieldKey → column number
+      // Build header map from hrow (1-based row → 0-based array index)
+      const headerRow = allRows[hrow-1]||[]
+      const hmap = {}
+      headerRow.forEach((v,i)=>{
+        if(v===null||v===undefined||v==='') return
+        const n=String(v).trim()
+        if(!hmap[n]) hmap[n]=[]
+        hmap[n].push(i+1) // 1-based col
+      })
+      // Cache for other callers (portal save etc.)
+      _hdrCache[`${masterSheet}:${hrow}`] = hmap
+
+      // Resolve fieldKey → 1-based column index
       const colNums = {}
-      let maxCol = 1
       for(const [fk,spec] of Object.entries(nameMap)){
         const tildeIdx = spec.lastIndexOf('~')
         let name,occ
         if(tildeIdx>0&&/^\d+$/.test(spec.slice(tildeIdx+1))){ name=spec.slice(0,tildeIdx); occ=parseInt(spec.slice(tildeIdx+1),10) }
         else{ name=spec; occ=1 }
         const cols = hmap[name]
-        if(cols&&cols.length>=occ){ colNums[fk]=cols[occ-1]; if(cols[occ-1]>maxCol) maxCol=cols[occ-1] }
+        if(cols&&cols.length>=occ) colNums[fk]=cols[occ-1]
       }
 
-      const enc = encodeURIComponent(masterSheet)
+      const dataRows = allRows.slice(dataStart-1) // rows from dataStart onward (0-based)
+
+      function matchesSerial(v){
+        if(v===null||v===undefined) return false
+        if(typeof v==='number') return Math.round(v)===serial
+        if(typeof v==='string'){
+          const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso&&toExcelSerial(iso[1])===serial) return true
+          const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy&&toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)===serial) return true
+        }
+        return false
+      }
 
       if(APPEND_IDS.has(id)){
-        // Find all rows matching this date (col A or B)
-        const dateColAddr = `B${dataStart}:B500`
-        const dateData = await gGet(`/worksheets('${enc}')/range(address='${dateColAddr}')`, readSid)
-        const dateVals = (dateData&&dateData.values)||[]
-        const matchRows = []
-        for(let i=0;i<dateVals.length;i++){
-          const v = dateVals[i][0]
-          if(v===null||v===undefined) continue
-          if(typeof v==='number'&&Math.round(v)===serial) matchRows.push(dataStart+i)
-          else if(typeof v==='string'){
-            const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso&&toExcelSerial(iso[1])===serial) matchRows.push(dataStart+i)
-            const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy&&toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)===serial) matchRows.push(dataStart+i)
+        // Append sheet: collect all rows where col B (index 1) matches the date
+        const rows = []
+        for(const row of dataRows){
+          if(!row||row.length===0) continue
+          if(matchesSerial(row[1])){ // col B
+            const obj={}
+            for(const [fk,cn] of Object.entries(colNums)) obj[fk]=row[cn-1]
+            rows.push(obj)
           }
         }
-        if(!matchRows.length){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
-        const rows = []
-        for(const rn of matchRows){
-          const rd = await gGet(`/worksheets('${enc}')/range(address='A${rn}:${colLetter(maxCol)}${rn}')`, readSid)
-          const vals = (rd&&rd.values&&rd.values[0])||[]
-          const row = {}
-          for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
-          rows.push(row)
-        }
-        sheetData[id] = {rows, fields:Object.keys(nameMap), append:true}
+        sheetData[id]={rows,fields:Object.keys(nameMap),append:true}
       } else {
-        // Single date-row sheet — findRow uses its own gGet internally; pass session via _wbReadSid global
-        window._wbReadSid = readSid
-        const rowNum = await findRow(masterSheet, serial, dataStart)
-        window._wbReadSid = null
-        if(!rowNum){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; return }
-        const rd = await gGet(`/worksheets('${enc}')/range(address='A${rowNum}:${colLetter(maxCol)}${rowNum}')`, readSid)
-        const vals = (rd&&rd.values&&rd.values[0])||[]
-        const row = {}
-        for(const [fk,cn] of Object.entries(colNums)) row[fk] = vals[cn-1]
-        sheetData[id] = {rows:[row], fields:Object.keys(nameMap), append:false}
+        // Date-row sheet: find the single row where col A (index 0) matches the date
+        let foundRow=null
+        for(const row of dataRows){
+          if(!row||row.length===0) continue
+          if(matchesSerial(row[0])){ foundRow=row; break }
+        }
+        if(!foundRow){ sheetData[id]={rows:[],fields:Object.keys(nameMap)}; continue }
+        const obj={}
+        for(const [fk,cn] of Object.entries(colNums)) obj[fk]=foundRow[cn-1]
+        sheetData[id]={rows:[obj],fields:Object.keys(nameMap),append:false}
       }
     }catch(e){
-      sheetData[id] = {rows:[], fields:Object.keys(nameMap), error:e.message}
+      sheetData[id]={rows:[],fields:Object.keys(nameMap),error:e.message}
     }
-  })(id) }
+  }
 
   // Format a raw cell value for display
   function fmtVal(v, fk, id){
