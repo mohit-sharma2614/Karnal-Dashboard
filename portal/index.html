@@ -3952,6 +3952,9 @@ async function submitUpload(){
   } finally {
     uplFloatDone(totalWritten, totalErrors)
     if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
+    // Refresh home view (submission log + audit matrix) now that upload is done
+    // _uploadInProgress is already false so renderHome guard is lifted
+    setTimeout(()=>loadSubLog().catch(()=>{}), 1500)
   }
 }
 
