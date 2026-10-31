@@ -4187,8 +4187,6 @@ function showBulkQueueView(files){
         <button class="bq-run-btn" id="bqRunBtn" onclick="runBulkQueue()">Upload All</button>
       </div>
     </div>
-    <div class="bq-summary" id="bqSummary"></div>
-    <div class="bq-list" id="bqList"></div>
     <div class="bq-drop-multi" id="bqDropZone"
          ondragover="event.preventDefault();document.getElementById('bqDropZone').classList.add('dragging')"
          ondragleave="document.getElementById('bqDropZone').classList.remove('dragging')"
@@ -4196,7 +4194,9 @@ function showBulkQueueView(files){
          onclick="document.getElementById('bqAddInp').click()">
       <div class="bq-drop-multi-title">Drop more workbooks here</div>
       <div class="bq-drop-multi-sub">Or click to browse — all 6 workbooks can go in at once</div>
-    </div>`
+    </div>
+    <div class="bq-summary" id="bqSummary"></div>
+    <div class="bq-list" id="bqList"></div>`
   _bqRenderList()
 }
 
