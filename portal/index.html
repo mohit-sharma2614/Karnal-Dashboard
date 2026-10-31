@@ -1518,7 +1518,7 @@ function renderHome(resetDate=true){
         </div>
         <div class="hero-right">
           <div class="hstat c1"><div class="hv" id="hBiogasVal">—<span class="hu">m³</span></div><div class="hl">Biogas today</div><div class="hs" id="hBiogasSub" style="color:#a1a1aa">${_user?'Loading…':'Sign in'}</div></div>
-          <div class="hstat c2"><div class="hv">${SHEETS.length}<span class="hu">sh</span></div><div class="hl">Sheets configured</div><div class="hs" style="color:#16a34a">All active</div></div>
+          <div class="hstat c2"><div class="hv" id="hCbgVal">—<span class="hu">kg</span></div><div class="hl">CBG produced today</div><div class="hs" id="hCbgSub" style="color:#a1a1aa">${_user?'Loading…':'Sign in'}</div></div>
           <div class="hstat c3"><div class="hv">${todayDone}<span class="hu">done</span></div><div class="hl">Today's entries</div><div class="hs" style="color:#d97706">${todayDone} of ${todayTotal}</div></div>
           <div class="hstat c4"><div class="hv">${todayTotal-todayDone}<span class="hu">left</span></div><div class="hl">Pending sheets</div><div class="hs" style="color:${todayTotal-todayDone>0?'#dc2626':'#16a34a'}">${dateLbl}</div></div>
         </div>
@@ -1610,7 +1610,10 @@ function renderHome(resetDate=true){
     </div>
   </div>`
   // Load live biogas total asynchronously after DOM is set
-  if(_user && typeof getToken==='function') loadBiogasToday().catch(()=>{})
+  if(_user && typeof getToken==='function'){
+    loadBiogasToday().catch(()=>{})
+    loadCbgToday().catch(()=>{})
+  }
 }
 
 // Fetch D1+D2 combined raw biogas total for today and update the hero tile
@@ -1639,6 +1642,29 @@ async function loadBiogasToday(){
     const subEl=document.getElementById('hBiogasSub')
     if(valEl) valEl.innerHTML=total>0?`${Math.round(total).toLocaleString()}<span class="hu">m³</span>`:'—<span class="hu">m³</span>'
     if(subEl){ subEl.textContent=total>0?'D1+D2 combined':'No entry yet'; subEl.style.color=total>0?'#16a34a':'#a1a1aa' }
+  }catch(e){}
+}
+
+// Fetch Total CBG Production (in Kg) from PSA Production sheet for today
+async function loadCbgToday(){
+  try{
+    const today=_todayStr()
+    const serial=toExcelSerial(today)
+    const row=await findRow('PSA Production', serial, 3)
+    if(!row){
+      const v=document.getElementById('hCbgVal'); if(v) v.innerHTML='—<span class="hu">kg</span>'
+      const s=document.getElementById('hCbgSub'); if(s){s.textContent='No entry yet';s.style.color='#a1a1aa'}
+      return
+    }
+    const col=await getColByName('PSA Production',2,'Total CBG Production (in Kg)')
+    if(!col) return
+    const res=await gGet(`/worksheets('PSA%20Production')/range(address='${colLetter(col)}${row}')`)
+    const val=res&&res.values&&res.values[0]&&res.values[0][0]
+    const kg=parseFloat(val)||0
+    const valEl=document.getElementById('hCbgVal')
+    const subEl=document.getElementById('hCbgSub')
+    if(valEl) valEl.innerHTML=kg>0?`${Math.round(kg).toLocaleString()}<span class="hu">kg</span>`:'—<span class="hu">kg</span>'
+    if(subEl){ subEl.textContent=kg>0?'PSA Production':'No entry yet'; subEl.style.color=kg>0?'#16a34a':'#a1a1aa' }
   }catch(e){}
 }
 
