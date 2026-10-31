@@ -1077,6 +1077,20 @@ function fromExcelSerial(n){
   const d = new Date(new Date('1899-12-30T00:00:00').getTime() + n * 86400000)
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
 }
+// Convert serial → DD-Mon-YYYY string to match existing master workbook date format
+const _MON_ABBR=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+function toDisplayDate(serial){
+  const d = new Date(new Date('1899-12-30T00:00:00').getTime() + serial * 86400000)
+  return `${String(d.getDate()).padStart(2,'0')}-${_MON_ABBR[d.getMonth()]}-${d.getFullYear()}`
+}
+// Parse DD-Mon-YYYY → Excel serial (for findRow matching)
+function parseDMonY(s){
+  const m=s.match(/^(\d{2})-([A-Za-z]{3})-(\d{4})$/)
+  if(!m) return null
+  const mi=_MON_ABBR.findIndex(x=>x.toLowerCase()===m[2].toLowerCase())
+  if(mi<0) return null
+  return toExcelSerial(`${m[3]}-${String(mi+1).padStart(2,'0')}-${m[1]}`)
+}
 function n(v){ return parseFloat(v)||0 }
 
 const FN = {
@@ -1828,6 +1842,7 @@ async function renderWbDetail(wbIdx, selectedDate){
         if(typeof v==='string'){
           const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso&&toExcelSerial(iso[1])===serial) return true
           const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy&&toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`)===serial) return true
+          const dMonY=parseDMonY(v); if(dMonY!==null&&dMonY===serial) return true
         }
         return false
       }
@@ -2608,6 +2623,8 @@ async function findRow(sheetName, serial, dataStart=3, sessionId=null){
     if(typeof v==='string'){
       const iso=v.match(/^(\d{4}-\d{2}-\d{2})/); if(iso){ const s=toExcelSerial(iso[1]); if(s===serial) return dataStart+i }
       const dmy=v.match(/^(\d{2})-(\d{2})-(\d{4})$/); if(dmy){ const s=toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`); if(s===serial) return dataStart+i }
+      // DD-Mon-YYYY format used in master workbook (e.g. 08-Oct-2026)
+      const dMonY=parseDMonY(v); if(dMonY!==null&&dMonY===serial) return dataStart+i
     }
   }
   return null
@@ -3848,7 +3865,7 @@ async function submitUpload(){
           const colNums = Object.values(masterCols).filter(Boolean)
           const maxCol = colNums.length ? Math.max(...colNums, 1) : 10
           const values = Array(maxCol).fill(null)
-          values[0] = serial  // date always in col A of master
+          values[0] = toDisplayDate(serial)  // write DD-Mon-YYYY to match master workbook format
           for(const [fk, mc] of Object.entries(masterCols)){
             if(rowData[fk] != null) values[mc - 1] = rowData[fk]
           }
