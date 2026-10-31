@@ -3747,6 +3747,7 @@ function renderUplPreview(){
       <button type="button" class="save-btn" onclick="submitUpload()" id="uplSubmitBtn">
         Transfer to Master Workbook (${recognized.length} sheet${recognized.length===1?'':'s'}, ${totalRows} rows)
       </button>
+      <button type="button" class="clear-btn" onclick="showBulkQueueView([_uplFile])" title="Add this file to the queue and upload more workbooks together">+ Add to Queue</button>
       <button type="button" class="clear-btn" onclick="showUploadView()">&#8617; Start Over</button>
     </div></div>`
 
