@@ -3659,7 +3659,8 @@ function renderUplPreview(){
     // PSA time-fraction keys: stored as hrs÷24 in Excel, display as hours
     const PSA_HRS_KEYS = new Set(['psa_hrs','comp_hrs'])
     showRows.forEach(({dateStr,rowData})=>{
-      html += `<tr><td>${dateStr}</td>${keys.map(k=>{
+      const dispDate = toDisplayDate(toExcelSerial(dateStr))
+      html += `<tr><td>${dispDate}</td>${keys.map(k=>{
         let v = rowData[k]
         if(v == null) return `<td>—</td>`
         if(PSA_HRS_KEYS.has(k) && typeof v === 'number'){
