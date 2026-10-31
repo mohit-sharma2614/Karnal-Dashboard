@@ -467,6 +467,52 @@
     .upl-log-ok{color:var(--text);}
     .upl-log-err{color:var(--danger);font-weight:600;}
 
+    /* ── Bulk Queue UI ──────────────────────────────── */
+    .bq-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+    .bq-title{font-size:1.1rem;font-weight:800;color:var(--text);letter-spacing:-.025em;}
+    .bq-sub{font-size:.75rem;color:var(--muted);margin-top:2px;}
+    .bq-run-btn{padding:8px 20px;background:var(--accent);color:#fff;border:none;border-radius:8px;
+      font-size:.82rem;font-weight:700;cursor:pointer;letter-spacing:.01em;transition:opacity .15s;}
+    .bq-run-btn:disabled{opacity:.5;cursor:not-allowed;}
+    .bq-run-btn:not(:disabled):hover{opacity:.88;}
+    .bq-add-btn{padding:6px 14px;background:none;border:1.5px solid var(--border);border-radius:8px;
+      color:var(--muted);font-size:.78rem;font-weight:600;cursor:pointer;transition:border-color .12s,color .12s;}
+    .bq-add-btn:hover{border-color:var(--accent);color:var(--accent);}
+    .bq-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
+    .bq-card{background:var(--surface);border:1.5px solid var(--border);border-radius:10px;
+      padding:11px 14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s;}
+    .bq-card.bq-active{border-color:var(--accent);}
+    .bq-card.bq-done{border-color:var(--success);}
+    .bq-card.bq-error{border-color:var(--danger);}
+    .bq-card-icon{width:32px;height:32px;border-radius:8px;flex-shrink:0;
+      background:rgba(37,99,235,.1);display:flex;align-items:center;justify-content:center;}
+    .bq-card-body{flex:1;min-width:0;}
+    .bq-card-name{font-size:.85rem;font-weight:700;color:var(--text);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px;}
+    .bq-card-sheets{font-size:.7rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .bq-card-log{font-size:.72rem;font-family:'Cascadia Code','Consolas',monospace;color:var(--muted);
+      margin-top:6px;max-height:100px;overflow-y:auto;line-height:1.6;display:none;}
+    .bq-card-log.show{display:block;}
+    .bq-chip{flex-shrink:0;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;
+      letter-spacing:.03em;white-space:nowrap;}
+    .bq-chip-wait{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+    .bq-chip-parse{background:#eff6ff;color:#2563eb;}
+    .bq-chip-run{background:#dbeafe;color:#1d4ed8;animation:bq-pulse 1.2s ease infinite;}
+    .bq-chip-done{background:#dcfce7;color:#166534;}
+    .bq-chip-skip{background:#fef9c3;color:#854d0e;}
+    .bq-chip-err{background:#fee2e2;color:#991b1b;}
+    @keyframes bq-pulse{0%,100%{opacity:1}50%{opacity:.6}}
+    .bq-summary{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;
+      padding:12px 16px;font-size:.82rem;display:none;margin-bottom:14px;}
+    .bq-summary.show{display:block;}
+    .bq-sum-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;}
+    .bq-sum-label{color:var(--muted);}
+    .bq-sum-val{font-weight:700;color:var(--text);}
+    .bq-drop-multi{border:2px dashed var(--accent2);border-radius:10px;padding:16px;
+      text-align:center;cursor:pointer;transition:border-color .15s,background .15s;}
+    .bq-drop-multi:hover,.bq-drop-multi.dragging{border-color:var(--accent);background:rgba(37,99,235,.04);}
+    .bq-drop-multi-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:4px;}
+    .bq-drop-multi-sub{font-size:.72rem;color:var(--muted);}
     /* Floating upload progress widget */
     #uplFloat{
       position:fixed;bottom:24px;right:24px;z-index:9999;
@@ -3288,7 +3334,8 @@ function showUploadView(){
         </div>
         <div class="upl-drop-cta">
           <button class="upl-drop-btn" onclick="event.stopPropagation();document.getElementById('uplFileInp').click()">Choose file</button>
-          <span class="upl-drop-or">or drag &amp; drop</span>
+          <span class="upl-drop-or">or</span>
+          <button class="upl-drop-btn" style="background:#065f46;border-color:#065f46;" onclick="event.stopPropagation();document.getElementById('uplFileInpMulti').click()">Upload All Workbooks</button>
         </div>
         <div class="upl-drop-pills">
           <span class="upl-drop-pill">
@@ -3302,6 +3349,7 @@ function showUploadView(){
           </span>
         </div>
         <input type="file" id="uplFileInp" accept=".xlsx" style="display:none" onchange="onUplFileSelect(this)"/>
+        <input type="file" id="uplFileInpMulti" accept=".xlsx" multiple style="display:none" onchange="onUplMultiSelect(this)"/>
       </div>
 
       <!-- Workbook reference tiles (right) -->
@@ -3366,13 +3414,20 @@ function showUploadView(){
 
 function onUplDrop(e){
   e.preventDefault()
-  const f = e.dataTransfer?.files?.[0]
-  if(f && f.name.toLowerCase().endsWith('.xlsx')) loadUplFile(f)
-  else toast('Please drop an .xlsx file', true)
+  const files = [...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  if(!files.length){ toast('Please drop an .xlsx file', true); return }
+  if(files.length > 1) showBulkQueueView(files)
+  else loadUplFile(files[0])
 }
 function onUplFileSelect(inp){
   const f = inp.files?.[0]
   if(f) loadUplFile(f)
+}
+function onUplMultiSelect(inp){
+  const files = [...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  if(!files.length) return
+  if(files.length === 1) loadUplFile(files[0])
+  else showBulkQueueView(files)
 }
 
 async function loadUplFile(file){
@@ -3722,8 +3777,8 @@ function renderUplPreview(){
   previewEl.scrollIntoView({behavior:'smooth', block:'start'})
 }
 
-function uplLog(msg, isErr=false){
-  const el = document.getElementById('uplProgress')
+function uplLog(msg, isErr=false, targetEl=null){
+  const el = targetEl || document.getElementById('uplProgress')
   if(!el) return
   el.style.display = 'block'
   const line = document.createElement('div')
@@ -3772,45 +3827,55 @@ function uplFloatDone(written, errors){
   setTimeout(()=>{ if(w) w.style.display='none' }, 6000)
 }
 
-async function submitUpload(){
-  // Show progress bar immediately so any error is visible
-  const btn   = document.getElementById('uplSubmitBtn')
-  const logEl = document.getElementById('uplProgress')
+async function submitUpload(opts={}){
+  // opts: { parsedData, fileRef, logContainer, onDone } — for bulk queue mode
+  const _bulkMode = !!opts.logContainer
+  const btn   = _bulkMode ? null : document.getElementById('uplSubmitBtn')
+  const logEl = opts.logContainer || document.getElementById('uplProgress')
   if(btn) btn.disabled = true
-  if(logEl){ logEl.style.display='block'; logEl.innerHTML=''; setTimeout(()=>logEl.scrollIntoView({behavior:'smooth',block:'start'}),50) }
+  if(logEl && !_bulkMode){ logEl.style.display='block'; logEl.innerHTML=''; setTimeout(()=>logEl.scrollIntoView({behavior:'smooth',block:'start'}),50) }
+  else if(logEl){ logEl.style.display='block'; logEl.innerHTML='' }
 
-  if(!_uplParsed || Object.keys(_uplParsed).length===0){
-    uplLog('ERROR: No upload data — please re-select the file', true)
-    toast('No upload data — please select and parse a file first', true)
+  const parsedData = opts.parsedData || _uplParsed
+  const fileRef    = opts.fileRef    || _uplFile
+
+  if(!parsedData || Object.keys(parsedData).length===0){
+    uplLog('ERROR: No upload data — please re-select the file', true, logEl)
+    if(!_bulkMode) toast('No upload data — please select and parse a file first', true)
     if(btn){ btn.disabled=false }
+    if(opts.onDone) opts.onDone({written:0, skipped:0, errors:1})
     return
   }
   // Diagnostic: show what was parsed
-  uplLog(`Sheets to upload: ${Object.entries(_uplParsed).map(([k,v])=>`${k}(${v.length} rows)`).join(', ')}`)
+  uplLog(`Sheets to upload: ${Object.entries(parsedData).map(([k,v])=>`${k}(${v.length} rows)`).join(', ')}`, false, logEl)
 
-  uplLog('Authenticating…')
+  uplLog('Authenticating…', false, logEl)
   let t
   try{
     await initMsal()
     t = await getToken()
   } catch(authErr){
-    uplLog(`Auth error: ${authErr.message}`, true)
-    toast(`Authentication failed: ${authErr.message}`, true)
+    uplLog(`Auth error: ${authErr.message}`, true, logEl)
+    if(!_bulkMode) toast(`Authentication failed: ${authErr.message}`, true)
     if(btn){ btn.disabled=false }
+    if(opts.onDone) opts.onDone({written:0, skipped:0, errors:1})
     return
   }
   if(!t){
-    uplLog('ERROR: Not signed in — please sign in and try again', true)
-    toast('Sign in first', true)
+    uplLog('ERROR: Not signed in — please sign in and try again', true, logEl)
+    if(!_bulkMode) toast('Sign in first', true)
     if(btn){ btn.disabled=false }
+    if(opts.onDone) opts.onDone({written:0, skipped:0, errors:1})
     return
   }
-  uplLog('Authenticated ✓')
+  uplLog('Authenticated ✓', false, logEl)
 
-  // Advance stepper to step 3
-  const s2=document.getElementById('uplStep2'), s3=document.getElementById('uplStep3')
-  if(s2){s2.classList.remove('active');s2.classList.add('done')}
-  if(s3){s3.classList.add('active')}
+  // Advance stepper to step 3 (single-file mode only)
+  if(!_bulkMode){
+    const s2=document.getElementById('uplStep2'), s3=document.getElementById('uplStep3')
+    if(s2){s2.classList.remove('active');s2.classList.add('done')}
+    if(s3){s3.classList.add('active')}
+  }
 
   const mode = document.getElementById('uplConflictMode')?.value || 'overwrite'
 
@@ -3818,29 +3883,31 @@ async function submitUpload(){
   const sheetsWritten = []  // Fix 2: track partial state
 
   // Fix 3: collect date range for audit log
-  const allDates = Object.values(_uplParsed).flat().map(r=>r.dateStr).sort()
-  const totalRows = Object.values(_uplParsed).reduce((s,v)=>s+v.length, 0)
-  uplFloatShow(totalRows)
+  const allDates = Object.values(parsedData).flat().map(r=>r.dateStr).sort()
+  const totalRows = Object.values(parsedData).reduce((s,v)=>s+v.length, 0)
+  if(!_bulkMode) uplFloatShow(totalRows)
   const dateRangeStr = allDates.length
     ? (allDates[0]===allDates[allDates.length-1] ? allDates[0] : `${allDates[0]}→${allDates[allDates.length-1]}`)
     : 'no dates'
 
   try {
-    uplLog('Opening workbook session…')
-    const sid = await getSession()
-    uplLog(sid ? `Session opened ✓ (${sid.substring(0,12)}…)` : 'No session (will write without session) ⚠️')
+    uplLog('Opening workbook session…', false, logEl)
+    const sid = opts.sid || await getSession()
+    uplLog(sid ? `Session opened ✓ (${sid.substring(0,12)}…)` : 'No session (will write without session) ⚠️', false, logEl)
 
-    // Verify master workbook is reachable — list sheet names
-    try {
-      const wsList = await gGet('/worksheets?$select=name', sid)
-      const names = (wsList&&wsList.value||[]).map(w=>w.name)
-      uplLog(`Master sheets (${names.length}): ${names.join(', ')}`)
-    } catch(e) {
-      uplLog(`⚠️ Cannot list master sheets: ${e.message} — uploads may fail`, true)
+    // Verify master workbook is reachable — list sheet names (skip in bulk mode after first file)
+    if(!_bulkMode || opts.verifySheets){
+      try {
+        const wsList = await gGet('/worksheets?$select=name', sid)
+        const names = (wsList&&wsList.value||[]).map(w=>w.name)
+        uplLog(`Master sheets (${names.length}): ${names.join(', ')}`, false, logEl)
+      } catch(e) {
+        uplLog(`⚠️ Cannot list master sheets: ${e.message} — uploads may fail`, true, logEl)
+      }
     }
 
     // Fix 2 + Fix 3: write UPLOAD START to submission log before touching any sheet
-    const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
+    const uploadLabel = `[UPLOAD START] ${fileRef.name} | ${dateRangeStr} | ${Object.keys(parsedData).join(', ')}`
     await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, uploadLabel, sid).catch(()=>{})
 
     // Pre-resolve Manure month col via column names
@@ -3850,15 +3917,15 @@ async function submitUpload(){
       _manureMonthCol = await getColByName(m.masterSheet, m.hrow, 'Month')
     }
 
-    for(const [sName, rows] of Object.entries(_uplParsed)){
+    for(const [sName, rows] of Object.entries(parsedData)){
       // Sort rows by date serial ascending so master workbook stays in chronological order
       rows.sort((a,b)=>a.serial-b.serial)
       const cfg = UPL_CFG[sName]
       const mSheet = cfg.masterSheet || sName
       const meta = SHEET_META[cfg.cmKey]
       const nameMap = COLUMN_NAME_MAP[cfg.cmKey]
-      uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`)
-      uplFloatUpdate(sName, totalWritten, totalErrors)
+      uplLog(`▶ ${sName} — ${rows.length} row${rows.length===1?'':'s'}`, false, logEl)
+      if(!_bulkMode) uplFloatUpdate(sName, totalWritten, totalErrors)
 
       // Resolve MASTER column positions for every field key (one cached gGet per sheet)
       let masterCols = {}  // { fieldKey: 1-based master col num }
@@ -3881,9 +3948,9 @@ async function submitUpload(){
         }
         const mappedFields = Object.keys(masterCols).length
         const totalFields = Object.keys(nameMap).length
-        uplLog(`  Headers read ✓ — ${mappedFields}/${totalFields} fields mapped${mappedFields===0?' ⚠️ 0 FIELDS — header mismatch!':''}`)
+        uplLog(`  Headers read ✓ — ${mappedFields}/${totalFields} fields mapped${mappedFields===0?' ⚠️ 0 FIELDS — header mismatch!':''}`, false, logEl)
       } catch(e){
-        uplLog(`  ERROR resolving master columns for ${mSheet}: ${e.message} — skipping sheet`, true)
+        uplLog(`  ERROR resolving master columns for ${mSheet}: ${e.message} — skipping sheet`, true, logEl)
         totalErrors += rows.length; continue
       }
 
@@ -3902,7 +3969,7 @@ async function submitUpload(){
             if(cfg.dupKeys){
               const key = [serial, ...cfg.dupKeys.map(k=>String(rowData[k]||'').trim().toLowerCase())].join('|')
               if(batchKeys.has(key)){
-                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip`)
+                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip`, false, logEl)
                 totalDupSkipped++; continue
               }
               batchKeys.add(key)
@@ -3919,7 +3986,7 @@ async function submitUpload(){
           } else {
             rowNum = await findRow(mSheet, serial, cfg.dataStart, sid)
             if(rowNum && mode === 'skip'){
-              uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Skipped (row ${rowNum} exists)`)
+              uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Skipped (row ${rowNum} exists)`, false, logEl)
               totalSkipped++; continue
             }
             if(!rowNum){
@@ -3960,15 +4027,15 @@ async function submitUpload(){
           const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values]}, sid)
 
           if(res && res.error){
-            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${res.error.message}`, true)
+            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${res.error.message}`, true, logEl)
             totalErrors++
           } else {
-            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Row ${rowNum} ✓`)
+            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Row ${rowNum} ✓`, false, logEl)
             totalWritten++
           }
-          uplFloatUpdate(sName, totalWritten, totalErrors)
+          if(!_bulkMode) uplFloatUpdate(sName, totalWritten, totalErrors)
         } catch(e){
-          uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${e.message}`, true)
+          uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${e.message}`, true, logEl)
           totalErrors++
         }
       }
@@ -3990,12 +4057,12 @@ async function submitUpload(){
       }
     }
 
-    uplLog(``)
-    uplLog(`═ Done: ${totalWritten} written  ${totalSkipped} skipped  ${totalDupSkipped} dup-skipped  ${totalErrors} error${totalErrors===1?'':'s'} ═`)
+    uplLog(``, false, logEl)
+    uplLog(`═ Done: ${totalWritten} written  ${totalSkipped} skipped  ${totalDupSkipped} dup-skipped  ${totalErrors} error${totalErrors===1?'':'s'} ═`, false, logEl)
 
     // Fix 2 + Fix 3: write UPLOAD COMPLETE to submission log with full summary
     const status = totalErrors === 0 ? 'COMPLETE' : `PARTIAL (${totalErrors} errors)`
-    const endLabel = `[UPLOAD ${status}] ${_uplFile.name} | ${dateRangeStr} | written:${totalWritten} skipped:${totalSkipped+totalDupSkipped} errors:${totalErrors}`
+    const endLabel = `[UPLOAD ${status}] ${fileRef.name} | ${dateRangeStr} | written:${totalWritten} skipped:${totalSkipped+totalDupSkipped} errors:${totalErrors}`
     await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, endLabel, sid).catch(()=>{})
 
     // Big result banner — unmissable
@@ -4009,8 +4076,11 @@ async function submitUpload(){
       logEl.appendChild(banner)
       banner.scrollIntoView({behavior:'smooth',block:'nearest'})
     }
-    if(totalErrors === 0) toast(`Transfer complete — ${totalWritten} row${totalWritten===1?'':'s'} written to master workbook`)
-    else toast(`Transfer done with ${totalErrors} error${totalErrors===1?'':'s'} — see log`, true)
+    if(!_bulkMode){
+      if(totalErrors === 0) toast(`Transfer complete — ${totalWritten} row${totalWritten===1?'':'s'} written to master workbook`)
+      else toast(`Transfer done with ${totalErrors} error${totalErrors===1?'':'s'} — see log`, true)
+    }
+    if(opts.onDone) opts.onDone({written:totalWritten, skipped:totalSkipped+totalDupSkipped, errors:totalErrors, sid})
 
   } catch(e){
     if(logEl){
@@ -4020,30 +4090,275 @@ async function submitUpload(){
       logEl.appendChild(banner)
       banner.scrollIntoView({behavior:'smooth',block:'nearest'})
     }
-    // Fix 2: log failure state so partial writes are traceable
-    uplLog(`Fatal: ${e.message}`, true)
+    uplLog(`Fatal: ${e.message}`, true, logEl)
     const sid2 = await getSession().catch(()=>null)
     if(sid2){
-      const failLabel = `[UPLOAD FAILED] ${_uplFile.name} | ${dateRangeStr} | sheets completed before failure: ${sheetsWritten.join(', ')||'none'} | error: ${e.message}`
+      const failLabel = `[UPLOAD FAILED] ${fileRef.name} | ${dateRangeStr} | sheets completed before failure: ${sheetsWritten.join(', ')||'none'} | error: ${e.message}`
       await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, failLabel, sid2).catch(()=>{})
     }
-    toast(`Upload failed: ${e.message}`, true)
+    if(!_bulkMode) toast(`Upload failed: ${e.message}`, true)
+    if(opts.onDone) opts.onDone({written:totalWritten, skipped:totalSkipped+totalDupSkipped, errors:totalErrors+1})
   } finally {
-    uplFloatDone(totalWritten, totalErrors)
+    if(!_bulkMode) uplFloatDone(totalWritten, totalErrors)
     if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
-    // Refresh home view (submission log + audit matrix) now that upload is done
-    // _uploadInProgress is already false so renderHome guard is lifted
-    // Pass sid so we see in-session submission log writes immediately
-    loadSubLog(sid).catch(()=>{})
-    // Also refresh after a delay (session may need time to flush to persistent store)
-    setTimeout(()=>loadSubLog().catch(()=>{}), 4000)
+    if(!_bulkMode){
+      loadSubLog(sid).catch(()=>{})
+      setTimeout(()=>loadSubLog().catch(()=>{}), 4000)
+    }
   }
+}
+
+// ── BULK QUEUE ────────────────────────────────────────────────────────────────
+// Parses a single File into {parsed, rejected} without touching global state.
+async function parseSingleFile(file){
+  const buf = await file.arrayBuffer()
+  await new Promise(r=>setTimeout(r,0))
+  const wb = XLSX.read(buf, {type:'array', raw:true})
+  const now = new Date()
+  const minSer = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()-60))
+  const maxSer = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+  const parsed={}, rejected={}
+  for(const sName of wb.SheetNames){
+    const cfg=UPL_CFG[sName]; if(!cfg) continue
+    const nameMap=COLUMN_NAME_MAP[cfg.cmKey]; if(!nameMap) continue
+    const ws=wb.Sheets[sName]
+    const all=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null})
+    const cm=buildCmFromHeaders(all[cfg.dataStart-2]||[], nameMap)
+    const dataRows=all.slice(cfg.dataStart-1)
+    const rows=[]; let rej=0
+    for(const row of dataRows){
+      if(!row||row.length===0) continue
+      const rawDate=row[0]; if(rawDate==null||rawDate==='') continue
+      let serial
+      if(typeof rawDate==='number'&&rawDate>40000&&rawDate<50000) serial=Math.round(rawDate)
+      else if(typeof rawDate==='string'){
+        const m=rawDate.match(/^(\d{4}-\d{2}-\d{2})/); if(m) serial=toExcelSerial(m[1])
+        else{ const dmy=rawDate.match(/^(\d{2})[\/-](\d{2})[\/-](\d{4})$/); if(dmy) serial=toExcelSerial(`${dmy[3]}-${dmy[2]}-${dmy[1]}`) }
+      }
+      if(!serial) continue
+      if(serial<minSer||serial>maxSer){ rej++; continue }
+      const rowData={}
+      for(const [fk,sc] of Object.entries(cm)){
+        const v=row[sc-1]; if(v!=null&&v!=='') rowData[fk]=v
+      }
+      if(Object.keys(rowData).length===0) continue
+      rows.push({serial, dateStr:fromExcelSerial(serial)||String(serial), rowData})
+    }
+    if(rows.length) parsed[sName]=rows
+    if(rej) rejected[sName]=rej
+  }
+  return {parsed, rejected, sheetNames:wb.SheetNames}
+}
+
+let _bqFiles=[], _bqResults=[]
+
+function showBulkQueueView(files){
+  _bqFiles=[...files]
+  _bqResults=[]
+  cur=null
+  const hb=document.getElementById('homeBtn'); if(hb) hb.style.display='flex'
+  document.getElementById('saveBarEl').style.display='none'
+  document.getElementById('main').padding='16px 20px'
+  document.getElementById('main').innerHTML=`
+    <div class="bq-header">
+      <div>
+        <div class="bq-title">Upload Queue</div>
+        <div class="bq-sub">${files.length} workbook${files.length===1?'':'s'} selected · Processed sequentially</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="bq-add-btn" onclick="document.getElementById('bqAddInp').click()">+ Add more</button>
+        <input type="file" id="bqAddInp" accept=".xlsx" multiple style="display:none" onchange="bqAddFiles(this)"/>
+        <button class="bq-run-btn" id="bqRunBtn" onclick="runBulkQueue()">Upload All</button>
+      </div>
+    </div>
+    <div class="bq-summary" id="bqSummary"></div>
+    <div class="bq-list" id="bqList"></div>
+    <div class="bq-drop-multi" id="bqDropZone"
+         ondragover="event.preventDefault();document.getElementById('bqDropZone').classList.add('dragging')"
+         ondragleave="document.getElementById('bqDropZone').classList.remove('dragging')"
+         ondrop="document.getElementById('bqDropZone').classList.remove('dragging');bqOnDrop(event)"
+         onclick="document.getElementById('bqAddInp').click()">
+      <div class="bq-drop-multi-title">Drop more workbooks here</div>
+      <div class="bq-drop-multi-sub">Or click to browse — all 6 workbooks can go in at once</div>
+    </div>`
+  _bqRenderList()
+}
+
+function _bqRenderList(){
+  const list=document.getElementById('bqList'); if(!list) return
+  list.innerHTML=''
+  _bqFiles.forEach((f,idx)=>{
+    const res=_bqResults[idx]
+    let chipClass='bq-chip-wait', chipText='WAITING'
+    if(res){
+      if(res.status==='parsing'){chipClass='bq-chip-parse';chipText='PARSING…'}
+      else if(res.status==='running'){chipClass='bq-chip-run';chipText='UPLOADING'}
+      else if(res.status==='done'){ chipClass=res.errors>0?'bq-chip-err':'bq-chip-done'; chipText=res.errors>0?`${res.errors} ERR`:`✓ ${res.written} rows` }
+      else if(res.status==='skip'){chipClass='bq-chip-skip';chipText='EMPTY'}
+      else if(res.status==='error'){chipClass='bq-chip-err';chipText='FAILED'}
+    }
+    const sheets=res?.sheets||[]
+    const sheetText=sheets.length ? sheets.slice(0,4).join(' · ')+(sheets.length>4?` +${sheets.length-4} more`:'') : '—'
+    const card=document.createElement('div')
+    card.className='bq-card'+(res?.status==='running'?' bq-active':res?.status==='done'&&res.errors===0?' bq-done':res?.status==='error'||res?.errors>0?' bq-error':'')
+    card.id=`bqCard${idx}`
+    card.innerHTML=`
+      <div class="bq-card-icon">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+      </div>
+      <div class="bq-card-body">
+        <div class="bq-card-name">${f.name}</div>
+        <div class="bq-card-sheets" id="bqSheets${idx}">${sheetText}</div>
+        <div class="bq-card-log bq-card-log${res?.status==='running'||res?.status==='done'||res?.status==='error'?' show':''}" id="bqLog${idx}"></div>
+      </div>
+      <span class="bq-chip ${chipClass}" id="bqChip${idx}">${chipText}</span>`
+    list.appendChild(card)
+    if(res?.logLines){
+      const logEl=document.getElementById(`bqLog${idx}`)
+      if(logEl) res.logLines.forEach(({msg,err})=>{ const d=document.createElement('div');d.className=err?'upl-log-err':'upl-log-ok';d.textContent=msg;logEl.appendChild(d) })
+    }
+  })
+}
+
+function bqAddFiles(inp){
+  const newFiles=[...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  _bqFiles=[..._bqFiles, ...newFiles]
+  newFiles.forEach(()=>_bqResults.push(null))
+  _bqRenderList()
+}
+function bqOnDrop(e){
+  e.preventDefault()
+  const newFiles=[...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  _bqFiles=[..._bqFiles,...newFiles]
+  newFiles.forEach(()=>_bqResults.push(null))
+  _bqRenderList()
+}
+
+function _bqSetChip(idx, chipClass, text){
+  const chip=document.getElementById(`bqChip${idx}`); if(!chip) return
+  chip.className=`bq-chip ${chipClass}`; chip.textContent=text
+}
+function _bqSetCard(idx, cardClass){
+  const card=document.getElementById(`bqCard${idx}`); if(!card) return
+  card.className=`bq-card ${cardClass}`
+}
+function _bqSetSheets(idx, text){
+  const el=document.getElementById(`bqSheets${idx}`); if(el) el.textContent=text
+}
+function _bqLog(idx, msg, isErr=false){
+  const logEl=document.getElementById(`bqLog${idx}`); if(!logEl) return
+  logEl.classList.add('show')
+  const line=document.createElement('div'); line.className=isErr?'upl-log-err':'upl-log-ok'
+  line.textContent=msg; logEl.appendChild(line); logEl.scrollTop=logEl.scrollHeight
+  if(!_bqResults[idx]) _bqResults[idx]={}
+  if(!_bqResults[idx].logLines) _bqResults[idx].logLines=[]
+  _bqResults[idx].logLines.push({msg,err:isErr})
+}
+
+async function runBulkQueue(){
+  const btn=document.getElementById('bqRunBtn'); if(btn){ btn.disabled=true; btn.textContent='Running…' }
+  const sumEl=document.getElementById('bqSummary')
+  let grandWritten=0, grandSkipped=0, grandErrors=0
+
+  // Auth once for entire queue
+  try{
+    await initMsal()
+    const t=await getToken()
+    if(!t){ toast('Sign in first', true); if(btn){btn.disabled=false;btn.textContent='Upload All'} return }
+  } catch(e){ toast(`Auth failed: ${e.message}`, true); if(btn){btn.disabled=false;btn.textContent='Upload All'} return }
+
+  // Open session once
+  let sharedSid=null
+  try{ sharedSid=await getSession() } catch(e){}
+
+  for(let idx=0; idx<_bqFiles.length; idx++){
+    const file=_bqFiles[idx]
+    _bqResults[idx]={status:'parsing',logLines:[]}
+    _bqSetChip(idx,'bq-chip-parse','PARSING…')
+    _bqSetCard(idx,'bq-card bq-active')
+    const logEl=document.getElementById(`bqLog${idx}`)
+    if(logEl) logEl.classList.add('show')
+
+    let parsed={}, sheetNames=[]
+    try{
+      const r=await parseSingleFile(file)
+      parsed=r.parsed; sheetNames=r.sheetNames
+      const detectedSheets=Object.keys(parsed)
+      if(detectedSheets.length===0){
+        _bqResults[idx]={status:'skip',sheets:sheetNames,logLines:[{msg:'No recognised sheets with data in date range',err:false}]}
+        _bqSetChip(idx,'bq-chip-skip','EMPTY')
+        _bqSetCard(idx,'bq-card')
+        _bqSetSheets(idx, sheetNames.filter(s=>UPL_CFG[s]).join(' · ')||'No matching sheets')
+        _bqLog(idx,'No data rows in last 60 days')
+        continue
+      }
+      _bqSetSheets(idx, detectedSheets.slice(0,5).join(' · ')+(detectedSheets.length>5?` +${detectedSheets.length-5} more`:''))
+      _bqResults[idx].sheets=detectedSheets
+    } catch(e){
+      _bqResults[idx]={status:'error',logLines:[{msg:`Parse failed: ${e.message}`,err:true}]}
+      _bqSetChip(idx,'bq-chip-err','PARSE ERR')
+      _bqSetCard(idx,'bq-card bq-error')
+      _bqLog(idx,`Parse failed: ${e.message}`,true)
+      grandErrors++; continue
+    }
+
+    // Upload
+    _bqResults[idx].status='running'
+    _bqSetChip(idx,'bq-chip-run','UPLOADING')
+
+    await new Promise(resolve=>{
+      submitUpload({
+        parsedData: parsed,
+        fileRef:    file,
+        logContainer: logEl,
+        sid:        sharedSid,
+        verifySheets: idx===0,
+        onDone: ({written,skipped,errors,sid:newSid})=>{
+          if(newSid) sharedSid=newSid
+          grandWritten+=written; grandSkipped+=skipped; grandErrors+=errors
+          const ok=errors===0
+          _bqResults[idx]={status:'done',written,skipped,errors,sheets:_bqResults[idx].sheets,logLines:_bqResults[idx].logLines}
+          _bqSetChip(idx, ok?'bq-chip-done':'bq-chip-err', ok?`✓ ${written} rows`:`${errors} ERR`)
+          _bqSetCard(idx, ok?'bq-card bq-done':'bq-card bq-error')
+          resolve()
+        }
+      })
+    })
+  }
+
+  // Final summary
+  if(sumEl){
+    const allOk=grandErrors===0
+    sumEl.classList.add('show')
+    sumEl.innerHTML=`
+      <div style="font-weight:700;font-size:.9rem;color:${allOk?'#166534':'#991b1b'};margin-bottom:6px;">
+        ${allOk?'✅ All workbooks uploaded':'⚠️ Upload complete with errors'}
+      </div>
+      <div class="bq-sum-row"><span class="bq-sum-label">Total rows written</span><span class="bq-sum-val" style="color:var(--success)">${grandWritten}</span></div>
+      <div class="bq-sum-row"><span class="bq-sum-label">Skipped (duplicate / exists)</span><span class="bq-sum-val">${grandSkipped}</span></div>
+      <div class="bq-sum-row"><span class="bq-sum-label">Errors</span><span class="bq-sum-val" style="color:${grandErrors>0?'var(--danger)':'var(--text)'}">${grandErrors}</span></div>`
+    sumEl.scrollIntoView({behavior:'smooth',block:'start'})
+  }
+  const allOk = grandErrors===0
+  if(allOk) toast(`All done — ${grandWritten} rows written to master workbook`)
+  else toast(`Queue complete — ${grandErrors} error${grandErrors===1?'':'s'}, ${grandWritten} rows written`, true)
+  if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
+  loadSubLog(sharedSid).catch(()=>{})
+  setTimeout(()=>loadSubLog().catch(()=>{}), 4000)
 }
 
 window.showUploadView = showUploadView
 window.onUplDrop = onUplDrop
 window.onUplFileSelect = onUplFileSelect
+window.onUplMultiSelect = onUplMultiSelect
 window.submitUpload = submitUpload
+window.showBulkQueueView = showBulkQueueView
+window.runBulkQueue = runBulkQueue
+window.bqAddFiles = bqAddFiles
+window.bqOnDrop = bqOnDrop
 </script>
 <!-- Floating upload progress widget (always on top, survives SPA view switches) -->
 <div id="uplFloat">
