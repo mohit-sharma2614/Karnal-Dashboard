@@ -3974,9 +3974,8 @@ async function submitUpload(opts={}){
               }
               batchKeys.add(key)
             }
-            // Find last used row — append sheets have date in col B, date-row sheets in col A
-            const scanCol = cfg.append ? 'B' : 'A'
-            const d = await gGet(`/worksheets('${enc}')/range(address='${scanCol}${cfg.dataStart}:${scanCol}600')`, sid)
+            // Find last used row — date is always in col A for all sheets (including Cal/append)
+            const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`, sid)
             const existRows = (d&&d.values)||[]
             let last = cfg.dataStart - 1
             for(let j=existRows.length-1; j>=0; j--){
@@ -4004,12 +4003,9 @@ async function submitUpload(opts={}){
           const colNums = Object.values(masterCols).filter(Boolean)
           const maxCol = colNums.length ? Math.max(...colNums, 1) : 10
           const values = Array(maxCol).fill(null)
-          // Append sheets (Cal, Manure, Maintenance) have date in col B; date-row sheets in col A
-          if(cfg.append){
-            values[1] = toDisplayDate(serial)  // col B for append sheets
-          } else {
-            values[0] = toDisplayDate(serial)  // col A for date-indexed sheets
-          }
+          // Date is always col A (index 0) in all master sheets — append and date-row alike.
+          // Write as numeric Excel serial so Graph API stores it as a date cell (not text).
+          values[0] = serial
           for(const [fk, mc] of Object.entries(masterCols)){
             if(rowData[fk] != null) values[mc - 1] = rowData[fk]
           }
