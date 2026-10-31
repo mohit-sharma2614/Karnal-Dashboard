@@ -3838,8 +3838,9 @@ async function submitUpload(){
               }
               batchKeys.add(key)
             }
-            // Find last used row in master (use session so we see uncommitted writes)
-            const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`, sid)
+            // Find last used row — append sheets have date in col B, date-row sheets in col A
+            const scanCol = cfg.append ? 'B' : 'A'
+            const d = await gGet(`/worksheets('${enc}')/range(address='${scanCol}${cfg.dataStart}:${scanCol}600')`, sid)
             const existRows = (d&&d.values)||[]
             let last = cfg.dataStart - 1
             for(let j=existRows.length-1; j>=0; j--){
@@ -3867,7 +3868,12 @@ async function submitUpload(){
           const colNums = Object.values(masterCols).filter(Boolean)
           const maxCol = colNums.length ? Math.max(...colNums, 1) : 10
           const values = Array(maxCol).fill(null)
-          values[0] = toDisplayDate(serial)  // write DD-Mon-YYYY to match master workbook format
+          // Append sheets (Cal, Manure, Maintenance) have date in col B; date-row sheets in col A
+          if(cfg.append){
+            values[1] = toDisplayDate(serial)  // col B for append sheets
+          } else {
+            values[0] = toDisplayDate(serial)  // col A for date-indexed sheets
+          }
           for(const [fk, mc] of Object.entries(masterCols)){
             if(rowData[fk] != null) values[mc - 1] = rowData[fk]
           }
