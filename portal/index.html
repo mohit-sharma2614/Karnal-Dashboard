@@ -4377,6 +4377,27 @@ window.showBulkQueueView = showBulkQueueView
 window.runBulkQueue = runBulkQueue
 window.bqAddFiles = bqAddFiles
 window.bqOnDrop = bqOnDrop
+
+// Global drag intercept — prevent Chrome from navigating when files are dropped
+// anywhere on the page. Route to the right handler based on current view.
+document.addEventListener('dragover', e => {
+  if(e.dataTransfer && [...(e.dataTransfer.types||[])].includes('Files')) e.preventDefault()
+})
+document.addEventListener('drop', e => {
+  if(!e.dataTransfer || ![...(e.dataTransfer.types||[])].includes('Files')) return
+  // If the drop landed directly on a dedicated drop zone, let it handle natively
+  if(e.target.closest('#uplDropZone') || e.target.closest('#bqDropZone')) return
+  e.preventDefault()
+  const files = [...e.dataTransfer.files].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  if(!files.length) return
+  // Bulk queue is open — add to it via the exported handler
+  if(document.getElementById('bqList')){
+    bqOnDrop(e)
+  } else {
+    // Upload page is open — open bulk queue
+    showBulkQueueView(files)
+  }
+})
 </script>
 <!-- Floating upload progress widget (always on top, survives SPA view switches) -->
 <div id="uplFloat">
