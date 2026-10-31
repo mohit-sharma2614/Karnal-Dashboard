@@ -3941,7 +3941,9 @@ async function submitUpload(opts={}){
         try {
           uplLog(`  Building master dedup index for ${mSheet}…`, false, logEl)
           const enc2 = encodeURIComponent(mSheet)
-          const md = await gGet(`/worksheets('${enc2}')/range(address='A${cfg.dataStart}:AZ2000')`, sid)
+          // Start one row before dataStart so mRows[0] = header row (e.g. row 2 when dataStart=3)
+          const dedupRangeStart = cfg.dataStart - 1
+          const md = await gGet(`/worksheets('${enc2}')/range(address='A${dedupRangeStart}:AZ2000')`, sid)
           const mRows = (md&&md.values)||[]
           const mHdr = mRows[0]||[]
           // Find col indices for dupKeys by matching master header names
@@ -3950,7 +3952,7 @@ async function submitUpload(opts={}){
             if(!spec) return -1
             const lname = spec[1].toLowerCase().replace(/\s*~\d+$/,'')
             const idx = mHdr.findIndex(h=>h&&String(h).trim().toLowerCase()===lname)
-            return idx // 0-based within range
+            return idx // 0-based within range (row 0 = header, data starts at row 1)
           })
           for(let r=1; r<mRows.length; r++){
             const mRow = mRows[r]
@@ -4053,9 +4055,9 @@ async function submitUpload(opts={}){
         const last3 = _last3Days()
         const uploadedDates = new Set(rows.map(r=>r.dateStr))
         const today = _todayStr()
-        // Always mark today as submitted (upload action = today's submission)
-        // plus any last-3-days dates that were in the file
-        const datesToLog = new Set([today])
+        // Only mark dates that were actually present in the uploaded file
+        const datesToLog = new Set()
+        if(uploadedDates.has(today)) datesToLog.add(today)
         for(const d of last3){ if(uploadedDates.has(d)) datesToLog.add(d) }
         for(const d of datesToLog){
           await appendSubmissionLog(toExcelSerial(d), sheetLabel, sid).catch(()=>{})
