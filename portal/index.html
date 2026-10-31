@@ -3941,7 +3941,7 @@ async function submitUpload(opts={}){
         try {
           uplLog(`  Building master dedup index for ${mSheet}…`, false, logEl)
           const enc2 = encodeURIComponent(mSheet)
-          const md = await gGet(`/worksheets('${enc2}')/range(address='A${cfg.dataStart}:ZZ2000')`, sid)
+          const md = await gGet(`/worksheets('${enc2}')/range(address='A${cfg.dataStart}:AZ2000')`, sid)
           const mRows = (md&&md.values)||[]
           const mHdr = mRows[0]||[]
           // Find col indices for dupKeys by matching master header names
@@ -4173,7 +4173,12 @@ function showBulkQueueView(files){
         <div class="bq-title">Upload Queue</div>
         <div class="bq-sub">${files.length} workbook${files.length===1?'':'s'} selected · Processed sequentially</div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--fg);cursor:pointer;padding:6px 10px;border:1.5px solid #7c3aed;border-radius:7px;background:var(--surface)">
+          <input type="checkbox" id="bqFullYearChk" style="width:14px;height:14px;accent-color:#7c3aed;cursor:pointer;"
+                 ${_uplFullYear?'checked':''} onchange="_uplFullYear=this.checked">
+          <span><strong style="color:#7c3aed">Full Year Mode</strong> — accept all 2026 dates</span>
+        </label>
         <button class="bq-add-btn" onclick="document.getElementById('bqAddInp').click()">+ Add more</button>
         <input type="file" id="bqAddInp" accept=".xlsx" multiple style="display:none" onchange="bqAddFiles(this)"/>
         <button class="bq-run-btn" id="bqRunBtn" onclick="runBulkQueue()">Upload All</button>
