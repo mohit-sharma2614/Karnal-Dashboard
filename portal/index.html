@@ -2407,7 +2407,14 @@ async function getToken(){
     const r = await _msal.acquireTokenSilent({ scopes:CONFIG.scopes, account })
     _token=r.accessToken; _user=account.name||account.username
     return _token
-  }catch{ await _msal.acquireTokenRedirect({ scopes:CONFIG.scopes }); return null }
+  }catch{
+    try{
+      // Use popup so the page does not navigate away mid-upload
+      const r2 = await _msal.acquireTokenPopup({ scopes:CONFIG.scopes, account })
+      _token=r2.accessToken; _user=account.name||account.username
+      return _token
+    }catch{ return null }
+  }
 }
 
 function updateAuthUI(){
@@ -3598,10 +3605,10 @@ function renderUplPreview(){
     </div>
     <div id="uplProgress" style="display:none;margin-top:12px"></div>
     <div style="margin-top:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
-      <button class="save-btn" onclick="submitUpload()" id="uplSubmitBtn">
+      <button type="button" class="save-btn" onclick="submitUpload()" id="uplSubmitBtn">
         Transfer to Master Workbook (${recognized.length} sheet${recognized.length===1?'':'s'}, ${totalRows} rows)
       </button>
-      <button class="clear-btn" onclick="showUploadView()">&#8617; Start Over</button>
+      <button type="button" class="clear-btn" onclick="showUploadView()">&#8617; Start Over</button>
     </div></div>`
 
   previewEl.style.display = 'block'
