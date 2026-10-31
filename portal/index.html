@@ -3156,14 +3156,15 @@ initMsal().then(()=>{
   loadSubLog()
 }).catch(()=>{})
 
-async function loadSubLog(){
+async function loadSubLog(sessionId){
   try{
     // Get used range to find last row, then fetch last 200 rows from bottom
-    const used = await gGet(`/worksheets('Submission%20Log')/usedRange(valuesOnly=true)`)
+    const sid = sessionId || null
+    const used = await gGet(`/worksheets('Submission%20Log')/usedRange(valuesOnly=true)`, sid)
     if(!used||!used.rowCount) return
     const lastRow = used.rowCount  // rowCount = number of rows used = last row number (1-based)
     const firstRow = Math.max(3, lastRow - 199)
-    const d = await gGet(`/worksheets('Submission%20Log')/range(address='A${firstRow}:E${lastRow}')`)
+    const d = await gGet(`/worksheets('Submission%20Log')/range(address='A${firstRow}:E${lastRow}')`, sid)
     if(d&&d.values){ window._subLog=d.values; buildSidebar(); renderHome(false) }
   }catch(e){}
 }
@@ -3957,16 +3958,18 @@ async function submitUpload(){
       }
       sheetsWritten.push(sName)
 
-      // Write audit log entries for any last-3-days dates in this upload
-      // so the audit matrix shows "Saved" instead of "Missing!" for uploaded dates
+      // Write audit log entries so the tracker shows this sheet as updated
       if(totalWritten > 0){
         const sheetLabel = SHEETS.find(s=>s.id===cfg.cmKey)?.label || sName
         const last3 = _last3Days()
         const uploadedDates = new Set(rows.map(r=>r.dateStr))
-        for(const d of last3){
-          if(uploadedDates.has(d)){
-            await appendSubmissionLog(toExcelSerial(d), sheetLabel, sid).catch(()=>{})
-          }
+        const today = _todayStr()
+        // Always mark today as submitted (upload action = today's submission)
+        // plus any last-3-days dates that were in the file
+        const datesToLog = new Set([today])
+        for(const d of last3){ if(uploadedDates.has(d)) datesToLog.add(d) }
+        for(const d of datesToLog){
+          await appendSubmissionLog(toExcelSerial(d), sheetLabel, sid).catch(()=>{})
         }
       }
     }
@@ -4014,7 +4017,10 @@ async function submitUpload(){
     if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
     // Refresh home view (submission log + audit matrix) now that upload is done
     // _uploadInProgress is already false so renderHome guard is lifted
-    setTimeout(()=>loadSubLog().catch(()=>{}), 1500)
+    // Pass sid so we see in-session submission log writes immediately
+    loadSubLog(sid).catch(()=>{})
+    // Also refresh after a delay (session may need time to flush to persistent store)
+    setTimeout(()=>loadSubLog().catch(()=>{}), 4000)
   }
 }
 
