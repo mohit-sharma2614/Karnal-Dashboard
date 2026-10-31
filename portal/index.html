@@ -3677,6 +3677,15 @@ async function submitUpload(){
     const sid = await getSession()
     uplLog(sid ? `Session opened ✓ (${sid.substring(0,12)}…)` : 'No session (will write without session) ⚠️')
 
+    // Verify master workbook is reachable — list sheet names
+    try {
+      const wsList = await gGet('/worksheets?$select=name', sid)
+      const names = (wsList&&wsList.value||[]).map(w=>w.name)
+      uplLog(`Master sheets (${names.length}): ${names.join(', ')}`)
+    } catch(e) {
+      uplLog(`⚠️ Cannot list master sheets: ${e.message} — uploads may fail`, true)
+    }
+
     // Fix 2 + Fix 3: write UPLOAD START to submission log before touching any sheet
     const uploadLabel = `[UPLOAD START] ${_uplFile.name} | ${dateRangeStr} | ${Object.keys(_uplParsed).join(', ')}`
     await appendSubmissionLog(allDates[0] ? toExcelSerial(allDates[0]) : 0, uploadLabel, sid).catch(()=>{})
@@ -3700,7 +3709,7 @@ async function submitUpload(){
       try {
         const cacheKey = `${mSheet}:${meta.hrow}`
         if(!_hdrCache[cacheKey]){
-          const rh = await gGet(`/worksheets('${encodeURIComponent(mSheet)}')/range(address='${meta.hrow}:${meta.hrow}')`, sid)
+          const rh = await gGet(`/worksheets('${encodeURIComponent(mSheet)}')/range(address='${meta.hrow}:${meta.hrow}')`, null)
           const vals = (rh&&rh.values&&rh.values[0]) || []
           const hmap = {}
           vals.forEach((v,i)=>{ if(v!=null&&v!==''){const n=String(v).trim();if(!hmap[n])hmap[n]=[];hmap[n].push(i+1)} })
