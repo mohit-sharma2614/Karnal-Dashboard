@@ -3393,8 +3393,8 @@ function onUplDrop(e){
   e.preventDefault()
   const files = [...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
   if(!files.length){ toast('Please drop an .xlsx file', true); return }
-  if(files.length > 1) showBulkQueueView(files)
-  else loadUplFile(files[0])
+  // Always go to bulk queue — user can drop more files or click Upload All
+  showBulkQueueView(files)
 }
 function onUplFileSelect(inp){
   const f = inp.files?.[0]
@@ -3403,8 +3403,8 @@ function onUplFileSelect(inp){
 function onUplMultiSelect(inp){
   const files = [...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
   if(!files.length) return
-  if(files.length === 1) loadUplFile(files[0])
-  else showBulkQueueView(files)
+  // Always go to bulk queue so user can add more files before uploading
+  showBulkQueueView(files)
 }
 
 async function loadUplFile(file){
@@ -4173,7 +4173,7 @@ function showBulkQueueView(files){
     <div class="bq-header">
       <div>
         <div class="bq-title">Upload Queue</div>
-        <div class="bq-sub">${files.length} workbook${files.length===1?'':'s'} selected · Processed sequentially</div>
+        <div class="bq-sub" id="bqSubtitle">${files.length} workbook${files.length===1?'':'s'} selected · Processed sequentially</div>
       </div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <label style="display:flex;align-items:center;gap:6px;font-size:.82rem;color:var(--fg);cursor:pointer;padding:6px 10px;border:1.5px solid #7c3aed;border-radius:7px;background:var(--surface)">
@@ -4201,6 +4201,8 @@ function showBulkQueueView(files){
 
 function _bqRenderList(){
   const list=document.getElementById('bqList'); if(!list) return
+  const sub=document.getElementById('bqSubtitle')
+  if(sub) sub.textContent=`${_bqFiles.length} workbook${_bqFiles.length===1?'':'s'} selected · Processed sequentially`
   list.innerHTML=''
   _bqFiles.forEach((f,idx)=>{
     const res=_bqResults[idx]
