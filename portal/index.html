@@ -3274,6 +3274,7 @@ let _uplWb       = null   // SheetJS workbook
 let _uplParsed   = {}     // { sheetName: [ {serial, dateStr, rowData} ] }
 let _uplRejected = {}     // { sheetName: count }  — Fix 6 date-window rejects
 let _uplFile     = null
+let _uplFullYear = false  // Full Year Mode: accept Jan 1 2026 → today, master dedup on append sheets
 
 // Fix 6: helper to convert JS Date → Excel serial
 function dateToSerial(d){
@@ -3408,6 +3409,12 @@ function showUploadView(){
         <div class="upl-guard-item"><div class="upl-guard-dot"></div>Upload logged with your email &amp; date range</div>
       </div>
     </div>
+    <div style="margin-top:10px;display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;">
+      <input type="checkbox" id="uplFullYearChk" style="width:16px;height:16px;accent-color:#7c3aed;cursor:pointer;" onchange="_uplFullYear=this.checked;if(_uplWb)parseUplWorkbook()">
+      <label for="uplFullYearChk" style="cursor:pointer;font-size:.85rem;color:var(--fg);line-height:1.3">
+        <strong style="color:#7c3aed">Full Year Mode</strong> — accept all 2026 dates (Jan 1 → today); duplicate rows are checked against master before appending
+      </label>
+    </div>
 
     <div id="uplPreview" style="display:none;margin-top:4px;"></div>`
 }
@@ -3538,9 +3545,11 @@ function parseUplWorkbook(){
   _uplParsed   = {}
   _uplRejected = {}
 
-  // Accept dates within [today-60, today] — no future dates
+  // Accept dates within window — full year mode: Jan 1 2026 → today; normal: last 60 days → today
   const now     = new Date()
-  const minSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 60))
+  const minSer  = _uplFullYear
+    ? toExcelSerial('2026-01-01')
+    : dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate() - 60))
   const maxSer  = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
 
   for(const sName of _uplWb.SheetNames){
@@ -3592,7 +3601,7 @@ function parseUplWorkbook(){
       const reason = dataRows.filter(r=>r&&r.length>0).length === 0
         ? 'empty sheet'
         : rejected > 0
-          ? `all ${rejected} rows outside date window (last 60 days)`
+          ? `all ${rejected} rows outside date window (${_uplFullYear ? '2026 full year' : 'last 60 days'})`
           : 'no valid dates found'
       _uplRejected[sName] = _uplRejected[sName] || 0
       _uplRejected[`__reason__${sName}`] = reason
@@ -3615,7 +3624,7 @@ function renderUplPreview(){
       <p style="color:var(--muted);font-size:.9rem">
         Sheets in file: ${(_uplWb.SheetNames||[]).join(', ')}<br>
         Expected: D1, D2, PSA Production, Pressmud Cal., etc.
-        ${rejTotal>0 ? `<br><strong style="color:var(--danger)">${rejTotal} rows rejected — dates outside last 60 days.</strong>` : ''}
+        ${rejTotal>0 ? `<br><strong style="color:var(--danger)">${rejTotal} rows rejected — dates outside ${_uplFullYear?'2026':'last 60 days'}.</strong>` : ''}
       </p>
       <button class="clear-btn" onclick="showUploadView()" style="margin-top:8px">Try another file</button>
     </div>`
@@ -3685,7 +3694,7 @@ function renderUplPreview(){
   const rejEntries = Object.entries(_uplRejected).filter(([s,c])=>typeof c==='number')
   if(rejEntries.length){
     rejHtml = `<div style="background:#fee2e2;border:1px solid #fca5a5;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem">
-      <strong style="color:var(--danger)">Rows rejected (dates outside last 60 days or future):</strong>
+      <strong style="color:var(--danger)">Rows rejected (dates outside ${_uplFullYear?'2026':'last 60 days'} or future):</strong>
       ${rejEntries.map(([s,c])=>`<span style="margin-left:10px">${s}: <b>${c}</b></span>`).join('')}
     </div>`
   }
@@ -3954,8 +3963,39 @@ async function submitUpload(opts={}){
         totalErrors += rows.length; continue
       }
 
-      // For append sheets: track within-batch dup keys by field key values
+      // For append sheets: build master-side dedup set in Full Year Mode
       const batchKeys = new Set()
+      const masterKeys = new Set()
+      const isFullYear = opts.fullYear !== undefined ? opts.fullYear : _uplFullYear
+      if(cfg.append && cfg.dupKeys && isFullYear){
+        try {
+          uplLog(`  Building master dedup index for ${mSheet}…`, false, logEl)
+          const enc2 = encodeURIComponent(mSheet)
+          const md = await gGet(`/worksheets('${enc2}')/range(address='A${cfg.dataStart}:ZZ2000')`, sid)
+          const mRows = (md&&md.values)||[]
+          const mHdr = mRows[0]||[]
+          // Find col indices for dupKeys by matching master header names
+          const dkCols = cfg.dupKeys.map(dk => {
+            const spec = Object.entries(COLUMN_NAME_MAP[cfg.cmKey]||{}).find(([k])=>k===dk)
+            if(!spec) return -1
+            const lname = spec[1].toLowerCase().replace(/\s*~\d+$/,'')
+            const idx = mHdr.findIndex(h=>h&&String(h).trim().toLowerCase()===lname)
+            return idx // 0-based within range
+          })
+          for(let r=1; r<mRows.length; r++){
+            const mRow = mRows[r]
+            const dateVal = mRow[0]
+            if(dateVal==null||dateVal==='') continue
+            const mSerial = typeof dateVal==='number' ? Math.round(dateVal) : 0
+            if(!mSerial) continue
+            const mkParts = [mSerial, ...dkCols.map(ci => ci>=0 ? String(mRow[ci]||'').trim().toLowerCase() : '')]
+            masterKeys.add(mkParts.join('|'))
+          }
+          uplLog(`  Master dedup index: ${masterKeys.size} existing rows indexed`, false, logEl)
+        } catch(e) {
+          uplLog(`  ⚠️ Could not build master dedup index: ${e.message} — within-batch dedup only`, true, logEl)
+        }
+      }
 
       for(let i=0; i<rows.length; i++){
         const {serial, dateStr, rowData} = rows[i]
@@ -3968,8 +4008,8 @@ async function submitUpload(opts={}){
             // Within-batch dup detection using field keys
             if(cfg.dupKeys){
               const key = [serial, ...cfg.dupKeys.map(k=>String(rowData[k]||'').trim().toLowerCase())].join('|')
-              if(batchKeys.has(key)){
-                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip`, false, logEl)
+              if(batchKeys.has(key) || masterKeys.has(key)){
+                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip (${masterKeys.has(key)?'master':'batch'})`, false, logEl)
                 totalDupSkipped++; continue
               }
               batchKeys.add(key)
@@ -4106,12 +4146,14 @@ async function submitUpload(opts={}){
 
 // ── BULK QUEUE ────────────────────────────────────────────────────────────────
 // Parses a single File into {parsed, rejected} without touching global state.
-async function parseSingleFile(file){
+async function parseSingleFile(file, {fullYear=false}={}){
   const buf = await file.arrayBuffer()
   await new Promise(r=>setTimeout(r,0))
   const wb = XLSX.read(buf, {type:'array', raw:true})
   const now = new Date()
-  const minSer = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()-60))
+  const minSer = fullYear
+    ? toExcelSerial('2026-01-01')
+    : dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()-60))
   const maxSer = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
   const parsed={}, rejected={}
   for(const sName of wb.SheetNames){
@@ -4280,7 +4322,7 @@ async function runBulkQueue(){
 
     let parsed={}, sheetNames=[]
     try{
-      const r=await parseSingleFile(file)
+      const r=await parseSingleFile(file, {fullYear:_uplFullYear})
       parsed=r.parsed; sheetNames=r.sheetNames
       const detectedSheets=Object.keys(parsed)
       if(detectedSheets.length===0){
@@ -4288,7 +4330,7 @@ async function runBulkQueue(){
         _bqSetChip(idx,'bq-chip-skip','EMPTY')
         _bqSetCard(idx,'bq-card')
         _bqSetSheets(idx, sheetNames.filter(s=>UPL_CFG[s]).join(' · ')||'No matching sheets')
-        _bqLog(idx,'No data rows in last 60 days')
+        _bqLog(idx, _uplFullYear ? 'No data rows for 2026' : 'No data rows in last 60 days')
         continue
       }
       _bqSetSheets(idx, detectedSheets.slice(0,5).join(' · ')+(detectedSheets.length>5?` +${detectedSheets.length-5} more`:''))
@@ -4312,6 +4354,7 @@ async function runBulkQueue(){
         logContainer: logEl,
         sid:        sharedSid,
         verifySheets: idx===0,
+        fullYear:   _uplFullYear,
         onDone: ({written,skipped,errors,sid:newSid})=>{
           if(newSid) sharedSid=newSid
           grandWritten+=written; grandSkipped+=skipped; grandErrors+=errors
