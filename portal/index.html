@@ -3782,6 +3782,8 @@ async function submitUpload(){
     }
 
     for(const [sName, rows] of Object.entries(_uplParsed)){
+      // Sort rows by date serial ascending so master workbook stays in chronological order
+      rows.sort((a,b)=>a.serial-b.serial)
       const cfg = UPL_CFG[sName]
       const mSheet = cfg.masterSheet || sName
       const meta = SHEET_META[cfg.cmKey]
