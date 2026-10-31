@@ -495,6 +495,10 @@
   <div class="main-wrap">
     <!-- TOPBAR -->
     <div class="topbar">
+      <img src="../assets/images/lr_energy_logo.jpg" alt="LR Energy" style="height:30px;width:auto;border-radius:5px;object-fit:contain;flex-shrink:0">
+      <div style="width:1px;height:22px;background:#e4e4e7;flex-shrink:0"></div>
+      <img src="../assets/images/elan_logo.jpg" alt="Elan Energy" style="height:30px;width:auto;border-radius:5px;object-fit:contain;flex-shrink:0">
+      <div style="width:1px;height:22px;background:#e4e4e7;flex-shrink:0;margin-right:4px"></div>
       <div class="tb-live"><div class="tb-pulse"></div><span class="tb-ltext">PLANT LIVE</span></div>
       <button id="homeBtn" onclick="renderHome()" style="display:none;align-items:center;gap:5px;background:none;border:1px solid #e4e4e7;border-radius:7px;padding:4px 11px;font-size:11px;font-weight:600;color:#52525b;cursor:pointer;font-family:inherit">⌂ Home</button>
       <div class="tb-sp"></div>
@@ -1387,6 +1391,18 @@ function updateTopbarDate(){
   el.innerHTML=`<strong>${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}</strong> · Week ${wk}`
 }
 
+function _greeting(){
+  const h=new Date().getHours()
+  return h<12?'Good Morning':h<17?'Good Afternoon':'Good Evening'
+}
+function _firstName(fullName){
+  if(!fullName) return ''
+  const parts=fullName.trim().split(/\s+/)
+  const titles=['dr.','mr.','mrs.','ms.','prof.']
+  if(parts.length>1&&titles.includes(parts[0].toLowerCase())) return parts[0]+' '+parts[1]
+  return parts[0]
+}
+
 function renderHome(resetDate=true){
   // Don't switch the view while an upload is running — progress widget handles feedback
   if(window._uploadInProgress) return
@@ -1484,8 +1500,12 @@ function renderHome(resetDate=true){
       <div class="hero-inner">
         <div class="hero-left">
           <div class="hero-tag">CBG Karnal · Data Portal</div>
-          <div class="hero-h1">Your plant's<br><em>daily command</em> centre.</div>
-          <div class="hero-sub">Upload input workbooks to sync production data for D1 &amp; D2 digesters, lab calibrations, feedstock, and sales.</div>
+          ${_user
+            ? `<div class="hero-h1">${_greeting()},<br><em>${_firstName(_user)}</em> 👋</div>
+               <div class="hero-sub">What's new today at CBG Karnal?</div>`
+            : `<div class="hero-h1">Your plant's<br><em>daily command</em> centre.</div>
+               <div class="hero-sub">Upload input workbooks to sync production data for D1 &amp; D2 digesters, lab calibrations, feedstock, and sales.</div>`
+          }
           <div class="hero-btns">
             <button class="h-btn-p" onclick="showUploadView()">⬆ Upload workbook</button>
             <button class="h-btn-s" onclick="renderAudit()">View 3-day audit ↗</button>
@@ -1496,7 +1516,7 @@ function renderHome(resetDate=true){
           </div>
         </div>
         <div class="hero-right">
-          <div class="hstat c1"><div class="hv">—<span class="hu">m³</span></div><div class="hl">Biogas today</div><div class="hs" style="color:#a1a1aa">Sign in</div></div>
+          <div class="hstat c1"><div class="hv" id="hBiogasVal">—<span class="hu">m³</span></div><div class="hl">Biogas today</div><div class="hs" id="hBiogasSub" style="color:#a1a1aa">${_user?'Loading…':'Sign in'}</div></div>
           <div class="hstat c2"><div class="hv">${SHEETS.length}<span class="hu">sh</span></div><div class="hl">Sheets configured</div><div class="hs" style="color:#16a34a">All active</div></div>
           <div class="hstat c3"><div class="hv">${todayDone}<span class="hu">done</span></div><div class="hl">Today's entries</div><div class="hs" style="color:#d97706">${todayDone} of ${todayTotal}</div></div>
           <div class="hstat c4"><div class="hv">${todayTotal-todayDone}<span class="hu">left</span></div><div class="hl">Pending sheets</div><div class="hs" style="color:${todayTotal-todayDone>0?'#dc2626':'#16a34a'}">${dateLbl}</div></div>
@@ -1588,6 +1608,37 @@ function renderHome(resetDate=true){
       </div>
     </div>
   </div>`
+  // Load live biogas total asynchronously after DOM is set
+  if(_user && typeof getToken==='function') loadBiogasToday().catch(()=>{})
+}
+
+// Fetch D1+D2 combined raw biogas total for today and update the hero tile
+async function loadBiogasToday(){
+  try{
+    const today=_todayStr()
+    const serial=toExcelSerial(today)
+    const [rowD1, rowD2] = await Promise.all([
+      findRow('D1', serial, 3),
+      findRow('D2', serial, 3),
+    ])
+    if(!rowD1 && !rowD2){
+      const v=document.getElementById('hBiogasVal'); if(v) v.innerHTML='—<span class="hu">m³</span>'
+      const s=document.getElementById('hBiogasSub'); if(s){s.textContent='No entry yet';s.style.color='#a1a1aa'}
+      return
+    }
+    const colD1=await getColByName('D1',2,'Raw Biogas (Total Produce) (B+C)')
+    const colD2=await getColByName('D2',2,'Raw Biogas (Total Produce) (B+C)')
+    const reads=[]
+    if(rowD1&&colD1) reads.push(gGet(`/worksheets('D1')/range(address='${colLetter(colD1)}${rowD1}')`))
+    if(rowD2&&colD2) reads.push(gGet(`/worksheets('D2')/range(address='${colLetter(colD2)}${rowD2}')`))
+    const results=await Promise.all(reads)
+    let total=0
+    results.forEach(r=>{ const v=r&&r.values&&r.values[0]&&r.values[0][0]; if(v) total+=parseFloat(v)||0 })
+    const valEl=document.getElementById('hBiogasVal')
+    const subEl=document.getElementById('hBiogasSub')
+    if(valEl) valEl.innerHTML=total>0?`${Math.round(total).toLocaleString()}<span class="hu">m³</span>`:'—<span class="hu">m³</span>'
+    if(subEl){ subEl.textContent=total>0?'D1+D2 combined':'No entry yet'; subEl.style.color=total>0?'#16a34a':'#a1a1aa' }
+  }catch(e){}
 }
 
 // tracks which workbook rows are expanded in the audit matrix
