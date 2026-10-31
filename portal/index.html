@@ -1958,11 +1958,11 @@ async function renderWbDetail(wbIdx, selectedDate){
   function fmtVal(v, fk, id){
     if(v===null||v===undefined||v==='') return null
     if(typeof v==='number'){
-      // PSA time conversions
+      // PSA time display — values stored as plain numbers (decimal hrs / plain mins)
       if(id==='PSA'){
-        if(fk==='psa_hrs'||fk==='comp_hrs') return (Math.round(v*24*100)/100)+' hrs'
-        if(fk==='comp_min') return (Math.round(v*24*60*10)/10)+' min'
-        if(fk==='psa_comp_diff') return (Math.round(v*24*60*10)/10)+' min'
+        if(fk==='psa_hrs'||fk==='comp_hrs') return (Math.round(v*100)/100)+' hrs'
+        if(fk==='comp_min'||fk==='psa_run_min') return Math.round(v)+' min'
+        if(fk==='psa_comp_diff') return Math.round(v)+' min'
       }
       // Excel serial date (large number between ~40000–50000)
       if(v>40000&&v<60000){ const ds=fromExcelSerial(Math.round(v)); return ds||v.toFixed(0) }
@@ -2770,20 +2770,9 @@ window.handleSave = async ()=>{
       }
     }
 
-    // PSA: time-formatted cells must be converted to Excel time fractions
-    // hrs fields: decimal hours ÷ 24; min fields: decimal minutes ÷ 60 ÷ 24; diff: minutes ÷ 60 ÷ 24
-    if(cur.id === 'PSA') {
-      const psaHrsCol  = colMap['psa_hrs']
-      const compHrsCol = colMap['comp_hrs']
-      const compMinCol = colMap['comp_min']
-      const diffCol    = colMap['psa_comp_diff']
-      if(psaHrsCol  && rowData[psaHrsCol])  rowData[psaHrsCol]  = rowData[psaHrsCol]  / 24
-      if(compHrsCol && rowData[compHrsCol]) rowData[compHrsCol] = rowData[compHrsCol] / 24
-      // psa_run_min stored as plain integer in master (upload doesn't convert it)
-      // comp_min stored as time fraction (upload converts it ÷60÷24)
-      if(compMinCol && rowData[compMinCol]) rowData[compMinCol] = rowData[compMinCol] / 60 / 24
-      if(diffCol    && rowData[diffCol])    rowData[diffCol]    = rowData[diffCol]    / 60 / 24
-    }
+    // PSA: all time fields stored as plain numbers in Master (no Excel time fraction conversion)
+    // psa_hrs/comp_hrs = decimal hours (e.g. 10.25), psa_run_min/comp_min/diff = plain minutes
+    // No conversion needed — write the value as entered directly
 
     const sn = masterSheet
 
