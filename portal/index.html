@@ -408,9 +408,23 @@
 
     /* ── File selected state ── */
     .upl-file-selected{
-      display:flex;align-items:center;gap:12px;
+      display:flex;flex-direction:column;gap:0;
       background:var(--surface);
-      border:2px solid var(--accent2);border-radius:10px;padding:10px 14px;
+      border:2px solid var(--accent2);border-radius:10px;overflow:hidden;
+    }
+    .upl-file-sel-queue-zone{
+      display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:4px;padding:28px 14px;
+      border-bottom:1.5px dashed var(--border);
+      color:var(--muted);cursor:pointer;
+      transition:background .15s,border-color .15s,color .15s;
+      text-align:center;
+    }
+    .upl-file-sel-queue-zone:hover,.upl-file-sel-queue-zone.dragging{
+      background:rgba(37,99,235,.06);border-color:var(--accent);color:var(--accent);
+    }
+    .upl-file-sel-row{
+      display:flex;align-items:center;gap:12px;padding:10px 14px;
     }
     .upl-file-sel-icon{
       width:34px;height:34px;border-radius:8px;flex-shrink:0;
@@ -3416,20 +3430,34 @@ async function loadUplFile(file){
   const dz = document.getElementById('uplDropZone')
   if(dz){
     dz.outerHTML = `<div class="upl-file-selected" id="uplFileCard">
-      <div class="upl-file-sel-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
+      <div class="upl-file-sel-queue-zone"
+           ondragover="event.preventDefault();this.classList.add('dragging')"
+           ondragleave="this.classList.remove('dragging')"
+           ondrop="this.classList.remove('dragging');onUplDrop(event)"
+           onclick="document.getElementById('uplFileInpMulti').click()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
         </svg>
+        <div style="font-weight:600;font-size:.82rem;margin-top:6px">Drop another workbook to add to queue</div>
+        <div style="font-size:.72rem;color:var(--muted);margin-top:2px">Or click to browse · all 6 workbooks can go in at once</div>
       </div>
-      <div class="upl-file-sel-meta">
-        <div class="upl-file-sel-name">${file.name}</div>
-        <div class="upl-file-sel-hint" id="uplFileHint">
-          <span class="upl-spinner"></span>
-          <span id="uplFileHintText">${sizeStr} · Reading file…</span>
+      <div class="upl-file-sel-row">
+        <div class="upl-file-sel-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+          </svg>
         </div>
+        <div class="upl-file-sel-meta">
+          <div class="upl-file-sel-name">${file.name}</div>
+          <div class="upl-file-sel-hint" id="uplFileHint">
+            <span class="upl-spinner"></span>
+            <span id="uplFileHintText">${sizeStr} · Reading file…</span>
+          </div>
+        </div>
+        <button class="upl-file-sel-change" onclick="showUploadView()">Change</button>
       </div>
-      <button class="upl-file-sel-change" onclick="showUploadView()">Change</button>
     </div>`
   }
 
