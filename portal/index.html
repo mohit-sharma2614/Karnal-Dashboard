@@ -2579,8 +2579,8 @@ async function fetchCalQty(sheetId){
   }
 }
 
-async function findRow(sheetName, serial, dataStart=3){
-  const d=await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStart}:A400')`, window._wbReadSid||null)
+async function findRow(sheetName, serial, dataStart=3, sessionId=null){
+  const d=await gGet(`/worksheets('${encodeURIComponent(sheetName)}')/range(address='A${dataStart}:A600')`, sessionId||window._wbReadSid||null)
   const rows=(d&&d.values)||[]
   for(let i=0;i<rows.length;i++){
     const v=rows[i][0]; if(v===null||v===undefined) continue
@@ -3758,8 +3758,8 @@ async function submitUpload(){
               }
               batchKeys.add(key)
             }
-            // Find last used row in master (scan col A up to 600)
-            const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`)
+            // Find last used row in master (use session so we see uncommitted writes)
+            const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`, sid)
             const existRows = (d&&d.values)||[]
             let last = cfg.dataStart - 1
             for(let j=existRows.length-1; j>=0; j--){
@@ -3767,13 +3767,13 @@ async function submitUpload(){
             }
             rowNum = last + 1
           } else {
-            rowNum = await findRow(mSheet, serial, cfg.dataStart)
+            rowNum = await findRow(mSheet, serial, cfg.dataStart, sid)
             if(rowNum && mode === 'skip'){
               uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Skipped (row ${rowNum} exists)`)
               totalSkipped++; continue
             }
             if(!rowNum){
-              const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`)
+              const d = await gGet(`/worksheets('${enc}')/range(address='A${cfg.dataStart}:A600')`, sid)
               const existRows = (d&&d.values)||[]
               let last = cfg.dataStart - 1
               for(let j=existRows.length-1; j>=0; j--){
