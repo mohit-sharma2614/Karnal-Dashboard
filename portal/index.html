@@ -2794,8 +2794,8 @@ window.handleSave = async ()=>{
 
 async function appendSubmissionLog(dateSerial, sheetLabel, sessionId){
   const SL = encodeURIComponent('Submission Log')
-  // Use usedRange to find last row — no hardcoded cap
-  const used = await gGet(`/worksheets('${SL}')/usedRange(valuesOnly=true)`)
+  // Must pass sessionId so we see rows written earlier in this same session
+  const used = await gGet(`/worksheets('${SL}')/usedRange(valuesOnly=true)`, sessionId||null)
   const rowNum = used&&used.rowCount ? used.rowCount + 1 : 3
   const accounts = _msal?.getAllAccounts()||[]
   const email = accounts[0]?.username||''
