@@ -3649,7 +3649,7 @@ function renderUplPreview(){
       gapHtml = `<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:6px;padding:10px 14px;margin-bottom:16px;font-size:.82rem">
         <strong style="color:#856404">⚠ Date gap detected across sheets</strong>
         <div style="margin-top:6px;overflow-x:auto">
-        <table class="upl-tbl"><thead><tr><th>Sheet</th>${sortedDates.map(d=>`<th style="font-size:.72rem">${d.slice(5)}</th>`).join('')}</tr></thead><tbody>`
+        <table class="upl-tbl"><thead><tr><th>Sheet</th>${sortedDates.map(d=>{ const dt=new Date(d+'T00:00:00'); return `<th style="font-size:.72rem">${String(dt.getDate()).padStart(2,'0')}-${_MON_ABBR[dt.getMonth()]}</th>` }).join('')}</tr></thead><tbody>`
       drSheets.forEach(s => {
         const sheetDates = new Set(_uplParsed[s].map(r=>r.dateStr))
         gapHtml += `<tr><td style="font-weight:600">${s}</td>${sortedDates.map(d =>
@@ -3709,11 +3709,12 @@ function renderUplPreview(){
   for(const [sName, rows] of Object.entries(_uplParsed)){
     const dates = rows.map(r=>r.dateStr)
     const first = dates[0], last = dates[dates.length-1]
+    const fmtDs = ds => { const d=new Date(ds+'T00:00:00'); return `${String(d.getDate()).padStart(2,'0')}-${_MON_ABBR[d.getMonth()]}-${d.getFullYear()}` }
     const cfg = UPL_CFG[sName]
     html += `<div class="upl-sheet-card">
       <div class="upl-sc-name">${sName}</div>
       <div class="upl-sc-rows">${rows.length} row${rows.length===1?'':'s'}</div>
-      <div class="upl-sc-dates">${first===last ? first : `${first} → ${last}`}</div>
+      <div class="upl-sc-dates">${first===last ? fmtDs(first) : `${fmtDs(first)} → ${fmtDs(last)}`}</div>
       <div class="upl-sc-mode">${cfg.append ? 'Append (dup-safe)' : 'Date-indexed'}</div>
     </div>`
   }
