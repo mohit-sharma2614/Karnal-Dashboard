@@ -3268,6 +3268,7 @@ function dateToSerial(d){
 }
 
 function showUploadView(){
+  window._uploadInProgress = false  // leaving bulk queue or upload
   cur = null
   const hb=document.getElementById('homeBtn'); if(hb){hb.style.display='flex'}
   document.getElementById('saveBarEl').style.display='none'
@@ -4327,6 +4328,7 @@ async function runBulkQueue(){
   const btn=document.getElementById('bqRunBtn'); if(btn){ btn.disabled=true; btn.textContent='Running…' }
   const sumEl=document.getElementById('bqSummary')
   let grandWritten=0, grandSkipped=0, grandErrors=0
+  window._uploadInProgress = true  // prevent loadSubLog from navigating away mid-queue
 
   // Auth once for entire queue
   try{
@@ -4412,6 +4414,7 @@ async function runBulkQueue(){
   if(allOk) toast(`All done — ${grandWritten} rows written to master workbook`)
   else toast(`Queue complete — ${grandErrors} error${grandErrors===1?'':'s'}, ${grandWritten} rows written`, true)
   if(btn){ btn.disabled=false; btn.textContent='Upload Again' }
+  window._uploadInProgress = false  // allow renderHome to navigate now
   loadSubLog(sharedSid).catch(()=>{})
   setTimeout(()=>loadSubLog().catch(()=>{}), 4000)
 }
