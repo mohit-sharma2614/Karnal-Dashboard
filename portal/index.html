@@ -1251,7 +1251,8 @@ function _fmtDayPill(dStr){
   const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
   const today=_todayStr()
-  const lbl=dStr===today?'Today':`${months[d.getMonth()]} ${d.getDate()} · ${days[d.getDay()]}`
+  const datePart=`${months[d.getMonth()]} ${d.getDate()} · ${days[d.getDay()]}`
+  const lbl=dStr===today?`Today · ${months[d.getMonth()]} ${d.getDate()}`:datePart
   return lbl
 }
 function _last3Days(){
