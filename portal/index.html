@@ -3430,11 +3430,11 @@ async function loadUplFile(file){
   const dz = document.getElementById('uplDropZone')
   if(dz){
     dz.outerHTML = `<div class="upl-file-selected" id="uplFileCard">
-      <input type="file" id="uplCardInpMulti" accept=".xlsx" multiple style="display:none" onchange="onUplMultiSelect(this)"/>
+      <input type="file" id="uplCardInpMulti" accept=".xlsx" multiple style="display:none" onchange="onUplCardMultiSelect(this)"/>
       <div class="upl-file-sel-queue-zone"
            ondragover="event.preventDefault();this.classList.add('dragging')"
            ondragleave="this.classList.remove('dragging')"
-           ondrop="this.classList.remove('dragging');onUplDrop(event)"
+           ondrop="this.classList.remove('dragging');onUplCardDrop(event)"
            onclick="document.getElementById('uplCardInpMulti').click()">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:.5">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
@@ -4408,6 +4408,23 @@ window.runBulkQueue = runBulkQueue
 window.bqAddFiles = bqAddFiles
 window.bqOnDrop = bqOnDrop
 
+// Card drop zone handlers — include the already-loaded _uplFile when opening queue
+function onUplCardMultiSelect(inp){
+  const newFiles=[...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  if(!newFiles.length) return
+  const all = _uplFile ? [_uplFile, ...newFiles] : newFiles
+  showBulkQueueView(all)
+}
+function onUplCardDrop(e){
+  e.preventDefault()
+  const newFiles=[...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  if(!newFiles.length){ toast('Please drop an .xlsx file', true); return }
+  const all = _uplFile ? [_uplFile, ...newFiles] : newFiles
+  showBulkQueueView(all)
+}
+window.onUplCardMultiSelect = onUplCardMultiSelect
+window.onUplCardDrop = onUplCardDrop
+
 // Global drag intercept — prevent Chrome from navigating when files are dropped
 // anywhere on the page. Route to the right handler based on current view.
 document.addEventListener('dragover', e => {
@@ -4415,16 +4432,19 @@ document.addEventListener('dragover', e => {
 })
 document.addEventListener('drop', e => {
   if(!e.dataTransfer || ![...(e.dataTransfer.types||[])].includes('Files')) return
-  // If the drop landed directly on a dedicated drop zone, let it handle natively
-  if(e.target.closest('#uplDropZone') || e.target.closest('#bqDropZone')) return
+  // If the drop landed on a dedicated drop zone, let it handle natively
+  if(e.target.closest('#uplDropZone') || e.target.closest('#bqDropZone') || e.target.closest('.upl-file-sel-queue-zone')) return
   e.preventDefault()
   const files = [...e.dataTransfer.files].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
   if(!files.length) return
-  // Bulk queue is open — add to it via the exported handler
   if(document.getElementById('bqList')){
+    // Bulk queue open — add to existing queue (never reset it)
     bqOnDrop(e)
+  } else if(document.getElementById('uplFileCard')){
+    // Single-file card showing — preserve _uplFile when opening queue
+    onUplCardDrop(e)
   } else {
-    // Upload page is open — open bulk queue
+    // Fresh upload page — open bulk queue
     showBulkQueueView(files)
   }
 })
