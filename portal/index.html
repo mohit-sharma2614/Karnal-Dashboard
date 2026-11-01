@@ -510,6 +510,8 @@
     .bq-chip{flex-shrink:0;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;
       letter-spacing:.03em;white-space:nowrap;}
     .bq-chip-wait{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
+    .bq-remove-btn{flex-shrink:0;width:24px;height:24px;border:none;background:none;color:var(--muted);font-size:.85rem;cursor:pointer;border-radius:5px;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s;margin-left:4px;}
+    .bq-remove-btn:hover{background:#fee2e2;color:#dc2626;}
     .bq-chip-parse{background:#eff6ff;color:#2563eb;}
     .bq-chip-run{background:#dbeafe;color:#1d4ed8;animation:bq-pulse 1.2s ease infinite;}
     .bq-chip-done{background:#dcfce7;color:#166534;}
@@ -4261,7 +4263,9 @@ function _bqRenderList(){
         <div class="bq-card-sheets" id="bqSheets${idx}">${sheetText}</div>
         <div class="bq-card-log bq-card-log${res?.status==='running'||res?.status==='done'||res?.status==='error'?' show':''}" id="bqLog${idx}"></div>
       </div>
-      <span class="bq-chip ${chipClass}" id="bqChip${idx}">${chipText}</span>`
+      <span class="bq-chip ${chipClass}" id="bqChip${idx}">${chipText}</span>
+      ${!res||res.status==='waiting'||!res.status?`<button class="bq-remove-btn" onclick="bqRemoveFile(${idx})" title="Remove from queue">✕</button>`:''}
+    `
     list.appendChild(card)
     if(res?.logLines){
       const logEl=document.getElementById(`bqLog${idx}`)
@@ -4270,15 +4274,29 @@ function _bqRenderList(){
   })
 }
 
+function _bqDedup(newFiles){
+  const existing = new Set(_bqFiles.map(f=>f.name.toLowerCase()))
+  const dupes = newFiles.filter(f=>existing.has(f.name.toLowerCase()))
+  const fresh = newFiles.filter(f=>!existing.has(f.name.toLowerCase()))
+  if(dupes.length) toast(`Already in queue: ${dupes.map(f=>f.name).join(', ')}`, true)
+  return fresh
+}
+function bqRemoveFile(idx){
+  _bqFiles.splice(idx,1)
+  _bqResults.splice(idx,1)
+  _bqRenderList()
+}
 function bqAddFiles(inp){
-  const newFiles=[...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  const newFiles=_bqDedup([...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx')))
+  if(!newFiles.length) return
   _bqFiles=[..._bqFiles, ...newFiles]
   newFiles.forEach(()=>_bqResults.push(null))
   _bqRenderList()
 }
 function bqOnDrop(e){
   e.preventDefault()
-  const newFiles=[...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
+  const newFiles=_bqDedup([...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx')))
+  if(!newFiles.length) return
   _bqFiles=[..._bqFiles,...newFiles]
   newFiles.forEach(()=>_bqResults.push(null))
   _bqRenderList()
@@ -4412,18 +4430,26 @@ window.bqOnDrop = bqOnDrop
 function onUplCardMultiSelect(inp){
   const newFiles=[...(inp.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
   if(!newFiles.length) return
-  const all = _uplFile ? [_uplFile, ...newFiles] : newFiles
-  showBulkQueueView(all)
+  const base = _uplFile ? [_uplFile] : []
+  const baseNames = new Set(base.map(f=>f.name.toLowerCase()))
+  const dupes = newFiles.filter(f=>baseNames.has(f.name.toLowerCase()))
+  const fresh = newFiles.filter(f=>!baseNames.has(f.name.toLowerCase()))
+  if(dupes.length) toast(`Already selected: ${dupes.map(f=>f.name).join(', ')}`, true)
+  if(!fresh.length && !base.length) return
+  showBulkQueueView([...base, ...fresh])
 }
 function onUplCardDrop(e){
   e.preventDefault()
   const newFiles=[...(e.dataTransfer?.files||[])].filter(f=>f.name.toLowerCase().endsWith('.xlsx'))
   if(!newFiles.length){ toast('Please drop an .xlsx file', true); return }
-  const all = _uplFile ? [_uplFile, ...newFiles] : newFiles
-  showBulkQueueView(all)
+  const base = _uplFile ? [_uplFile] : []
+  const baseNames = new Set(base.map(f=>f.name.toLowerCase()))
+  const fresh = newFiles.filter(f=>!baseNames.has(f.name.toLowerCase()))
+  showBulkQueueView([...base, ...fresh])
 }
 window.onUplCardMultiSelect = onUplCardMultiSelect
 window.onUplCardDrop = onUplCardDrop
+window.bqRemoveFile = bqRemoveFile
 
 // Global drag intercept — prevent Chrome from navigating when files are dropped
 // anywhere on the page. Route to the right handler based on current view.
