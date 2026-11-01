@@ -4035,7 +4035,7 @@ async function submitUpload(opts={}){
             if(cfg.dupKeys){
               const key = [serial, ...cfg.dupKeys.map(k=>String(rowData[k]||'').trim().toLowerCase())].join('|')
               if(batchKeys.has(key) || masterKeys.has(key)){
-                uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Dup skip (${masterKeys.has(key)?'master':'batch'})`, false, logEl)
+                uplLog(`  [${i+1}/${rows.length}] ${toDisplayDate(serial)} → Dup skip (${masterKeys.has(key)?'master':'batch'})`, false, logEl)
                 totalDupSkipped++; continue
               }
               batchKeys.add(key)
@@ -4051,7 +4051,7 @@ async function submitUpload(opts={}){
           } else {
             rowNum = await findRow(mSheet, serial, cfg.dataStart, sid)
             if(rowNum && mode === 'skip'){
-              uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Skipped (row ${rowNum} exists)`, false, logEl)
+              uplLog(`  [${i+1}/${rows.length}] ${toDisplayDate(serial)} → Skipped (row ${rowNum} exists)`, false, logEl)
               totalSkipped++; continue
             }
             if(!rowNum){
@@ -4089,15 +4089,15 @@ async function submitUpload(opts={}){
           const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values]}, sid)
 
           if(res && res.error){
-            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${res.error.message}`, true, logEl)
+            uplLog(`  [${i+1}/${rows.length}] ${toDisplayDate(serial)} → ERROR: ${res.error.message}`, true, logEl)
             totalErrors++
           } else {
-            uplLog(`  [${i+1}/${rows.length}] ${dateStr} → Row ${rowNum} ✓`, false, logEl)
+            uplLog(`  [${i+1}/${rows.length}] ${toDisplayDate(serial)} → Row ${rowNum} ✓`, false, logEl)
             totalWritten++
           }
           if(!_bulkMode) uplFloatUpdate(sName, totalWritten, totalErrors)
         } catch(e){
-          uplLog(`  [${i+1}/${rows.length}] ${dateStr} → ERROR: ${e.message}`, true, logEl)
+          uplLog(`  [${i+1}/${rows.length}] ${toDisplayDate(serial)} → ERROR: ${e.message}`, true, logEl)
           totalErrors++
         }
       }
@@ -4365,7 +4365,8 @@ async function bqParsePreview(idx){
   const previewEl=document.getElementById(`bqPreview${idx}`); if(!previewEl) return
   previewEl.innerHTML=`<div class="bq-preview-loading">Parsing…</div>`
   try{
-    const r=await parseSingleFile(_bqFiles[idx], {fullYear:_uplFullYear})
+    // Always parse full year for preview so user sees all data in the file
+    const r=await parseSingleFile(_bqFiles[idx], {fullYear:true})
     _bqParsed[idx]={parsed:r.parsed, sheetNames:r.sheetNames, rejected:r.rejected}
     bqRenderPreview(idx)
   } catch(e){
@@ -4381,22 +4382,22 @@ function bqRenderPreview(idx){
   if(!recSheets.length){ previewEl.innerHTML=`<div class="bq-preview-loading">No recognised sheets in this workbook.</div>`; return }
   const skipped=_bqSkip[idx]||new Set()
   const fmtDs=ds=>{ const d=new Date(ds+'T00:00:00'); return `${String(d.getDate()).padStart(2,'0')}-${_MON_ABBR[d.getMonth()]}-${d.getFullYear()}` }
-  const rows=recSheets.map(sName=>{
-    const rows=parsed[sName]
-    if(!rows||!rows.length){
-      return `<div class="bq-preview-sheet" style="opacity:.55">
+  const sheetRows=recSheets.map(sName=>{
+    const sRows=parsed[sName]
+    if(!sRows||!sRows.length){
+      return `<div class="bq-preview-sheet" style="opacity:.5">
         <span class="bq-ps-name">${sName}</span>
-        <span class="bq-ps-rows" style="color:var(--muted)">0 rows</span>
-        <span class="bq-ps-dates">—</span>
+        <span class="bq-ps-rows">0 rows</span>
+        <span class="bq-ps-dates">no 2026 data</span>
       </div>`
     }
-    const dates=rows.map(r=>r.dateStr).sort()
+    const dates=sRows.map(r=>r.dateStr).sort()
     const first=fmtDs(dates[0]), last=fmtDs(dates[dates.length-1])
     const dateRange=first===last?first:`${first} → ${last}`
     const isSkip=skipped.has(sName)
     return `<div class="bq-preview-sheet${isSkip?' skipped':''}">
       <span class="bq-ps-name">${sName}</span>
-      <span class="bq-ps-rows">${rows.length} row${rows.length===1?'':'s'}</span>
+      <span class="bq-ps-rows">${sRows.length} row${sRows.length===1?'':'s'}</span>
       <span class="bq-ps-dates">${dateRange}</span>
       <label class="bq-ps-skip" title="Skip this sheet during upload">
         <input type="checkbox" ${isSkip?'checked':''} onchange="bqToggleSkip(${idx},'${sName.replace(/'/g,"\\'")}',this.checked)">
@@ -4404,7 +4405,8 @@ function bqRenderPreview(idx){
       </label>
     </div>`
   }).join('')
-  previewEl.innerHTML=rows
+  const filterNote=`<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border-soft,rgba(0,0,0,.06))">Preview shows all 2026 data · Upload applies your date filter</div>`
+  previewEl.innerHTML=filterNote+sheetRows
 }
 
 function bqToggleSkip(idx, sheetName, skip){
