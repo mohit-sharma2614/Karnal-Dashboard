@@ -6204,7 +6204,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Digester%20Temp')/range(address='A4:G400')"),
     gFetch("/worksheets('Digester%20TS-VS')/range(address='A4:N400')"),
     gFetch("/worksheets('Digester%20IA-PA')/range(address='A4:R400')"),
-    gFetch("/worksheets('Daily%20Revenue%20%26%20Costs')/range(address='A4:H700')"),
+    gFetch("/worksheets('Daily%20Revenue%20%26%20Costs')/range(address='A4:I700')"),
     gFetch("/worksheets('Feed_and_Balance')/range(address='A3:CU700')"),
     gFetch("/worksheets('Manure%20Sales')/range(address='A3:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A5:K400')"),
@@ -6326,11 +6326,11 @@ async function buildAnalyticsD() {
   const mfcVals=mfcR?.values||[];
   const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+3];return typeof v==='number'?v:0;};
   M.manpower=aggMonth(rc,gD,8); // RC col9 — actual manpower entered daily
-  // EMI Tracker: row0=header, rows1-4=individual EMIs; cols 5-16=Jan-Dec
+  // EMI Tracker: row0=header, rows1+=individual EMIs; col0=text name, cols 4-15=Jan-Dec
   const emiVals=emiR?.values||[];
-  const emiDataRows=emiVals.slice(1).filter(r=>r&&typeof r[0]==='number');
-  M.emi=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+5];return s+(typeof v==='number'?v:0);},0);});
-  const emi_rows=emiDataRows.map(r=>({type:r[1]||'',desc:r[2]||'',vals:months.map(m=>{const ci=MNAMES.indexOf(m);return ci>=0&&typeof r[ci+5]==='number'?r[ci+5]:0;})}));
+  const emiDataRows=emiVals.slice(1).filter(r=>r&&r.length>=5&&typeof r[4]==='number');
+  M.emi=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+4];return s+(typeof v==='number'?v:0);},0);});
+  const emi_rows=emiDataRows.map(r=>({type:r[0]||'',desc:r[1]||'',vals:months.map(m=>{const ci=MNAMES.indexOf(m);return ci>=0&&typeof r[ci+4]==='number'?r[ci+4]:0;})}));
   // Sales Detail: col0=Date, col2=Veer₹, col4=Adinath₹, col6=GAIL₹, col8=SPS₹
   const salesRows=getRows(salesR,0);
   M.veer_rev=aggMonth(salesRows,gD,2); M.adi_rev=aggMonth(salesRows,gD,4);
