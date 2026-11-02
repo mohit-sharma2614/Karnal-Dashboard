@@ -2942,6 +2942,7 @@ function _renderOVSectionsDa(da,rec){
   try{_renderOVSectionsDaInner(da,rec,sg);}catch(e){console.error('[OV DAY ERR]',e);sg.innerHTML='<div style="padding:20px;color:red;font-size:12px">Day view error: '+e.message+'</div>';}
 }
 function _renderOVSectionsDaInner(da,rec,sg){
+  const nv=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
   const dp=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},f=rec.feed||{},ex=rec.exp||{};
   const fmtV=v=>v!=null&&v!==''?String(v):'—';
   const fmtKg=v=>v!=null?fmtN(Math.round(v))+' kg':'—';
