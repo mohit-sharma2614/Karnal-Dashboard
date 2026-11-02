@@ -3248,10 +3248,10 @@ const UPL_CFG = {
   'D1':                    { cmKey:'D1',      dataStart:3, append:false },
   'D2':                    { cmKey:'D2',      dataStart:3, append:false },
   'PSA Production':        { cmKey:'PSA',     dataStart:3, append:false },
-  'Digester pH':           { cmKey:'PH',      dataStart:3, append:false },
-  'Digester Temp':         { cmKey:'TEMP',    dataStart:3, append:false },
-  'Digester TS-VS':        { cmKey:'TSVS',    dataStart:3, append:false },
-  'Digester IA-PA':        { cmKey:'IAPA',    dataStart:3, append:false },
+  'Digester pH':           { cmKey:'PH',      dataStart:3, srcDataStart:4, append:false },
+  'Digester Temp':         { cmKey:'TEMP',    dataStart:3, srcDataStart:4, append:false },
+  'Digester TS-VS':        { cmKey:'TSVS',    dataStart:3, srcDataStart:4, append:false },
+  'Digester IA-PA':        { cmKey:'IAPA',    dataStart:3, srcDataStart:4, append:false },
   'Feed_and_Balance':      { cmKey:'FB',      dataStart:3, append:false, masterSheet:'Feed_and_Balance' },
   'Pressmud Cal.':         { cmKey:'PMCAL',   dataStart:3, append:true,  dupKeys:['sample','loc'] },
   'CSL Cal.':              { cmKey:'CSLCAL',  dataStart:3, append:true,  dupKeys:['sample','loc'] },
@@ -4187,8 +4187,11 @@ async function parseSingleFile(file, {fullYear=false}={}){
     const nameMap=COLUMN_NAME_MAP[cfg.cmKey]; if(!nameMap) continue
     const ws=wb.Sheets[sName]
     const all=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null})
-    const cm=buildCmFromHeaders(all[cfg.dataStart-2]||[], nameMap)
-    const dataRows=all.slice(cfg.dataStart-1)
+    // srcDataStart overrides dataStart for Input Workbook parsing when the sheet
+    // has an extra group-header row (e.g. Digester sheets have D1/D2 labels at row 2)
+    const srcDs = cfg.srcDataStart || cfg.dataStart
+    const cm=buildCmFromHeaders(all[srcDs-2]||[], nameMap)
+    const dataRows=all.slice(srcDs-1)
     const rows=[]; let rej=0
     for(const row of dataRows){
       if(!row||row.length===0) continue
