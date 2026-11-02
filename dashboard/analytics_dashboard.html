@@ -2939,6 +2939,9 @@ function renderOV(){
 // ═══ OVERVIEW DAY VIEW — section cards with D1/D2 tables + sparklines ════
 function _renderOVSectionsDa(da,rec){
   const sg=document.getElementById('ov_sgrid');if(!sg)return;
+  try{_renderOVSectionsDaInner(da,rec,sg);}catch(e){console.error('[OV DAY ERR]',e);sg.innerHTML='<div style="padding:20px;color:red;font-size:12px">Day view error: '+e.message+'</div>';}
+}
+function _renderOVSectionsDaInner(da,rec,sg){
   const dp=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},f=rec.feed||{},ex=rec.exp||{};
   const fmtV=v=>v!=null&&v!==''?String(v):'—';
   const fmtKg=v=>v!=null?fmtN(Math.round(v))+' kg':'—';
@@ -3153,7 +3156,7 @@ function _renderOVSectionsDa(da,rec){
     {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Net Margin %'},
   ];
   sg.innerHTML=SECS_DA.map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
-}
+} // end _renderOVSectionsDaInner
 
 // ═══ S1 FEEDSTOCK ════════════════════════════════════════════
 function renderS1(){
