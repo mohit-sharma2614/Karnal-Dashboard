@@ -6418,7 +6418,7 @@ async function buildAnalyticsD() {
     const _idealCbg=nv(cer[17])||(_idealPur?Math.round(_idealPur*0.7434):null);
     const _rbgTot=nv(p[IDX.P_rbg_tot]),_purified=nv(p[IDX.P_pur_tot]),_cbgTot=nv(p[IDX.P_cbg_tot]);
     days[k]={mo:moKey(dt),dt:k,
-      psa:{psa_hrs:_psaHrs?+_psaHrs.toFixed(3):_psaHrs,comp_hrs:nv(p[3]),rbg_d1:nv(p[IDX.P_rbg_d1]),rbg_d2:nv(p[IDX.P_rbg_d2]),rbg_tot:_rbgTot,
+      psa:{psa_hrs:_psaHrs?+_psaHrs.toFixed(3):_psaHrs,comp_hrs:(v=>v!=null&&v>0&&v<2?+(v*24).toFixed(3):v)(nv(p[3])),rbg_d1:nv(p[IDX.P_rbg_d1]),rbg_d2:nv(p[IDX.P_rbg_d2]),rbg_tot:_rbgTot,
         purified:_purified,act_cbg:_cbgTot,cbg_d1:nv(p[IDX.P_cbg_d1]),cbg_d2:nv(p[IDX.P_cbg_d2]),cbg_tot:_cbgTot,
         dispatched:nv(p[IDX.P_dispatched]),veer:nv(p[IDX.P_veer]),adinath:nv(p[IDX.P_adinath]),kfs:nv(p[IDX.P_kfs]),ksk:nv(p[IDX.P_ksk]),om:nv(p[IDX.P_om]),sps:nv(p[IDX.P_sps]),
         ch4:nv(p[IDX.P_ch4]),cascade:nv(p[IDX.P_cascade2]),storage:nv(p[IDX.P_storage]),d1_eff:nv(d1r[IDX.D_psa_eff_pct]),d2_eff:nv(d2r[IDX.D_psa_eff_pct]),
