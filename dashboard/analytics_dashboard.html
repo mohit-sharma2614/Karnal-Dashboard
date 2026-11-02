@@ -6189,7 +6189,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Digester%20TS-VS')/range(address='A4:N400')"),
     gFetch("/worksheets('Digester%20IA-PA')/range(address='A4:R400')"),
     gFetch("/worksheets('Daily%20Revenue%20%26%20Costs')/range(address='A4:H700')"),
-    gFetch("/worksheets('Feed%20%26%20Balance')/range(address='A4:V700')"),
+    gFetch("/worksheets('Feed_and_Balance')/range(address='A3:CU700')"),
     gFetch("/worksheets('Manure%20Sales')/range(address='A3:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A5:K400')"),
     gFetch("/worksheets('Pressmud%20Cal.')/range(address='A3:J400')"),
@@ -6279,14 +6279,18 @@ async function buildAnalyticsD() {
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
   M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
-  M.pm_in=aggMonth(fb,gD,1); M.gs_in=aggMonth(fb,gD,2); M.csl_in=aggMonth(fb,gD,3); M.cd_in=aggMonth(fb,gD,4); M.sg_in=aggMonth(fb,gD,5);
-  M.pm_feed=aggMonth(fb,gD,11); M.gs_feed=aggMonth(fb,gD,12); M.csl_feed=aggMonth(fb,gD,13); M.cd_feed=aggMonth(fb,gD,14); M.sg_feed=aggMonth(fb,gD,15);
-  M.sg_cost=aggMonth(fb,gD,10);
-  M.pm_cost=aggMonth(fb,gD,6); M.gs_cost=aggMonth(fb,gD,7); M.csl_cost=aggMonth(fb,gD,8); M.cd_cost=aggMonth(fb,gD,9);
+  // Feed_and_Balance verified col indices (0-based, from A1:DZ3 header fetch 2026-11-02):
+  // Procurement totals: cd=18, csl=26, pm=47, sg=66, gs=71, ap=76
+  // Procurement costs:  cd=22, csl=30, pm=64, sg=68, gs=74, ap=78
+  // Feedstock fed:      cd=79, pm=80, csl=81, gs=82, sg=83, ap=84
+  // Balance:            cd=93, pm=94, csl=95, gs=96, sg=97, ap=98
+  M.pm_in=aggMonth(fb,gD,47); M.gs_in=aggMonth(fb,gD,71); M.csl_in=aggMonth(fb,gD,26); M.cd_in=aggMonth(fb,gD,18); M.sg_in=aggMonth(fb,gD,66); M.ap_in=aggMonth(fb,gD,76);
+  M.pm_feed=aggMonth(fb,gD,80); M.gs_feed=aggMonth(fb,gD,82); M.csl_feed=aggMonth(fb,gD,81); M.cd_feed=aggMonth(fb,gD,79); M.sg_feed=aggMonth(fb,gD,83); M.ap_feed=aggMonth(fb,gD,84);
+  M.pm_cost=aggMonth(fb,gD,64); M.gs_cost=aggMonth(fb,gD,74); M.csl_cost=aggMonth(fb,gD,30); M.cd_cost=aggMonth(fb,gD,22); M.sg_cost=aggMonth(fb,gD,68); M.ap_cost=aggMonth(fb,gD,78);
   M.storage=aggMonthLast(psa,gD,IDX.P_storage);
-  M.pm_bal=aggMonth(fb,gD,17); M.gs_bal=aggMonth(fb,gD,18); M.csl_bal=aggMonth(fb,gD,19); M.cd_bal=aggMonth(fb,gD,20); M.sg_bal=aggMonth(fb,gD,21);
-  M.pm_bal_last=aggMonthLast(fb,gD,17); M.gs_bal_last=aggMonthLast(fb,gD,18); M.csl_bal_last=aggMonthLast(fb,gD,19); M.cd_bal_last=aggMonthLast(fb,gD,20); M.sg_bal_last=aggMonthLast(fb,gD,21);
-  M.pm_feed_avg=aggMonth(fb,gD,11,'avg'); M.gs_feed_avg=aggMonth(fb,gD,12,'avg'); M.csl_feed_avg=aggMonth(fb,gD,13,'avg'); M.cd_feed_avg=aggMonth(fb,gD,14,'avg'); M.sg_feed_avg=aggMonth(fb,gD,15,'avg');
+  M.pm_bal=aggMonth(fb,gD,94); M.gs_bal=aggMonth(fb,gD,96); M.csl_bal=aggMonth(fb,gD,95); M.cd_bal=aggMonth(fb,gD,93); M.sg_bal=aggMonth(fb,gD,97); M.ap_bal=aggMonth(fb,gD,98);
+  M.pm_bal_last=aggMonthLast(fb,gD,94); M.gs_bal_last=aggMonthLast(fb,gD,96); M.csl_bal_last=aggMonthLast(fb,gD,95); M.cd_bal_last=aggMonthLast(fb,gD,93); M.sg_bal_last=aggMonthLast(fb,gD,97); M.ap_bal_last=aggMonthLast(fb,gD,98);
+  M.pm_feed_avg=aggMonth(fb,gD,80,'avg'); M.gs_feed_avg=aggMonth(fb,gD,82,'avg'); M.csl_feed_avg=aggMonth(fb,gD,81,'avg'); M.cd_feed_avg=aggMonth(fb,gD,79,'avg'); M.sg_feed_avg=aggMonth(fb,gD,83,'avg'); M.ap_feed_avg=aggMonth(fb,gD,84,'avg');
   M.pm_bpp=aggMonth(d1,gD,IDX.D_pm_bpp); M.cd_bpp=aggMonth(d1,gD,IDX.D_cd_bpp); M.gs_bpp=aggMonth(d1,gD,IDX.D_gs_bpp); M.csl_bpp=aggMonth(d1,gD,IDX.D_csl_bpp); M.sg_bpp=aggMonth(d1,gD,IDX.D_sg_bpp);
   M.d2_pm_bpp=aggMonth(d2,gD,IDX.D_pm_bpp); M.d2_cd_bpp=aggMonth(d2,gD,IDX.D_cd_bpp); M.d2_gs_bpp=aggMonth(d2,gD,IDX.D_gs_bpp); M.d2_csl_bpp=aggMonth(d2,gD,IDX.D_csl_bpp); M.d2_sg_bpp=aggMonth(d2,gD,IDX.D_sg_bpp); M.act_cbg=M.cbg;
   // D1 BPP from CBG Expected sheet (cols 1-5 = pm,cd,csl,gs,sg per D1)
@@ -6357,7 +6361,7 @@ async function buildAnalyticsD() {
   DD.d2=buildDA(d2,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
     cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act});
-  DD.feed=buildDA(fb,gD,{pm_in:1,gs_in:2,csl_in:3,cd_in:4,sg_in:5,pm_feed:11,gs_feed:12,csl_feed:13,cd_feed:14,sg_feed:15,pm_bal:17,gs_bal:18,csl_bal:19,cd_bal:20,sg_bal:21});
+  DD.feed=buildDA(fb,gD,{pm_in:47,gs_in:71,csl_in:26,cd_in:18,sg_in:66,ap_in:76,pm_feed:80,gs_feed:82,csl_feed:81,cd_feed:79,sg_feed:83,ap_feed:84,pm_cost:64,gs_cost:74,csl_cost:30,cd_cost:22,sg_cost:68,ap_cost:78,pm_bal:94,gs_bal:96,csl_bal:95,cd_bal:93,sg_bal:97,ap_bal:98});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   // Patch daily SFOM/LFOM from Manure Sales transactions (rc cols 2/3 are NULL for Aug-Sep 2026)
   manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const m=moKey(dt);if(!DD.rev[m])return;const dk=dayKey(dt);const di=DD.rev[m].dates.indexOf(dk);if(di<0)return;const t=(r[4]||'').toString().toUpperCase().trim(),a=nv(r[5])||0;if(t==='SFOM')DD.rev[m].sfom_rev[di]=(DD.rev[m].sfom_rev[di]||0)+a;else if(t==='LFOM')DD.rev[m].lfom_rev[di]=(DD.rev[m].lfom_rev[di]||0)+a;});
@@ -6416,7 +6420,7 @@ async function buildAnalyticsD() {
         bg_est_exp:nv(d2r[IDX.D_bg_est1]),bg_est_act:nv(d2r[IDX.D_bg_psa]),
         cd_exp:nv(d2r[IDX.D_cd_exp]),pm_exp:nv(d2r[IDX.D_pm_exp]),csl_exp:nv(d2r[IDX.D_csl_exp]),gs_exp:nv(d2r[IDX.D_gs_exp]),sg_exp:nv(d2r[IDX.D_sg_exp]),
         cd_act:nv(d2r[IDX.D_cd_act]),pm_act:nv(d2r[IDX.D_pm_act]),csl_act:nv(d2r[IDX.D_csl_act]),gs_act:nv(d2r[IDX.D_gs_act]),sg_act:nv(d2r[IDX.D_sg_act])},
-      feed:{pm_in:nv(fbr[1]),gs_in:nv(fbr[2]),csl_in:nv(fbr[3]),cd_in:nv(fbr[4]),sg_in:nv(fbr[5]),pm_feed:nv(fbr[11]),gs_feed:nv(fbr[12]),csl_feed:nv(fbr[13]),cd_feed:nv(fbr[14]),sg_feed:nv(fbr[15]),pm_bal:nv(fbr[17]),gs_bal:nv(fbr[18]),csl_bal:nv(fbr[19]),cd_bal:nv(fbr[20]),sg_bal:nv(fbr[21])},
+      feed:{pm_in:nv(fbr[47]),gs_in:nv(fbr[71]),csl_in:nv(fbr[26]),cd_in:nv(fbr[18]),sg_in:nv(fbr[66]),ap_in:nv(fbr[76]),pm_feed:nv(fbr[80]),gs_feed:nv(fbr[82]),csl_feed:nv(fbr[81]),cd_feed:nv(fbr[79]),sg_feed:nv(fbr[83]),ap_feed:nv(fbr[84]),pm_cost:nv(fbr[64]),gs_cost:nv(fbr[74]),csl_cost:nv(fbr[30]),cd_cost:nv(fbr[22]),sg_cost:nv(fbr[68]),ap_cost:nv(fbr[78]),pm_bal:nv(fbr[94]),gs_bal:nv(fbr[96]),csl_bal:nv(fbr[95]),cd_bal:nv(fbr[93]),sg_bal:nv(fbr[97]),ap_bal:nv(fbr[98])},
       rev:(()=>{const _mo=moKey(dt),_mi=months.indexOf(_mo),_d=MDAYS[_mo]||30,_mp=(_mi>=0?M.manpower[_mi]||0:0)/_d,_emi=(_mi>=0?M.emi[_mi]||0:0)/_d;return{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),manpower_daily:_mp,emi_daily:_emi,total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)+_mp+_emi};})(),
       exp:{tot_exp:nv(cer[13]),d1_exp:nv(cer[6]),d2_exp:nv(cer[12]),ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg,act_pur:nv(p[IDX.P_pur_tot]),act_cbg:nv(p[IDX.P_cbg_tot]),
         d1_pm_bpp:nv(cer[1]),d1_cd_bpp:nv(cer[2]),d1_csl_bpp:nv(cer[3]),d1_gs_bpp:nv(cer[4]),d1_sg_bpp:nv(cer[5]),
