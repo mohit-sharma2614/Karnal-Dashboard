@@ -2909,7 +2909,8 @@ window.handleSave = async ()=>{
 
     const sessionId=await getSession()
     const range=`A${rowNum}:${colLetter(maxCol)}${rowNum}`
-    const res=await gPatch(`/worksheets('${encodeURIComponent(sn)}')/range(address='${range}')`,{values:[values]},sessionId)
+    const numFmt=Array(maxCol).fill(null); numFmt[0]='dd-mmm-yyyy'
+    const res=await gPatch(`/worksheets('${encodeURIComponent(sn)}')/range(address='${range}')`,{values:[values],numberFormat:[numFmt]},sessionId)
 
     if(res&&res.error){ toast(`Save failed: ${res.error.message}`,true) }
     else {
@@ -4098,7 +4099,8 @@ async function submitUpload(opts={}){
           }
 
           const range = `A${rowNum}:${colLetter(maxCol)}${rowNum}`
-          const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values]}, sid)
+          const numFmt=Array(maxCol).fill(null); numFmt[0]='dd-mmm-yyyy'
+          const res = await gPatch(`/worksheets('${enc}')/range(address='${range}')`, {values:[values],numberFormat:[numFmt]}, sid)
 
           if(res && res.error){
             uplLog(`  [${i+1}/${rows.length}] ${toDisplayDate(serial)} → ERROR: ${res.error.message}`, true, logEl)
