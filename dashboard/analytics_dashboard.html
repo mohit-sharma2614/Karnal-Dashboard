@@ -3057,12 +3057,12 @@ function _renderOVSectionsDa(da,rec){
 
   // S2 Lab & Process
   const s2={id:'s2',clr:'#1a56db',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin'};
-  const s2snap=latestHealthSnapshot(da);
-  const _ph1=s2snap.ph_d1??d1r.ph,_ph2=s2snap.ph_d2??d2r.ph;
-  const _ia1=s2snap.ia_d1??d1r.ia,_ia2=s2snap.ia_d2??d2r.ia;
-  const _ts1=s2snap.ts_d1??d1r.ts,_ts2=s2snap.ts_d2??d2r.ts;
-  const _vs1=s2snap.vs_d1??d1r.vs,_vs2=s2snap.vs_d2??d2r.vs;
-  const d1Temp=s2snap.tp_d1??d1r.temp_c,d2Temp=s2snap.tp_d2??d2r.temp_c;
+  const _haAvg=f=>{const a=healthDArr(f).filter(x=>x!=null&&x!==0);return a.length?+(a.reduce((s,x)=>s+x,0)/a.length):null;};
+  const _ph1=_haAvg('ph_d1'),_ph2=_haAvg('ph_d2');
+  const _ia1=_haAvg('ia_d1'),_ia2=_haAvg('ia_d2');
+  const _ts1=_haAvg('ts_d1'),_ts2=_haAvg('ts_d2');
+  const _vs1=_haAvg('vs_d1'),_vs2=_haAvg('vs_d2');
+  const d1Temp=_haAvg('tp_d1')??d1r.temp_c,d2Temp=_haAvg('tp_d2')??d2r.temp_c;
   const s2rows=tbl(['Parameter','D1','D2'],[
     tblRow('OLR (kg VS/m³/d)',d1r.olr!=null?d1r.olr.toFixed(2):'—',d2r.olr!=null?d2r.olr.toFixed(2):'—'),
     tblRow('pH',_ph1!=null?_ph1.toFixed(2):'—',_ph2!=null?_ph2.toFixed(2):'—'),
