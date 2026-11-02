@@ -6470,23 +6470,23 @@ async function buildAnalyticsD() {
     gs:parseCalSheet(gsCalR,'gs'),
     sg:parseCalSheet(sgCalR,'sg'),
   };
-  // ── Vendor supply parsing ─────────────────────────────────────
+  // ── Vendor supply parsing — reads from Feed_and_Balance sheet (fb rows)
+  // Indices are 0-based from Feed_and_Balance col layout (verified from memory 2026-10-29)
   const vendorDefs={
-    pm:[{n:'Sonipat',i:14},{n:'Malakpur Sugar Mill (Baraut)',i:15},{n:'Ramala (Bhagpat)',i:16},
-        {n:'Thana Bhavan',i:17},{n:'Tikuala',i:18},{n:'Shmali Sugar Mill',i:19},
-        {n:'Laknour Biogas',i:20},{n:'Balyan Tikuala',i:21},{n:'Singh Associate',i:22},
-        {n:'Naveen',i:23},{n:'G.S.',i:24},{n:'SBEC',i:25},{n:'Sahakumbri',i:26},
-        {n:'Rathi Kathuali Sugar Mill',i:27},{n:'Devom',i:28},{n:'Vaibhav (Ramala)',i:29},{n:'Unn Sugar Mill',i:30}],
-    cd:[{n:'Gharaunda',i:7},{n:'Phoosgarh',i:8},{n:'Radha Krishna',i:9}],
-    csl:[{n:'Sadasat',i:10},{n:'Grain Syrup',i:11},{n:'Pant Nagar',i:12},{n:'Virangam',i:13}],
-    sg:[{n:'Carlsberg',i:31}],
+    pm:[{n:'Sonipat',i:31},{n:'Malakpur Sugar Mill (Baraut)',i:32},{n:'Ramala (Bhagpat)',i:33},
+        {n:'Thana Bhavan',i:34},{n:'Tikuala',i:35},{n:'Shamli Sugar Mill',i:36},
+        {n:'Laknour Biogas',i:37},{n:'Balyan Tikuala',i:38},{n:'Singh Associate',i:39},
+        {n:'Naveen',i:40},{n:'G.S.',i:41},{n:'SBEC',i:42},{n:'Sahakumbri',i:43},
+        {n:'Rathi Kathuali Sugar Mill',i:44},{n:'Devom',i:45},{n:'Vaibhav (Ramala)',i:46}],
+    cd:[{n:'Gharaunda',i:15},{n:'Phoosgarh',i:16},{n:'Radha Krishna',i:17}],
+    csl:[{n:'Sadasat',i:23},{n:'Pant Nagar',i:24},{n:'Virangam',i:25}],
+    sg:[{n:'Carlsberg',i:65}],
   };
-  const fsRows=(fsR?.values||[]).slice(1).filter(r=>r[0]!=null&&r[0]!=='');
   const vendors={};
   for(const [cat,defs] of Object.entries(vendorDefs)){
     vendors[cat]=defs.map(v=>{
       const byMonth={};
-      fsRows.forEach(r=>{
+      fb.forEach(r=>{
         const dt=toDate(r[0]); if(!dt) return;
         const mk=moKey(dt); if(!mk||!months.includes(mk)) return;
         byMonth[mk]=(byMonth[mk]||0)+(nv(r[v.i])||0);
