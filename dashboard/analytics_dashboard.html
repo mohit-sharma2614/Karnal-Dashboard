@@ -1454,7 +1454,7 @@ function latestHealthSnapshot(dateKey){
     }
   };
   const hm=D.health_maps||{};
-  console.log('[HS DEBUG] dateKey=',dateKey,'hm.ph keys:',Object.keys(hm.ph||{}).slice(0,10));
+  const _phKeys=Object.keys(hm.ph||{});console.log('[HS DEBUG] dateKey=',dateKey,'hm.ph total keys:',_phKeys.length,'Jan keys:',_phKeys.filter(k=>k.includes('Jan')).sort());
   latestVal(hm.ph,{ph_d1:1,ph_d2:4});
   console.log('[HS DEBUG] after ph snap=',JSON.stringify(snap));
   latestVal(hm.tmp,{tp_d1:1,tp_d2:4});
