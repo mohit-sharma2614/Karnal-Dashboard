@@ -2007,8 +2007,11 @@ function renderSectionDay(sectionId){
       html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No data available for this date.</div>`;
     } else {
       let d1Tot=0,d2Tot=0;
+      const fbHasData=fedDefs.some(r=>f[r.kf]!=null&&f[r.kf]>0);
       const fedRows=fedDefs.map(r=>{
-        const d1v=d1r[r.k1]||0,d2v=d2r[r.k1]||0,tot=f[r.kf]||0;
+        const d1v=d1r[r.k1]||0,d2v=d2r[r.k1]||0;
+        const fbTot=f[r.kf]||0;
+        const tot=fbHasData?fbTot:(d1v+d2v); // fall back to D1+D2 when no FB data
         d1Tot+=d1v; d2Tot+=d2v;
         const pct=tot>0&&(d1v+d2v)>0?Math.min((d1v+d2v)/tot*100,200):0;
         const bClr=pct>=90?'#2E7D32':pct>=70?'#E65100':'#C62828';
@@ -2016,7 +2019,7 @@ function renderSectionDay(sectionId){
           <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
           <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1)+' '+r.u:'—'}</td>
           <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1)+' '+r.u:'—'}</td>
-          <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
+          <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right;${!fbHasData&&tot>0?'color:var(--text2)':''}">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
           <td style="width:25%"><div style="display:flex;align-items:center;gap:5px">
             <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
               <div style="width:${Math.min(pct,100).toFixed(0)}%;height:100%;background:${bClr};border-radius:3px"></div></div>
@@ -2035,8 +2038,8 @@ function renderSectionDay(sectionId){
         <td>TOTAL</td>
         <td style="color:#1565C0;text-align:right;font-variant-numeric:tabular-nums">${d1Tot>0?fmtN(d1Tot):'—'}</td>
         <td style="color:#2E7D32;text-align:right;font-variant-numeric:tabular-nums">${d2Tot>0?fmtN(d2Tot):'—'}</td>
-        <td style="text-align:right;font-variant-numeric:tabular-nums">${f.feed_total>0?fmtN(f.feed_total):'—'}</td>
-        <td></td>
+        <td style="text-align:right;font-variant-numeric:tabular-nums">${(fbHasData&&f.feed_total>0)?fmtN(f.feed_total):(d1Tot+d2Tot)>0?fmtN(d1Tot+d2Tot)+'*':'—'}</td>
+        <td style="font-size:9px;color:var(--text3)">${!fbHasData&&(d1Tot+d2Tot)>0?'* D1+D2 sum':''}</td>
       </tr></tbody></table>`;
     }
 
@@ -2049,7 +2052,6 @@ function renderSectionDay(sectionId){
     }
 
     // ── 3. Inventory Balance ──────────────────────────────────────
-    html+=groupHeader('Inventory Balance','Closing balance for this date');
     const thresholds={pm:{v:500,u:'MT'},gs:{v:30,u:'KL'},csl:{v:30,u:'KL'},cd:{v:40,u:'MT'},sg:{v:30,u:'MT'}};
     const balDefs=[
       {nm:'Pressmud',   k:'pm_bal',  tk:'pm',  clr:'#1565C0'},
@@ -2058,12 +2060,27 @@ function renderSectionDay(sectionId){
       {nm:'Cow Dung',   k:'cd_bal',  tk:'cd',  clr:'#2E7D32'},
       {nm:'Spent Grain',k:'sg_bal',  tk:'sg',  clr:'#E65100'},
     ];
-    const hasBal=balDefs.some(r=>f[r.k]!=null);
+    // If today has no balance, carry forward from the most recent day that does
+    let balSrc=f, balSrcDate=null;
+    if(!balDefs.some(r=>f[r.k]!=null)){
+      const allDayKeys=Object.keys(D.days).sort((a,b)=>{
+        const [da,ma]=a.split('-'); const [db,mb]=b.split('-');
+        const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+        return (months.indexOf(ma)*31+parseInt(da))-(months.indexOf(mb)*31+parseInt(db));
+      });
+      const curIdx=allDayKeys.indexOf(curDay);
+      for(let i=curIdx-1;i>=0;i--){
+        const cand=D.days[allDayKeys[i]]?.feed||{};
+        if(balDefs.some(r=>cand[r.k]!=null)){balSrc=cand;balSrcDate=allDayKeys[i];break;}
+      }
+    }
+    const hasBal=balDefs.some(r=>balSrc[r.k]!=null);
+    html+=groupHeader('Inventory Balance', balSrcDate?`Last updated: ${balSrcDate}`:'Closing balance for this date');
     if(!hasBal){
       html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No data available for this date.</div>`;
     } else {
       const balRows=balDefs.map(r=>{
-        const bal=f[r.k]; const thr=thresholds[r.tk];
+        const bal=balSrc[r.k]; const thr=thresholds[r.tk];
         if(bal==null) return`<tr><td style="font-weight:700;color:${r.clr}">${r.nm}</td><td colspan="5" style="color:var(--text3);font-size:10px">—</td></tr>`;
         const pct=thr.v>0?bal/thr.v*100:0;
         const zone=pct>=60?0:pct>=45?1:2;
