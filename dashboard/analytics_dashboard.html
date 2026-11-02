@@ -6504,10 +6504,10 @@ async function initDashboard() {
       b.onclick=function(){setYear(yr,this);};
       yf.appendChild(b);
     });
-    // Build month filter buttons dynamically — only months with actual CBG data
+    // Build month filter buttons dynamically — all months that have any data
     const mf=document.getElementById('month_filter');
     mf.querySelectorAll('.mb[data-month]').forEach(b=>b.remove());
-    const activeMonths=D.months.filter((_,i)=>(D.M.cbg[i]||0)>0);
+    const activeMonths=D.months;
     activeMonths.forEach(m=>{
       const b=document.createElement('button');
       b.className='mb'; b.textContent=m;
