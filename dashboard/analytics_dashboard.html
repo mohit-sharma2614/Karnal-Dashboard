@@ -1454,7 +1454,9 @@ function latestHealthSnapshot(dateKey){
     }
   };
   const hm=D.health_maps||{};
+  console.log('[HS DEBUG] dateKey=',dateKey,'hm.ph keys:',Object.keys(hm.ph||{}).slice(0,10));
   latestVal(hm.ph,{ph_d1:1,ph_d2:4});
+  console.log('[HS DEBUG] after ph snap=',JSON.stringify(snap));
   latestVal(hm.tmp,{tp_d1:1,tp_d2:4});
   latestVal(hm.tsvs,{ts_d1:1,vs_d1:2,ts_d1_6m:3,vs_d1_6m:4,ts_d1_sl:5,vs_d1_sl:6,ts_d2:7,vs_d2:8,ts_d2_6m:9,vs_d2_6m:10,ts_d2_sl:11,vs_d2_sl:12});
   latestVal(hm.iapa,{ia_d1:4,ia_d2:12,pa_d1:1,pa_d2:9,ia_ind_d1:2,ia_ind_d2:10,ta_d1:3,ta_d2:11});
