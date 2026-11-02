@@ -516,9 +516,9 @@
     .bq-preview-wrap.expanded{max-height:600px;}
     .bq-preview{border-top:1px solid var(--border);margin-top:8px;padding-top:8px;}
     .bq-preview-loading{font-size:.75rem;color:var(--muted);padding:6px 0;}
-    .bq-preview-sheet{display:flex;align-items:center;gap:8px;padding:5px 0;
-      border-bottom:1px solid var(--border-soft,rgba(0,0,0,.06));flex-wrap:wrap;}
+    .bq-preview-sheet{padding:5px 0;border-bottom:1px solid var(--border-soft,rgba(0,0,0,.06));}
     .bq-preview-sheet:last-child{border-bottom:none;}
+    .bq-ps-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
     .bq-ps-name{font-size:.78rem;font-weight:600;color:var(--text);min-width:120px;flex-shrink:0;}
     .bq-ps-rows{font-size:.72rem;color:var(--muted);min-width:52px;flex-shrink:0;}
     .bq-ps-dates{font-size:.72rem;color:var(--muted);flex:1;min-width:120px;}
@@ -526,6 +526,18 @@
     .bq-ps-skip input[type=checkbox]{cursor:pointer;}
     .bq-ps-skip.skipped .bq-ps-name{text-decoration:line-through;opacity:.5;}
     .bq-preview-sheet.skipped .bq-ps-name{text-decoration:line-through;opacity:.5;}
+    .bq-data-details{margin-top:4px;}
+    .bq-data-details summary{font-size:.68rem;color:var(--accent);cursor:pointer;user-select:none;list-style:none;padding:2px 0;}
+    .bq-data-details summary::-webkit-details-marker{display:none;}
+    .bq-data-details[open] summary{margin-bottom:6px;}
+    .bq-data-scroll{overflow-x:auto;border-radius:6px;border:1px solid var(--border);}
+    .bq-data-table{border-collapse:collapse;font-size:.68rem;width:100%;min-width:300px;}
+    .bq-data-table th{background:var(--bg-alt,rgba(0,0,0,.04));color:var(--muted);font-weight:600;
+      padding:4px 8px;text-align:left;border-bottom:1px solid var(--border);white-space:nowrap;}
+    .bq-data-table td{padding:3px 8px;color:var(--text);border-bottom:1px solid var(--border-soft,rgba(0,0,0,.04));white-space:nowrap;}
+    .bq-data-table tr:last-child td{border-bottom:none;}
+    .bq-data-table tr:nth-child(even) td{background:var(--bg-alt,rgba(0,0,0,.02));}
+    .bq-data-more{font-size:.65rem;color:var(--muted);padding:4px 8px;text-align:right;}
     .bq-chip{flex-shrink:0;padding:3px 9px;border-radius:20px;font-size:.7rem;font-weight:700;
       letter-spacing:.03em;white-space:nowrap;}
     .bq-chip-wait{background:var(--bg);color:var(--muted);border:1px solid var(--border);}
@@ -4181,7 +4193,7 @@ async function parseSingleFile(file, {fullYear=false}={}){
     ? toExcelSerial('2026-01-01')
     : dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()-60))
   const maxSer = dateToSerial(new Date(now.getFullYear(), now.getMonth(), now.getDate()))
-  const parsed={}, rejected={}
+  const parsed={}, rejected={}, headers={}
   for(const sName of wb.SheetNames){
     const cfg=UPL_CFG[sName]; if(!cfg) continue
     const nameMap=COLUMN_NAME_MAP[cfg.cmKey]; if(!nameMap) continue
@@ -4213,8 +4225,9 @@ async function parseSingleFile(file, {fullYear=false}={}){
     }
     if(rows.length) parsed[sName]=rows
     if(rej) rejected[sName]=rej
+    headers[sName]=Object.keys(cm)
   }
-  return {parsed, rejected, sheetNames:wb.SheetNames}
+  return {parsed, rejected, sheetNames:wb.SheetNames, headers:headers||{}}
 }
 
 let _bqFiles=[], _bqResults=[], _bqParsed=[], _bqExpanded=new Set(), _bqSkip={}
@@ -4370,7 +4383,7 @@ async function bqParsePreview(idx){
   try{
     // Always parse full year for preview so user sees all data in the file
     const r=await parseSingleFile(_bqFiles[idx], {fullYear:true})
-    _bqParsed[idx]={parsed:r.parsed, sheetNames:r.sheetNames, rejected:r.rejected}
+    _bqParsed[idx]={parsed:r.parsed, sheetNames:r.sheetNames, rejected:r.rejected, headers:r.headers||{}}
     bqRenderPreview(idx)
   } catch(e){
     previewEl.innerHTML=`<div class="bq-preview-loading" style="color:var(--danger)">Parse error: ${e.message}</div>`
@@ -4380,7 +4393,7 @@ async function bqParsePreview(idx){
 function bqRenderPreview(idx){
   const previewEl=document.getElementById(`bqPreview${idx}`); if(!previewEl) return
   const data=_bqParsed[idx]; if(!data) return
-  const {parsed, sheetNames}=data
+  const {parsed, sheetNames, headers:hdrMap={}}=data
   const recSheets=sheetNames.filter(s=>UPL_CFG[s])
   if(!recSheets.length){ previewEl.innerHTML=`<div class="bq-preview-loading">No recognised sheets in this workbook.</div>`; return }
   const skipped=_bqSkip[idx]||new Set()
@@ -4398,14 +4411,34 @@ function bqRenderPreview(idx){
     const first=fmtDs(dates[0]), last=fmtDs(dates[dates.length-1])
     const dateRange=first===last?first:`${first} → ${last}`
     const isSkip=skipped.has(sName)
+    // Build mini data table (first 5 rows)
+    const cols=hdrMap[sName]||[]
+    const previewRows=sRows.slice(0,5)
+    const maxCols=Math.min(cols.length,8)
+    const visibleCols=cols.slice(0,maxCols)
+    const thCells=['<th>Date</th>',...visibleCols.map(c=>`<th>${c}</th>`)].join('')
+    const tBodyRows=previewRows.map(r=>{
+      const tds=['<td>'+fmtDs(r.dateStr)+'</td>',...visibleCols.map(c=>`<td>${r.rowData[c]!=null?r.rowData[c]:''}</td>`)].join('')
+      return `<tr>${tds}</tr>`
+    }).join('')
+    const miniTable=cols.length?`<details class="bq-data-details">
+      <summary>▸ preview rows</summary>
+      <div class="bq-data-scroll">
+        <table class="bq-data-table"><thead><tr>${thCells}</tr></thead><tbody>${tBodyRows}</tbody></table>
+        ${sRows.length>5?`<div class="bq-data-more">showing 5 of ${sRows.length} rows</div>`:''}
+      </div>
+    </details>`:''
     return `<div class="bq-preview-sheet${isSkip?' skipped':''}">
-      <span class="bq-ps-name">${sName}</span>
-      <span class="bq-ps-rows">${sRows.length} row${sRows.length===1?'':'s'}</span>
-      <span class="bq-ps-dates">${dateRange}</span>
-      <label class="bq-ps-skip" title="Skip this sheet during upload">
-        <input type="checkbox" ${isSkip?'checked':''} onchange="bqToggleSkip(${idx},'${sName.replace(/'/g,"\\'")}',this.checked)">
-        Skip
-      </label>
+      <div class="bq-ps-row">
+        <span class="bq-ps-name">${sName}</span>
+        <span class="bq-ps-rows">${sRows.length} row${sRows.length===1?'':'s'}</span>
+        <span class="bq-ps-dates">${dateRange}</span>
+        <label class="bq-ps-skip" title="Skip this sheet during upload">
+          <input type="checkbox" ${isSkip?'checked':''} onchange="bqToggleSkip(${idx},'${sName.replace(/'/g,"\\'")}',this.checked)">
+          Skip
+        </label>
+      </div>
+      ${miniTable}
     </div>`
   }).join('')
   const filterNote=`<div style="font-size:.68rem;color:var(--muted);margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border-soft,rgba(0,0,0,.06))">Preview shows all 2026 data · Upload applies your date filter</div>`
