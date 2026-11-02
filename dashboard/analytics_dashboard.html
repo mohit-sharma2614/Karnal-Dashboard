@@ -6310,7 +6310,7 @@ async function gFetch(path) {
 function setStatus(msg) { const el=document.getElementById('authStatus'); if(el) el.textContent=msg; }
 async function buildAnalyticsD() {
   setStatus('Fetching plant data (15–30 seconds)…');
-  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,fsR,cbgExpR,mfcR,emiR] = await Promise.all([
+  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,cbgExpR,mfcR,emiR] = await Promise.all([
     gFetch("/worksheets('PSA%20Production')/range(address='A3:AH700')"),
     gFetch("/worksheets('D1')/range(address='A3:BD700')"),
     gFetch("/worksheets('D2')/range(address='A3:BD700')"),
@@ -6327,7 +6327,6 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Cow%20Dung%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
-    gFetch("/worksheets('Feedstock%20Supply')/range(address='A3:AJ400')"),
     gFetch("/worksheets('CBG%20Expected')/range(address='A4:X700')"),
     gFetch("/worksheets('Monthly%20Fixed%20Costs')/range(address='A3:P10')"),
     gFetch("/worksheets('EMI%20Tracker')/range(address='A3:R10')"),
