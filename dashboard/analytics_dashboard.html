@@ -2575,36 +2575,40 @@ function _renderOVSections(mo){
        const st=D.stock||{};
        const fmtN2=v=>v!=null&&v>0?fmtN(Math.round(v)):'—';
        const fmtL2=v=>v!=null&&v>0?fmtL(v):'—';
+       const sgFedR=sumA(mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed'));
        const rows=[
-         {nm:'Pressmud (PM)',in:getIn('pm_in'),fed:sumA(pmF),stk:st.pm||null,procC:sumA(mo==='ALL'?mArr('pm_proc_cost'):dArr('feed','pm_proc_cost')),fedC:sumA(mo==='ALL'?mArr('pm_feed_cost'):dArr('feed','pm_feed_cost'))},
-         {nm:'Cow Dung (CD)',in:getIn('cd_in'),fed:sumA(cdF),stk:st.cd||null,procC:sumA(mo==='ALL'?mArr('cd_proc_cost'):dArr('feed','cd_proc_cost')),fedC:sumA(mo==='ALL'?mArr('cd_feed_cost'):dArr('feed','cd_feed_cost'))},
-         {nm:'Grain Syrup (GS)',in:getIn('gs_in'),fed:sumA(gsF),stk:st.gs||null,procC:sumA(mo==='ALL'?mArr('gs_proc_cost'):dArr('feed','gs_proc_cost')),fedC:sumA(mo==='ALL'?mArr('gs_feed_cost'):dArr('feed','gs_feed_cost'))},
-         {nm:'CSL',in:getIn('csl_in'),fed:sumA(cslF),stk:st.csl||null,procC:sumA(mo==='ALL'?mArr('csl_proc_cost'):dArr('feed','csl_proc_cost')),fedC:sumA(mo==='ALL'?mArr('csl_feed_cost'):dArr('feed','csl_feed_cost'))},
-         {nm:'Spent Grain (SG)',in:getIn('sg_in'),fed:sumA(mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed')),stk:st.sg||null,procC:sumA(mo==='ALL'?mArr('sg_proc_cost'):dArr('feed','sg_proc_cost')),fedC:sumA(mo==='ALL'?mArr('sg_feed_cost'):dArr('feed','sg_feed_cost'))},
+         {nm:'Pressmud (PM)', u:'MT', in:getIn('pm_in'),fed:sumA(pmF)},
+         {nm:'Cow Dung (CD)', u:'MT', in:getIn('cd_in'),fed:sumA(cdF)},
+         {nm:'Grain Syrup (GS)',u:'KL',in:getIn('gs_in'),fed:sumA(gsF)},
+         {nm:'CSL',            u:'KL', in:getIn('csl_in'),fed:sumA(cslF)},
+         {nm:'Spent Grain (SG)',u:'MT',in:getIn('sg_in'),fed:sgFedR},
        ];
        const totIn=rows.reduce((s,r)=>s+(r.in||0),0);
        const totFed=rows.reduce((s,r)=>s+(r.fed||0),0);
-       const totStk=rows.reduce((s,r)=>s+(r.stk||0),0);
-       const totPC=rows.reduce((s,r)=>s+(r.procC||0),0);
-       const totFC=rows.reduce((s,r)=>s+(r.fedC||0),0);
+       const fmtU=(v,u)=>v>0?fmtN(Math.round(v))+' '+u:'—';
+       const utilPct=(fed,proc)=>proc>0?Math.round(fed/proc*100):null;
+       const utilClr=(p)=>p==null?'var(--text2)':p>=90?'#16a34a':p>=70?'#d97706':'#dc2626';
        const th='<th style="padding:5px 8px;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
        const td=(v,bold,clr)=>`<td style="padding:5px 8px;font-size:12px;${bold?'font-weight:700;':''}${clr?'color:'+clr+';':''}white-space:nowrap">${v}</td>`;
-       const hdr=`<tr>${th}FEEDSTOCK</th>${th}PROCURED (MT)</th>${th}FED (MT)</th>${th}STOCK (MT)</th>${th}PROC COST</th>${th}FEED COST</th></tr>`;
-       const rowsHtml=rows.map(r=>`<tr style="border-bottom:1px solid var(--bdr)">
-         ${td('<b style="color:#0d7d5f">'+r.nm+'</b>',false)}
-         ${td(fmtN2(r.in))}
-         ${td(fmtN2(r.fed))}
-         ${td(r.stk>0?'<span style="color:#0e7490;font-weight:600">'+fmtN2(r.stk)+'</span>':'—')}
-         ${td(fmtL2(r.procC))}
-         ${td(fmtL2(r.fedC))}
-       </tr>`).join('');
+       const hdr=`<tr>${th}FEEDSTOCK</th>${th}PROCURED</th>${th}FED</th>${th}BALANCE</th>${th}UTIL%</th></tr>`;
+       const rowsHtml=rows.map(r=>{
+         const bal=(r.in||0)-(r.fed||0);
+         const up=utilPct(r.fed,r.in);
+         const balClr=bal>=0?'#0e7490':'#dc2626';
+         return`<tr style="border-bottom:1px solid var(--bdr)">
+           ${td('<b style="color:#0d7d5f">'+r.nm+'</b>',false)}
+           ${td(fmtU(r.in,r.u))}
+           ${td(fmtU(r.fed,r.u))}
+           ${td(r.in>0?'<span style="color:'+balClr+';font-weight:600">'+(bal>=0?'+':'')+fmtN(Math.round(bal))+' '+r.u+'</span>':'—')}
+           ${td(up!=null?'<span style="color:'+utilClr(up)+';font-weight:700">'+up+'%</span>':'—')}
+         </tr>`;}).join('');
+       const totBal=totIn-totFed;const totUp=utilPct(totFed,totIn);
        const totRow=`<tr style="border-top:2px solid var(--bdr);background:var(--bg3)">
          ${td('<b>Total</b>',true)}
-         ${td('<b>'+fmtN2(totIn)+'</b>',true)}
-         ${td('<b>'+fmtN2(totFed)+'</b>',true)}
-         ${td('<b>'+fmtN2(totStk)+'</b>',true)}
-         ${td('<b>'+fmtL2(totPC)+'</b>',true)}
-         ${td('<b>'+fmtL2(totFC)+'</b>',true)}
+         ${td('<b>'+fmtN(Math.round(totIn))+'</b>',true)}
+         ${td('<b>'+fmtN(Math.round(totFed))+'</b>',true)}
+         ${td('<b style="color:'+(totBal>=0?'#0e7490':'#dc2626')+'">'+(totBal>=0?'+':'')+fmtN(Math.round(totBal))+'</b>',true)}
+         ${td(totUp!=null?'<b style="color:'+utilClr(totUp)+'">'+totUp+'%</b>':'—',true)}
        </tr>`;
        return`<div style="overflow-x:auto;margin-bottom:8px"><table style="width:100%;border-collapse:collapse"><thead>${hdr}</thead><tbody>${rowsHtml}${totRow}</tbody></table></div>`;
      })(),
@@ -2976,16 +2980,40 @@ function _renderOVSectionsDa(da,rec){
     return (D.M[key]||[]).slice(-7).map(v=>v||0);
   };
 
-  // S1 Feedstock — daily values; keys may be null if day has no feed data
+  // S1 Feedstock — daily values, same 5-col layout as monthly card
   const s1={id:'s1',clr:'#0d7d5f',nm:'Feedstock Procurement',person:'Mr. Vivek Kumar'};
-  const safeVal=(v)=>v!=null&&v>0?v:null;
-  const s1rows=tbl(['Feedstock','Fed (MT/KL)','Procured (MT/KL)'],[
-    tblRow('Pressmud',fmtMT(safeVal(f.pm_feed)),undefined,fmtMT(safeVal(f.pm_in))),
-    tblRow('Cow Dung',fmtMT(safeVal(f.cd_feed)),undefined,fmtMT(safeVal(f.cd_in))),
-    tblRow('CSL',fmtKL(safeVal(f.csl_feed)),undefined,fmtKL(safeVal(f.csl_in))),
-    tblRow('Grain Syrup',fmtKL(safeVal(f.gs_feed)),undefined,fmtKL(safeVal(f.gs_in))),
-    tblRow('Spent Grain',fmtMT(safeVal(f.sg_feed)),undefined,fmtMT(safeVal(f.sg_in))),
-  ]);
+  const _fmtU=(v,u)=>v!=null&&v>0?fmtN(Math.round(v))+' '+u:'—';
+  const _uPct=(fed,proc)=>proc>0?Math.round(fed/proc*100):null;
+  const _uClr=(p)=>p==null?'var(--text2)':p>=90?'#16a34a':p>=70?'#d97706':'#dc2626';
+  const _s1defs=[
+    {nm:'Pressmud', u:'MT', proc:f.pm_in||0, fed:f.pm_feed||0},
+    {nm:'Cow Dung', u:'MT', proc:f.cd_in||0, fed:f.cd_feed||0},
+    {nm:'Grain Syrup',u:'KL',proc:f.gs_in||0,fed:f.gs_feed||0},
+    {nm:'CSL',      u:'KL', proc:f.csl_in||0,fed:f.csl_feed||0},
+    {nm:'Spent Grain',u:'MT',proc:f.sg_in||0,fed:f.sg_feed||0},
+  ];
+  const _th='<th style="padding:5px 8px;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
+  const _td=(v,clr)=>`<td style="padding:5px 8px;font-size:12px;font-weight:600;${clr?'color:'+clr+';':''}white-space:nowrap">${v}</td>`;
+  const _s1totProc=_s1defs.reduce((s,r)=>s+r.proc,0),_s1totFed=_s1defs.reduce((s,r)=>s+r.fed,0);
+  const _s1rows=_s1defs.map(r=>{const bal=r.proc-r.fed;const up=_uPct(r.fed,r.proc);
+    return`<tr style="border-bottom:1px solid var(--bdr)">
+      ${_td('<b style="color:#0d7d5f">'+r.nm+'</b>')}
+      ${_td(_fmtU(r.proc,r.u))}
+      ${_td(_fmtU(r.fed,r.u))}
+      ${_td(r.proc>0?'<span style="color:'+(bal>=0?'#0e7490':'#dc2626')+'">'+(bal>=0?'+':'')+fmtN(Math.round(bal))+' '+r.u+'</span>':'—')}
+      ${_td(up!=null?'<span style="color:'+_uClr(up)+'">'+up+'%</span>':'—')}
+    </tr>`;}).join('');
+  const _s1totBal=_s1totProc-_s1totFed;const _s1up=_uPct(_s1totFed,_s1totProc);
+  const s1rows=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+    <thead><tr>${_th}FEEDSTOCK</th>${_th}PROCURED</th>${_th}FED</th>${_th}BALANCE</th>${_th}UTIL%</th></tr></thead>
+    <tbody>${_s1rows}
+    <tr style="border-top:2px solid var(--bdr);background:var(--bg3)">
+      ${_td('<b>Total</b>')}
+      ${_td('<b>'+fmtN(Math.round(_s1totProc))+'</b>')}
+      ${_td('<b>'+fmtN(Math.round(_s1totFed))+'</b>')}
+      ${_td('<b style="color:'+(_s1totBal>=0?'#0e7490':'#dc2626')+'">'+(_s1totBal>=0?'+':'')+fmtN(Math.round(_s1totBal))+'</b>')}
+      ${_td(_s1up!=null?'<b style="color:'+_uClr(_s1up)+'">'+_s1up+'%</b>':'—')}
+    </tr></tbody></table></div>`;
   // Sparkline: last 7 days of total feed for this month
   const curMoFeed=curMonth!=='ALL'?(D.D.feed?.[curMonth]||{}):{};
   const pmArr7=(curMoFeed.pm_feed||[]).slice(-7).map(v=>v||0);
