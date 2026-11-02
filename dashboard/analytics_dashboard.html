@@ -2840,20 +2840,58 @@ function renderOV(){
     }).join('');
   }
 
-  // Highlights
-  const bv=cbgMAll[bestIdx]||0,wv=cbgMAll[worstIdx]||0;
-  const bp=bv>0?Math.round(bv/TGT.cbg_month*100):0,wp=wv>0?Math.round(wv/TGT.cbg_month*100):0;
-  const bRev=(D.M.total_rev||[])[bestIdx],wRev=(D.M.total_rev||[])[worstIdx];
-  [{id:1,mo:MONTHS[bestIdx]??'—',val:bv,pct:bp,rev:bRev,gap:Math.max(TGT.cbg_month-bv,0)},
-   {id:2,mo:MONTHS[worstIdx]??'—',val:wv,pct:wp,rev:wRev,gap:Math.max(TGT.cbg_month-wv,0)}
-  ].forEach(h=>{
-    const el=id=>document.getElementById('ov_hl'+h.id+'_'+id);
-    const ttl=el('ttl');if(ttl)ttl.textContent=h.mo+' 2026';
-    const pct=el('pct');if(pct)pct.textContent=h.pct+'%';
-    const body=el('body');if(body)body.innerHTML=`${fmtN(Math.round(h.val))} kg CBG${h.rev!=null?' · Rev '+fmtL(h.rev):''}`;
-    const bar=el('bar');if(bar)bar.style.width=Math.min(h.pct,100)+'%';
-    const tgt=el('tgt');if(tgt)tgt.textContent=h.gap>0?fmtN(Math.round(h.gap))+' kg gap':'On target ✓';
-  });
+  // Highlights — Best/Worst Month (YTD) or Best/Worst Day (month selected)
+  if(mo==='ALL'){
+    const bv=cbgMAll[bestIdx]||0,wv=cbgMAll[worstIdx]||0;
+    const bp=bv>0?Math.round(bv/TGT.cbg_month*100):0,wp=wv>0?Math.round(wv/TGT.cbg_month*100):0;
+    const bRev=(D.M.total_rev||[])[bestIdx],wRev=(D.M.total_rev||[])[worstIdx];
+    document.getElementById('ov_hl1_tag').textContent='Best Month';
+    document.getElementById('ov_hl2_tag').textContent='Worst Month';
+    const f1=document.querySelector('.hlc-best .hl-foot span:first-child');if(f1)f1.textContent='vs monthly target';
+    const f2=document.querySelector('.hlc-worst .hl-foot span:first-child');if(f2)f2.textContent='vs monthly target';
+    [{id:1,lbl:MONTHS[bestIdx]??'—',val:bv,pct:bp,rev:bRev,gap:Math.max(TGT.cbg_month-bv,0)},
+     {id:2,lbl:MONTHS[worstIdx]??'—',val:wv,pct:wp,rev:wRev,gap:Math.max(TGT.cbg_month-wv,0)}
+    ].forEach(h=>{
+      const el=id=>document.getElementById('ov_hl'+h.id+'_'+id);
+      const ttl=el('ttl');if(ttl)ttl.textContent=h.lbl+' 2026';
+      const pct=el('pct');if(pct)pct.textContent=h.pct+'%';
+      const body=el('body');if(body)body.innerHTML=`${fmtN(Math.round(h.val))} kg CBG${h.rev!=null?' · Rev '+fmtL(h.rev):''}`;
+      const bar=el('bar');if(bar)bar.style.width=Math.min(h.pct,100)+'%';
+      const tgt=el('tgt');if(tgt)tgt.textContent=h.gap>0?fmtN(Math.round(h.gap))+' kg gap':'On target ✓';
+    });
+  } else {
+    // Best Day / Worst Day within selected month
+    const dayTgt=TGT.cbg_month/30;
+    const dayEntries=Object.entries(D.days).filter(([d])=>d.endsWith('-'+mo)&&(D.days[d]?.psa?.cbg_tot||0)>0);
+    dayEntries.sort((a,b)=>(b[1].psa?.cbg_tot||0)-(a[1].psa?.cbg_tot||0));
+    const bestDE=dayEntries[0],worstDE=dayEntries[dayEntries.length-1];
+    document.getElementById('ov_hl1_tag').textContent='Best Day';
+    document.getElementById('ov_hl2_tag').textContent='Worst Day';
+    const f1=document.querySelector('.hlc-best .hl-foot span:first-child');if(f1)f1.textContent='vs daily target';
+    const f2=document.querySelector('.hlc-worst .hl-foot span:first-child');if(f2)f2.textContent='vs daily target';
+    [[bestDE,1],[worstDE,2]].forEach(([de,id])=>{
+      const el=id2=>document.getElementById('ov_hl'+id+'_'+id2);
+      if(!de){
+        document.getElementById('ov_hl'+id+'_tag').textContent=id===1?'Best Day':'Worst Day';
+        const ttl=el('ttl');if(ttl)ttl.textContent='No data';
+        const pct=el('pct');if(pct)pct.textContent='—';
+        const body=el('body');if(body)body.textContent='—';
+        const bar=el('bar');if(bar)bar.style.width='0%';
+        const tgt=el('tgt');if(tgt)tgt.textContent='—';
+        return;
+      }
+      const [date,rec2]=de;
+      const cbg=rec2.psa?.cbg_tot||0;
+      const pct=dayTgt>0?Math.round(cbg/dayTgt*100):0;
+      const rev=rec2.rev?.total_rev||null;
+      const gap=Math.max(dayTgt-cbg,0);
+      const ttl=el('ttl');if(ttl)ttl.textContent=date+' 2026';
+      const pct2=el('pct');if(pct2)pct2.textContent=pct+'%';
+      const body=el('body');if(body)body.innerHTML=`${fmtN(Math.round(cbg))} kg CBG${rev!=null?' · Rev '+fmtL(rev):''}`;
+      const bar=el('bar');if(bar)bar.style.width=Math.min(pct,100)+'%';
+      const tgt=el('tgt');if(tgt)tgt.textContent=gap>0?fmtN(Math.round(gap))+' kg gap':'On target ✓';
+    });
+  }
 
   // Section grid
   _renderOVSections(mo);
