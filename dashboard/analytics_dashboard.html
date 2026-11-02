@@ -1987,8 +1987,8 @@ function renderSectionDay(sectionId){
       html+=`<div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;margin-bottom:14px">
         <div><table class="tbl"><thead><tr><th>Feedstock</th><th>Received</th></tr></thead><tbody>${procRows}</tbody></table></div>
         <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
-          <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:6px">VENDOR-WISE SUPPLY</div>
-          <div style="font-size:11px;color:var(--text3)">Vendor breakdown not available at day level — view month filter for vendor details.</div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:6px">VENDOR-WISE SUPPLY${isDa?' <span style="font-size:9px;font-weight:400;color:var(--text3);text-transform:none">('+vendMo+' month totals)</span>':''}</div>
+          ${vendorBlocks}
         </div>
       </div>`;
     }
@@ -3089,20 +3089,23 @@ function _renderOVSectionsDa(da,rec){
 
 // ═══ S1 FEEDSTOCK ════════════════════════════════════════════
 function renderS1(){
-  if(renderSectionDay('s1')) return; else hideSectionDay('s1');
+  hideSectionDay('s1'); // always hide generic day panel — S1 uses its own layout for day view
   const mo=curMonth;
+  const isDa=curDay!=='ALL';
+  const dayRec=isDa?D.days[curDay]||{}:{};
+  const dayFeed=dayRec.feed||{},dayD1=dayRec.d1||{},dayD2=dayRec.d2||{},dayRev=dayRec.rev||{};
   const s=D.stock||{pm:0,gs:0,csl:0,cd:0,sg:0};
   const pb=document.getElementById('s1_period');
-  if(pb) pb.textContent=mo==='ALL'?'All Months':mo;
+  if(pb) pb.textContent=isDa?curDay:mo==='ALL'?'All Months':mo;
 
-  // helpers
-  const getIn=(k)=>sumA(mo==='ALL'?mArr(k):dArr('feed',k));
-  const getFed=(k)=>sumA(mo==='ALL'?mArr(k):dArr('feed',k));
-  // D1/D2 fed: sum each month's daily totals then sum across months (or sum daily for month view)
-  const getD1=(k)=>mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d1?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
+  // helpers — single day or month/YTD
+  const getIn=(k)=>isDa?(dayFeed[k]||0):sumA(mo==='ALL'?mArr(k):dArr('feed',k));
+  const getFed=(k)=>isDa?(dayFeed[k]||0):sumA(mo==='ALL'?mArr(k):dArr('feed',k));
+  const getD1=(k)=>isDa?(dayD1[k]||0):mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d1?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
                               :sumA(dArr('d1',k));
-  const getD2=(k)=>mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d2?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
+  const getD2=(k)=>isDa?(dayD2[k]||0):mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d2?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
                               :sumA(dArr('d2',k));
+  const vendMo=isDa?(dayRec.mo||mo):mo; // use day's month for vendor lookup
 
   // ── 1. Procurement ────────────────────────────────────────────
   const procRows=[
@@ -3120,9 +3123,9 @@ function renderS1(){
     const list=vend[cat]||[];
     const u=vendorUnits[cat]||'';
     if(!list.length) return '<span style="color:var(--text3);font-size:10px">—</span>';
-    const filtered=mo==='ALL'
+    const filtered=vendMo==='ALL'
       ?list.map(v=>({name:v.name,total:v.total}))
-      :list.map(v=>({name:v.name,total:(v.byMonth?.[mo]||0)})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
+      :list.map(v=>({name:v.name,total:(v.byMonth?.[vendMo]||0)})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
     if(!filtered.length) return '<span style="color:var(--text3);font-size:10px">No data this period</span>';
     return filtered.map(v=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:1px 0;border-bottom:1px solid var(--bdr)">
       <span style="font-size:10px;color:var(--text2)">${v.name}</span>
@@ -3206,14 +3209,15 @@ function renderS1(){
   const fcEl=document.getElementById('s1_feed_cost');
   if(fcEl){
     const fcArr2=mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost');
-    const totalFC=sumA(fcArr2);
-    const label=mo==='ALL'?'YTD Feedstock Cost':mo+' Feedstock Cost';
+    const totalFC=isDa?(dayRev.feed_cost||0):sumA(fcArr2);
+    const label=isDa?curDay+' Feedstock Cost':mo==='ALL'?'YTD Feedstock Cost':mo+' Feedstock Cost';
     fcEl.innerHTML=totalFC>0?`<div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid var(--amber);border-radius:8px;padding:10px 16px">
       <span style="font-size:11px;font-weight:600;color:var(--text2)">${label}</span>
       <span style="font-size:20px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">${fmtL(totalFC)}</span>
     </div>`:'';
   }
 
+  if(!isDa){
   const labels=mo==='ALL'?MONTHS:dDates('feed');
   const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
   const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
@@ -3264,9 +3268,9 @@ function renderS1(){
     </tr></thead><tbody>${balRows}</tbody></table>`;
   }
 
-  // ── 4. Anomaly Detection ──────────────────────────────────────
+  // ── 4. Anomaly Detection (month/YTD only) ────────────────────
   const anomalyEl=document.getElementById('s1_anomaly');
-  if(anomalyEl){
+  if(anomalyEl&&!isDa){
     const _fd=mo==='ALL'?MONTHS:dDates('feed');
     const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
     const checks=[
@@ -3330,6 +3334,7 @@ function renderS1(){
   const gsBpp=mo==='ALL'?mArr('gs_bpp'):dArr('exp','d1_gs_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_gs_bpp')[i]||0));
   const sgBpp=mo==='ALL'?mArr('sg_bpp'):dArr('exp','d1_sg_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_sg_bpp')[i]||0));
   bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange)],true);
+  } // end if(!isDa) charts block
 }
 
 // ═══ S2 LAB ══════════════════════════════════════════════════
