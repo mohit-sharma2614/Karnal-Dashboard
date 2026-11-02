@@ -2995,7 +2995,8 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const dCBG=dp.cbg_tot,dDisp=dp.dispatched;
   const dCH4v=dp.ch4!=null?(dp.ch4>1?dp.ch4:dp.ch4*100):null;
   const dPsaHrs=dp.psa_hrs,dCompHrs=dp.comp_hrs;
-  const dPsaEff=dCBG&&ex.tot_exp>0?dCBG/ex.tot_exp*100:null;
+  const _psaEff1=d1r.psa_eff_pct,_psaEff2=d2r.psa_eff_pct;
+  const dPsaEff=_psaEff1!=null&&_psaEff2!=null?(_psaEff1+_psaEff2)/2:_psaEff1??_psaEff2??(dCBG&&ex.tot_exp>0?dCBG/ex.tot_exp*100:null);
   const dDR=dCBG&&dDisp?dDisp/dCBG*100:null;
   const sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
   const drainD1=d1r.drain_act,drainD2=d2r.drain_act;
@@ -7051,8 +7052,8 @@ function _buildRpBody(p){
     statusChips=[
       {t:'CBG Achievement',v:moTgtAch!=null?moTgtAch+'%':'—',sub:'vs '+fNI(TGT.cbg_month)+' kg target',cls:moTgtAch>=90?'g':moTgtAch>=75?'a':'r'},
       {t:'Net Margin',v:moMgn!=null?moMgn+'%':'—',sub:'Target: 45%',cls:moMgn>=40?'g':moMgn>=25?'a':'r'},
-      {t:'pH D1',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—',sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
-      {t:'OLR D1',v:(D.M.d1_olr||[])[moIdx]!=null?((D.M.d1_olr||[])[moIdx]).toFixed(2)+' kg/m³/d':'—',sub:'Target ≥ 3.5',cls:(D.M.d1_olr||[])[moIdx]>=3.5?'g':(D.M.d1_olr||[])[moIdx]?'a':'b'},
+      {t:'pH D1 / D2',v:(D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—')+' / '+(D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'),sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'OLR D1 / D2',v:((D.M.d1_olr||[])[moIdx]!=null?((D.M.d1_olr||[])[moIdx]).toFixed(2):'—')+' / '+((D.M.d2_olr||[])[moIdx]!=null?((D.M.d2_olr||[])[moIdx]).toFixed(2):'—')+' kg/m³/d',sub:'Target ≥ 3.5',cls:(D.M.d1_olr||[])[moIdx]>=3.5?'g':(D.M.d1_olr||[])[moIdx]?'a':'b'},
     ];
   } else {
     const daLabel=da||'—';
@@ -7064,8 +7065,8 @@ function _buildRpBody(p){
     statusChips=[
       {t:'Daily Achievement',v:dAch!=null?dAch+'%':'—',sub:'Daily target: '+fNI(dTgtDay)+' kg',cls:dAch>=90?'g':dAch>=75?'a':'r'},
       {t:'Est. Margin',v:dMgn!=null?dMgn+'%':'—',sub:'Estimated',cls:dMgn>=40?'g':dMgn>=25?'a':'r'},
-      {t:'pH D1',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—',sub:'Latest',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
-      {t:'Temp D1',v:D.kpis.temp_d1!=null?D.kpis.temp_d1.toFixed(1)+' °C':'—',sub:'Latest',cls:D.kpis.temp_d1&&D.kpis.temp_d1>=33?'g':D.kpis.temp_d1?'a':'b'},
+      {t:'pH D1 / D2',v:(D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—')+' / '+(D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'),sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'Temp D1 / D2',v:(D.kpis.temp_d1!=null?D.kpis.temp_d1.toFixed(1):'—')+' / '+(D.kpis.temp_d2!=null?D.kpis.temp_d2.toFixed(1):'—')+' °C',sub:'Latest reading',cls:D.kpis.temp_d1&&D.kpis.temp_d1>=33?'g':D.kpis.temp_d1?'a':'b'},
     ];
   }
 
@@ -7142,13 +7143,20 @@ function _buildRpBody(p){
   </div>`;
 
   // ── 3: digesters D1/D2 cards ──────────────────────────────────────
-  const olr1=p==='monthly'?(D.M.d1_olr||[])[moIdx]:avgA(D.M.d1_olr);
-  const olr2=p==='monthly'?(D.M.d2_olr||[])[moIdx]:avgA(D.M.d2_olr);
-  const ph1=D.kpis.ph_d1,ph2=D.kpis.ph_d2;
-  const iapa1=D.kpis.iapa_d1,iapa2=D.kpis.iapa_d2;
-  const ts1=D.kpis.ts_d1,ts2=D.kpis.ts_d2;
-  const vs1=D.kpis.vs_d1,vs2=D.kpis.vs_d2;
-  const t1=D.kpis.temp_d1,t2=D.kpis.temp_d2;
+  const olr1=p==='daily'?nv(dRec?.d1?.olr):p==='monthly'?(D.M.d1_olr||[])[moIdx]:avgA(D.M.d1_olr);
+  const olr2=p==='daily'?nv(dRec?.d2?.olr):p==='monthly'?(D.M.d2_olr||[])[moIdx]:avgA(D.M.d2_olr);
+  // For daily: use day-specific health if available via health_maps, fallback to kpis (latest)
+  const _hm=(map,col)=>{const r=(D.health_maps||{})[map]?.[da];return r?nv(r[col]):null;};
+  const ph1=p==='daily'?(_hm('ph',1)??D.kpis.ph_d1):D.kpis.ph_d1;
+  const ph2=p==='daily'?(_hm('ph',4)??D.kpis.ph_d2):D.kpis.ph_d2;
+  const iapa1=p==='daily'?(_hm('iapa',4)??D.kpis.iapa_d1):D.kpis.iapa_d1;
+  const iapa2=p==='daily'?(_hm('iapa',12)??D.kpis.iapa_d2):D.kpis.iapa_d2;
+  const ts1=p==='daily'?(_hm('tsvs',1)??D.kpis.ts_d1):D.kpis.ts_d1;
+  const ts2=p==='daily'?(_hm('tsvs',7)??D.kpis.ts_d2):D.kpis.ts_d2;
+  const vs1=p==='daily'?(_hm('tsvs',2)??D.kpis.vs_d1):D.kpis.vs_d1;
+  const vs2=p==='daily'?(_hm('tsvs',8)??D.kpis.vs_d2):D.kpis.vs_d2;
+  const t1=p==='daily'?(_hm('tmp',1)??D.kpis.temp_d1):D.kpis.temp_d1;
+  const t2=p==='daily'?(_hm('tmp',4)??D.kpis.temp_d2):D.kpis.temp_d2;
   const digRow=(l,v,c,proof)=>`<div class="rp-dig-row"><span class="rp-dig-rl">${l}</span><div class="rp-dig-rv-wrap"><span class="rp-dig-rv ${c||''}">${v}</span>${proof?`<span class="rp-dig-proof">${proof}</span>`:''}</div></div>`;
   const olrClr1=olr1>=3.5?'g':olr1?'a':'';const olrClr2=olr2>=3.5?'g':olr2?'a':'';
   const iapaBadge=v=>v==null?'b':v<=0.35?'g':v<=0.5?'a':'r';
@@ -7188,7 +7196,9 @@ function _buildRpBody(p){
     const eff=(D.M.psa_eff||[])[moIdx];psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg=fNI(moCBG/Math.max(dim,1))+' kg/d avg';
   } else {
     cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.act_raw))+' m³';
-    const eff=nv(dRec?.psa?.psa_eff);psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg='—';
+    const _e1=nv(dRec?.psa?.d1_eff),_e2=nv(dRec?.psa?.d2_eff);
+    const eff=_e1!=null&&_e2!=null?(_e1+_e2)/2:_e1??_e2;
+    psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg='—';
   }
   const mc2=(stripe,lbl,v,cls,dl,drc,proof1,proof2)=>`<div class="rp-mc2">
     <div class="rp-mc-stripe" style="background:${stripe}"></div>
