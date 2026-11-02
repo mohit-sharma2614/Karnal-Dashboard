@@ -1454,9 +1454,7 @@ function latestHealthSnapshot(dateKey){
     }
   };
   const hm=D.health_maps||{};
-  const _phKeys=Object.keys(hm.ph||{});console.log('[HS DEBUG] dateKey=',dateKey,'hm.ph total keys:',_phKeys.length,'Jan keys:',_phKeys.filter(k=>k.includes('Jan')).sort());
   latestVal(hm.ph,{ph_d1:1,ph_d2:4});
-  console.log('[HS DEBUG] after ph snap=',JSON.stringify(snap));
   latestVal(hm.tmp,{tp_d1:1,tp_d2:4});
   latestVal(hm.tsvs,{ts_d1:1,vs_d1:2,ts_d1_6m:3,vs_d1_6m:4,ts_d1_sl:5,vs_d1_sl:6,ts_d2:7,vs_d2:8,ts_d2_6m:9,vs_d2_6m:10,ts_d2_sl:11,vs_d2_sl:12});
   latestVal(hm.iapa,{ia_d1:4,ia_d2:12,pa_d1:1,pa_d2:9,ia_ind_d1:2,ia_ind_d2:10,ta_d1:3,ta_d2:11});
@@ -3059,13 +3057,18 @@ function _renderOVSectionsDa(da,rec){
 
   // S2 Lab & Process
   const s2={id:'s2',clr:'#1a56db',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin'};
-  const d1Temp=d1r.temp_c,d2Temp=d2r.temp_c;
+  const s2snap=latestHealthSnapshot(da);
+  const _ph1=s2snap.ph_d1??d1r.ph,_ph2=s2snap.ph_d2??d2r.ph;
+  const _ia1=s2snap.ia_d1??d1r.ia,_ia2=s2snap.ia_d2??d2r.ia;
+  const _ts1=s2snap.ts_d1??d1r.ts,_ts2=s2snap.ts_d2??d2r.ts;
+  const _vs1=s2snap.vs_d1??d1r.vs,_vs2=s2snap.vs_d2??d2r.vs;
+  const d1Temp=s2snap.tp_d1??d1r.temp_c,d2Temp=s2snap.tp_d2??d2r.temp_c;
   const s2rows=tbl(['Parameter','D1','D2'],[
     tblRow('OLR (kg VS/m³/d)',d1r.olr!=null?d1r.olr.toFixed(2):'—',d2r.olr!=null?d2r.olr.toFixed(2):'—'),
-    tblRow('pH',d1r.ph!=null?d1r.ph.toFixed(2):'—',d2r.ph!=null?d2r.ph.toFixed(2):'—'),
-    tblRow('IA/PA',d1r.ia!=null?d1r.ia.toFixed(2):'—',d2r.ia!=null?d2r.ia.toFixed(2):'—'),
-    tblRow('TS %',d1r.ts!=null?fmtPct(d1r.ts):'—',d2r.ts!=null?fmtPct(d2r.ts):'—'),
-    tblRow('VS %',d1r.vs!=null?fmtPct(d1r.vs):'—',d2r.vs!=null?fmtPct(d2r.vs):'—'),
+    tblRow('pH',_ph1!=null?_ph1.toFixed(2):'—',_ph2!=null?_ph2.toFixed(2):'—'),
+    tblRow('IA/PA',_ia1!=null?_ia1.toFixed(2):'—',_ia2!=null?_ia2.toFixed(2):'—'),
+    tblRow('TS %',_ts1!=null?fmtPct(_ts1):'—',_ts2!=null?fmtPct(_ts2):'—'),
+    tblRow('VS %',_vs1!=null?fmtPct(_vs1):'—',_vs2!=null?fmtPct(_vs2):'—'),
     tblRow('Temp (°C)',d1Temp!=null?d1Temp.toFixed(1):'—',d2Temp!=null?d2Temp.toFixed(1)+'⚠':'—',undefined,undefined,false,d2Temp!=null&&d2Temp<35),
   ]);
   const s2spk=spkFromMo('d1','temp_c');
@@ -6344,9 +6347,6 @@ async function buildAnalyticsD() {
   const getRows=(raw,dc)=>(raw?.values||[]).filter(r=>toDate(r[dc]));
   const psa=getRows(psaR,0),d1=getRows(d1R,0),d2=getRows(d2R,0),cbgExp=getRows(cbgExpR,0);
   const ph=getRows(phR,0),tmp_=getRows(tmpR,0),tsvs_=getRows(tsvsR,0),iapa_=getRows(iapaR,0);
-  console.log('[HEALTH DEBUG] ph rows:',ph.length,'tmp:',tmp_.length,'tsvs:',tsvs_.length,'iapa:',iapa_.length);
-  if(ph.length>0)console.log('[HEALTH DEBUG] ph[0] date raw:',ph[0][0],'dayKey:',dayKey(toDate(ph[0][0])));
-  if(ph.length>0)console.log('[HEALTH DEBUG] ph sample:',ph.slice(0,3).map(r=>[r[0],r[1],r[4]]));
   const rc=getRows(rcR,0),fb=getRows(fbR,0);
   const monthSet=new Set(); const yearMonthSet=new Set();
   psa.forEach(r=>{const dt=toDate(r[0]);if(!dt)return;const m=moKey(dt);if(m){monthSet.add(m);yearMonthSet.add(dt.getFullYear()+'|'+m);}});
