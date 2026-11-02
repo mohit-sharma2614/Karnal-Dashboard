@@ -3057,13 +3057,12 @@ function _renderOVSectionsDa(da,rec){
 
   // S2 Lab & Process
   const s2={id:'s2',clr:'#1a56db',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin'};
-  const s2snap=latestHealthSnapshot(da);
-  console.log('[OV S2] da=',da,'ph_d1=',s2snap.ph_d1,'tp_d1=',s2snap.tp_d1,'ts_d1=',s2snap.ts_d1);
-  const _ph1=s2snap.ph_d1,_ph2=s2snap.ph_d2;
-  const _ia1=s2snap.ia_d1,_ia2=s2snap.ia_d2;
-  const _ts1=s2snap.ts_d1,_ts2=s2snap.ts_d2;
-  const _vs1=s2snap.vs_d1,_vs2=s2snap.vs_d2;
-  const d1Temp=s2snap.tp_d1??d1r.temp_c,d2Temp=s2snap.tp_d2??d2r.temp_c;
+  const _hv=(map,col)=>{const r=(D.health_maps||{})[map]?.[da];return r?nv(r[col]):null;};
+  const _ph1=_hv('ph',1),_ph2=_hv('ph',4);
+  const _ia1=_hv('iapa',4),_ia2=_hv('iapa',12);
+  const _ts1=_hv('tsvs',1),_ts2=_hv('tsvs',7);
+  const _vs1=_hv('tsvs',2),_vs2=_hv('tsvs',8);
+  const d1Temp=_hv('tmp',1)??d1r.temp_c,d2Temp=_hv('tmp',4)??d2r.temp_c;
   const s2rows=tbl(['Parameter','D1','D2'],[
     tblRow('OLR (kg VS/m³/d)',d1r.olr!=null?d1r.olr.toFixed(2):'—',d2r.olr!=null?d2r.olr.toFixed(2):'—'),
     tblRow('pH',_ph1!=null?_ph1.toFixed(2):'—',_ph2!=null?_ph2.toFixed(2):'—'),
