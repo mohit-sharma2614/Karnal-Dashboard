@@ -2862,7 +2862,7 @@ function renderOV(){
   } else {
     // Best Day / Worst Day within selected month
     const dayTgt=TGT.cbg_month/30;
-    const dayEntries=Object.entries(D.days).filter(([d])=>d.endsWith('-'+mo)&&(D.days[d]?.psa?.cbg_tot||0)>0);
+    const dayEntries=Object.entries(D.days).filter(([d,r])=>r.mo===mo&&(r?.psa?.cbg_tot||0)>0);
     dayEntries.sort((a,b)=>(b[1].psa?.cbg_tot||0)-(a[1].psa?.cbg_tot||0));
     const bestDE=dayEntries[0],worstDE=dayEntries[dayEntries.length-1];
     document.getElementById('ov_hl1_tag').textContent='Best Day';
@@ -2883,7 +2883,7 @@ function renderOV(){
       const [date,rec2]=de;
       const cbg=rec2.psa?.cbg_tot||0;
       const pct=dayTgt>0?Math.round(cbg/dayTgt*100):0;
-      const rev=rec2.rev?.total_rev||null;
+      const rv2=rec2.rev||{};const rev=rv2.total_rev||((rv2.cbg_rev||0)+(rv2.sfom_rev||0)+(rv2.lfom_rev||0)+(rv2.other_rev||0))||null;
       const gap=Math.max(dayTgt-cbg,0);
       const ttl=el('ttl');if(ttl)ttl.textContent=date+' 2026';
       const pct2=el('pct');if(pct2)pct2.textContent=pct+'%';
