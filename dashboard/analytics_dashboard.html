@@ -3058,8 +3058,7 @@ function renderS1(){
     {nm:'Spent Grain',k:'sg_in',u:'MT',clr:'#E65100'},
   ];
   // vendor lookup for current period
-  // Feedstock Supply sheet stores quantities in KG (for MT feedstocks) or Litres (for KL feedstocks)
-  // Feed & Balance uses MT/KL → divide vendor raw values by 1000
+  // Feed & Balance stores vendor quantities in MT/KL directly (no conversion needed)
   const vendorUnits={pm:'MT',cd:'MT',csl:'KL',sg:'MT'};
   const vend=D.vendors||{};
   const vendorForPeriod=(cat)=>{
@@ -3067,8 +3066,8 @@ function renderS1(){
     const u=vendorUnits[cat]||'';
     if(!list.length) return '<span style="color:var(--text3);font-size:10px">—</span>';
     const filtered=mo==='ALL'
-      ?list.map(v=>({name:v.name,total:v.total/1000}))
-      :list.map(v=>({name:v.name,total:(v.byMonth?.[mo]||0)/1000})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
+      ?list.map(v=>({name:v.name,total:v.total}))
+      :list.map(v=>({name:v.name,total:(v.byMonth?.[mo]||0)})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
     if(!filtered.length) return '<span style="color:var(--text3);font-size:10px">No data this period</span>';
     return filtered.map(v=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:1px 0;border-bottom:1px solid var(--bdr)">
       <span style="font-size:10px;color:var(--text2)">${v.name}</span>
