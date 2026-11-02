@@ -6964,9 +6964,9 @@ function _buildRpBody(p){
   </div>`;
 
   // ── 2: feedstock table ────────────────────────────────────────────
-  const fsKeys=['pm_feed','cd_feed','gs_qty','csl_feed','sg_feed'];
+  const fsKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed'];
   const fsCostKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost'];
-  const fsProcKeys=['pm_proc','cd_proc','gs_qty','csl_proc','sg_proc'];
+  const fsProcKeys=['pm_in','cd_in','gs_in','csl_in','sg_in'];
   const fsNames=['Pressmud','Cow Dung','Grain Syrup','CSL','Spent Grain'];
   let fsTotalFed=0,fsTotalCost=0,fsTotalProc=0;
   const fsRows2=fsNames.map((nm,i)=>{
@@ -7306,8 +7306,8 @@ function renderReport(){
   function fsTbl(){
     const keys=['PM','CD','GS','CSL','SG'];
     const names=['Pressmud (PM)','Cow Dung (CD)','Grain Syrup (GS)','CSL','Spent Grain (SG)'];
-    const feedKeys=['pm_feed','cd_feed','gs_qty','csl_feed','sg_feed'];
-    const procKeys=['pm_proc','cd_proc','gs_qty','csl_proc','sg_proc'];
+    const feedKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed'];
+    const procKeys=['pm_in','cd_in','gs_in','csl_in','sg_in'];
     const costKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost'];
     let rows='',tF=0,tC=0;
     keys.forEach((k,i)=>{
