@@ -6428,15 +6428,13 @@ async function buildAnalyticsD() {
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
   // Monthly Fixed Costs: row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols 3-14 = Jan-Dec
   const mfcVals=mfcR?.values||[];
-  const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+3];return typeof v==='number'?v:0;};
-  const _mp_rc=aggMonth(rc,gD,8);
-  const _emi_rc=aggMonth(rc,gD,9);
-  M.manpower=months.map((m,i)=>_mp_rc[i]||mfcGet(3,m)); // RC col I actual if present, else Monthly Fixed Costs row3
-  // EMI: use daily RC col J if present, else EMI Tracker sheet
+  // MFC sheet: row0=title, row1=header, row2=ElecUsage, row3=ElecCost, row4=Manpower, row5=LoanEMI; cols: A=CostHead, B=Unit, C=Jan..N=Dec
+  const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+2];return typeof v==='number'?v:0;};
+  M.manpower=months.map(m=>mfcGet(4,m)); // row idx 4 = Manpower Cost
+  // EMI: from EMI Tracker sheet (monthly totals per loan)
   const emiVals=emiR?.values||[];
   const emiDataRows=emiVals.slice(1).filter(r=>r&&r.length>=5&&typeof r[4]==='number');
-  const _emi_tracker=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+4];return s+(typeof v==='number'?v:0);},0);});
-  M.emi=months.map((m,i)=>_emi_rc[i]||_emi_tracker[i]||0);
+  M.emi=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+4];return s+(typeof v==='number'?v:0);},0);});
   const emi_rows=emiDataRows.map(r=>({type:r[0]||'',desc:r[1]||'',vals:months.map(m=>{const ci=MNAMES.indexOf(m);return ci>=0&&typeof r[ci+4]==='number'?r[ci+4]:0;})}));
   // Sales Detail: col0=Date, col2=Veer₹, col4=Adinath₹, col6=GAIL₹, col8=SPS₹
   const salesRows=getRows(salesR,0);
@@ -6485,7 +6483,8 @@ async function buildAnalyticsD() {
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
     cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
   DD.feed=buildDA(fb,gD,{pm_in:47,gs_in:71,csl_in:26,cd_in:18,sg_in:66,ap_in:76,pm_feed:80,gs_feed:82,csl_feed:81,cd_feed:79,sg_feed:83,ap_feed:84,feed_total:85,pm_cost:64,gs_cost:74,csl_cost:30,cd_cost:22,sg_cost:68,ap_cost:78,pm_bal:94,gs_bal:96,csl_bal:95,cd_bal:93,sg_bal:97,ap_bal:98});
-  DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,manpower_cost:8,emi_cost:9,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)+(nv(r[8])||0)+(nv(r[9])||0)});
+  // Daily cost = feedstock+transport+maint+elec only; manpower+EMI are monthly lump sums, not daily
+  DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   // Patch daily SFOM/LFOM from Manure Sales transactions (rc cols 2/3 are NULL for Aug-Sep 2026)
   manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const m=moKey(dt);if(!DD.rev[m])return;const dk=dayKey(dt);const di=DD.rev[m].dates.indexOf(dk);if(di<0)return;const t=(r[4]||'').toString().toUpperCase().trim(),a=nv(r[5])||0;if(t==='SFOM')DD.rev[m].sfom_rev[di]=(DD.rev[m].sfom_rev[di]||0)+a;else if(t==='LFOM')DD.rev[m].lfom_rev[di]=(DD.rev[m].lfom_rev[di]||0)+a;});
   months.forEach(m=>{if(!DD.rev[m])return;DD.rev[m].total_rev=DD.rev[m].dates.map((_,di)=>(DD.rev[m].cbg_rev[di]||0)+(DD.rev[m].sfom_rev[di]||0)+(DD.rev[m].lfom_rev[di]||0));});
