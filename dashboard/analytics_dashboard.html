@@ -6342,6 +6342,9 @@ async function buildAnalyticsD() {
   const getRows=(raw,dc)=>(raw?.values||[]).filter(r=>toDate(r[dc]));
   const psa=getRows(psaR,0),d1=getRows(d1R,0),d2=getRows(d2R,0),cbgExp=getRows(cbgExpR,0);
   const ph=getRows(phR,0),tmp_=getRows(tmpR,0),tsvs_=getRows(tsvsR,0),iapa_=getRows(iapaR,0);
+  console.log('[HEALTH DEBUG] ph rows:',ph.length,'tmp:',tmp_.length,'tsvs:',tsvs_.length,'iapa:',iapa_.length);
+  if(ph.length>0)console.log('[HEALTH DEBUG] ph[0] date raw:',ph[0][0],'dayKey:',dayKey(toDate(ph[0][0])));
+  if(ph.length>0)console.log('[HEALTH DEBUG] ph sample:',ph.slice(0,3).map(r=>[r[0],r[1],r[4]]));
   const rc=getRows(rcR,0),fb=getRows(fbR,0);
   const monthSet=new Set(); const yearMonthSet=new Set();
   psa.forEach(r=>{const dt=toDate(r[0]);if(!dt)return;const m=moKey(dt);if(m){monthSet.add(m);yearMonthSet.add(dt.getFullYear()+'|'+m);}});
