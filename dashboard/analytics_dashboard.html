@@ -851,12 +851,17 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="kpi-panel">
       <div class="kpi"><div class="kpi-bar" id="ov_k1_bar"></div><div class="kpi-label" id="ov_k1_lbl"></div><div class="kpi-value" id="ov_k1_val">—</div><div class="kpi-sub" id="ov_k1_sub"></div><div class="kpi-delta" id="ov_k1_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k2_bar"></div><div class="kpi-label" id="ov_k2_lbl"></div><div class="kpi-value" id="ov_k2_val">—</div><div class="kpi-sub" id="ov_k2_sub"></div><div class="kpi-delta" id="ov_k2_dlt" style="display:none"></div></div>
-      <div class="kpi"><div class="kpi-bar" id="ov_k3_bar"></div><div class="kpi-label" id="ov_k3_lbl"></div><div class="kpi-value" id="ov_k3_val">—</div><div class="kpi-sub" id="ov_k3_sub"></div><div class="kpi-delta" id="ov_k3_dlt" style="display:none"></div><div class="kpi-pb"><div class="kpi-pb-fill" id="ov_k3_pbf" style="width:0%"></div></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k3_bar"></div><div class="kpi-label" id="ov_k3_lbl"></div><div class="kpi-value" id="ov_k3_val">—</div><div class="kpi-sub" id="ov_k3_sub"></div><div class="kpi-delta" id="ov_k3_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k4_bar"></div><div class="kpi-label" id="ov_k4_lbl"></div><div class="kpi-value" id="ov_k4_val">—</div><div class="kpi-sub" id="ov_k4_sub"></div><div class="kpi-delta" id="ov_k4_dlt" style="display:none"></div></div>
-      <div class="kpi"><div class="kpi-bar" id="ov_k5_bar"></div><div class="kpi-label" id="ov_k5_lbl"></div><div class="kpi-value" id="ov_k5_val">—</div><div class="kpi-sub" id="ov_k5_sub"></div><div class="kpi-delta" id="ov_k5_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k5_bar"></div><div class="kpi-label" id="ov_k5_lbl"></div><div class="kpi-value" id="ov_k5_val">—</div><div class="kpi-sub" id="ov_k5_sub"></div><div class="kpi-delta" id="ov_k5_dlt" style="display:none"></div><div class="kpi-pb"><div class="kpi-pb-fill" id="ov_k5_pbf" style="width:0%"></div></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k6_bar"></div><div class="kpi-label" id="ov_k6_lbl"></div><div class="kpi-value" id="ov_k6_val">—</div><div class="kpi-sub" id="ov_k6_sub"></div><div class="kpi-delta" id="ov_k6_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k7_bar"></div><div class="kpi-label" id="ov_k7_lbl"></div><div class="kpi-value" id="ov_k7_val">—</div><div class="kpi-sub" id="ov_k7_sub"></div><div class="kpi-delta" id="ov_k7_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k8_bar"></div><div class="kpi-label" id="ov_k8_lbl"></div><div class="kpi-value" id="ov_k8_val">—</div><div class="kpi-sub" id="ov_k8_sub"></div><div class="kpi-delta" id="ov_k8_dlt" style="display:none"></div></div>
+    </div>
+    <div id="ov_kpi_extra" style="display:none;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink7);background:var(--ov-white)">
+      <div class="kpi" style="border-right:1px solid var(--ink7);border-bottom:none"><div class="kpi-bar" id="ov_ke1_bar"></div><div class="kpi-label" id="ov_ke1_lbl"></div><div class="kpi-value" id="ov_ke1_val">—</div><div class="kpi-sub" id="ov_ke1_sub"></div></div>
+      <div class="kpi" style="border-right:1px solid var(--ink7);border-bottom:none"><div class="kpi-bar" id="ov_ke2_bar"></div><div class="kpi-label" id="ov_ke2_lbl"></div><div class="kpi-value" id="ov_ke2_val">—</div><div class="kpi-sub" id="ov_ke2_sub"></div></div>
+      <div class="kpi" style="border-right:none;border-bottom:none"><div class="kpi-bar" id="ov_ke3_bar"></div><div class="kpi-label" id="ov_ke3_lbl"></div><div class="kpi-value" id="ov_ke3_val">—</div><div class="kpi-sub" id="ov_ke3_sub"></div></div>
     </div>
   </div>
 
@@ -2473,7 +2478,19 @@ function _fillOVKpis(kpis){
     const vE=document.getElementById('ov_k'+n+'_val');if(vE){vE.textContent=k.v||'—';vE.className='kpi-value'+(k.dc?' '+k.dc:'');}
     const sE=document.getElementById('ov_k'+n+'_sub');if(sE)sE.textContent=k.s||'';
     const dE=document.getElementById('ov_k'+n+'_dlt');if(dE){if(k.d){dE.textContent=k.d;dE.className='kpi-delta'+(k.dc?' '+k.dc:'');dE.style.display='';}else dE.style.display='none';}
-    if(n===3&&k.pb!=null){const pf=document.getElementById('ov_k3_pbf');if(pf)pf.style.width=Math.min(100,k.pb)+'%';}
+    if(n===5&&k.pb!=null){const pf=document.getElementById('ov_k5_pbf');if(pf)pf.style.width=Math.min(100,k.pb)+'%';}
+  });
+}
+
+function _fillOVExtra(items){
+  const wrap=document.getElementById('ov_kpi_extra');
+  if(wrap)wrap.style.display='grid';
+  items.forEach((k,i)=>{
+    const id='ke'+(i+1);
+    const bE=document.getElementById('ov_'+id+'_bar');if(bE)bE.style.background=k.bar||'var(--blue)';
+    const lE=document.getElementById('ov_'+id+'_lbl');if(lE)lE.textContent=k.l||'';
+    const vE=document.getElementById('ov_'+id+'_val');if(vE){vE.textContent=k.v||'—';vE.className='kpi-value'+(k.dc?' '+k.dc:'');}
+    const sE=document.getElementById('ov_'+id+'_sub');if(sE)sE.textContent=k.s||'';
   });
 }
 
@@ -2732,8 +2749,14 @@ function renderOV(){
     const dUpt=dp.comp_hrs&&dp.psa_hrs&&dp.psa_hrs>0?dp.comp_hrs/dp.psa_hrs*100:null;
     const dDay=TGT.cbg_month/30;
     const dAch=dCBG&&dDay>0?dCBG/dDay*100:null;
-    const dc=[{l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},{l:'Dispatch',v:dDisp&&dCBG&&dCBG>0?dDisp/dCBG*100:null,ok:0},{l:'PSA',v:dUpt,ok:dUpt>=90?1:dUpt>=70?0:-1},{l:'Margin',v:dMgn,ok:dMgn>=40?1:dMgn>=25?0:-1},{l:'CH4',v:dCH4v,ok:dCH4v>=90?1:dCH4v>=80?0:-1},{l:'OLR',v:d1r.olr!=null?Math.min(100,d1r.olr/4.5*100):null,ok:d1r.olr>=2?1:d1r.olr>=1.5?0:-1}];
-    const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.30,.15,.25,.20,.05,.05][i])*100,0));
+    // Plant Health: RBG | CBG | PSA Eff
+    const dRbgPct=dp.ideal_raw&&dp.ideal_raw>0?dp.rbg_tot/dp.ideal_raw*100:null;
+    const dc=[
+      {l:'RBG',v:dRbgPct,ok:dRbgPct>=85?1:dRbgPct>=70?0:-1},
+      {l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},
+      {l:'PSA Eff',v:dUpt,ok:dUpt>=90?1:dUpt>=70?0:-1}
+    ];
+    const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.25,.45,.30][i])*100,0));
     _fillOVHealthRing(dHS,da+' 2026',dc,null);
     const CBG_RATE=0.04725*2110; // ₹99.6975/kg
     const dCapRev=Math.round(dDay*CBG_RATE);
@@ -2741,14 +2764,18 @@ function renderOV(){
     _fillOVKpis([
       {bar:'#1565C0',l:'Daily Contract Quantity',v:fmtN(Math.round(dDay))+' kg',s:'GoBardhan ID: P-LEKPL'},
       {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:dCBG!=null?fmtN(Math.round(dCBG))+' kg':'—',s:da+' 2026',d:dAch!=null?Math.round(dAch)+'% of contract qty':null,dc:dAch>=90?'g':dAch>=75?'a':'r'},
-      {bar:'#6d28d9',l:'Capacity Revenue (GoBardhan)',v:'₹'+fmtN(dCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
+      {bar:'#6d28d9',l:'Capacity Revenue',v:'₹'+fmtN(dCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
       {bar:'#0e7490',l:'Actual Energy Revenue',v:dActRev!=null?'₹'+fmtN(dActRev):'—',s:'Actual CBG × ₹99.70/kg',dc:dActRev!=null&&dCapRev>0?dActRev/dCapRev>=0.9?'g':dActRev/dCapRev>=0.75?'a':'r':null},
       {bar:'#1b8a4a',l:'Total Revenue',v:dRev?fmtL(dRev):'—',s:'CBG + Manure'},
       {bar:'#c67c00',l:'Net Margin',v:dMgn!=null?dMgn.toFixed(1)+'%':'—',s:'Target: 40%+',dc:dMgn>=40?'g':dMgn>=25?'a':'r'},
       {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
       {bar:'#c67c00',l:'Plant Uptime',v:dUpt!=null?dUpt.toFixed(1)+'%':'—',s:'Comp÷PSA hrs',dc:dUpt>=90?'g':dUpt>=70?'a':'r'},
-      {bar:'#1b8a4a',l:'CH4 Purity',v:dCH4v!=null?dCH4v.toFixed(1)+'%':'—',s:'Target: ≥90%',dc:dCH4v>=90?'g':dCH4v>=80?'a':'r'},
-      {bar:'#1565C0',l:'OLR D1 / D2',v:(d1r.olr!=null?d1r.olr.toFixed(2):'—')+' / '+(d2r.olr!=null?d2r.olr.toFixed(2):'—'),s:'kg VS/m³/d'},
+    ]);
+    // Extra row: CH4 | OLR D1 | OLR D2
+    _fillOVExtra([
+      {bar:'#1b8a4a',l:'CH4 Purity',v:dCH4v!=null?dCH4v.toFixed(1)+'%':'—',s:'Target: ≥90%'},
+      {bar:'#1565C0',l:'OLR D1',v:d1r.olr!=null?d1r.olr.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
+      {bar:'#1565C0',l:'OLR D2',v:d2r.olr!=null?d2r.olr.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
     ]);
     // Render section cards with daily data
     _renderOVSectionsDa(da,rec);
@@ -2783,16 +2810,16 @@ function renderOV(){
   const cpkMo=D.cpk_monthly||{};
   const cpkVal=mo==='ALL'?(D.kpis.ytd_cbg>0?D.finance.ytd_cost/D.kpis.ytd_cbg:null):(cpkMo[mo]||null);
 
-  // Health ring
+  // Health ring — 3 components: RBG | CBG | PSA Eff
+  const rbgTotM=sumA(mo==='ALL'?mArr('rbg_tot'):dArr('psa','rbg_tot'));
+  const rbgIdealM=sumA(mo==='ALL'?(D.M.raw_biogas||[]):dArr('psa','ideal_raw'));
+  const rbgPct=rbgIdealM>0?rbgTotM/rbgIdealM*100:null;
   const hComps=[
+    {l:'RBG',v:rbgPct,ok:rbgPct>=85?1:rbgPct>=70?0:-1},
     {l:'CBG',v:achPct,ok:achPct>=90?1:achPct>=75?0:-1},
-    {l:'Dispatch',v:drPct,ok:drPct>=95?1:drPct>=80?0:-1},
     {l:'PSA Eff',v:uptPct,ok:uptPct>=90?1:uptPct>=70?0:-1},
-    {l:'Margin',v:marginPct,ok:marginPct>=40?1:marginPct>=25?0:-1},
-    {l:'CH4 %',v:ch4Pct,ok:ch4Pct>=90?1:ch4Pct>=80?0:-1},
-    {l:'OLR D1',v:avgO1!=null?Math.min(100,avgO1/4.5*100):null,ok:avgO1>=2?1:avgO1>=1.5?0:-1},
   ];
-  const wts=[.30,.15,.25,.20,.05,.05];
+  const wts=[.25,.45,.30];
   const hs=Math.round(hComps.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*wts[i]*100,0));
   const hPeriod=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
   // 7-period sparkline: last 7 months' health scores approximated by cbg achievement
@@ -2806,18 +2833,24 @@ function renderOV(){
   const moActRev=Math.round(tCBG*CBG_RATE2);
   const moRevRatio=moCapRev>0?moActRev/moCapRev:null;
   const contractLbl=mo==='ALL'?'Annually Contract Quantity':'Monthly Contract Quantity';
-  const contractSub=mo==='ALL'?'Full-year · GoBardhan ID: P-LEKPL':mo+' · GoBardhan ID: P-LEKPL';
+  const contractSub=mo==='ALL'?'Full-year · ID: P-LEKPL':mo+' · ID: P-LEKPL';
+  // Order: k1=Contract Qty, k2=Actual Offtake, k3=Capacity Revenue, k4=Actual Energy Revenue,
+  //        k5=Total Revenue, k6=Net Margin, k7=Production Cost, k8=Plant Uptime
   _fillOVKpis([
     {bar:'#1565C0',l:contractLbl,v:fmtN(tgtCBG)+' kg',s:contractSub},
     {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'YTD total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of contract qty':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
-    {bar:'#6d28d9',l:'Capacity Revenue (GoBardhan)',v:'₹'+fmtN(moCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
+    {bar:'#6d28d9',l:'Capacity Revenue',v:'₹'+fmtN(moCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
     {bar:'#0e7490',l:'Actual Energy Revenue',v:'₹'+fmtN(moActRev),s:'Actual CBG × ₹99.70/kg',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
     {bar:'#c67c00',l:'Net Margin',v:marginPct!=null?marginPct.toFixed(1)+'%':'—',s:'Target: 40%+',d:marginPct>=40?'On target':'▼ Below 40%',dc:marginPct>=40?'g':marginPct>=25?'a':'r'},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
     {bar:'#c67c00',l:'Plant Uptime',v:uptPct!=null?uptPct.toFixed(1)+'%':'—',s:'Comp ÷ PSA hrs · ≥90%',d:uptPct>=90?'On target':'▼ Below 90%',dc:uptPct>=90?'g':uptPct>=70?'a':'r'},
-    {bar:'#1b8a4a',l:'CH4 Purity (Avg)',v:ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',s:'Target: ≥90%',dc:ch4Pct>=90?'g':ch4Pct>=80?'a':'r'},
-    {bar:'#1565C0',l:'OLR D1 / D2',v:(avgO1!=null?avgO1.toFixed(2):'—')+' / '+(avgO2!=null?avgO2.toFixed(2):'—'),s:'kg VS/m³/d · design 2.5'},
+  ]);
+  // Extra row: CH4 Purity | OLR D1 | OLR D2
+  _fillOVExtra([
+    {bar:'#1b8a4a',l:'CH4 Purity (Avg)',v:ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',s:'Target: ≥90%'},
+    {bar:'#1565C0',l:'OLR D1 (Avg)',v:avgO1!=null?avgO1.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
+    {bar:'#1565C0',l:'OLR D2 (Avg)',v:avgO2!=null?avgO2.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
   ]);
 
   // Strip
@@ -6378,8 +6411,8 @@ async function buildAnalyticsD() {
   M.pm_bal=aggMonth(fb,gD,94); M.gs_bal=aggMonth(fb,gD,96); M.csl_bal=aggMonth(fb,gD,95); M.cd_bal=aggMonth(fb,gD,93); M.sg_bal=aggMonth(fb,gD,97); M.ap_bal=aggMonth(fb,gD,98);
   M.pm_bal_last=aggMonthLast(fb,gD,94); M.gs_bal_last=aggMonthLast(fb,gD,96); M.csl_bal_last=aggMonthLast(fb,gD,95); M.cd_bal_last=aggMonthLast(fb,gD,93); M.sg_bal_last=aggMonthLast(fb,gD,97); M.ap_bal_last=aggMonthLast(fb,gD,98);
   M.pm_feed_avg=aggMonth(fb,gD,80,'avg'); M.gs_feed_avg=aggMonth(fb,gD,82,'avg'); M.csl_feed_avg=aggMonth(fb,gD,81,'avg'); M.cd_feed_avg=aggMonth(fb,gD,79,'avg'); M.sg_feed_avg=aggMonth(fb,gD,83,'avg'); M.ap_feed_avg=aggMonth(fb,gD,84,'avg');
-  M.pm_bpp=aggMonth(d1,gD,IDX.D_pm_bpp); M.cd_bpp=aggMonth(d1,gD,IDX.D_cd_bpp); M.gs_bpp=aggMonth(d1,gD,IDX.D_gs_bpp); M.csl_bpp=aggMonth(d1,gD,IDX.D_csl_bpp); M.sg_bpp=aggMonth(d1,gD,IDX.D_sg_bpp);
-  M.d2_pm_bpp=aggMonth(d2,gD,IDX.D_pm_bpp); M.d2_cd_bpp=aggMonth(d2,gD,IDX.D_cd_bpp); M.d2_gs_bpp=aggMonth(d2,gD,IDX.D_gs_bpp); M.d2_csl_bpp=aggMonth(d2,gD,IDX.D_csl_bpp); M.d2_sg_bpp=aggMonth(d2,gD,IDX.D_sg_bpp); M.act_cbg=M.cbg;
+  M.pm_bpp=aggMonth(d1,gD,IDX.D_pm_bpp); M.cd_bpp=aggMonth(d1,gD,IDX.D_cd_bpp); M.gs_bpp=aggMonth(d1,gD,IDX.D_gs_bpp); M.csl_bpp=aggMonth(d1,gD,IDX.D_csl_bpp); M.sg_bpp=aggMonth(d1,gD,IDX.D_sg_bpp); M.ap_bpp=aggMonth(d1,gD,IDX.D_ap_bpp);
+  M.d2_pm_bpp=aggMonth(d2,gD,IDX.D_pm_bpp); M.d2_cd_bpp=aggMonth(d2,gD,IDX.D_cd_bpp); M.d2_gs_bpp=aggMonth(d2,gD,IDX.D_gs_bpp); M.d2_csl_bpp=aggMonth(d2,gD,IDX.D_csl_bpp); M.d2_sg_bpp=aggMonth(d2,gD,IDX.D_sg_bpp); M.d2_ap_bpp=aggMonth(d2,gD,IDX.D_ap_bpp); M.act_cbg=M.cbg;
   // D1 BPP from CBG Expected sheet (cols 1-5 = pm,cd,csl,gs,sg per D1)
   M.d1_pm_bpp=aggMonth(cbgExp,gD,1); M.d1_cd_bpp=aggMonth(cbgExp,gD,2); M.d1_csl_bpp=aggMonth(cbgExp,gD,3); M.d1_gs_bpp=aggMonth(cbgExp,gD,4); M.d1_sg_bpp=aggMonth(cbgExp,gD,5);
   // Aliases used by generate report and S1 render (cost_per_kg moved after M.total_cost)
@@ -6396,7 +6429,8 @@ async function buildAnalyticsD() {
   // Monthly Fixed Costs: row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols 3-14 = Jan-Dec
   const mfcVals=mfcR?.values||[];
   const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+3];return typeof v==='number'?v:0;};
-  M.manpower=aggMonth(rc,gD,8); // RC col9 — actual manpower entered daily
+  const _mp_rc=aggMonth(rc,gD,8);
+  M.manpower=months.map((m,i)=>_mp_rc[i]||mfcGet(3,m)); // RC col I actual if present, else Monthly Fixed Costs row3
   // EMI Tracker: row0=header, rows1+=individual EMIs; col0=text name, cols 4-15=Jan-Dec
   const emiVals=emiR?.values||[];
   const emiDataRows=emiVals.slice(1).filter(r=>r&&r.length>=5&&typeof r[4]==='number');
@@ -6444,10 +6478,10 @@ async function buildAnalyticsD() {
   DD.psa=buildDA(psa,gD,{cbg_tot:IDX.P_cbg_tot,purified:IDX.P_pur_tot,dispatched:IDX.P_dispatched,psa_hrs:psaH,comp_hrs:r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;},storage:IDX.P_storage,rbg_d1:IDX.P_rbg_d1,rbg_d2:IDX.P_rbg_d2,rbg_tot:IDX.P_rbg_tot,cbg_d1:IDX.P_cbg_d1,cbg_d2:IDX.P_cbg_d2,ch4:IDX.P_ch4,veer:IDX.P_veer,adinath:IDX.P_adinath,kfs:IDX.P_kfs,ksk:IDX.P_ksk,om:IDX.P_om,sps:IDX.P_sps});
   DD.d1=buildDA(d1,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
-    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act});
+    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
   DD.d2=buildDA(d2,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
-    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act});
+    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
   DD.feed=buildDA(fb,gD,{pm_in:47,gs_in:71,csl_in:26,cd_in:18,sg_in:66,ap_in:76,pm_feed:80,gs_feed:82,csl_feed:81,cd_feed:79,sg_feed:83,ap_feed:84,feed_total:85,pm_cost:64,gs_cost:74,csl_cost:30,cd_cost:22,sg_cost:68,ap_cost:78,pm_bal:94,gs_bal:96,csl_bal:95,cd_bal:93,sg_bal:97,ap_bal:98});
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   // Patch daily SFOM/LFOM from Manure Sales transactions (rc cols 2/3 are NULL for Aug-Sep 2026)
@@ -6500,18 +6534,18 @@ async function buildAnalyticsD() {
       d1:{feed_act:nv(d1r[IDX.D_feed_act]),bg_act:nv(d1r[IDX.D_bg_psa]),cbg:nv(d1r[IDX.D_cbg]),olr:nv(d1r[IDX.D_olr]),sfom:nv(d1r[IDX.D_sfom]),lfom:nv(d1r[IDX.D_lfom]),drain_ac:nv(d1r[IDX.D_drain_act]),psa_eff_pct:nv(d1r[IDX.D_psa_eff_pct]),
         feed_exp:nv(d1r[IDX.D_feed_exp]),bg_total:nv(d1r[IDX.D_bg_total]),bg_vent:nv(d1r[IDX.D_bg_vent]),drain_exp:nv(d1r[IDX.D_drain_exp]),
         bg_est_exp:nv(d1r[IDX.D_bg_est1]),bg_est_act:nv(d1r[IDX.D_bg_psa]),
-        cd_exp:nv(d1r[IDX.D_cd_exp]),pm_exp:nv(d1r[IDX.D_pm_exp]),csl_exp:nv(d1r[IDX.D_csl_exp]),gs_exp:nv(d1r[IDX.D_gs_exp]),sg_exp:nv(d1r[IDX.D_sg_exp]),
-        cd_act:nv(d1r[IDX.D_cd_act]),pm_act:nv(d1r[IDX.D_pm_act]),csl_act:nv(d1r[IDX.D_csl_act]),gs_act:nv(d1r[IDX.D_gs_act]),sg_act:nv(d1r[IDX.D_sg_act])},
+        cd_exp:nv(d1r[IDX.D_cd_exp]),pm_exp:nv(d1r[IDX.D_pm_exp]),csl_exp:nv(d1r[IDX.D_csl_exp]),gs_exp:nv(d1r[IDX.D_gs_exp]),sg_exp:nv(d1r[IDX.D_sg_exp]),ap_exp:nv(d1r[IDX.D_ap_exp]),
+        cd_act:nv(d1r[IDX.D_cd_act]),pm_act:nv(d1r[IDX.D_pm_act]),csl_act:nv(d1r[IDX.D_csl_act]),gs_act:nv(d1r[IDX.D_gs_act]),sg_act:nv(d1r[IDX.D_sg_act]),ap_act:nv(d1r[IDX.D_ap_act])},
       d2:{feed_act:nv(d2r[IDX.D_feed_act]),bg_act:nv(d2r[IDX.D_bg_psa]),cbg:nv(d2r[IDX.D_cbg]),olr:nv(d2r[IDX.D_olr]),sfom:nv(d2r[IDX.D_sfom]),lfom:nv(d2r[IDX.D_lfom]),drain_ac:nv(d2r[IDX.D_drain_act]),psa_eff_pct:nv(d2r[IDX.D_psa_eff_pct]),
         feed_exp:nv(d2r[IDX.D_feed_exp]),bg_total:nv(d2r[IDX.D_bg_total]),bg_vent:nv(d2r[IDX.D_bg_vent]),drain_exp:nv(d2r[IDX.D_drain_exp]),
         bg_est_exp:nv(d2r[IDX.D_bg_est1]),bg_est_act:nv(d2r[IDX.D_bg_psa]),
-        cd_exp:nv(d2r[IDX.D_cd_exp]),pm_exp:nv(d2r[IDX.D_pm_exp]),csl_exp:nv(d2r[IDX.D_csl_exp]),gs_exp:nv(d2r[IDX.D_gs_exp]),sg_exp:nv(d2r[IDX.D_sg_exp]),
-        cd_act:nv(d2r[IDX.D_cd_act]),pm_act:nv(d2r[IDX.D_pm_act]),csl_act:nv(d2r[IDX.D_csl_act]),gs_act:nv(d2r[IDX.D_gs_act]),sg_act:nv(d2r[IDX.D_sg_act])},
+        cd_exp:nv(d2r[IDX.D_cd_exp]),pm_exp:nv(d2r[IDX.D_pm_exp]),csl_exp:nv(d2r[IDX.D_csl_exp]),gs_exp:nv(d2r[IDX.D_gs_exp]),sg_exp:nv(d2r[IDX.D_sg_exp]),ap_exp:nv(d2r[IDX.D_ap_exp]),
+        cd_act:nv(d2r[IDX.D_cd_act]),pm_act:nv(d2r[IDX.D_pm_act]),csl_act:nv(d2r[IDX.D_csl_act]),gs_act:nv(d2r[IDX.D_gs_act]),sg_act:nv(d2r[IDX.D_sg_act]),ap_act:nv(d2r[IDX.D_ap_act])},
       feed:{pm_in:nv(fbr[47]),gs_in:nv(fbr[71]),csl_in:nv(fbr[26]),cd_in:nv(fbr[18]),sg_in:nv(fbr[66]),ap_in:nv(fbr[76]),pm_feed:nv(fbr[80]),gs_feed:nv(fbr[82]),csl_feed:nv(fbr[81]),cd_feed:nv(fbr[79]),sg_feed:nv(fbr[83]),ap_feed:nv(fbr[84]),feed_total:nv(fbr[85]),pm_cost:nv(fbr[64]),gs_cost:nv(fbr[74]),csl_cost:nv(fbr[30]),cd_cost:nv(fbr[22]),sg_cost:nv(fbr[68]),ap_cost:nv(fbr[78]),pm_bal:nv(fbr[94]),gs_bal:nv(fbr[96]),csl_bal:nv(fbr[95]),cd_bal:nv(fbr[93]),sg_bal:nv(fbr[97]),ap_bal:nv(fbr[98])},
       rev:(()=>{const _mo=moKey(dt),_mi=months.indexOf(_mo),_d=MDAYS[_mo]||30,_mp=(_mi>=0?M.manpower[_mi]||0:0)/_d,_emi=(_mi>=0?M.emi[_mi]||0:0)/_d;return{cbg_rev:nv(rcr[1]),sfom_rev:nv(rcr[2]),lfom_rev:nv(rcr[3]),feed_cost:nv(rcr[4]),trans_cost:nv(rcr[5]),maint_cost:nv(rcr[6]),elec_cost:nv(rcr[7]),manpower_daily:_mp,emi_daily:_emi,total_rev:(nv(rcr[1])||0)+(nv(rcr[2])||0)+(nv(rcr[3])||0),total_cost:(nv(rcr[4])||0)+(nv(rcr[5])||0)+(nv(rcr[6])||0)+(nv(rcr[7])||0)+_mp+_emi};})(),
       exp:{tot_exp:nv(cer[13]),d1_exp:nv(cer[6]),d2_exp:nv(cer[12]),ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg,act_pur:nv(p[IDX.P_pur_tot]),act_cbg:nv(p[IDX.P_cbg_tot]),
-        d1_pm_bpp:nv(cer[1]),d1_cd_bpp:nv(cer[2]),d1_csl_bpp:nv(cer[3]),d1_gs_bpp:nv(cer[4]),d1_sg_bpp:nv(cer[5]),
-        d2_pm_bpp:nv(cer[7]),d2_cd_bpp:nv(cer[8]),d2_csl_bpp:nv(cer[9]),d2_gs_bpp:nv(cer[10]),d2_sg_bpp:nv(cer[11])},
+        d1_pm_bpp:nv(cer[1]),d1_cd_bpp:nv(cer[2]),d1_csl_bpp:nv(cer[3]),d1_gs_bpp:nv(cer[4]),d1_sg_bpp:nv(cer[5]),d1_ap_bpp:nv(d1r[IDX.D_ap_bpp]),
+        d2_pm_bpp:nv(cer[7]),d2_cd_bpp:nv(cer[8]),d2_csl_bpp:nv(cer[9]),d2_gs_bpp:nv(cer[10]),d2_sg_bpp:nv(cer[11]),d2_ap_bpp:nv(d2r[IDX.D_ap_bpp])},
       health:{ph:{d1:nv(phr[1]),d2:nv(phr[4])},tp:{d1:nv(tmr[1]),d2:nv(tmr[4])},ia:{d1:null,d2:null},ts:{d1:null},vs:{d1:null}}
     };
   });
@@ -6519,9 +6553,9 @@ async function buildAnalyticsD() {
   const lastPsa=psa[psa.length-1]||[],lastPh=ph[ph.length-1]||[],lastFb=fb[fb.length-1]||[];
   const latDt=toDate(lastPsa[0]);
   const ytd_rev=M.total_rev.reduce((s,v)=>s+(v||0),0),ytd_cost=M.total_cost.reduce((s,v)=>s+(v||0),0);
-  const stock={pm:nv(lastFb[17])||0,gs:nv(lastFb[18])||0,csl:nv(lastFb[19])||0,cd:nv(lastFb[20])||0,sg:nv(lastFb[21])||0,date:dayKey(toDate(lastFb[0]))||'—'};
+  const stock={cd:nv(lastFb[93])||0,pm:nv(lastFb[94])||0,csl:nv(lastFb[95])||0,gs:nv(lastFb[96])||0,sg:nv(lastFb[97])||0,ap:nv(lastFb[98])||0,date:dayKey(toDate(lastFb[0]))||'—'};
   const avgF=ci=>{const v=fb.map(r=>nv(r[ci])).filter(x=>x!==null&&x>0);return v.length?v.reduce((s,x)=>s+x,0)/v.length:1;};
-  const inv_days={pm:stock.pm/avgF(11),gs:stock.gs/avgF(12),csl:stock.csl/avgF(13),cd:stock.cd/avgF(14),sg:stock.sg>0?stock.sg/avgF(15):0};
+  const inv_days={cd:stock.cd>0?stock.cd/avgF(79):0,pm:stock.pm>0?stock.pm/avgF(80):0,csl:stock.csl>0?stock.csl/avgF(81):0,gs:stock.gs>0?stock.gs/avgF(82):0,sg:stock.sg>0?stock.sg/avgF(83):0,ap:stock.ap>0?stock.ap/avgF(84):0};
   const td=Math.round(130000/30);
   const heatmap={};
   months.forEach(m=>{const dp=DD.psa[m]||{};heatmap[m]=(dp.dates||[]).map((_,i)=>{const c=(dp.cbg_tot||[])[i]||0;return c>=td?'g':c>=td*.7?'a':c>0?'r':'empty';});});
@@ -7051,10 +7085,10 @@ function _buildRpBody(p){
   </div>`;
 
   // ── 2: feedstock table ────────────────────────────────────────────
-  const fsKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed'];
-  const fsCostKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost'];
-  const fsProcKeys=['pm_in','cd_in','gs_in','csl_in','sg_in'];
-  const fsNames=['Pressmud','Cow Dung','Grain Syrup','CSL','Spent Grain'];
+  const fsKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed','ap_feed'];
+  const fsCostKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost','ap_cost'];
+  const fsProcKeys=['pm_in','cd_in','gs_in','csl_in','sg_in','ap_in'];
+  const fsNames=['Pressmud','Cow Dung','Grain Syrup','CSL','Spent Grain','Apple Pomace'];
   let fsTotalFed=0,fsTotalCost=0,fsTotalProc=0;
   const fsRows2=fsNames.map((nm,i)=>{
     let fed=0,cost=0,proc=0;
@@ -7391,11 +7425,11 @@ function renderReport(){
 
   // ── Section 3: Feedstock ──
   function fsTbl(){
-    const keys=['PM','CD','GS','CSL','SG'];
-    const names=['Pressmud (PM)','Cow Dung (CD)','Grain Syrup (GS)','CSL','Spent Grain (SG)'];
-    const feedKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed'];
-    const procKeys=['pm_in','cd_in','gs_in','csl_in','sg_in'];
-    const costKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost'];
+    const keys=['PM','CD','GS','CSL','SG','AP'];
+    const names=['Pressmud (PM)','Cow Dung (CD)','Grain Syrup (GS)','CSL','Spent Grain (SG)','Apple Pomace (AP)'];
+    const feedKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed','ap_feed'];
+    const procKeys=['pm_in','cd_in','gs_in','csl_in','sg_in','ap_in'];
+    const costKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost','ap_cost'];
     let rows='',tF=0,tC=0;
     keys.forEach((k,i)=>{
       let fed,cost;
