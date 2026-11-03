@@ -1270,7 +1270,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="kg k4">
     <div class="kc g"><div class="kl">Total Revenue</div><div class="kv g" id="s8_rev_kpi">₹448.5 L</div><div class="ks">CBG + Manure</div></div>
     <div class="kc r"><div class="kl">Total Cost</div><div class="kv r" id="s8_cost_kpi">₹237.0 L</div><div class="ks">Feedstock + Fixed</div></div>
-    <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="s8_margin_kpi">47.2%</div><div class="ks">Target: 45%</div></div>
+    <div class="kc a"><div class="kl">Total Production Cost</div><div class="kv a" id="s8_margin_kpi">—</div><div class="ks"></div></div>
     <div class="kc a"><div class="kl">Cost per kg CBG</div><div class="kv a" id="s8_cpk">—</div><div class="ks" id="s8_cpk_tgt">Target: ₹75/kg</div></div>
   </div>
   <div class="kg" style="grid-template-columns:repeat(3,1fr)">
@@ -1283,7 +1283,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct" id="ct_s8_cost">Cost Breakdown (₹)</div><div class="cw t"><canvas id="c_s8_cost"></canvas></div></div>
   </div>
   <div class="cg c2">
-    <div class="cc"><div class="ct" id="ct_s8_margin">Net Margin %</div><div class="cw"><canvas id="c_s8_margin"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s8_margin">Total Production Cost (₹)</div><div class="cw"><canvas id="c_s8_margin"></canvas></div></div>
     <div class="cc"><div class="ct">Cost per kg CBG (₹/kg)</div><div class="cw"><canvas id="c_s8_cpk_chart"></canvas></div></div>
   </div>
   <div class="cg c2">
@@ -2404,7 +2404,7 @@ function renderSectionDay(sectionId){
       metricCard('Feedstock Cost',fL2(rv.feed_cost),'','r'),
       metricCard('Transport Cost',fL2(rv.trans_cost),'','a'),
       metricCard('Maintenance Cost',fL2(rv.maint_cost),'','a'),
-      metricCard('Net Margin',mg!=null?mg+'%':null,'',mgCls,'Revenue minus variable cost'),
+      metricCard('Total Production Cost',totC>0?fL(totC):null,'','r','Variable costs total'),
     ]);
   } else if(sectionId==='s8'){
     const totR=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0);
@@ -2416,7 +2416,7 @@ function renderSectionDay(sectionId){
     html+=grid([
       metricCard('Total Revenue',fL2(totR),'','g','All products'),
       metricCard('Total Variable Cost',fL2(totC),'','r','Feed + transport + maint'),
-      metricCard('Net Margin',mg!=null?mg+'%':null,'',mgCls,'',true,Math.max(mg||0,0)),
+      metricCard('Total Production Cost',fmtL(totC),'','r','Feed + transport + maint combined'),
       metricCard('Cost per kg CBG',cpk,'','a','Variable cost ÷ CBG produced'),
     ]);
   }
@@ -2573,7 +2573,7 @@ function _renderOVSections(mo){
   const iaD2=D.kpis.ia_d2!=null?D.kpis.ia_d2.toFixed(2):'—';
   // S5 CBG/hr and trips
   const cbgHr=tCH>0?(tCBG/tCH).toFixed(0)+' kg/hr':'—';
-  const drainD=(mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_act')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_act'))[i]||0));
+  const drainD=(mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac'))[i]||0));
   const tDrain=sumA(drainD);
   const drAchPct=tDrain>0&&tExp>0?tDrain/tExp*100:null;
   // S6 manure revenue
@@ -2680,9 +2680,9 @@ function _renderOVSections(mo){
     {id:'s8',tab:'s8',clr:'#9f1239',num:'S8',nm:'Finance',person:'Management',swFlag:'',
      st:sOk(mrg,40,25),
      stat:[{l:'Margin '+(mrg>=40?'OK':mrg>=25?'Caution':'Alert'),c:mrg>=40?'g':mrg>=25?'a':'r'}],
-     mx:[{l:'YTD Revenue',v:fmtL(tRev)},{l:'YTD Cost',v:fmtL(tCost)},{l:'Net Margin',v:mrg!=null?mrg.toFixed(1)+'%':'—',vc:mrg>=40?'g':mrg>=25?'a':'r'},{l:'Cost/kg CBG',v:cpkV!=null?'₹'+cpkV.toFixed(1)+'/kg':'—',vc:cpkV!=null&&cpkV<=TGT.cost_kg?'g':'r'},{l:'Biggest Cost',v:bigCost}],
-     cl:'Monthly Net Margin % — Target 45%',
-     ch:()=>line('ov_ch_s8',mo==='ALL'?MONTHS:dDates('rev'),(D.M.margin||[]).length?[lDS('Margin %',D.M.margin,C.rose)]:revD.length?[lDS('Margin %',revD.map((v,i)=>costD[i]>0&&v>0?(v-costD[i])/v*100:null),C.rose)]:[]),
+     mx:[{l:'YTD Revenue',v:fmtL(tRev)},{l:'Total Production Cost',v:fmtL(tCost),vc:'r'},{l:'Cost/kg CBG',v:cpkV!=null?'₹'+cpkV.toFixed(1)+'/kg':'—',vc:cpkV!=null&&cpkV<=TGT.cost_kg?'g':'r'},{l:'Biggest Cost',v:bigCost}],
+     cl:'Monthly Total Production Cost (₹)',
+     ch:()=>bar('ov_ch_s8',mo==='ALL'?MONTHS:dDates('rev'),[bDS('Total Cost',costD,C.rose)]),
      exploreLbl:'Finance',exploreHint:'P&L · Cost breakdown · Margin trends'},
   ];
   const stlblM={ok:'Good',warn:'Caution',alert:'Alert'};
@@ -2769,7 +2769,7 @@ function renderOV(){
       {bar:'#6d28d9',l:'Capacity Revenue',v:'₹'+fmtN(dCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
       {bar:'#0e7490',l:'Actual Energy Revenue',v:dActRev!=null?'₹'+fmtN(dActRev):'—',s:'Actual CBG × ₹99.70/kg',dc:dActRev!=null&&dCapRev>0?dActRev/dCapRev>=0.9?'g':dActRev/dCapRev>=0.75?'a':'r':null},
       {bar:'#1b8a4a',l:'Total Revenue',v:dRev?fmtL(dRev):'—',s:'CBG + Manure'},
-      {bar:'#c67c00',l:'Net Margin',v:dMgn!=null?dMgn.toFixed(1)+'%':'—',s:'Target: 40%+',dc:dMgn>=40?'g':dMgn>=25?'a':'r'},
+      {bar:'#c67c00',l:'Total Production Cost',v:dCost!=null?fmtR(dCost):'—',s:''},
       {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
       {bar:'#c67c00',l:'Plant Uptime',v:dUpt!=null?dUpt.toFixed(1)+'%':'—',s:'Comp÷PSA hrs',dc:dUpt>=90?'g':dUpt>=70?'a':'r'},
     ]);
@@ -2844,7 +2844,7 @@ function renderOV(){
     {bar:'#6d28d9',l:'Capacity Revenue',v:'₹'+fmtN(moCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
     {bar:'#0e7490',l:'Actual Energy Revenue',v:'₹'+fmtN(moActRev),s:'Actual CBG × ₹99.70/kg',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
-    {bar:'#c67c00',l:'Net Margin',v:marginPct!=null?marginPct.toFixed(1)+'%':'—',s:'Target: 40%+',d:marginPct>=40?'On target':'▼ Below 40%',dc:marginPct>=40?'g':marginPct>=25?'a':'r'},
+    {bar:'#c67c00',l:'Total Production Cost',v:fmtR(totalCost),s:''},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
     {bar:'#c67c00',l:'Plant Uptime',v:uptPct!=null?uptPct.toFixed(1)+'%':'—',s:'Comp ÷ PSA hrs · ≥90%',d:uptPct>=90?'On target':'▼ Below 90%',dc:uptPct>=90?'g':uptPct>=70?'a':'r'},
   ]);
@@ -3003,7 +3003,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const dPsaEff=_psaEff1!=null&&_psaEff2!=null?(_psaEff1+_psaEff2)/2:_psaEff1??_psaEff2??(dCBG&&ex.tot_exp>0?dCBG/ex.tot_exp*100:null);
   const dDR=dCBG&&dDisp?dDisp/dCBG*100:null;
   const sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
-  const drainD1=d1r.drain_act,drainD2=d2r.drain_act;
+  const drainD1=d1r.drain_ac,drainD2=d2r.drain_ac;
   const drainTot=(drainD1||0)+(drainD2||0);
   const drainExp=(d1r.drain_exp||0)+(d2r.drain_exp||0);
   const drainAch=drainTot&&drainExp>0?drainTot/drainExp*100:null;
@@ -3127,7 +3127,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
     tblRow('LFOM (KL)',fmtKL(d1r.lfom),fmtKL(d2r.lfom)),
     tblRow('Drain % Feed',drFeed!=null?fmtPct(drFeed):'—'),
   ]);
-  const s6spk=spkFromMo('d1','drain_act');
+  const s6spk=spkFromMo('d1','drain_ac');
 
   // S7 Sales
   const s7={id:'s7',clr:'#b45309',nm:'Sales',person:'Mr. Vivek Kumar'};
@@ -3144,10 +3144,10 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s8rows=tbl(['Parameter','Actual','Target'],[
     tblRow('Est Revenue',dRev?fmtR(dRev):'—'),
     tblRow('Est Cost',dCost?fmtR(dCost):'—'),
-    tblRow('Net Margin',dMgn!=null?fmtPct(dMgn):'—',undefined,'45%',undefined,dMgn!=null&&dMgn<25),
+    tblRow('Total Production Cost',dCost!=null?fmtR(dCost):'—'),
     tblRow('Production Cost/kg',dCpk!=null?'₹'+dCpk.toFixed(2):'—',undefined,'≤₹75'),
   ]);
-  const s8spk=(D.M.margin||[]).filter(v=>v!=null&&v!==0).slice(-7).map(v=>Math.max(0,v));
+  const s8spk=(D.M.total_cost||[]).filter(v=>v!=null&&v!==0).slice(-7);
 
   const SECS_DA=[
     {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:'7-day PM+CD Feed (MT)'},
@@ -3157,7 +3157,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
     {sec:s5,content:s5rows,spk:s5spk,spkClr:'#0e7490',spkLbl:'7-day Dispatch Rate'},
     {sec:s6,content:s6rows,spk:s6spk,spkClr:'#3f6212',spkLbl:'7-day Drain Achievement %'},
     {sec:s7,content:s7rows,spk:s7spk,spkClr:'#b45309',spkLbl:'7-day Dispatch Rate'},
-    {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Net Margin %'},
+    {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Total Production Cost'},
   ];
   sg.innerHTML=SECS_DA.map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
 } // end _renderOVSectionsDaInner
@@ -4610,7 +4610,7 @@ function renderS8(){
   // ── KPI cards ──────────────────────────────────────────────
   document.getElementById('s8_rev_kpi').textContent=fmtR(totR);
   document.getElementById('s8_cost_kpi').textContent=fmtR(totC);
-  document.getElementById('s8_margin_kpi').textContent=(mo==='ALL'?D.kpis.ytd_margin:mg)+'%';
+  document.getElementById('s8_margin_kpi').textContent=fmtR(mo==='ALL'?D.finance.ytd_cost:totC);
   document.getElementById('s8_cpk').textContent=cpk?'₹'+cpk+'/kg':'—';
   {const el=document.getElementById('s8_cpk_tgt');if(el)el.textContent='Target: ₹'+TGT.cost_kg+'/kg';}
   document.getElementById('s8_cbg_rev').textContent=fmtR(mo==='ALL'?fin.ytd_cbg_rev:sumA(cbgR));
@@ -4626,12 +4626,12 @@ function renderS8(){
     bDS('Manpower',mp,C.purple),bDS('EMI / Loan',emi,C.pink)
   ],true);
   if(charts['c_s8_margin'])charts['c_s8_margin'].destroy();
-  charts['c_s8_margin']=new Chart(document.getElementById('c_s8_margin'),{type:'line',
+  const costArr=mo==='ALL'?D.M.total_cost:[D.M.total_cost?.[idx]||null];
+  charts['c_s8_margin']=new Chart(document.getElementById('c_s8_margin'),{type:'bar',
     data:{labels:lbl,datasets:[
-      {label:'Net Margin %',data:margins,borderColor:C.cyan,backgroundColor:a(C.cyan,0.1),fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:C.cyan},
-      {label:'Target 45%',data:lbl.map(()=>45),borderColor:C.green,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
+      {label:'Total Production Cost (₹)',data:costArr,backgroundColor:a(C.rose,0.7),borderColor:C.rose,borderWidth:1}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},
-      scales:{y:{ticks:{callback:v=>v+'%'},suggestedMin:0,suggestedMax:60}}}});
+      scales:{y:{ticks:{callback:v=>'₹'+(v>=1e5?(v/1e5).toFixed(1)+'L':v>=1e3?(v/1e3).toFixed(0)+'k':v)},suggestedMin:0}}}});
   if(charts['c_s8_cpk_chart'])charts['c_s8_cpk_chart'].destroy();
   charts['c_s8_cpk_chart']=new Chart(document.getElementById('c_s8_cpk_chart'),{type:'line',
     data:{labels:lbl,datasets:[
@@ -6353,6 +6353,7 @@ async function buildAnalyticsD() {
   const getRows=(raw,dc)=>(raw?.values||[]).filter(r=>toDate(r[dc]));
   const psa=getRows(psaR,0),d1=getRows(d1R,0),d2=getRows(d2R,0),cbgExp=getRows(cbgExpR,0);
   const ph=getRows(phR,0),tmp_=getRows(tmpR,0),tsvs_=getRows(tsvsR,0),iapa_=getRows(iapaR,0);
+  console.log('[IAPA] rows loaded:',iapa_.length,'sample col4:',(iapa_[0]?.[4]??'—'),'sample col12:',(iapa_[0]?.[12]??'—'),'raw sample:',iapa_.slice(0,2));
   const rc=getRows(rcR,0),fb=getRows(fbR,0);
   const monthSet=new Set(); const yearMonthSet=new Set();
   psa.forEach(r=>{const dt=toDate(r[0]);if(!dt)return;const m=moKey(dt);if(m){monthSet.add(m);yearMonthSet.add(dt.getFullYear()+'|'+m);}});
@@ -7034,7 +7035,7 @@ function _buildRpBody(p){
     coverMeta=[{l:'Capacity',v:'5.4 TPD'},{l:'Months',v:MONTHS.length+' / 12'},{l:'CBG Produced',v:fNI(ytdCBG)+' kg'},{l:'Revenue YTD',v:fL(ytdRev)}];
     statusChips=[
       {t:'CBG Achievement',v:tgtAch!=null?tgtAch+'%':'—',sub:'vs '+fNI(tgtCBG)+' kg target',cls:tgtAch>=90?'g':tgtAch>=75?'a':'r'},
-      {t:'Net Margin',v:ytdMgn!=null?ytdMgn+'%':'—',sub:'Target: 45%',cls:ytdMgn>=40?'g':ytdMgn>=25?'a':'r'},
+      {t:'Total Prod. Cost',v:ytdCost>0?fL(ytdCost):'—',sub:'YTD total',cls:'r'},
       {t:'pH Status',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(1):'—',sub:'D1 latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
       {t:'Months Tracked',v:MONTHS.length+' / 12',sub:'Data completeness',cls:'b'},
     ];
@@ -7045,7 +7046,7 @@ function _buildRpBody(p){
     coverMeta=[{l:'Quarter',v:curQ+' 2026'},{l:'Months',v:qMos.join(', ')},{l:'CBG Produced',v:fNI(qCBG)+' kg'},{l:'Revenue',v:fL(qRev)}];
     statusChips=[
       {t:'CBG Achievement',v:qTgtAch!=null?qTgtAch+'%':'—',sub:'vs '+fNI(qTgt)+' kg target',cls:qTgtAch>=90?'g':qTgtAch>=75?'a':'r'},
-      {t:'Net Margin',v:qMgn!=null?qMgn+'%':'—',sub:'Target: 45%',cls:qMgn>=40?'g':qMgn>=25?'a':'r'},
+      {t:'Total Prod. Cost',v:qCost>0?fL(qCost):'—',sub:'Quarter total',cls:'r'},
       {t:'pH D1 Latest',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—',sub:'Range 6.5–7.5',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
       {t:'Avg OLR D1',v:qAvg('d1_olr')!=null?qAvg('d1_olr').toFixed(2)+' kg/m³/d':'—',sub:'Target ≥ 3.5',cls:qAvg('d1_olr')>=3.5?'g':qAvg('d1_olr')?'a':'b'},
     ];
@@ -7056,7 +7057,7 @@ function _buildRpBody(p){
     coverMeta=[{l:'Month',v:mo+' 2026'},{l:'Days',v:dim},{l:'CBG Produced',v:fNI(moCBG)+' kg'},{l:'Revenue',v:fL(moRev)}];
     statusChips=[
       {t:'CBG Achievement',v:moTgtAch!=null?moTgtAch+'%':'—',sub:'vs '+fNI(TGT.cbg_month)+' kg target',cls:moTgtAch>=90?'g':moTgtAch>=75?'a':'r'},
-      {t:'Net Margin',v:moMgn!=null?moMgn+'%':'—',sub:'Target: 45%',cls:moMgn>=40?'g':moMgn>=25?'a':'r'},
+      {t:'Total Prod. Cost',v:moCost>0?fL(moCost):'—',sub:'Month total',cls:'r'},
       {t:'pH D1 / D2',v:(D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—')+' / '+(D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'),sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
       {t:'OLR D1 / D2',v:((D.M.d1_olr||[])[moIdx]!=null?((D.M.d1_olr||[])[moIdx]).toFixed(2):'—')+' / '+((D.M.d2_olr||[])[moIdx]!=null?((D.M.d2_olr||[])[moIdx]).toFixed(2):'—')+' kg/m³/d',sub:'Target ≥ 3.5',cls:(D.M.d1_olr||[])[moIdx]>=3.5?'g':(D.M.d1_olr||[])[moIdx]?'a':'b'},
     ];
@@ -7069,7 +7070,7 @@ function _buildRpBody(p){
     coverMeta=[{l:'Date',v:daLabel},{l:'Plant',v:'Karnal CBG'},{l:'CBG',v:fNI(dCBG)+' kg'},{l:'Est. Revenue',v:fL(dRev)}];
     statusChips=[
       {t:'Daily Achievement',v:dAch!=null?dAch+'%':'—',sub:'Daily target: '+fNI(dTgtDay)+' kg',cls:dAch>=90?'g':dAch>=75?'a':'r'},
-      {t:'Est. Margin',v:dMgn!=null?dMgn+'%':'—',sub:'Estimated',cls:dMgn>=40?'g':dMgn>=25?'a':'r'},
+      {t:'Total Prod. Cost',v:dCost>0?fL(dCost):'—',sub:'Day total',cls:'r'},
       {t:'pH D1 / D2',v:(D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—')+' / '+(D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'),sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
       {t:'Temp D1 / D2',v:(D.kpis.temp_d1!=null?D.kpis.temp_d1.toFixed(1):'—')+' / '+(D.kpis.temp_d2!=null?D.kpis.temp_d2.toFixed(1):'—')+' °C',sub:'Latest reading',cls:D.kpis.temp_d1&&D.kpis.temp_d1>=33?'g':D.kpis.temp_d1?'a':'b'},
     ];
@@ -7286,7 +7287,7 @@ function _buildRpBody(p){
     ${pct!=null?`<div class="rp-pnl-pct ${pct>=40?'g':pct>=20?'a':'nt'}">${pct}%</div>`:''}
   </div>`;
   const fRX=v=>v!=null&&v>0?fmtR(v):'—';
-  const pnl=`${secH('6','P&L — Cost Structure & Net Margin')}
+  const pnl=`${secH('6','P&L — Cost Structure & Total Production Cost')}
   <div class="rp-pnl-wrap">
     ${pRow('Total Revenue',fRX(pnlRev),pnlRev?100:'','',pnlRev?'CBG + Manure combined':null)}
     ${pnlFeed!=null?pRow('Feedstock Cost',fRX(pnlFeed),pnlRev&&pnlFeed?-Math.round(pnlFeed/pnlRev*100):null,'','Pressmud, GS, CD, CSL, SG'):''}
@@ -7295,7 +7296,7 @@ function _buildRpBody(p){
     ${pnlFixed!=null?pRow('Fixed Overheads',fRX(pnlFixed),null,'','Monthly fixed ₹3,00,000'):''}
     ${pnlEMI!=null?pRow('EMI / Debt Service',fRX(pnlEMI),null,'','Loan repayment'):''}
     ${pRow('Total Operating Cost',fRX(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'subtotal',null)}
-    ${pRow('Net Profit / Margin',fRX(pnlMgn),pnlMgnPct,'total',pnlMgnPct!=null?`${pnlMgnPct}% net margin · Target: 45%`:null)}
+    ${pRow('Total Production Cost',fRX(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'total',null)}
   </div>`;
 
   // ── 7: findings (3 columns) ───────────────────────────────────────
@@ -7306,10 +7307,10 @@ function _buildRpBody(p){
   else if(achKpi!=null&&achKpi<90)allFindings.push({cls:'wa',badge:'WATCH',head:'CBG Below 90% Target',vals:[{l:'Achievement',v:achKpi+'%',c:'a'},{l:'Target',v:'≥90%',c:'nt'},{l:'Gap',v:(90-achKpi)+'%',c:'a'}]});
   else allFindings.push({cls:'ok',badge:'OK',head:'CBG Production On Target',vals:[{l:'Achievement',v:(achKpi||'—')+(achKpi!=null?'%':''),c:'g'},{l:'Target',v:'≥90%',c:'nt'},{l:'Status',v:'On Track',c:'g'}]});
   // margin
-  const mgnKpi=p==='yearly'?ytdMgn:p==='quarterly'?qMgn:p==='monthly'?moMgn:dMgn;
-  if(mgnKpi!=null&&mgnKpi<25)allFindings.push({cls:'al',badge:'ALERT',head:'Net Margin Below 25%',vals:[{l:'Margin',v:mgnKpi+'%',c:'r'},{l:'Target',v:'45%',c:'nt'},{l:'Gap',v:(45-mgnKpi)+'%',c:'r'}]});
-  else if(mgnKpi!=null&&mgnKpi<40)allFindings.push({cls:'wa',badge:'WATCH',head:'Margin Below 40% Target',vals:[{l:'Margin',v:mgnKpi+'%',c:'a'},{l:'Target',v:'45%',c:'nt'},{l:'Gap',v:(45-mgnKpi)+'%',c:'a'}]});
-  else allFindings.push({cls:'ok',badge:'OK',head:'Margin Within Target Range',vals:[{l:'Margin',v:mgnKpi!=null?mgnKpi+'%':'—',c:'g'},{l:'Target',v:'45%',c:'nt'},{l:'Status',v:'Healthy',c:'g'}]});
+  const costKpi=p==='yearly'?ytdCost:p==='quarterly'?qCost:p==='monthly'?moCost:dCost;
+  const fmtCostKpi=v=>v>0?fL(v):'—';
+  if(costKpi>0)allFindings.push({cls:'ok',badge:'INFO',head:'Total Production Cost',vals:[{l:'Period Cost',v:fmtCostKpi(costKpi),c:'nt'},{l:'Period',v:p,c:'nt'},{l:'Status',v:'Tracked',c:'g'}]});
+  else allFindings.push({cls:'ok',badge:'OK',head:'Production Cost Data Unavailable',vals:[{l:'Status',v:'No data',c:'nt'},{l:'Expected',v:'Enter costs',c:'nt'},{l:'Sheet',v:'Daily Rev & Costs',c:'nt'}]});
   // temperature
   if(t1!=null&&t1<33)allFindings.push({cls:'al',badge:'ALERT',head:'Digester Temperature Low',vals:[{l:'D1 Temp',v:t1.toFixed(1)+'°C',c:'r'},{l:'D2 Temp',v:t2!=null?t2.toFixed(1)+'°C':'—',c:t2&&t2<33?'r':'nt'},{l:'Threshold',v:'33°C',c:'nt'}]});
   else if(t1!=null&&t1<35)allFindings.push({cls:'wa',badge:'WATCH',head:'Temperature Near Winter Threshold',vals:[{l:'D1 Temp',v:t1.toFixed(1)+'°C',c:'a'},{l:'D2 Temp',v:t2!=null?t2.toFixed(1)+'°C':'—',c:'nt'},{l:'Threshold',v:'33°C',c:'nt'}]});
@@ -7331,23 +7332,23 @@ function _buildRpBody(p){
   // ── 8: comparison table ───────────────────────────────────────────
   let cmpHtml;
   if(p==='quarterly'){
-    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th><th>Revenue</th><th>Margin</th></tr></thead><tbody>
+    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th><th>Revenue</th><th>Total Cost</th></tr></thead><tbody>
       ${qMos.map(m=>{
         const qi=MONTHS.indexOf(m);if(qi<0)return'';
         const c=(D.M.cbg||[])[qi]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;
-        const r=(D.M.total_rev||[])[qi];const mg=(D.M.margin||[])[qi];
-        return`<tr><td>${m} 2026</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td>${fNI(t)}</td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td>${r!=null?fL(r):'—'}</td><td>${mg!=null?chip(mg+'%',mg>=40?'up':mg>=25?'wa':'dn'):'—'}</td></tr>`;
+        const r=(D.M.total_rev||[])[qi];const cost=(D.M.total_cost||[])[qi];
+        return`<tr><td>${m} 2026</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td>${fNI(t)}</td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td>${r!=null?fL(r):'—'}</td><td>${cost!=null?fL(cost):'—'}</td></tr>`;
       }).join('')}
-      <tr><td><strong>${curQ} Total</strong></td><td><strong>${fNI(qCBG)}</strong></td><td><strong>${fNI(qTgt)}</strong></td><td>${qTgtAch!=null?chip(qTgtAch+'%',qTgtAch>=90?'up':qTgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(qRev)}</strong></td><td>${qMgn!=null?chip(qMgn+'%',qMgn>=40?'up':qMgn>=25?'wa':'dn'):'—'}</td></tr>
+      <tr><td><strong>${curQ} Total</strong></td><td><strong>${fNI(qCBG)}</strong></td><td><strong>${fNI(qTgt)}</strong></td><td>${qTgtAch!=null?chip(qTgtAch+'%',qTgtAch>=90?'up':qTgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(qRev)}</strong></td><td>${qCost>0?fL(qCost):'—'}</td></tr>
     </tbody></table></div>`;
   } else if(p==='yearly'){
-    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th><th>Revenue</th><th>Margin</th></tr></thead><tbody>
+    cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th><th>Revenue</th><th>Total Cost</th></tr></thead><tbody>
       ${MONTHS.map((m,i)=>{
         const c=(D.M.cbg||[])[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;
-        const r=(D.M.total_rev||[])[i];const mg=(D.M.margin||[])[i];
-        return`<tr><td>${m}</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(t)}</span></div></td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td><div class="rp-num-pair"><span class="rp-np-big">${r!=null?fL(r):'—'}</span></div></td><td>${mg!=null?chip(mg+'%',mg>=40?'up':mg>=25?'wa':'dn'):'—'}</td></tr>`;
+        const r=(D.M.total_rev||[])[i];const cost=(D.M.total_cost||[])[i];
+        return`<tr><td>${m}</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(t)}</span></div></td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td><div class="rp-num-pair"><span class="rp-np-big">${r!=null?fL(r):'—'}</span></div></td><td>${cost!=null?fL(cost):'—'}</td></tr>`;
       }).join('')}
-      <tr><td><strong>YTD Total</strong></td><td><strong>${fNI(ytdCBG)}</strong></td><td><strong>${fNI(tgtCBG)}</strong></td><td>${tgtAch!=null?chip(tgtAch+'%',tgtAch>=90?'up':tgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(ytdRev)}</strong></td><td>${ytdMgn!=null?chip(ytdMgn+'%',ytdMgn>=40?'up':ytdMgn>=25?'wa':'dn'):'—'}</td></tr>
+      <tr><td><strong>YTD Total</strong></td><td><strong>${fNI(ytdCBG)}</strong></td><td><strong>${fNI(tgtCBG)}</strong></td><td>${tgtAch!=null?chip(tgtAch+'%',tgtAch>=90?'up':tgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(ytdRev)}</strong></td><td>${ytdCost>0?fL(ytdCost):'—'}</td></tr>
     </tbody></table></div>`;
   } else if(p==='monthly'){
     const cbgDays=[];const cbgDates=[];
@@ -7418,7 +7419,7 @@ function renderReport(){
       three:[
         {lbl:'Actual CBG Produced',val:fNI(ytdCBG)+' kg',sub:MONTHS[0]+'–'+MONTHS[MONTHS.length-1]+' 2026 · '+(tgtAch!=null?tgtAch+'% of target':''),pct:tgtAch||0,clr:tgtAch>=90?'#16a34a':tgtAch>=75?'#d97706':'#dc2626'},
         {lbl:'Total Revenue',val:fL(ytdRev),sub:'CBG + SFOM + LFOM combined',pct:90,clr:'#16a34a'},
-        {lbl:'Net Margin YTD',val:ytdMgn!=null?ytdMgn+'%':'—',sub:'Target: 45% · '+(ytdMgn!=null&&ytdMgn<45?'▼ '+(45-ytdMgn).toFixed(1)+'% below target':'✓ On target'),pct:ytdMgn||0,clr:ytdMgn>=40?'#d97706':'#dc2626'},
+        {lbl:'Total Production Cost YTD',val:ytdCost>0?fL(ytdCost):'—',sub:'All cost components combined',pct:0,clr:'#dc2626'},
       ]
     };
   } else if(v==='monthly'){
@@ -7435,7 +7436,7 @@ function renderReport(){
       three:[
         {lbl:'CBG Produced — '+mo,val:fNI(moCBG)+' kg',sub:mo+' 2026 · '+(tgtAch!=null?tgtAch+'% of target':''),pct:tgtAch||0,clr:tgtAch>=90?'#16a34a':tgtAch>=75?'#d97706':'#dc2626'},
         {lbl:'Revenue — '+mo,val:fL(moRev),sub:'CBG + Manure revenue',pct:moRev>0&&D.finance.ytd_rev>0?Math.round(moRev/D.finance.ytd_rev*100):0,clr:'#d97706'},
-        {lbl:'Net Margin — '+mo,val:moMgn!=null?moMgn+'%':'—',sub:'Target: 45% · '+(moMgn!=null&&moMgn<45?'▼ '+(45-moMgn).toFixed(1)+'% gap':'✓ On target'),pct:moMgn||0,clr:moMgn>=40?'#d97706':'#dc2626'},
+        {lbl:'Total Production Cost — '+mo,val:moCost>0?fL(moCost):'—',sub:'All cost components combined',pct:0,clr:'#dc2626'},
       ]
     };
   } else {
@@ -7456,7 +7457,7 @@ function renderReport(){
       three:[
         {lbl:'CBG Produced Today',val:fNI(dCBG)+' kg',sub:da+' · '+(dAch!=null?dAch+'% of daily target':''),pct:dAch||0,clr:dAch>=90?'#16a34a':dAch>=75?'#d97706':'#dc2626'},
         {lbl:'Est. Revenue Today',val:fL(dRev),sub:'CBG + Manure estimated',pct:dRev>0&&D.finance.ytd_rev>0?Math.min(100,Math.round(dRev/(D.finance.ytd_rev/MONTHS.length/30)*100)):0,clr:'#d97706'},
-        {lbl:'Est. Margin Today',val:dMgn!=null?dMgn+'%':'—',sub:'Target: 45% · '+(dMgn!=null&&dMgn<45?'▼ Below target':'✓ On target'),pct:dMgn||0,clr:dMgn>=40?'#d97706':'#dc2626'},
+        {lbl:'Total Production Cost Today',val:dCost>0?fL(dCost):'—',sub:'All cost components combined',pct:0,clr:'#dc2626'},
       ]
     };
   }
@@ -7601,7 +7602,7 @@ function renderReport(){
       ${maint!=null?`<tr><td>Manpower Cost</td><td>${fL(maint)}</td><td>${rev>0?Math.round(maint/rev*100)+'%':'—'}</td></tr>`:''}
       ${elec!=null?`<tr><td>Power / Utilities</td><td>${fL(elec)}</td><td>${rev>0?Math.round(elec/rev*100)+'%':'—'}</td></tr>`:''}
       <tr><td>Total Cost</td><td>${fL(cost)}</td><td>${rev>0?Math.round(cost/rev*100)+'%':'—'}</td></tr>
-      <tr><td>Net Margin</td><td>${fL(rev&&cost?rev-cost:null)}</td><td class="${margin>=40?'ok':margin>=25?'wa':'al'}">${margin!=null?margin+'%':'—'}</td></tr>
+      <tr><td>Total Production Cost</td><td>${fL(cost)}</td><td>${rev>0&&cost>0?Math.round(cost/rev*100)+'% of revenue':'—'}</td></tr>
     </tbody></table>`;
   }
 
@@ -7614,8 +7615,9 @@ function renderReport(){
     const t1=D.kpis.temp_d1,t2=D.kpis.temp_d2;
     if(tgtCBG>0&&ytdCBG/tgtCBG<0.9)items.push({bg:'#fef3c7',clr:'#d97706',t:'CBG Achievement Below 90%',txt:`YTD achievement at ${Math.round(ytdCBG/tgtCBG*100)}% of target. Review PSA efficiency and feedstock supply gaps.`});
     else items.push({bg:'#d1fae5',clr:'#16a34a',t:'CBG Achievement On Track',txt:`YTD ${Math.round(ytdCBG/tgtCBG*100)}% achievement. Plant maintaining target output across ${MONTHS.length} months.`});
-    if(ytdMgn!=null&&ytdMgn<40)items.push({bg:'#fee2e2',clr:'#dc2626',t:'Margin Below 40% — Action Required',txt:`Net margin at ${ytdMgn}% vs target 45%. Feedstock cost optimization is the primary lever.`});
-    else if(ytdMgn!=null)items.push({bg:'#d1fae5',clr:'#16a34a',t:'Margin Healthy at '+ytdMgn+'%',txt:'Net margin within acceptable range. Continue monitoring feedstock cost as main variable.'});
+    const _ytdCostR=D.finance.ytd_cost;
+    if(_ytdCostR>0)items.push({bg:'#fef3c7',clr:'#d97706',t:'Total Production Cost: '+fmtR(_ytdCostR),txt:'YTD total production cost (feedstock + manpower + electricity + EMI + maintenance). Monitor feedstock cost as the primary variable.'});
+    else items.push({bg:'#f3f4f6',clr:'#6b7280',t:'Production Cost Data Unavailable',txt:'Enter cost data via the Daily Revenue & Costs sheet to see total production cost tracking.'});
     if(t1!=null&&t1<33)items.push({bg:'#fef3c7',clr:'#d97706',t:'Digester Temperature Alert',txt:`D1 temp ${t1.toFixed(1)}°C${t2!=null?' · D2 '+t2.toFixed(1)+'°C':''} — approaching 32°C winter threshold. Heating protocol review recommended.`});
     return items.map(f=>`<div class="rp-finding"><div class="rp-f-icon" style="background:${f.bg};color:${f.clr}">●</div><div class="rp-f-body"><div class="rp-f-ttl">${f.t}</div><div class="rp-f-txt">${f.txt}</div></div></div>`).join('');
   }
@@ -7623,8 +7625,8 @@ function renderReport(){
   // ── Section 9: Comparison ──
   function compTbl(){
     if(v==='yearly'){
-      return`<div style="overflow-x:auto"><table class="rp-tbl"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target (kg)</th><th>Achiev.</th><th>Revenue</th><th>Margin%</th></tr></thead><tbody>
-        ${MONTHS.map((m,i)=>{const c=D.M.cbg?.[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;const r=(D.M.total_rev||[])[i];const mg=(D.M.margin||[])[i];return`<tr><td>${m} 2026</td><td>${fNI(c)}</td><td>${fNI(t)}</td><td class="${a>=90?'ok':a>=75?'wa':'al'}">${a!=null?a+'%':'—'}</td><td>${r!=null?fL(r):'—'}</td><td class="${mg>=40?'ok':mg>=25?'wa':'al'}">${mg!=null?mg+'%':'—'}</td></tr>`;}).join('')}
+      return`<div style="overflow-x:auto"><table class="rp-tbl"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target (kg)</th><th>Achiev.</th><th>Revenue</th><th>Total Cost</th></tr></thead><tbody>
+        ${MONTHS.map((m,i)=>{const c=D.M.cbg?.[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;const r=(D.M.total_rev||[])[i];const cost=(D.M.total_cost||[])[i];return`<tr><td>${m} 2026</td><td>${fNI(c)}</td><td>${fNI(t)}</td><td class="${a>=90?'ok':a>=75?'wa':'al'}">${a!=null?a+'%':'—'}</td><td>${r!=null?fL(r):'—'}</td><td>${cost!=null?fL(cost):'—'}</td></tr>`;}).join('')}
       </tbody></table></div>`;
     }
     if(v==='monthly'){
@@ -7663,7 +7665,7 @@ function renderReport(){
     <div class="rp-sec">${secH('4','Digesters — Process Parameters')}<div class="rp-sec-body">${digTbl()}</div></div>
     <div class="rp-sec">${secH('5','Production — Biogas & CBG Output')}<div class="rp-sec-body">${prodTbl()}</div></div>
     <div class="rp-sec">${secH('6','Sales — Dispatch & Revenue')}<div class="rp-sec-body">${salesTbl()}</div></div>
-    <div class="rp-sec">${secH('7','P&L — Cost Structure & Net Margin')}<div class="rp-sec-body">${plTbl()}</div></div>
+    <div class="rp-sec">${secH('7','P&L — Cost Structure & Total Production Cost')}<div class="rp-sec-body">${plTbl()}</div></div>
     <div class="rp-sec">${secH('8','Key Findings')}<div class="rp-sec-body">${findingsHtml()}</div></div>
     <div class="rp-sec">${secH('9','Period Comparison Data')}<div class="rp-sec-body">${compTbl()}</div></div>
     <div class="rp-sec">${secH('10','Action Items')}<div class="rp-sec-body">${actions.map(a=>`<div class="rp-action-row"><div class="rp-ap" style="background:${a.clr}22;border:1px solid ${a.clr};color:${a.clr}">${a.n}</div><div><div class="rp-at">${a.t}</div><div class="rp-ao">${a.o}</div></div></div>`).join('')}</div></div>
