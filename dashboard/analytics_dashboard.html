@@ -1241,7 +1241,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="kc c"><div class="kl">Total Dispatched</div><div class="kv c" id="s7_disp">—</div><div class="ks">kg</div></div>
     <div class="kc"><div class="kl">Dispatch Rate</div><div class="kv" id="s7_disp_rate">—</div><div class="ks">dispatched ÷ produced</div></div>
   </div>
-  <div class="kg" style="grid-template-columns:repeat(3,1fr)">
+  <div class="kg" style="grid-template-columns:repeat(2,1fr)">
     <div class="kc g"><div class="kl">CBG Revenue</div><div class="kv g" id="s7_cbg_rev">—</div></div>
     <div class="kc a"><div class="kl">Manure Revenue</div><div class="kv a" id="s7_mn_rev">—</div><div class="ks">SFOM + LFOM</div></div>
   </div>
@@ -4529,10 +4529,10 @@ function renderS7(){
   const sv=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   sv('s7_cbg_prod',fmtN(Math.round(totCBG)));
   sv('s7_disp',fmtN(Math.round(totDisp)));
-  sv('s7_cbg_rev',fmtL(totCBGR));
-  sv('s7_sfom_rev',fmtL(totSfomR));
-  sv('s7_lfom_rev',fmtL(totLfomR));
-  sv('s7_mn_rev',fmtL(mnRev));
+  sv('s7_cbg_rev',fmtR(totCBGR));
+  sv('s7_sfom_rev',fmtR(totSfomR));
+  sv('s7_lfom_rev',fmtR(totLfomR));
+  sv('s7_mn_rev',fmtR(mnRev));
   const drEl=document.getElementById('s7_disp_rate');
   if(drEl){drEl.textContent=dispRate!=null?dispRate.toFixed(1)+'%':'—';drEl.style.color=dispRate!=null?(dispRate>=90?'var(--green)':dispRate>=70?'var(--amber)':'var(--red)'):'var(--text3)';}
 
@@ -6319,7 +6319,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Digester%20IA-PA')/range(address='A4:R400')"),
     gFetch("/worksheets('Daily%20Revenue%20%26%20Costs')/range(address='A4:K700')"),
     gFetch("/worksheets('Feed_and_Balance')/range(address='A3:CU700')"),
-    gFetch("/worksheets('Manure%20Sales')/range(address='A3:G600')"),
+    gFetch("/worksheets('Manure%20Sales')/range(address='A2:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A5:K400')"),
     gFetch("/worksheets('Pressmud%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('CSL%20Cal.')/range(address='A3:J400')"),
