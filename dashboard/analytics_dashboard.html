@@ -6446,9 +6446,9 @@ async function buildAnalyticsD() {
   M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
   // Monthly Fixed Costs: row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols 3-14 = Jan-Dec
   const mfcVals=mfcR?.values||[];
-  // MFC sheet: row0=title, row1=header, row2=ElecUsage, row3=ElecCost, row4=Manpower, row5=LoanEMI; cols: A=CostHead, B=Unit, C=Jan..N=Dec
-  const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+2];return typeof v==='number'?v:0;};
-  M.manpower=months.map(m=>mfcGet(4,m)); // row idx 4 = Manpower Cost
+  // MFC sheet (A3:P10): row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols: A=CostHead, B=Unit, C=Annual, D=Jan..O=Dec (ci+3)
+  const mfcGet=(rowIdx,mo)=>{const ci=MNAMES.indexOf(mo);if(ci<0)return 0;const v=mfcVals[rowIdx]?.[ci+3];return typeof v==='number'?v:0;};
+  M.manpower=months.map(m=>mfcGet(3,m)); // row idx 3 = Manpower Cost
   // EMI: from EMI Tracker sheet (monthly totals per loan)
   const emiVals=emiR?.values||[];
   const emiDataRows=emiVals.slice(1).filter(r=>r&&r.length>=5&&typeof r[4]==='number');
