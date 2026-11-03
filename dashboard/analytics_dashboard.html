@@ -1271,7 +1271,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="kc g"><div class="kl">Total Revenue</div><div class="kv g" id="s8_rev_kpi">₹448.5 L</div><div class="ks">CBG + Manure</div></div>
     <div class="kc r"><div class="kl">Total Cost</div><div class="kv r" id="s8_cost_kpi">₹237.0 L</div><div class="ks">Feedstock + Fixed</div></div>
     <div class="kc a"><div class="kl">Net Margin</div><div class="kv a" id="s8_margin_kpi">47.2%</div><div class="ks">Target: 45%</div></div>
-    <div class="kc a"><div class="kl">Cost per kg CBG</div><div class="kv a" id="s8_cpk">—</div><div class="ks">Target: ₹28/kg</div></div>
+    <div class="kc a"><div class="kl">Cost per kg CBG</div><div class="kv a" id="s8_cpk">—</div><div class="ks" id="s8_cpk_tgt">Target: ₹75/kg</div></div>
   </div>
   <div class="kg" style="grid-template-columns:repeat(3,1fr)">
     <div class="kc c"><div class="kl">CBG Revenue</div><div class="kv c" id="s8_cbg_rev">—</div><div class="ks">Primary income</div></div>
@@ -4604,13 +4604,14 @@ function renderS8(){
   const lblRev  = mo==='ALL'?MONTHS:dDates('rev');
 
   // ── KPI cards ──────────────────────────────────────────────
-  document.getElementById('s8_rev_kpi').textContent=fmtL(totR);
-  document.getElementById('s8_cost_kpi').textContent=fmtL(totC);
+  document.getElementById('s8_rev_kpi').textContent=fmtR(totR);
+  document.getElementById('s8_cost_kpi').textContent=fmtR(totC);
   document.getElementById('s8_margin_kpi').textContent=(mo==='ALL'?D.kpis.ytd_margin:mg)+'%';
   document.getElementById('s8_cpk').textContent=cpk?'₹'+cpk+'/kg':'—';
-  document.getElementById('s8_cbg_rev').textContent=fmtL(mo==='ALL'?fin.ytd_cbg_rev:sumA(cbgR));
-  document.getElementById('s8_mn_rev2').textContent=fmtL(mo==='ALL'?fin.ytd_manure:(sumA(sfomR)+sumA(lfomR)));
-  document.getElementById('s8_fc').textContent=fmtL(mo==='ALL'?fin.ytd_feed_cost:sumA(fc));
+  {const el=document.getElementById('s8_cpk_tgt');if(el)el.textContent='Target: ₹'+TGT.cost_kg+'/kg';}
+  document.getElementById('s8_cbg_rev').textContent=fmtR(mo==='ALL'?fin.ytd_cbg_rev:sumA(cbgR));
+  document.getElementById('s8_mn_rev2').textContent=fmtR(mo==='ALL'?fin.ytd_manure:(sumA(sfomR)+sumA(lfomR)));
+  document.getElementById('s8_fc').textContent=fmtR(mo==='ALL'?fin.ytd_feed_cost:sumA(fc));
 
   // ── Charts ─────────────────────────────────────────────────
   bar('c_s8_rev',lblRev,[
@@ -4631,7 +4632,7 @@ function renderS8(){
   charts['c_s8_cpk_chart']=new Chart(document.getElementById('c_s8_cpk_chart'),{type:'line',
     data:{labels:lbl,datasets:[
       {label:'Cost/kg (₹)',data:cpk_arr,borderColor:C.orange,backgroundColor:a(C.orange,0.1),fill:true,tension:0.3,pointRadius:4,pointBackgroundColor:C.orange},
-      {label:'Target ₹28',data:lbl.map(()=>28),borderColor:C.green,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
+      {label:'Target ₹'+TGT.cost_kg,data:lbl.map(()=>TGT.cost_kg),borderColor:C.green,borderDash:[6,4],borderWidth:1.5,pointRadius:0,fill:false}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},
       scales:{y:{ticks:{callback:v=>'₹'+v},suggestedMin:0}}}});
   // Cost structure pie — all 6 cost components
@@ -6467,6 +6468,7 @@ async function buildAnalyticsD() {
   M.d1_bg_psa=aggMonth(d1,gD,IDX.D_bg_psa); M.d2_bg_psa=aggMonth(d2,gD,IDX.D_bg_psa);
   M.d1_bg_vent=aggMonth(d1,gD,IDX.D_bg_vent); M.d2_bg_vent=aggMonth(d2,gD,IDX.D_bg_vent);
   M.d1_sfom=aggMonth(d1,gD,IDX.D_sfom); M.d2_sfom=aggMonth(d2,gD,IDX.D_sfom); M.d1_lfom=aggMonth(d1,gD,IDX.D_lfom); M.d2_lfom=aggMonth(d2,gD,IDX.D_lfom);
+  M.d1_feed=aggMonth(d1,gD,IDX.D_feed_act); M.d2_feed=aggMonth(d2,gD,IDX.D_feed_act);
   const _d1bg=aggMonth(d1,gD,IDX.D_bg_psa),_d2bg=aggMonth(d2,gD,IDX.D_bg_psa);
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
@@ -6637,7 +6639,7 @@ async function buildAnalyticsD() {
       return{name:v.n,total,byMonth};
     }).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
   }
-  const tgts={cbg_month:130000,cbg_total:months.length*130000,cost_kg:75};
+  const tgts={cbg_day:5400,cbg_month:162000,cbg_total:months.length*162000,cost_kg:75};
   const ts=new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})+', '+new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'});
   return {
     meta:{plant:'LREKPL — 5.4 TPD CBG Plant, Karnal',updated:ts,period:months.length>0?months[0]+' – '+months[months.length-1]+' '+(latDt?latDt.getFullYear():2026):'—'},
