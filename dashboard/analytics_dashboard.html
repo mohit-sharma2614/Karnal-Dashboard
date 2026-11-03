@@ -7133,7 +7133,7 @@ function _buildRpBody(p){
       <td>${proc>0?fNI(proc):'—'}</td>
       <td>${fed>0?fNI(fed):'—'}</td>
       <td><div class="rp-fs-pct"><span class="rp-fs-pct-v ${utlClr}">${util!=null?util+'%':'—'}</span></div></td>
-      <td>${cost>0?fL(cost/Math.max(fed,1)/1000):'—'}</td>
+      <td>${cost>0&&fed>0?fL(cost/fed):'—'}</td>
       <td>${cost>0?fL(cost):'—'}</td>
     </tr>`;
   });
@@ -7201,7 +7201,7 @@ function _buildRpBody(p){
     cbgV=fNI(moCBG)+' kg';cbgTgt=fNI(TGT.cbg_month)+' kg';cbgAch=moTgtAch;biogasV=fN((D.M.raw_biogas||[])[moIdx])+' m³';
     const eff=(D.M.psa_eff||[])[moIdx];psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg=fNI(moCBG/Math.max(dim,1))+' kg/d avg';
   } else {
-    cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.act_raw))+' m³';
+    cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.rbg_tot))+' m³';
     const _e1=nv(dRec?.psa?.d1_eff),_e2=nv(dRec?.psa?.d2_eff);
     const eff=_e1!=null&&_e2!=null?(_e1+_e2)/2:_e1??_e2;
     psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg='—';
