@@ -7472,7 +7472,7 @@ function renderReport(){
     let rows='',tF=0,tC=0;
     keys.forEach((k,i)=>{
       let fed,cost;
-      if(v==='daily'){const f=D.days[da]?.feed||{};fed=f[feedKeys[i]||k.toLowerCase()+'_fed']||0;cost=0;}
+      if(v==='daily'){const f=D.days[da]?.feed||{};fed=f[feedKeys[i]]||0;cost=f[costKeys[i]]||0;}
       else if(v==='monthly'){fed=(D.M[feedKeys[i]]||[])[moIdx]||0;cost=(D.M[costKeys[i]]||[])[moIdx]||0;}
       else{fed=sumA(D.M[feedKeys[i]]||[]);cost=sumA(D.M[costKeys[i]]||[]);}
       tF+=fed;tC+=cost;
@@ -7514,12 +7514,17 @@ function renderReport(){
       </div>`;
     }
     // daily
-    const rec=D.days[da]||{};const d1r=rec.d1||{},d2r=rec.d2||{},hp=rec.psa||{};
+    const rec=D.days[da]||{};const d1r=rec.d1||{},d2r=rec.d2||{};
+    const phD1=rec.health?.ph?.d1,phD2=rec.health?.ph?.d2;
+    const tpD1=rec.health?.tp?.d1,tpD2=rec.health?.tp?.d2;
+    const iapaRow=D.health_maps?.iapa?.[da]||[];
+    const nv2=v=>{if(v===null||v===''||v===undefined)return null;const n=parseFloat(v);return isNaN(n)?null:n;};
+    const iD1=nv2(iapaRow[4]),iD2=nv2(iapaRow[12]);
     return`<table class="rp-tbl"><thead><tr><th>Parameter</th><th>D1</th><th>D2</th></tr></thead><tbody>
       <tr><td>OLR (kg VS/m³/d)</td><td class="${d1r.olr>=3.5?'ok':'wa'}">${d1r.olr!=null?d1r.olr.toFixed(2):'—'}</td><td class="${d2r.olr>=3.5?'ok':'wa'}">${d2r.olr!=null?d2r.olr.toFixed(2):'—'}</td></tr>
-      <tr><td>pH</td><td>${d1r.ph!=null?d1r.ph.toFixed(2):'—'}</td><td>${d2r.ph!=null?d2r.ph.toFixed(2):'—'}</td></tr>
-      <tr><td>IA/PA</td><td class="${d1r.iapa<=0.4?'ok':'wa'}">${d1r.iapa!=null?d1r.iapa.toFixed(2)+(d1r.iapa>0.4?' ⚠':''):'—'}</td><td class="${d2r.iapa<=0.4?'ok':'wa'}">${d2r.iapa!=null?d2r.iapa.toFixed(2)+(d2r.iapa>0.4?' ⚠':''):'—'}</td></tr>
-      <tr><td>Temperature (°C)</td><td>${d1r.temp!=null?d1r.temp.toFixed(1)+'°C':'—'}</td><td>${d2r.temp!=null?d2r.temp.toFixed(1)+'°C':'—'}</td></tr>
+      <tr><td>pH</td><td>${phD1!=null?phD1.toFixed(2):'—'}</td><td>${phD2!=null?phD2.toFixed(2):'—'}</td></tr>
+      <tr><td>IA/PA</td><td class="${iD1!=null&&iD1<=0.4?'ok':'wa'}">${iD1!=null?iD1.toFixed(2)+(iD1>0.4?' ⚠':''):'—'}</td><td class="${iD2!=null&&iD2<=0.4?'ok':'wa'}">${iD2!=null?iD2.toFixed(2)+(iD2>0.4?' ⚠':''):'—'}</td></tr>
+      <tr><td>Temperature (°C)</td><td>${tpD1!=null?tpD1.toFixed(1)+'°C':'—'}</td><td>${tpD2!=null?tpD2.toFixed(1)+'°C':'—'}</td></tr>
     </tbody></table>`;
   }
 
@@ -7550,7 +7555,7 @@ function renderReport(){
       </div>`;
     }
     const rec=D.days[da]||{};const dp=rec.psa||{};
-    const dCBG=dp.cbg_tot,dBio=dp.act_raw,dTgt=TGT.cbg_month/30,dAch=dCBG&&dTgt>0?Math.round(dCBG/dTgt*100):null;
+    const dCBG=dp.cbg_tot,dBio=dp.rbg_tot,dTgt=TGT.cbg_month/30,dAch=dCBG&&dTgt>0?Math.round(dCBG/dTgt*100):null;
     return`<div class="rp-mg">
       <div class="rp-mc"><div class="rp-ml">CBG Produced</div><div class="rp-mv ${dAch>=90?'g':dAch>=75?'a':'r'}">${fNI(dCBG)} kg</div></div>
       <div class="rp-mc"><div class="rp-ml">Daily Target</div><div class="rp-mv">${fNI(dTgt)} kg</div></div>
@@ -7601,7 +7606,6 @@ function renderReport(){
       ${feedCost!=null?`<tr><td>Feedstock Cost</td><td>${fL(feedCost)}</td><td class="al">${rev>0?Math.round(feedCost/rev*100)+'%':'—'}</td></tr>`:''}
       ${maint!=null?`<tr><td>Manpower Cost</td><td>${fL(maint)}</td><td>${rev>0?Math.round(maint/rev*100)+'%':'—'}</td></tr>`:''}
       ${elec!=null?`<tr><td>Power / Utilities</td><td>${fL(elec)}</td><td>${rev>0?Math.round(elec/rev*100)+'%':'—'}</td></tr>`:''}
-      <tr><td>Total Cost</td><td>${fL(cost)}</td><td>${rev>0?Math.round(cost/rev*100)+'%':'—'}</td></tr>
       <tr><td>Total Production Cost</td><td>${fL(cost)}</td><td>${rev>0&&cost>0?Math.round(cost/rev*100)+'% of revenue':'—'}</td></tr>
     </tbody></table>`;
   }
