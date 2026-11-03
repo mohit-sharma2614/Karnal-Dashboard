@@ -7121,7 +7121,7 @@ function _buildRpBody(p){
   let fsTotalFed=0,fsTotalCost=0,fsTotalProc=0;
   const fsRows2=fsNames.map((nm,i)=>{
     let fed=0,cost=0,proc=0;
-    if(p==='daily'&&da){const f=dRec?.feed||{};fed=nv(f[fsKeys[i]])||0;}
+    if(p==='daily'&&da){const f=dRec?.feed||{};fed=nv(f[fsKeys[i]])||0;proc=nv(f[fsProcKeys[i]])||0;cost=nv(f[fsCostKeys[i]])||0;}
     else if(p==='monthly'){fed=nv((D.M[fsKeys[i]]||[])[moIdx])||0;cost=nv((D.M[fsCostKeys[i]]||[])[moIdx])||0;proc=nv((D.M[fsProcKeys[i]]||[])[moIdx])||0;}
     else if(p==='quarterly'){fed=qIdxs.reduce((s,qi)=>s+(nv((D.M[fsKeys[i]]||[])[qi])||0),0);cost=qIdxs.reduce((s,qi)=>s+(nv((D.M[fsCostKeys[i]]||[])[qi])||0),0);proc=qIdxs.reduce((s,qi)=>s+(nv((D.M[fsProcKeys[i]]||[])[qi])||0),0);}
     else{fed=sumA(D.M[fsKeys[i]]||[]);cost=sumA(D.M[fsCostKeys[i]]||[]);proc=sumA(D.M[fsProcKeys[i]]||[]);}
