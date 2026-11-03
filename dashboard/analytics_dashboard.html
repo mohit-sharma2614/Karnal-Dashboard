@@ -6475,10 +6475,10 @@ async function buildAnalyticsD() {
   M.cbg_rev=aggMonth(rc,gD,1);
   // SFOM/LFOM revenue from Manure Sales transactions (manR).
   // Daily Revenue & Costs cols C/D are NULL for Aug 2026 and mostly NULL for Sep 2026.
-  const manRows=getRows(manR,1);
-  const gManD=r=>toDate(r[1]);
+  const manRows=getRows(manR,0);
+  const gManD=r=>toDate(r[0]);
   M.sfom_mn=mkA(); M.lfom_mn=mkA();
-  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const t=(r[4]||'').toString().toUpperCase().trim(),a=nv(r[5])||0;if(t==='SFOM')M.sfom_mn[mi]+=a;else if(t==='LFOM')M.lfom_mn[mi]+=a;});
+  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const t=(r[3]||'').toString().toUpperCase().trim(),a=nv(r[4])||0;if(t==='SFOM')M.sfom_mn[mi]+=a;else if(t==='LFOM')M.lfom_mn[mi]+=a;});
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
@@ -6506,7 +6506,7 @@ async function buildAnalyticsD() {
   // Daily cost = feedstock+transport+maint+elec only; manpower+EMI are monthly lump sums, not daily
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   // Patch daily SFOM/LFOM from Manure Sales transactions (rc cols 2/3 are NULL for Aug-Sep 2026)
-  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const m=moKey(dt);if(!DD.rev[m])return;const dk=dayKey(dt);const di=DD.rev[m].dates.indexOf(dk);if(di<0)return;const t=(r[4]||'').toString().toUpperCase().trim(),a=nv(r[5])||0;if(t==='SFOM')DD.rev[m].sfom_rev[di]=(DD.rev[m].sfom_rev[di]||0)+a;else if(t==='LFOM')DD.rev[m].lfom_rev[di]=(DD.rev[m].lfom_rev[di]||0)+a;});
+  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const m=moKey(dt);if(!DD.rev[m])return;const dk=dayKey(dt);const di=DD.rev[m].dates.indexOf(dk);if(di<0)return;const t=(r[3]||'').toString().toUpperCase().trim(),a=nv(r[4])||0;if(t==='SFOM')DD.rev[m].sfom_rev[di]=(DD.rev[m].sfom_rev[di]||0)+a;else if(t==='LFOM')DD.rev[m].lfom_rev[di]=(DD.rev[m].lfom_rev[di]||0)+a;});
   months.forEach(m=>{if(!DD.rev[m])return;DD.rev[m].total_rev=DD.rev[m].dates.map((_,di)=>(DD.rev[m].cbg_rev[di]||0)+(DD.rev[m].sfom_rev[di]||0)+(DD.rev[m].lfom_rev[di]||0));});
   DD.exp=buildDA(cbgExp,gD,{tot_exp:13,d1_exp:6,d2_exp:12,ideal_raw:15,ideal_pur:16,ideal_cbg:17,act_pur:18,act_cbg:19,act_disp:20,
     d1_pm_bpp:1,d1_cd_bpp:2,d1_csl_bpp:3,d1_gs_bpp:4,d1_sg_bpp:5,
