@@ -1337,7 +1337,7 @@ const C={
 };
 const a=(c,v)=>c+Math.round(v*255).toString(16).padStart(2,'0');
 
-function fmtL(v){if(!v)return'—';return v>=1e5?'₹'+(v/1e5).toFixed(1)+'L':v>=1e3?(v/1e3).toFixed(1)+'k':'₹'+v.toFixed(0)}
+function fmtL(v){return fmtR(v);}
 function fmtN(v){if(!v)return'—';return v>=1e6?(v/1e6).toFixed(2)+'M':v>=1e3?(v/1e3).toFixed(1)+'k':v.toFixed(0)}
 function fmtR(v){if(v==null||v===0)return'—';const n=Math.round(v);const s=String(Math.abs(n));const r=s.length>3?s.slice(0,-3).replace(/\B(?=(\d{2})+(?!\d))/g,',')+','+s.slice(-3):s;return(n<0?'-':'')+'₹'+r;}
 function fmtV(v){return(v===null||v===undefined)?null:Math.round(v*100)/100}
@@ -5230,7 +5230,7 @@ function renderSIForward(mo,day){
         <div>
           <div class="si-fwd-lbl">Month Closed</div>
           <div class="si-fwd-main">${mo} 2026 closed at <b>${cbg.toLocaleString()} kg</b> — ${ach}% of ${tgt.toLocaleString()} kg target</div>
-          <div class="si-fwd-sub">${rev>0?'Revenue: ₹'+fmtL(rev)+' L (CBG + SFOM + LFOM)':''}</div>
+          <div class="si-fwd-sub">${rev>0?'Revenue: '+fmtR(rev)+' (CBG + SFOM + LFOM)':''}</div>
         </div>
         <div class="si-fwd-r">
           <div class="si-fwd-rlbl">Achievement</div>
