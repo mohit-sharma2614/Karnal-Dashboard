@@ -6505,8 +6505,9 @@ async function buildAnalyticsD() {
   manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const t=(r[3]||'').toString().toUpperCase().trim(),a=nv(r[4])||0;if(t==='SFOM')M.sfom_mn[mi]+=a;else if(t==='LFOM')M.lfom_mn[mi]+=a;});
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
+  const mp_rc=aggMonth(rc,gD,8),emi_rc=aggMonth(rc,gD,9);
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
-  M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0)+(M.manpower[i]||0)+(M.emi[i]||0));
+  M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0)+(mp_rc[i]||0)+(emi_rc[i]||0));
   M.margin=M.total_rev.map((r,i)=>r>0?+((r-M.total_cost[i])/r*100).toFixed(1):null);
   M.cost_per_kg=months.map((_,i)=>{const c=M.dispatched[i]||0,k=M.total_cost[i]||0;return c>0?+(k/c).toFixed(2):null;});
   // Daily arrays
