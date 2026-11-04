@@ -6497,12 +6497,7 @@ async function buildAnalyticsD() {
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
   M.cbg_rev=aggMonth(rc,gD,1);
-  // SFOM/LFOM revenue from Manure Sales transactions (manR).
-  // Daily Revenue & Costs cols C/D are NULL for Aug 2026 and mostly NULL for Sep 2026.
-  const manRows=getRows(manR,0);
-  const gManD=r=>toDate(r[0]);
-  M.sfom_mn=mkA(); M.lfom_mn=mkA();
-  manRows.forEach(r=>{const dt=gManD(r);if(!dt)return;const mi=mIdx(moKey(dt));if(mi<0)return;const t=(r[3]||'').toString().toUpperCase().trim(),a=nv(r[4])||0;if(t==='SFOM')M.sfom_mn[mi]+=a;else if(t==='LFOM')M.lfom_mn[mi]+=a;});
+  M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   const mp_rc=aggMonth(rc,gD,8),emi_rc=aggMonth(rc,gD,9);
