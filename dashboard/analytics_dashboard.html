@@ -45,10 +45,9 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 .nav-row2{display:flex;align-items:center;padding:0 16px;height:36px;gap:4px}
 .nav-brand{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--acc);margin-right:14px;white-space:nowrap}
 .nav-brand small{color:var(--text2);font-weight:400;font-size:10px;margin-left:4px}
-.nav-lr-logo{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#0ea5e9,#2563eb);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;letter-spacing:-.5px;flex-shrink:0}
+.nav-lr-logo{height:28px;width:auto;object-fit:contain;flex-shrink:0}
 .nav-powered{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);white-space:nowrap;margin-left:10px}
-.nav-elan-logo{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:800;letter-spacing:.5px;color:#6366f1}
-.nav-elan-logo svg{width:14px;height:14px}
+.nav-elan-logo{height:22px;width:auto;object-fit:contain}
 .tabs{display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;flex:1}
 .tabs::-webkit-scrollbar{height:3px}.tabs::-webkit-scrollbar-thumb{background:var(--bdr)}
 .tb{padding:6px 14px;border:none;background:transparent;color:var(--text2);cursor:pointer;
@@ -712,7 +711,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 <nav class="nav">
   <div class="nav-row1">
     <div class="nav-brand">
-      <div class="nav-lr-logo">LR</div>
+      <img class="nav-lr-logo" src="../assets/images/lr_energy_logo.png" alt="LR Energy">
       <div>LREKPL <small>5.4 TPD CBG · Karnal</small></div>
     </div>
     <div class="tabs">
@@ -729,15 +728,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     </div>
     <span id="nav_updated" class="nav-right"></span>
     <div class="nav-powered">Powered by
-      <span class="nav-elan-logo">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2L3 7v10l9 5 9-5V7L12 2z" fill="#6366f1" opacity=".2"/>
-          <path d="M12 2L3 7l9 5 9-5-9-5z" fill="#6366f1"/>
-          <path d="M3 7v10l9 5V12L3 7z" fill="#818cf8"/>
-          <path d="M21 7v10l-9 5V12l9-5z" fill="#4f46e5"/>
-        </svg>
-        ELAN
-      </span>
+      <img class="nav-elan-logo" src="../assets/images/elan_logo.jpg" alt="Elan">
     </div>
   </div>
   <div class="nav-row2">
