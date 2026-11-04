@@ -861,10 +861,31 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <div class="kpi"><div class="kpi-bar" id="ov_k7_bar"></div><div class="kpi-label" id="ov_k7_lbl"></div><div class="kpi-value" id="ov_k7_val">—</div><div class="kpi-sub" id="ov_k7_sub"></div><div class="kpi-delta" id="ov_k7_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k8_bar"></div><div class="kpi-label" id="ov_k8_lbl"></div><div class="kpi-value" id="ov_k8_val">—</div><div class="kpi-sub" id="ov_k8_sub"></div><div class="kpi-delta" id="ov_k8_dlt" style="display:none"></div></div>
     </div>
-    <div id="ov_kpi_extra" style="display:none;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--ink7);background:var(--ov-white)">
-      <div class="kpi" style="border-right:1px solid var(--ink7);border-bottom:none"><div class="kpi-bar" id="ov_ke1_bar"></div><div class="kpi-label" id="ov_ke1_lbl"></div><div class="kpi-value" id="ov_ke1_val">—</div><div class="kpi-sub" id="ov_ke1_sub"></div></div>
-      <div class="kpi" style="border-right:1px solid var(--ink7);border-bottom:none"><div class="kpi-bar" id="ov_ke2_bar"></div><div class="kpi-label" id="ov_ke2_lbl"></div><div class="kpi-value" id="ov_ke2_val">—</div><div class="kpi-sub" id="ov_ke2_sub"></div></div>
-      <div class="kpi" style="border-right:none;border-bottom:none"><div class="kpi-bar" id="ov_ke3_bar"></div><div class="kpi-label" id="ov_ke3_lbl"></div><div class="kpi-value" id="ov_ke3_val">—</div><div class="kpi-sub" id="ov_ke3_sub"></div></div>
+    <div id="ov_kpi_extra" style="display:none;border-top:2px solid var(--ink7);background:var(--ink8,#f8fafc);padding:14px 20px 16px">
+      <div style="font-size:9px;font-weight:700;letter-spacing:.08em;color:var(--ink4);text-transform:uppercase;margin-bottom:10px">Gas Quality & Digester Performance</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px">
+        <div id="ov_ke1_card" style="background:var(--ov-white);border:1px solid var(--ink7);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px" id="ov_ke1_bar"></div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--ink4);text-transform:uppercase;margin-top:4px" id="ov_ke1_lbl"></div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink1);line-height:1.1;margin:4px 0 2px" id="ov_ke1_val">—</div>
+          <div style="font-size:10px;color:var(--ink4)" id="ov_ke1_sub"></div>
+          <div style="margin-top:8px;height:4px;background:var(--ink7);border-radius:2px;overflow:hidden"><div id="ov_ke1_pb" style="height:100%;border-radius:2px;width:0%;transition:width .4s"></div></div>
+        </div>
+        <div id="ov_ke2_card" style="background:var(--ov-white);border:1px solid var(--ink7);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px" id="ov_ke2_bar"></div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--ink4);text-transform:uppercase;margin-top:4px" id="ov_ke2_lbl"></div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink1);line-height:1.1;margin:4px 0 2px" id="ov_ke2_val">—</div>
+          <div style="font-size:10px;color:var(--ink4)" id="ov_ke2_sub"></div>
+          <div style="margin-top:8px;height:4px;background:var(--ink7);border-radius:2px;overflow:hidden"><div id="ov_ke2_pb" style="height:100%;border-radius:2px;width:0%;transition:width .4s"></div></div>
+        </div>
+        <div id="ov_ke3_card" style="background:var(--ov-white);border:1px solid var(--ink7);border-radius:10px;padding:12px 14px;position:relative;overflow:hidden">
+          <div style="position:absolute;top:0;left:0;right:0;height:3px" id="ov_ke3_bar"></div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:.04em;color:var(--ink4);text-transform:uppercase;margin-top:4px" id="ov_ke3_lbl"></div>
+          <div style="font-size:26px;font-weight:800;color:var(--ink1);line-height:1.1;margin:4px 0 2px" id="ov_ke3_val">—</div>
+          <div style="font-size:10px;color:var(--ink4)" id="ov_ke3_sub"></div>
+          <div style="margin-top:8px;height:4px;background:var(--ink7);border-radius:2px;overflow:hidden"><div id="ov_ke3_pb" style="height:100%;border-radius:2px;width:0%;transition:width .4s"></div></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2521,13 +2542,17 @@ function _fillOVKpis(kpis){
 
 function _fillOVExtra(items){
   const wrap=document.getElementById('ov_kpi_extra');
-  if(wrap)wrap.style.display='grid';
+  if(wrap)wrap.style.display='block';
+  const clrMap={g:'#16a34a',a:'#d97706',r:'#dc2626',b:'#1565C0'};
   items.forEach((k,i)=>{
     const id='ke'+(i+1);
-    const bE=document.getElementById('ov_'+id+'_bar');if(bE)bE.style.background=k.bar||'var(--blue)';
+    const c=clrMap[k.dc]||k.bar||'#1565C0';
+    const bE=document.getElementById('ov_'+id+'_bar');if(bE)bE.style.background=c;
     const lE=document.getElementById('ov_'+id+'_lbl');if(lE)lE.textContent=k.l||'';
-    const vE=document.getElementById('ov_'+id+'_val');if(vE){vE.textContent=k.v||'—';vE.className='kpi-value'+(k.dc?' '+k.dc:'');}
+    const vE=document.getElementById('ov_'+id+'_val');if(vE){vE.textContent=k.v||'—';vE.style.color=c;}
     const sE=document.getElementById('ov_'+id+'_sub');if(sE)sE.textContent=k.s||'';
+    const pbE=document.getElementById('ov_'+id+'_pb');if(pbE){pbE.style.width=Math.min(100,k.pb||0)+'%';pbE.style.background=c;}
+    const card=document.getElementById('ov_'+id+'_card');if(card)card.style.borderColor=c+'33';
   });
 }
 
@@ -2813,9 +2838,9 @@ function renderOV(){
     ]);
     // Extra row: CH4 | OLR D1 | OLR D2
     _fillOVExtra([
-      {bar:'#1b8a4a',l:'CH4 Purity',v:dCH4v!=null?dCH4v.toFixed(1)+'%':'—',s:'Target: ≥90%'},
-      {bar:'#1565C0',l:'OLR D1',v:d1r.olr!=null?d1r.olr.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
-      {bar:'#1565C0',l:'OLR D2',v:d2r.olr!=null?d2r.olr.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
+      {l:'CH4 Purity (Avg)',v:dCH4v!=null?dCH4v.toFixed(1)+'%':'—',s:'Target ≥ 90%',dc:dCH4v>=90?'g':dCH4v>=80?'a':'r',pb:dCH4v!=null?Math.min(100,dCH4v):0},
+      {l:'OLR D1',v:d1r.olr!=null?d1r.olr.toFixed(2)+' kg VS/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d',dc:d1r.olr>=3.5?'g':d1r.olr>=2.5?'a':'r',pb:d1r.olr!=null?Math.min(100,d1r.olr/4*100):0},
+      {l:'OLR D2',v:d2r.olr!=null?d2r.olr.toFixed(2)+' kg VS/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d',dc:d2r.olr>=3.5?'g':d2r.olr>=2.5?'a':'r',pb:d2r.olr!=null?Math.min(100,d2r.olr/4*100):0},
     ]);
     // Render section cards with daily data
     _renderOVSectionsDa(da,rec);
@@ -2892,9 +2917,9 @@ function renderOV(){
   ]);
   // Extra row: CH4 Purity | OLR D1 | OLR D2
   _fillOVExtra([
-    {bar:'#1b8a4a',l:'CH4 Purity (Avg)',v:ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',s:'Target: ≥90%'},
-    {bar:'#1565C0',l:'OLR D1 (Avg)',v:avgO1!=null?avgO1.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
-    {bar:'#1565C0',l:'OLR D2 (Avg)',v:avgO2!=null?avgO2.toFixed(2)+' kg/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d'},
+    {l:'CH4 Purity (Avg)',v:ch4Pct!=null?ch4Pct.toFixed(1)+'%':'—',s:'Target ≥ 90%',dc:ch4Pct>=90?'g':ch4Pct>=80?'a':'r',pb:ch4Pct!=null?Math.min(100,ch4Pct):0},
+    {l:'OLR D1 (Avg)',v:avgO1!=null?avgO1.toFixed(2)+' kg VS/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d',dc:avgO1>=3.5?'g':avgO1>=2.5?'a':'r',pb:avgO1!=null?Math.min(100,avgO1/4*100):0},
+    {l:'OLR D2 (Avg)',v:avgO2!=null?avgO2.toFixed(2)+' kg VS/m³/d':'—',s:'Target ≥ 3.5 kg VS/m³/d',dc:avgO2>=3.5?'g':avgO2>=2.5?'a':'r',pb:avgO2!=null?Math.min(100,avgO2/4*100):0},
   ]);
 
   // Strip
@@ -6424,6 +6449,7 @@ async function buildAnalyticsD() {
     P_rbg_d1:6, P_rbg_d2:7, P_rbg_tot:8,
     P_pur_d1:10, P_pur_d2:11, P_pur_tot:12,
     P_cbg_d1:14, P_cbg_d2:15, P_cbg_tot:16,
+    P_psa_eff_day:17,
     P_dispatched:20, P_veer:21, P_adinath:22, P_kfs:23, P_ksk:24, P_om:25, P_sps:26,
     P_ch4:27, P_cascade1:30, P_cascade2:31, P_storage:32,
     // D1 / D2 sheet (identical structure)
@@ -6452,6 +6478,9 @@ async function buildAnalyticsD() {
   M.ideal_pur=aggMonth(cbgExp,gD,16); M.ideal_raw=aggMonth(cbgExp,gD,15); M.ideal_cbg=aggMonth(cbgExp,gD,17); M.exp_tot=aggMonth(cbgExp,gD,13); M.d1_exp=aggMonth(cbgExp,gD,6); M.d2_exp_exp=aggMonth(cbgExp,gD,12);
   M.d1_eff=aggMonth(d1,gD,IDX.D_psa_eff_pct,'avg'); M.d2_eff=aggMonth(d2,gD,IDX.D_psa_eff_pct,'avg');
   M.d1_bg_total=aggMonth(d1,gD,IDX.D_bg_total); M.d2_bg_total=aggMonth(d2,gD,IDX.D_bg_total);
+  M.psa_eff_day=aggMonth(psa,gD,IDX.P_psa_eff_day,'avg');
+  // Count operational days per month for RBG% denominator
+  M.rbg_days=months.map((_,mi)=>psa.filter(r=>{const dt=gD(r);return dt&&mIdx(moKey(dt))===mi&&(nv(r[IDX.P_rbg_tot])||0)>0;}).length);
   M.d1_olr=aggMonth(d1,gD,IDX.D_olr,'avg'); M.d2_olr=aggMonth(d2,gD,IDX.D_olr,'avg');
   M.d1_feed=aggMonth(d1,gD,IDX.D_feed_act); M.d2_feed=aggMonth(d2,gD,IDX.D_feed_act);
   M.ph_d1=aggMonth(ph,gD,1,'avg'); M.ph_d2=aggMonth(ph,gD,4,'avg');
@@ -6543,7 +6572,7 @@ async function buildAnalyticsD() {
     return res;
   }
   const DD={};
-  DD.psa=buildDA(psa,gD,{cbg_tot:IDX.P_cbg_tot,purified:IDX.P_pur_tot,dispatched:IDX.P_dispatched,psa_hrs:psaH,comp_hrs:r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;},storage:IDX.P_storage,rbg_d1:IDX.P_rbg_d1,rbg_d2:IDX.P_rbg_d2,rbg_tot:IDX.P_rbg_tot,cbg_d1:IDX.P_cbg_d1,cbg_d2:IDX.P_cbg_d2,ch4:IDX.P_ch4,veer:IDX.P_veer,adinath:IDX.P_adinath,kfs:IDX.P_kfs,ksk:IDX.P_ksk,om:IDX.P_om,sps:IDX.P_sps});
+  DD.psa=buildDA(psa,gD,{cbg_tot:IDX.P_cbg_tot,purified:IDX.P_pur_tot,dispatched:IDX.P_dispatched,psa_hrs:psaH,comp_hrs:r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;},storage:IDX.P_storage,rbg_d1:IDX.P_rbg_d1,rbg_d2:IDX.P_rbg_d2,rbg_tot:IDX.P_rbg_tot,cbg_d1:IDX.P_cbg_d1,cbg_d2:IDX.P_cbg_d2,ch4:IDX.P_ch4,psa_eff_day:IDX.P_psa_eff_day,veer:IDX.P_veer,adinath:IDX.P_adinath,kfs:IDX.P_kfs,ksk:IDX.P_ksk,om:IDX.P_om,sps:IDX.P_sps});
   DD.d1=buildDA(d1,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
     cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
