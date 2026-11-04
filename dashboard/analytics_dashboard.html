@@ -712,7 +712,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   if(b) obs.observe(b,{attributes:true,attributeFilter:['style']})
 })()
 </script>
-<nav class="nav">
+<nav class="nav" id="mainNav" style="display:none">
   <div class="nav-row1">
     <div class="tabs">
       <button class="tb on" onclick="show('ov',this)">Overview</button>
@@ -6752,6 +6752,7 @@ async function initDashboard() {
     document.querySelector('.footer').innerHTML=`LREKPL — 5.4 TPD CBG Plant Karnal &nbsp;|&nbsp; ${period} &nbsp;|&nbsp; Data: CBG_Karnal_D1_D2_2026.xlsx`;
     document.getElementById('nav_updated').textContent=D.meta.updated;
     overlay.style.display='none';
+    document.getElementById('mainNav').style.display='';
     try{ renderOV(); }catch(e){ console.error('OV init error',e); }
   } catch(e) { setStatus('Error: '+e.message); console.error(e); }
 }
