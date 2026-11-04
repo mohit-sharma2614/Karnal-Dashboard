@@ -6508,7 +6508,7 @@ async function buildAnalyticsD() {
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
   M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0)+(M.manpower[i]||0)+(M.emi[i]||0));
   M.margin=M.total_rev.map((r,i)=>r>0?+((r-M.total_cost[i])/r*100).toFixed(1):null);
-  M.cost_per_kg=months.map((_,i)=>{const c=M.cbg[i]||0,k=M.total_cost[i]||0;return c>0?+(k/c).toFixed(2):null;});
+  M.cost_per_kg=months.map((_,i)=>{const c=M.dispatched[i]||0,k=M.total_cost[i]||0;return c>0?+(k/c).toFixed(2):null;});
   // Daily arrays
   function buildDA(rows,getD,colMap){
     const res={}; months.forEach(m=>{res[m]={dates:[]};Object.keys(colMap).forEach(k=>res[m][k]=[]);});
@@ -6608,7 +6608,7 @@ async function buildAnalyticsD() {
   const heatmap={};
   months.forEach(m=>{const dp=DD.psa[m]||{};heatmap[m]=(dp.dates||[]).map((_,i)=>{const c=(dp.cbg_tot||[])[i]||0;return c>=td?'g':c>=td*.7?'a':c>0?'r':'empty';});});
   const cost_per_kg={};
-  months.forEach((m,i)=>{const c=M.cbg[i]||0,k=M.total_cost[i]||0;cost_per_kg[m]=c>0?+(k/c).toFixed(2):null;});
+  months.forEach((m,i)=>{const c=M.dispatched[i]||0,k=M.total_cost[i]||0;cost_per_kg[m]=c>0?+(k/c).toFixed(2):null;});
   const olr_trail={d1:d1.slice(-30).map(r=>nv(r[IDX.D_olr])),d2:d2.slice(-30).map(r=>nv(r[IDX.D_olr])),dates:d1.slice(-30).map(r=>dayKey(toDate(r[0])))};
   const psa_days={};
   psa.forEach(r=>{const k=dayKey(toDate(r[0]));if(!k)return;const m=moKey(toDate(r[0]));psa_days[k]={date:k,mo:m,psa_hrs:psaH(r),act_raw:nv(r[IDX.P_rbg_tot]),act_pur:nv(r[IDX.P_pur_tot]),act_cbg:nv(r[IDX.P_cbg_tot]),dispatched:nv(r[IDX.P_dispatched]),veer:nv(r[IDX.P_veer]),adinath:nv(r[IDX.P_adinath]),kfs:nv(r[IDX.P_kfs]),ksk:nv(r[IDX.P_ksk]),om:nv(r[IDX.P_om]),sps:nv(r[IDX.P_sps]),ch4:nv(r[IDX.P_ch4]),cascade:nv(r[IDX.P_cascade2]),storage:nv(r[IDX.P_storage]),d1_eff:0,d2_eff:0};});
