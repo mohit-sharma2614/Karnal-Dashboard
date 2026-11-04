@@ -2777,32 +2777,35 @@ function renderOV(){
     const slEl=document.querySelector('#ov_mo_wrap .ov-slabel');if(slEl)slEl.style.display='';
     const rec=D.days[da]||{};
     const dp=rec.psa||{},d1r=rec.d1||{},d2r=rec.d2||{},rv=rec.rev||{},f=rec.feed||{},ex=rec.exp||{};
-    const dCBG=dp.cbg_tot||null,dDisp=dp.dispatched||null;
+    const dDisp=dp.dispatched||null;
     const dRev=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0)+(rv.other_rev||0)||(rv.total_rev||null);
     const dCost=rv.total_cost||null;
     const dMgn=dRev&&dCost&&dRev>0?(dRev-dCost)/dRev*100:null;
-    const dCpk=dCost&&dCBG&&dCBG>0?dCost/dCBG:null;
+    const dCpk=dCost&&dDisp&&dDisp>0?dCost/dDisp:null;
     const dCH4v=dp.ch4!=null?(dp.ch4>1?dp.ch4:dp.ch4*100):null;
     const dUpt=dp.comp_hrs&&dp.psa_hrs&&dp.psa_hrs>0?dp.comp_hrs/dp.psa_hrs*100:null;
     const dDay=TGT.cbg_day||5400;
-    const dAch=dCBG&&dDay>0?dCBG/dDay*100:null;
-    // Plant Health: RBG | CBG | PSA Eff
-    const dRbgPct=dp.ideal_raw&&dp.ideal_raw>0?dp.rbg_tot/dp.ideal_raw*100:null;
+    const dAch=dDisp&&dDay>0?dDisp/dDay*100:null;
+    // Plant Health: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (actual÷design 45.83%)
+    const dRbgRaw=(d1r.bg_total||0)+(d2r.bg_total||0);
+    const dRbgPct=dRbgRaw>0?dRbgRaw/13200*100:null;
+    const dPsaEffRaw=dp.d1_eff!=null&&dp.d2_eff!=null?(dp.d1_eff+dp.d2_eff)/2:dp.d1_eff??dp.d2_eff;
+    const dPsaEff=dPsaEffRaw!=null?dPsaEffRaw/0.4583*100:null;
     const dc=[
       {l:'RBG',v:dRbgPct,ok:dRbgPct>=85?1:dRbgPct>=70?0:-1},
       {l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},
-      {l:'PSA Eff',v:dUpt,ok:dUpt>=90?1:dUpt>=70?0:-1}
+      {l:'PSA Eff',v:dPsaEff,ok:dPsaEff>=90?1:dPsaEff>=70?0:-1}
     ];
     const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.25,.45,.30][i])*100,0));
     _fillOVHealthRing(dHS,da+' 2026',dc,null);
-    const CBG_RATE=0.04725*2110; // ₹99.6975/kg
+    const CBG_RATE=76; // ₹76/kg
     const dCapRev=Math.round(dDay*CBG_RATE);
-    const dActRev=dCBG!=null?Math.round(dCBG*CBG_RATE):null;
+    const dActRev=rv.cbg_rev||null;
     _fillOVKpis([
       {bar:'#1565C0',l:'Daily Contract Quantity',v:fmtN(Math.round(dDay))+' kg',s:'GoBardhan ID: P-LEKPL'},
-      {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:dCBG!=null?fmtN(Math.round(dCBG))+' kg':'—',s:da+' 2026',d:dAch!=null?Math.round(dAch)+'% of contract qty':null,dc:dAch>=90?'g':dAch>=75?'a':'r'},
-      {bar:'#6d28d9',l:'Capacity Revenue',v:fmtR(dCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
-      {bar:'#0e7490',l:'Actual Energy Revenue',v:dActRev!=null?fmtR(dActRev):'—',s:'Actual CBG × ₹99.70/kg',dc:dActRev!=null&&dCapRev>0?dActRev/dCapRev>=0.9?'g':dActRev/dCapRev>=0.75?'a':'r':null},
+      {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:dDisp!=null?fmtN(Math.round(dDisp))+' kg':'—',s:da+' 2026',d:dAch!=null?Math.round(dAch)+'% of contract qty':null,dc:dAch>=90?'g':dAch>=75?'a':'r'},
+      {bar:'#6d28d9',l:'Capacity Revenue',v:fmtR(dCapRev),s:''},
+      {bar:'#0e7490',l:'Actual Energy Revenue',v:dActRev!=null?fmtR(dActRev):'—',s:'',dc:dActRev!=null&&dCapRev>0?dActRev/dCapRev>=0.9?'g':dActRev/dCapRev>=0.75?'a':'r':null},
       {bar:'#1b8a4a',l:'Total Revenue',v:dRev?fmtL(dRev):'—',s:'CBG + Manure'},
       {bar:'#c67c00',l:'Total Production Cost',v:dCost!=null?fmtR(dCost):'—',s:''},
       {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
@@ -2827,34 +2830,39 @@ function renderOV(){
   const stripEl2=document.querySelector('#ov_mo_wrap .strip-card');if(stripEl2)stripEl2.style.display='';
   const hlEl2=document.querySelector('#ov_mo_wrap .hl-row');if(hlEl2)hlEl2.style.display='';
 
-  const cbgD=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
   const compA=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
   const psaA=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
   const ch4a=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
   const olrD1a=mo==='ALL'?(D.M.d1_olr||[]):dArr('d1','olr');
   const olrD2a=mo==='ALL'?(D.M.d2_olr||[]):dArr('d2','olr');
-  const tCBG=sumA(cbgD),tDisp=sumA(dispD),tPH=sumA(psaA),tCH=sumA(compA);
+  const tDisp=sumA(dispD),tPH=sumA(psaA),tCH=sumA(compA);
+  // Use dispatched as the actual offtake CBG figure
+  const tCBG=tDisp;
   const totalRev=mo==='ALL'?D.finance.ytd_rev:(D.M.total_rev?.[MONTHS.indexOf(mo)]||0);
   const totalCost=mo==='ALL'?D.finance.ytd_cost:(D.M.total_cost?.[MONTHS.indexOf(mo)]||0);
   const tgtCBG=mo==='ALL'?TGT.cbg_total:TGT.cbg_month;
   const achPct=tgtCBG>0?tCBG/tgtCBG*100:null;
   const uptPct=tPH>0?tCH/tPH*100:null;
   const marginPct=totalRev>0?(totalRev-totalCost)/totalRev*100:null;
-  const drPct=tCBG>0?tDisp/tCBG*100:null;
   const ch4VV=av(ch4a);const ch4Pct=ch4VV!=null?(ch4VV>1?ch4VV:ch4VV*100):null;
   const avgO1=av(olrD1a),avgO2=av(olrD2a);
   const cpkMo=D.cpk_monthly||{};
-  const cpkVal=mo==='ALL'?(D.kpis.ytd_cbg>0?D.finance.ytd_cost/D.kpis.ytd_cbg:null):(cpkMo[mo]||null);
+  const cpkVal=mo==='ALL'?(tCBG>0?totalCost/tCBG:null):(cpkMo[mo]||null);
 
-  // Health ring — 3 components: RBG | CBG | PSA Eff
-  const rbgTotM=sumA(mo==='ALL'?mArr('rbg_tot'):dArr('psa','rbg_tot'));
-  const rbgIdealM=sumA(mo==='ALL'?(D.M.raw_biogas||[]):dArr('psa','ideal_raw'));
-  const rbgPct=rbgIdealM>0?rbgTotM/rbgIdealM*100:null;
+  // Health ring — 3 components: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (actual÷design 45.83%)
+  const rbgD1M=sumA(mo==='ALL'?(D.M.d1_bg_total||[]):dArr('d1','bg_total'));
+  const rbgD2M=sumA(mo==='ALL'?(D.M.d2_bg_total||[]):dArr('d2','bg_total'));
+  const rbgDaysM=(mo==='ALL'?(D.M.d1_bg_total||[]):dArr('d1','bg_total')).filter(v=>v!=null&&v>0).length||1;
+  const rbgPct=(rbgD1M+rbgD2M)>0?(rbgD1M+rbgD2M)/(13200*rbgDaysM)*100:null;
+  const effD1M=av(mo==='ALL'?(D.M.d1_eff||[]):dArr('d1','psa_eff_pct'));
+  const effD2M=av(mo==='ALL'?(D.M.d2_eff||[]):dArr('d2','psa_eff_pct'));
+  const avgEffRaw=effD1M!=null&&effD2M!=null?(effD1M+effD2M)/2:effD1M??effD2M;
+  const psaEffPct=avgEffRaw!=null?avgEffRaw/0.4583*100:null;
   const hComps=[
     {l:'RBG',v:rbgPct,ok:rbgPct>=85?1:rbgPct>=70?0:-1},
     {l:'CBG',v:achPct,ok:achPct>=90?1:achPct>=75?0:-1},
-    {l:'PSA Eff',v:uptPct,ok:uptPct>=90?1:uptPct>=70?0:-1},
+    {l:'PSA Eff',v:psaEffPct,ok:psaEffPct>=90?1:psaEffPct>=70?0:-1},
   ];
   const wts=[.25,.45,.30];
   const hs=Math.round(hComps.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*wts[i]*100,0));
@@ -2865,19 +2873,18 @@ function renderOV(){
 
   // KPI panel
   const k2pct=tgtCBG>0?Math.round(tCBG/tgtCBG*100):null;
-  const CBG_RATE2=0.04725*2110; // ₹99.6975/kg
+  const CBG_RATE2=76; // ₹76/kg
   const moCapRev=Math.round(tgtCBG*CBG_RATE2);
-  const moActRev=Math.round(tCBG*CBG_RATE2);
-  const moRevRatio=moCapRev>0?moActRev/moCapRev:null;
+  // Actual Energy Revenue from Daily Revenue sheet (Total CBG Sale column)
+  const moActRev=mo==='ALL'?D.finance.ytd_cbg_rev:(D.M.cbg_rev?.[MONTHS.indexOf(mo)]||null);
+  const moRevRatio=moCapRev>0&&moActRev!=null?moActRev/moCapRev:null;
   const contractLbl=mo==='ALL'?'Annually Contract Quantity':'Monthly Contract Quantity';
   const contractSub=mo==='ALL'?'Full-year · ID: P-LEKPL':mo+' · ID: P-LEKPL';
-  // Order: k1=Contract Qty, k2=Actual Offtake, k3=Capacity Revenue, k4=Actual Energy Revenue,
-  //        k5=Total Revenue, k6=Net Margin, k7=Production Cost, k8=Plant Uptime
   _fillOVKpis([
     {bar:'#1565C0',l:contractLbl,v:fmtN(tgtCBG)+' kg',s:contractSub},
     {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'YTD total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of contract qty':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
-    {bar:'#6d28d9',l:'Capacity Revenue',v:fmtR(moCapRev),s:'Contract Qty × ₹99.70/kg (0.04725 mmBtu × ₹2,110)'},
-    {bar:'#0e7490',l:'Actual Energy Revenue',v:fmtR(moActRev),s:'Actual CBG × ₹99.70/kg',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
+    {bar:'#6d28d9',l:'Capacity Revenue',v:fmtR(moCapRev),s:''},
+    {bar:'#0e7490',l:'Actual Energy Revenue',v:moActRev!=null?fmtR(moActRev):'—',s:'',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
     {bar:'#c67c00',l:'Total Production Cost',v:fmtR(totalCost),s:''},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
@@ -4906,7 +4913,7 @@ function healthRows(containerId){
 }
 
 // ═══ PLANT INTELLIGENCE ══════════════════════════════════════
-let TGT = {cbg_day:5400, cbg_month:162000, cbg_total:1944000, cost_kg:30};
+let TGT = {cbg_day:5400, cbg_month:145800, cbg_total:1782000, cost_kg:30};
 let MONTHS_LIST = [];
 
 function momArrow(curr,prev){
@@ -6444,6 +6451,7 @@ async function buildAnalyticsD() {
   M.d1_cbg=aggMonth(psa,gD,IDX.P_cbg_d1); M.d2_cbg=aggMonth(psa,gD,IDX.P_cbg_d2); M.act_pur=aggMonth(psa,gD,IDX.P_pur_tot);
   M.ideal_pur=aggMonth(cbgExp,gD,16); M.ideal_raw=aggMonth(cbgExp,gD,15); M.ideal_cbg=aggMonth(cbgExp,gD,17); M.exp_tot=aggMonth(cbgExp,gD,13); M.d1_exp=aggMonth(cbgExp,gD,6); M.d2_exp_exp=aggMonth(cbgExp,gD,12);
   M.d1_eff=aggMonth(d1,gD,IDX.D_psa_eff_pct,'avg'); M.d2_eff=aggMonth(d2,gD,IDX.D_psa_eff_pct,'avg');
+  M.d1_bg_total=aggMonth(d1,gD,IDX.D_bg_total); M.d2_bg_total=aggMonth(d2,gD,IDX.D_bg_total);
   M.d1_olr=aggMonth(d1,gD,IDX.D_olr,'avg'); M.d2_olr=aggMonth(d2,gD,IDX.D_olr,'avg');
   M.d1_feed=aggMonth(d1,gD,IDX.D_feed_act); M.d2_feed=aggMonth(d2,gD,IDX.D_feed_act);
   M.ph_d1=aggMonth(ph,gD,1,'avg'); M.ph_d2=aggMonth(ph,gD,4,'avg');
