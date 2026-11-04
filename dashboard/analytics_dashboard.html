@@ -43,11 +43,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   border-bottom:2px solid var(--bdr);box-shadow:0 2px 8px rgba(0,0,0,.08)}
 .nav-row1{display:flex;align-items:center;padding:0 16px;height:44px;gap:4px;border-bottom:1px solid var(--bdr)}
 .nav-row2{display:flex;align-items:center;padding:0 16px;height:36px;gap:4px}
-.nav-brand{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:800;color:var(--acc);margin-right:14px;white-space:nowrap}
+.nav-brand{font-size:14px;font-weight:800;color:var(--acc);margin-right:14px;white-space:nowrap}
 .nav-brand small{color:var(--text2);font-weight:400;font-size:10px;margin-left:4px}
-.nav-lr-logo{height:28px;width:auto;object-fit:contain;flex-shrink:0}
-.nav-powered{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);white-space:nowrap;margin-left:10px}
-.nav-elan-logo{height:22px;width:auto;object-fit:contain}
 .tabs{display:flex;gap:2px;flex-wrap:nowrap;overflow-x:auto;flex:1}
 .tabs::-webkit-scrollbar{height:3px}.tabs::-webkit-scrollbar-thumb{background:var(--bdr)}
 .tb{padding:6px 14px;border:none;background:transparent;color:var(--text2);cursor:pointer;
@@ -710,10 +707,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 </script>
 <nav class="nav">
   <div class="nav-row1">
-    <div class="nav-brand">
-      <img class="nav-lr-logo" src="../assets/images/lr_energy_logo.png" alt="LR Energy">
-      <div>LREKPL <small>5.4 TPD CBG · Karnal</small></div>
-    </div>
+    <div class="nav-brand">LREKPL <small>5.4 TPD CBG · Karnal</small></div>
     <div class="tabs">
       <button class="tb on" onclick="show('ov',this)">Overview</button>
       <button class="tb" onclick="show('s1',this)">1 · Feedstock</button>
@@ -727,9 +721,6 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb" onclick="show('s8',this)">9 · Finance</button>
     </div>
     <span id="nav_updated" class="nav-right"></span>
-    <div class="nav-powered">Powered by
-      <img class="nav-elan-logo" src="../assets/images/elan_logo.jpg" alt="Elan">
-    </div>
   </div>
   <div class="nav-row2">
     <div id="year_filter" class="mf" style="margin-right:0">
