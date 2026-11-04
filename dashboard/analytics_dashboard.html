@@ -2563,7 +2563,7 @@ function _renderOVSections(mo){
   const sfomD=(mo==='ALL'?mArr('d1_sfom'):dArr('d1','sfom')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_sfom'):dArr('d2','sfom'))[i]||0));
   const lfomD=(mo==='ALL'?mArr('d1_lfom'):dArr('d1','lfom')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_lfom'):dArr('d2','lfom'))[i]||0));
   const revD=mo==='ALL'?mArr('total_rev'):dArr('rev','cbg_rev');
-  const costD=mo==='ALL'?mArr('total_cost'):[];
+  const costD=mo==='ALL'?mArr('total_cost'):[D.M.total_cost?.[MONTHS.indexOf(mo)]||0];
   const sfRevD=mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[MONTHS.indexOf(mo)]||0];
   const lfRevD=mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[MONTHS.indexOf(mo)]||0];
   const tCBG=sumA(cbgD),tDisp=sumA(dispD),tPH=sumA(psaH),tCH=sumA(compH);
