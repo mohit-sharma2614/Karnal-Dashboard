@@ -4587,8 +4587,8 @@ function renderS8(){
 
   // ── Revenue arrays ─────────────────────────────────────────
   const cbgR  = mo==='ALL'?mArr('cbg_rev'):dArr('rev','cbg_rev');
-  const sfomR = mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[idx]||0];
-  const lfomR = mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[idx]||0];
+  const sfomR = mo==='ALL'?mArr('sfom_mn'):dArr('rev','sfom_rev');
+  const lfomR = mo==='ALL'?mArr('lfom_mn'):dArr('rev','lfom_rev');
   const veerR = mo==='ALL'?D.M.veer_rev:[D.M.veer_rev[idx]];
   const adiR  = mo==='ALL'?D.M.adi_rev:[D.M.adi_rev[idx]];
   const gailR = mo==='ALL'?D.M.gail_rev:[D.M.gail_rev[idx]];
@@ -4599,8 +4599,9 @@ function renderS8(){
   const trans = mo==='ALL'?mArr('transport'):dArr('rev','trans_cost');
   const maint_ = mo==='ALL'?mArr('maint'):dArr('rev','maint_cost');
   const elec  = mo==='ALL'?D.M.elec:[D.M.elec[idx]];
-  const mp    = mo==='ALL'?D.M.manpower:[D.M.manpower[idx]];
-  const emi   = mo==='ALL'?D.M.emi:[D.M.emi[idx]];
+  // mp/emi read from Daily Revenue sheet (cols I/J) via M.total_cost
+  const mp_s8 = mo==='ALL'?D.M.mp_rc:[D.M.mp_rc?.[idx]||0];
+  const emi_s8= mo==='ALL'?D.M.emi_rc:[D.M.emi_rc?.[idx]||0];
   // Individual feedstock costs (from Feed & Balance sheet)
   const pmCost = mo==='ALL'?mArr('pm_cost'):(idx>=0?[D.M.pm_cost?.[idx]||0]:[]);
   const gsCost = mo==='ALL'?mArr('gs_cost'):(idx>=0?[D.M.gs_cost?.[idx]||0]:[]);
@@ -4610,7 +4611,8 @@ function renderS8(){
 
   // ── Totals ─────────────────────────────────────────────────
   const totR = mo==='ALL'?fin.ytd_rev:(sumA(cbgR)+sumA(sfomR)+sumA(lfomR));
-  const totC = mo==='ALL'?fin.ytd_cost:(sumA(fc)+sumA(trans)+sumA(maint_)+sumA(elec)+sumA(mp)+sumA(emi));
+  // Use pre-computed M.total_cost directly — avoids dependency on separate MFC/EMI sheets
+  const totC = mo==='ALL'?fin.ytd_cost:(D.M.total_cost?.[idx]||0);
   const mg   = totR>0?((totR-totC)/totR*100).toFixed(1):0;
   const margins = mo==='ALL'?D.M.margin:[D.M.margin[idx]];
   const cpkMonthly=D.cpk_monthly||{};
@@ -4637,7 +4639,7 @@ function renderS8(){
   ],true);
   bar('c_s8_cost',lbl,[
     bDS('Feedstock',fc,C.orange),bDS('Electricity',elec,C.lime),
-    bDS('Manpower',mp,C.purple),bDS('EMI / Loan',emi,C.pink)
+    bDS('Manpower',mp_s8,C.purple),bDS('EMI / Loan',emi_s8,C.pink)
   ],true);
   if(charts['c_s8_margin'])charts['c_s8_margin'].destroy();
   const costArr=mo==='ALL'?D.M.total_cost:[D.M.total_cost?.[idx]||null];
@@ -6502,6 +6504,7 @@ async function buildAnalyticsD() {
   const manRows=getRows(manR,0); const gManD=r=>toDate(r[0]);
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   const mp_rc=aggMonth(rc,gD,8),emi_rc=aggMonth(rc,gD,9);
+  M.mp_rc=mp_rc; M.emi_rc=emi_rc;
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
   M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0)+(mp_rc[i]||0)+(emi_rc[i]||0));
   M.margin=M.total_rev.map((r,i)=>r>0?+((r-M.total_cost[i])/r*100).toFixed(1):null);
