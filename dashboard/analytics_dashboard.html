@@ -2392,14 +2392,46 @@ function renderSectionDay(sectionId){
     const totC=(rv.feed_cost||0)+(rv.trans_cost||0)+(rv.maint_cost||0);
     const mg=totR>0?((totR-totC)/totR*100).toFixed(1):null;
     const mgCls=mg!=null?(mg>=10?'g':mg>=0?'a':'r'):'';
-    html+=groupHeader('Revenue','Income streams for the day');
+    const cbgProd=p.act_cbg||p.cbg_tot;
+    const disp=p.dispatched;
+    const dispRate=cbgProd>0&&disp!=null?disp/cbgProd*100:null;
+    html+=groupHeader('CBG Sales','Dispatch & revenue for the day');
     html+=grid([
-      metricCard('CBG Sales Revenue',fL2(rv.cbg_rev),'','g','Primary revenue'),
+      metricCard('CBG Produced',fN(cbgProd),'kg','g'),
+      metricCard('Total Dispatched',fN(disp),'kg','c','Cylinders dispatched'),
+      metricCard('Dispatch Rate',dispRate!=null?dispRate.toFixed(1):null,'%',dispRate!=null?(dispRate>=90?'g':dispRate>=70?'a':'r'):'','Dispatched ÷ produced'),
+      metricCard('CBG Revenue',fL2(rv.cbg_rev),'','b','Sales revenue'),
+    ]);
+    const custData=[['Veer',p.veer],['Adinath',p.adinath],['KFS Sonipat',p.kfs],['KSK Sonipat',p.ksk],['OM Filling',p.om],['SPS Yamuna Nagar',p.sps]];
+    const custTot=custData.reduce((s,[,v])=>s+(v||0),0);
+    const hasCust=custData.some(([,v])=>v!=null&&v>0);
+    html+=groupHeader('Customer Dispatch','kg dispatched by customer today');
+    if(!hasCust){
+      html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No dispatch data for this date.</div>`;
+    } else {
+      const custRows=custData.map(([nm,v])=>{
+        if(!v||v===0) return`<tr><td style="font-weight:700">${nm}</td><td colspan="2" style="color:var(--text3)">—</td></tr>`;
+        const pct=custTot>0?v/custTot*100:0;
+        return`<tr><td style="font-weight:700">${nm}</td>
+          <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right">${fmtN(Math.round(v))} kg</td>
+          <td style="width:30%"><div style="display:flex;align-items:center;gap:5px">
+            <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="width:${pct.toFixed(0)}%;height:100%;background:var(--cyan);border-radius:3px"></div></div>
+            <span style="font-size:10px;min-width:30px">${pct.toFixed(1)}%</span>
+          </div></td></tr>`;
+      }).join('');
+      html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr><th>Customer</th><th style="text-align:right">Dispatch</th><th>Share</th></tr></thead>
+        <tbody>${custRows}
+        <tr style="border-top:2px solid var(--bdr);font-weight:800"><td>TOTAL</td><td style="text-align:right;font-variant-numeric:tabular-nums">${fmtN(Math.round(custTot))} kg</td><td></td></tr>
+        </tbody></table>`;
+    }
+    html+=groupHeader('Revenue & Costs','Financial summary for the day');
+    html+=grid([
+      metricCard('CBG Revenue',fL2(rv.cbg_rev),'','g','Primary revenue'),
       metricCard('SFOM Revenue',fL2(rv.sfom_rev),'','b'),
       metricCard('LFOM Revenue',fL2(rv.lfom_rev),'','c'),
-      metricCard('Total Revenue',fL2(totR),'','g','All streams combined'),
+      metricCard('Total Revenue',totR>0?fL2(totR):null,'','g','All streams combined'),
     ]);
-    html+=groupHeader('Costs & Margin','Variable costs and daily profitability');
     html+=grid([
       metricCard('Feedstock Cost',fL2(rv.feed_cost),'','r'),
       metricCard('Transport Cost',fL2(rv.trans_cost),'','a'),
