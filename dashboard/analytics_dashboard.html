@@ -1285,7 +1285,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="cc"><div class="ct">Cost per kg CBG (₹/kg)</div><div class="cw"><canvas id="c_s8_cpk_chart"></canvas></div></div>
   </div>
   <div class="cg c2">
-    <div class="cc"><div class="ct">YTD Cost Structure</div><div class="cw"><canvas id="c_s8_pie"></canvas></div></div>
+    <div class="cc"><div class="ct">Cost Structure</div><div class="cw"><canvas id="c_s8_pie"></canvas></div></div>
     <div class="cc"><div class="ct">Customer-wise Revenue (₹)</div><div class="cw t"><canvas id="c_s8_cust"></canvas></div></div>
   </div>
   <div class="stitle">Customer Revenue Breakdown</div>
@@ -2543,7 +2543,7 @@ function _renderOVSections(mo){
   const sg=document.getElementById('ov_sgrid');if(!sg)return;
   ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id=>{const k='ov_ch_'+id;if(charts[k]){try{charts[k].destroy();}catch(e){}charts[k]=null;}});
   const av=a=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
-  const per=mo==='ALL'?'YTD':mo;
+  const per=mo==='ALL'?'Annual':mo;
   const lbls=mo==='ALL'?MONTHS:dDates('psa');
   const cbgD=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
@@ -2664,28 +2664,28 @@ function _renderOVSections(mo){
     {id:'s3',tab:'s3',clr:'#0e7490',num:'S3',nm:'Production',person:'Mr. Sohan Lal',swFlag:'',
      st:sOk(tD1+tD2>0?100:null,80,50),
      stat:[{l:'D1 '+(tD1>0?'Normal':'No Data'),c:tD1>0?'g':'a'},{l:'D2 '+(tD2>0?'Normal':'No Data'),c:tD2>0?'g':'a'}],
-     mx:[{l:'Biogas YTD',v:fmtM3(tD1+tD2)},{l:'Avg Daily',v:MONTHS.length>0?fmtN(Math.round((tD1+tD2)/(MONTHS.length*30)))+' m³/d':'—'},{l:'D1 Biogas',v:fmtM3(tD1)},{l:'D2 Biogas',v:fmtM3(tD2)},{l:'Vent/Flare',v:'0 m³',vc:'g'}],
+     mx:[{l:'Total Biogas',v:fmtM3(tD1+tD2)},{l:'Avg Daily',v:MONTHS.length>0?fmtN(Math.round((tD1+tD2)/(MONTHS.length*30)))+' m³/d':'—'},{l:'D1 Biogas',v:fmtM3(tD1)},{l:'D2 Biogas',v:fmtM3(tD2)},{l:'Vent/Flare',v:'0 m³',vc:'g'}],
      cl:'Monthly Biogas D1 vs D2 (m³)',
      ch:()=>bar('ov_ch_s3',lbls,[bDS('D1 (m³)',d1bg,C.blue),bDS('D2 (m³)',d2bg,C.teal)]),
      exploreLbl:'Production',exploreHint:'Biogas · D1/D2 output · Vent/Flare'},
     {id:'s4',tab:'s4',clr:'#6d28d9',num:'S4',nm:'Purification',person:'Mr. Bobby',swFlag:'',
      st:sOk(ch4P,90,80),
      stat:[{l:'PSA '+(ch4P>=90?'OK':ch4P>=80?'Caution':'Alert'),c:ch4P>=90?'g':ch4P>=80?'a':'r'}],
-     mx:[{l:'CBG YTD',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Eff YTD',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4 Purity',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hours',v:fmtN(Math.round(tPH))+' hrs'},{l:'Top Issue',v:'Moisture',vc:'r'}],
+     mx:[{l:'Total CBG',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Efficiency',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4 Purity',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hours',v:fmtN(Math.round(tPH))+' hrs'},{l:'Top Issue',v:'Moisture',vc:'r'}],
      cl:'Monthly PSA Efficiency % — Target 90%',
      ch:()=>line('ov_ch_s4',lbls,[lDS('PSA Eff %',purD.map((v,i)=>expD[i]>0?v/expD[i]*100:null),C.purple)]),
      exploreLbl:'Purification',exploreHint:'PSA efficiency · CH4 purity · hours'},
     {id:'s5',tab:'s5',clr:'#0e7490',num:'S5',nm:'Compressor',person:'Mr. Rajendra Kumar',swFlag:'',
      st:sOk(drPct,95,80),
      stat:[{l:drPct>=90?'Running':'Dispatch Low',c:drPct>=90?'g':'a'}],
-     mx:[{l:'Dispatched YTD',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'Comp Util',v:uptP!=null?uptP.toFixed(1)+'%':'—'},{l:'CBG/hr',v:cbgHr},{l:'Trips',v:'4 trips',vc:'r'}],
+     mx:[{l:'Total Dispatched',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'Comp Util',v:uptP!=null?uptP.toFixed(1)+'%':'—'},{l:'CBG/hr',v:cbgHr},{l:'Trips',v:'4 trips',vc:'r'}],
      cl:'Monthly Produced vs Dispatched (kg)',
      ch:()=>bar('ov_ch_s5',lbls,[bDS('Produced (kg)',cbgD,C.teal),bDS('Dispatched (kg)',dispD,C.green)]),
      exploreLbl:'Compressor',exploreHint:'CBG dispatch · utilization · trips'},
     {id:'s6',tab:'s6',clr:'#3f6212',num:'S6',nm:'Manure',person:'Mr. Vivek Kumar',swFlag:'',
      st:sOk(tSfom+tLfom>0?100:null,80,50),
      stat:[{l:'On Track',c:tSfom+tLfom>0?'g':'a'}],
-     mx:[{l:'Total Drain YTD',v:fmtM3(tDrain)},{l:'Drain Achiev.',v:drAchPct!=null?drAchPct.toFixed(1)+'%':'—',vc:drAchPct>=90?'g':drAchPct>=75?'a':'r'},{l:'SFOM YTD',v:fmtMT(tSfom)},{l:'LFOM YTD',v:fmtN(Math.round(tLfom))+' KL'},{l:'Manure Rev',v:fmtL(manRev)}],
+     mx:[{l:'Total Drain',v:fmtM3(tDrain)},{l:'Drain Achiev.',v:drAchPct!=null?drAchPct.toFixed(1)+'%':'—',vc:drAchPct>=90?'g':drAchPct>=75?'a':'r'},{l:'Total SFOM',v:fmtMT(tSfom)},{l:'Total LFOM',v:fmtN(Math.round(tLfom))+' KL'},{l:'Manure Rev',v:fmtL(manRev)}],
      cl:'Monthly Revenue — SFOM + LFOM (₹L)',
      ch:()=>bar('ov_ch_s6',mo==='ALL'?MONTHS:dDates('d1'),[bDS('SFOM',sfomD,C.lime),bDS('LFOM',lfomD,C.green)]),
      exploreLbl:'Manure',exploreHint:'Drain · SFOM · LFOM · Revenue'},
@@ -2699,7 +2699,7 @@ function _renderOVSections(mo){
     {id:'s8',tab:'s8',clr:'#9f1239',num:'S8',nm:'Finance',person:'Management',swFlag:'',
      st:sOk(mrg,40,25),
      stat:[{l:'Margin '+(mrg>=40?'OK':mrg>=25?'Caution':'Alert'),c:mrg>=40?'g':mrg>=25?'a':'r'}],
-     mx:[{l:'YTD Revenue',v:fmtL(tRev)},{l:'Total Production Cost',v:fmtL(tCost),vc:'r'},{l:'Cost/kg CBG',v:cpkV!=null?'₹'+cpkV.toFixed(1)+'/kg':'—',vc:cpkV!=null&&cpkV<=TGT.cost_kg?'g':'r'},{l:'Biggest Cost',v:bigCost}],
+     mx:[{l:'Total Revenue',v:fmtL(tRev)},{l:'Total Production Cost',v:fmtL(tCost),vc:'r'},{l:'Cost/kg CBG',v:cpkV!=null?'₹'+cpkV.toFixed(1)+'/kg':'—',vc:cpkV!=null&&cpkV<=TGT.cost_kg?'g':'r'},{l:'Biggest Cost',v:bigCost}],
      cl:'Monthly Total Production Cost (₹)',
      ch:()=>bar('ov_ch_s8',mo==='ALL'?MONTHS:dDates('rev'),[bDS('Total Cost',costD,C.rose)]),
      exploreLbl:'Finance',exploreHint:'P&L · Cost breakdown · Margin trends'},
@@ -2860,7 +2860,7 @@ function renderOV(){
   const contractSub=mo==='ALL'?'Full-year · ID: P-LEKPL':mo+' · ID: P-LEKPL';
   _fillOVKpis([
     {bar:'#1565C0',l:contractLbl,v:fmtN(tgtCBG)+' kg',s:contractSub},
-    {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'YTD total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of contract qty':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
+    {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'Annual total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of contract qty':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
     {bar:'#6d28d9',l:'Capacity Revenue',v:fmtR(moCapRev),s:''},
     {bar:'#0e7490',l:'Actual Energy Revenue',v:moActRev!=null?fmtR(moActRev):'—',s:'',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
@@ -2876,7 +2876,7 @@ function renderOV(){
   const worstIdx=posM.length?posM.reduce((w,x)=>x.v<w.v?x:w,posM[0]).i:0;
   const avgAch=posM.length?Math.round(posM.reduce((s,x)=>s+x.v/TGT.cbg_month*100,0)/posM.length):0;
   const smEl=document.getElementById('ov_strip_meta');
-  if(smEl)smEl.textContent=posM.length?`YTD Avg: ${avgAch}% · Best: ${MONTHS[bestIdx]??'—'} · Worst: ${MONTHS[worstIdx]??'—'}`:'';
+  if(smEl)smEl.textContent=posM.length?`Avg: ${avgAch}% · Best: ${MONTHS[bestIdx]??'—'} · Worst: ${MONTHS[worstIdx]??'—'}`:'';
   const stEl=document.getElementById('ov_strip_tiles');
   if(stEl){
     const allM=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -3299,7 +3299,7 @@ function renderS1(){
   if(fcEl){
     const fcArr2=mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost');
     const totalFC=isDa?(dayRev.feed_cost||0):sumA(fcArr2);
-    const label=isDa?curDay+' Feedstock Cost':mo==='ALL'?'YTD Feedstock Cost':mo+' Feedstock Cost';
+    const label=isDa?curDay+' Feedstock Cost':mo==='ALL'?'Annual Feedstock Cost':mo+' Feedstock Cost';
     fcEl.innerHTML=totalFC>0?`<div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid var(--amber);border-radius:8px;padding:10px 16px">
       <span style="font-size:11px;font-weight:600;color:var(--text2)">${label}</span>
       <span style="font-size:20px;font-weight:800;color:var(--amber);font-variant-numeric:tabular-nums">${fmtL(totalFC)}</span>
@@ -3462,14 +3462,14 @@ function renderS2(){
       vs_d1_sl:avgArr(healthDArr('vs_d1_sl')),vs_d2_sl:avgArr(healthDArr('vs_d2_sl')),
       ts_date:null,ia_date:null};
   }
-  _renderLabTable('s2_kpi_table',tv,mo==='ALL'?'YTD latest':mo+' avg');
+  _renderLabTable('s2_kpi_table',tv,mo==='ALL'?'Annual avg':mo+' avg');
   // ── Section 2: Feedstock Monitoring ───────────────────────────────────
   const _mSumOrNull=key=>{const a=mArr(key);const s=a.reduce((t,v)=>t+(v||0),0);return s>0?s:null;};
   const _mAvgOrLast=key=>{
     if(mo==='ALL'){const a=mArr(key);const v=a.filter(x=>x!=null&&x!==0);return v.length?v[v.length-1]:null;}
     else{const mi=D.months.indexOf(mo);return mi>=0&&(mArr(key)[mi]||0)>0?mArr(key)[mi]:null;}
   };
-  const bppPeriod=mo==='ALL'?'YTD sum':'Month total';
+  const bppPeriod=mo==='ALL'?'Annual sum':'Month total';
   const getMoBpp=k=>mo==='ALL'?_mSumOrNull(k):(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const bppData={
     d1_pm_bpp:getMoBpp('pm_bpp'),d1_cd_bpp:getMoBpp('cd_bpp'),d1_gs_bpp:getMoBpp('gs_bpp'),
@@ -3507,7 +3507,7 @@ function renderS2(){
   const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg_psa'),bg_vent:getSum('d1_bg_vent')};
   const predD2={bg_est_exp:getSum('d2_bg_est_exp'),bg_est_act:getSum('d2_bg_est_act'),bg_total:getSum('d2_bg_total'),bg_act:getSum('d2_bg_psa'),bg_vent:getSum('d2_bg_vent')};
   const predEl=document.getElementById('s2_pred_panel');
-  if(predEl) predEl.innerHTML=_biogasPredHtml(predD1,predD2,mo==='ALL'?'YTD':mo);
+  if(predEl) predEl.innerHTML=_biogasPredHtml(predD1,predD2,mo==='ALL'?'Annual':mo);
   // BPP trend chart for month/year view
   const predChartWrap=document.getElementById('s2_pred_chart_wrap');
   if(predChartWrap){predChartWrap.style.display='block';}
@@ -3745,7 +3745,7 @@ function _renderS3(){
   const moD2Feed=mo==='ALL'?sumArr(mArr('d2_feed')):sumArr(D.D.d2?.[mo]?.feed_act);
   const moD1Bg=mo==='ALL'?sumArr(mArr('d1_bg')):sumArr(D.D.d1?.[mo]?.bg_act);
   const moD2Bg=mo==='ALL'?sumArr(mArr('d2_bg')):sumArr(D.D.d2?.[mo]?.bg_act);
-  const periodLbl=mo==='ALL'?'YTD Total':mo+' Total';
+  const periodLbl=mo==='ALL'?'Annual Total':mo+' Total';
   dayPanel.style.display='block';
   dayPanel.innerHTML=`<div style="background:linear-gradient(135deg,var(--acc) 0%,#1976D2 100%);border-radius:8px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;flex-wrap:nowrap;gap:10px;overflow:hidden">
     <div style="flex-shrink:0">
@@ -4595,10 +4595,11 @@ function renderS8(){
   const spsR  = mo==='ALL'?D.M.sps_rev:[D.M.sps_rev[idx]];
 
   // ── Cost arrays ────────────────────────────────────────────
-  const fc   = mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost');
-  const trans = mo==='ALL'?mArr('transport'):dArr('rev','trans_cost');
-  const maint_ = mo==='ALL'?mArr('maint'):dArr('rev','maint_cost');
-  const elec  = mo==='ALL'?D.M.elec:[D.M.elec[idx]];
+  // For monthly view use pre-aggregated monthly totals so chart labels match (lbl=['Jan'] = 1 element)
+  const fc   = mo==='ALL'?mArr('feed_cost'):[D.M.feed_cost?.[idx]||0];
+  const trans = mo==='ALL'?mArr('transport'):[D.M.transport?.[idx]||0];
+  const maint_ = mo==='ALL'?mArr('maint'):[D.M.maint?.[idx]||0];
+  const elec  = mo==='ALL'?D.M.elec:[D.M.elec?.[idx]||0];
   // mp/emi read from Daily Revenue sheet (cols I/J) via M.total_cost
   const mp_s8 = mo==='ALL'?D.M.mp_rc:[D.M.mp_rc?.[idx]||0];
   const emi_s8= mo==='ALL'?D.M.emi_rc:[D.M.emi_rc?.[idx]||0];
@@ -4626,7 +4627,7 @@ function renderS8(){
   // ── KPI cards ──────────────────────────────────────────────
   document.getElementById('s8_rev_kpi').textContent=fmtR(totR);
   document.getElementById('s8_cost_kpi').textContent=fmtR(totC);
-  document.getElementById('s8_margin_kpi').textContent=fmtR(mo==='ALL'?D.finance.ytd_cost:totC);
+  document.getElementById('s8_margin_kpi').textContent=fmtR(totC);
   document.getElementById('s8_cpk').textContent=cpk?'₹'+cpk+'/kg':'—';
   {const el=document.getElementById('s8_cpk_tgt');if(el)el.textContent='Target: ₹'+TGT.cost_kg+'/kg';}
   document.getElementById('s8_cbg_rev').textContent=fmtR(mo==='ALL'?fin.ytd_cbg_rev:sumA(cbgR));
@@ -4680,7 +4681,7 @@ function renderS8(){
     `<thead><tr><th>Month</th><th>Veer Filling (₹)</th><th>Adinath Auto (₹)</th><th>GAIL/LREVPL (₹)</th><th>SPS Bio Chem (₹)</th><th>Total (₹)</th></tr></thead>
     <tbody>${custRows.join('')}
     <tr style="font-weight:700;border-top:2px solid var(--bdr)">
-      <td>YTD Total</td><td class="tg">${fmtL(vTot)}</td><td class="tc">${fmtL(aTot)}</td>
+      <td>Total</td><td class="tg">${fmtL(vTot)}</td><td class="tc">${fmtL(aTot)}</td>
       <td class="ta">${fmtL(gTot)}</td><td>${fmtL(sTot)}</td>
       <td class="tg">${fmtL(vTot+aTot+gTot+sTot)}</td></tr>
     </tbody>`;
@@ -4819,13 +4820,13 @@ function renderS8(){
     </tr></thead>
     <tbody>${growthRows.join('')}
     <tr style="font-weight:700;border-top:2px solid var(--bdr)">
-      <td>YTD Total</td><td class="tr">${fmtL(growthYtd)}</td>
+      <td>Total</td><td class="tr">${fmtL(growthYtd)}</td>
       <td colspan="11">—</td></tr>
     </tbody>`;
 
   // ── EMI Table ──────────────────────────────────────────────
   const emiData=fin.emi_rows||[];
-  const emiHead=`<thead><tr><th>EMI Type</th><th>Description</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}<th>YTD Total</th></tr></thead>`;
+  const emiHead=`<thead><tr><th>EMI Type</th><th>Description</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}<th>Total</th></tr></thead>`;
   const emiBody=emiData.map(e=>{
     const ytd=e.vals.reduce((s,v)=>s+(v||0),0);
     return`<tr><td>${e.type}</td><td>${e.desc}</td>${e.vals.map(v=>`<td>${v?'₹'+(v/1000).toFixed(0)+'k':'—'}</td>`).join('')}<td style="font-weight:700">₹${(ytd/1e5).toFixed(2)}L</td></tr>`;
@@ -5220,7 +5221,7 @@ function renderSIForward(mo,day){
         <div class="si-fwd-sub">Best: ${MONTHS_LIST[best]||'—'} (${Math.round((cbgArr[best]||0)/tgt*100)}%) · Worst: ${MONTHS_LIST[worst]||'—'} (${Math.round((cbgArr[worst]||0)/tgt*100)}%)</div>
       </div>
       <div class="si-fwd-r">
-        <div class="si-fwd-rlbl">YTD Achievement</div>
+        <div class="si-fwd-rlbl">Achievement</div>
         <div class="si-fwd-big" style="color:${achC}">${ach}%</div>
         <div class="si-fwd-sm">of ${Math.round(annTgt/1000)}k kg target</div>
       </div>`;
@@ -5296,8 +5297,8 @@ function renderSID1D2(mo,day){
     const d1=((D.M.d1_cbg||[]).reduce((a,b)=>a+(b||0),0));
     const d2=((D.M.d2_cbg||[]).reduce((a,b)=>a+(b||0),0));
     const tot=d1+d2||1; const li=MONTHS_LIST.length-1;
-    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[li],(D.M.d1_eff||[])[li],(D.M.ia_d1||[])[li],'var(--acc)','YTD')+
-      makeCard('D2',d2,tot,(D.M.ph_d2||[])[li],(D.M.d2_eff||[])[li],(D.M.ia_d2||[])[li],'var(--amber)','YTD');
+    el.innerHTML=makeCard('D1',d1,tot,(D.M.ph_d1||[])[li],(D.M.d1_eff||[])[li],(D.M.ia_d1||[])[li],'var(--acc)','Annual')+
+      makeCard('D2',d2,tot,(D.M.ph_d2||[])[li],(D.M.d2_eff||[])[li],(D.M.ia_d2||[])[li],'var(--amber)','Annual');
   } else {
     const i=MONTHS_LIST.indexOf(mo);
     const d1=(D.M.d1_cbg||[])[i]||0, d2=(D.M.d2_cbg||[])[i]||0, tot=d1+d2||1;
@@ -5321,7 +5322,7 @@ function renderSISignals(mo,day){
   const dayTgt=Math.round(TGT.cbg_month/30);
   el.innerHTML=`
     <div class="si-sig">
-      <div class="si-sig-lbl">Best Day ${mo!=='ALL'?'— '+mo:'— YTD'}</div>
+      <div class="si-sig-lbl">Best Day ${mo!=='ALL'?'— '+mo:'— Annual'}</div>
       <div class="si-sig-val">${best?Math.round(best.cbg).toLocaleString():'—'}</div>
       <div class="si-sig-sub">${best?best.date+(best.cbg>=dayTgt*1.1?' · Above target ✓':' · '+Math.round(best.cbg/dayTgt*100)+'% of daily target'):'No data'}</div>
     </div>
@@ -5567,7 +5568,7 @@ function renderSI(){
       d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'ALL');
     bppCard.style.display='none';
   } else {
-    cascTitle.textContent=`Performance Analysis — All Months (YTD)`;
+    cascTitle.textContent=`Performance Analysis — All Months`;
     issues=diagnose(d.totExp,d.idealPur,d.actPur,d.cbg,d.idealCBG,d.phD1,d.phD2,d.tpD1,d.tpD2,
       d.iaD1,d.iaD2,null,null,null,null,d.psaHrs,d.d1Eff,d.d2Eff,d.ch4,'ALL');
     bppCard.style.display='none';
