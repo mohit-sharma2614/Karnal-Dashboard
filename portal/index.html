@@ -1495,10 +1495,15 @@ function renderHome(resetDate=true){
       const lbl=isUpload?raw.replace(/^\[UPLOAD[^\]]*\]\s*/,''):raw
       let ts=r[4]||''; let tsDate=''
       if(typeof ts==='number'){
-        const totalMins=Math.round((ts%1)*24*60)
+        const rawSerial=r[4]
+        const totalMins=Math.round((rawSerial%1)*24*60)
         const hh=String(Math.floor(totalMins/60)).padStart(2,'0')
         const mm=String(totalMins%60).padStart(2,'0')
         ts=`${hh}:${mm}`
+        // Excel serial: days since 1899-12-30 (Excel leap-year bug offset)
+        const dObj=new Date(new Date(1899,11,30).getTime()+Math.floor(rawSerial)*86400000)
+        const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        tsDate=String(dObj.getDate()).padStart(2,'0')+'-'+months[dObj.getMonth()]+' · '
       } else {
         const tsStr=String(ts)
         const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
