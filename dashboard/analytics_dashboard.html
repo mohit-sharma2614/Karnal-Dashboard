@@ -2811,11 +2811,10 @@ function renderOV(){
     const dUpt=dp.comp_hrs&&dp.psa_hrs&&dp.psa_hrs>0?dp.comp_hrs/dp.psa_hrs*100:null;
     const dDay=TGT.cbg_day||5400;
     const dAch=dDisp&&dDay>0?dDisp/dDay*100:null;
-    // Plant Health: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (actual÷design 45.83%)
+    // Plant Health: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (PSA col R÷0.4583×100)
     const dRbgRaw=(d1r.bg_total||0)+(d2r.bg_total||0);
     const dRbgPct=dRbgRaw>0?dRbgRaw/13200*100:null;
-    const dPsaEffRaw=dp.d1_eff!=null&&dp.d2_eff!=null?(dp.d1_eff+dp.d2_eff)/2:dp.d1_eff??dp.d2_eff;
-    const dPsaEff=dPsaEffRaw!=null?dPsaEffRaw/0.4583*100:null;
+    const dPsaEff=dp.psa_eff_day!=null?(dp.psa_eff_day/0.4583)*100:null;
     const dc=[
       {l:'RBG',v:dRbgPct,ok:dRbgPct>=85?1:dRbgPct>=70?0:-1},
       {l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},
@@ -2875,15 +2874,16 @@ function renderOV(){
   const cpkMo=D.cpk_monthly||{};
   const cpkVal=mo==='ALL'?(tCBG>0?totalCost/tCBG:null):(cpkMo[mo]||null);
 
-  // Health ring — 3 components: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (actual÷design 45.83%)
+  // Health ring — 3 components: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (PSA col R÷0.4583×100)
   const rbgD1M=sumA(mo==='ALL'?(D.M.d1_bg_total||[]):dArr('d1','bg_total'));
   const rbgD2M=sumA(mo==='ALL'?(D.M.d2_bg_total||[]):dArr('d2','bg_total'));
-  const rbgDaysM=(mo==='ALL'?(D.M.d1_bg_total||[]):dArr('d1','bg_total')).filter(v=>v!=null&&v>0).length||1;
+  // Count actual working days (not months) for correct denominator
+  const rbgDaysArr=mo==='ALL'?(D.M.rbg_days||[]):dArr('psa','rbg_tot').map(v=>v!=null&&v>0?1:0);
+  const rbgDaysM=rbgDaysArr.reduce((s,v)=>s+(v||0),0)||1;
   const rbgPct=(rbgD1M+rbgD2M)>0?(rbgD1M+rbgD2M)/(13200*rbgDaysM)*100:null;
-  const effD1M=av(mo==='ALL'?(D.M.d1_eff||[]):dArr('d1','psa_eff_pct'));
-  const effD2M=av(mo==='ALL'?(D.M.d2_eff||[]):dArr('d2','psa_eff_pct'));
-  const avgEffRaw=effD1M!=null&&effD2M!=null?(effD1M+effD2M)/2:effD1M??effD2M;
-  const psaEffPct=avgEffRaw!=null?avgEffRaw/0.4583*100:null;
+  // PSA Eff: PSA sheet col R (psa_eff_day) ÷ 0.4583 × 100
+  const psaEffDayAvg=av(mo==='ALL'?(D.M.psa_eff_day||[]):dArr('psa','psa_eff_day'));
+  const psaEffPct=psaEffDayAvg!=null?(psaEffDayAvg/0.4583)*100:null;
   const hComps=[
     {l:'RBG',v:rbgPct,ok:rbgPct>=85?1:rbgPct>=70?0:-1},
     {l:'CBG',v:achPct,ok:achPct>=90?1:achPct>=75?0:-1},
@@ -6627,7 +6627,7 @@ async function buildAnalyticsD() {
       psa:{psa_hrs:_psaHrs?+_psaHrs.toFixed(3):_psaHrs,comp_hrs:(v=>v!=null&&v>0&&v<2?+(v*24).toFixed(3):v)(nv(p[3])),rbg_d1:nv(p[IDX.P_rbg_d1]),rbg_d2:nv(p[IDX.P_rbg_d2]),rbg_tot:_rbgTot,
         purified:_purified,act_cbg:_cbgTot,cbg_d1:nv(p[IDX.P_cbg_d1]),cbg_d2:nv(p[IDX.P_cbg_d2]),cbg_tot:_cbgTot,
         dispatched:nv(p[IDX.P_dispatched]),veer:nv(p[IDX.P_veer]),adinath:nv(p[IDX.P_adinath]),kfs:nv(p[IDX.P_kfs]),ksk:nv(p[IDX.P_ksk]),om:nv(p[IDX.P_om]),sps:nv(p[IDX.P_sps]),
-        ch4:nv(p[IDX.P_ch4]),cascade:nv(p[IDX.P_cascade2]),storage:nv(p[IDX.P_storage]),d1_eff:nv(d1r[IDX.D_psa_eff_pct]),d2_eff:nv(d2r[IDX.D_psa_eff_pct]),
+        ch4:nv(p[IDX.P_ch4]),cascade:nv(p[IDX.P_cascade2]),storage:nv(p[IDX.P_storage]),psa_eff_day:nv(p[IDX.P_psa_eff_day]),d1_eff:nv(d1r[IDX.D_psa_eff_pct]),d2_eff:nv(d2r[IDX.D_psa_eff_pct]),
         ideal_raw:_idealRaw,ideal_pur:_idealPur,ideal_cbg:_idealCbg,
         raw_pct:(_idealRaw&&_rbgTot)?Math.round(_rbgTot/_idealRaw*100):null,
         pur_pct:(_idealPur&&_purified)?Math.round(_purified/_idealPur*100):null,
