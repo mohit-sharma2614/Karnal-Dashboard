@@ -2831,7 +2831,7 @@ function renderOV(){
   const rbgD1M=sumA(mo==='ALL'?(D.M.d1_bg_total||[]):dArr('d1','bg_total'));
   const rbgD2M=sumA(mo==='ALL'?(D.M.d2_bg_total||[]):dArr('d2','bg_total'));
   // Count actual working days (not months) for correct denominator
-  const rbgDaysArr=mo==='ALL'?(D.M.rbg_days||[]):dArr('psa','rbg_tot').map(v=>v!=null&&v>0?1:0);
+  const rbgDaysArr=mo==='ALL'?(D.M.rbg_days||[]):dArr('d1','bg_total').map(v=>v!=null&&v>0?1:0);
   const rbgDaysM=rbgDaysArr.reduce((s,v)=>s+(v||0),0)||1;
   const rbgPct=(rbgD1M+rbgD2M)>0?(rbgD1M+rbgD2M)/(13200*rbgDaysM)*100:null;
   // PSA Eff: PSA sheet col R (psa_eff_day) ÷ 0.4583 × 100
