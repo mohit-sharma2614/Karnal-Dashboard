@@ -6749,8 +6749,15 @@ async function initDashboard() {
     document.getElementById('nav_updated').textContent=D.meta.updated;
     overlay.style.display='none';
     document.getElementById('mainNav').style.display='';
-    try{ renderOV(); }catch(e){ console.error('OV init error',e); }
-  } catch(e) { setStatus('Error: '+e.message); console.error(e); }
+    try{ renderOV(); }catch(e){
+      console.error('OV init error',e);
+      const sec=document.getElementById('sec_ov');
+      if(sec) sec.innerHTML=`<div style="padding:60px 32px;text-align:center;color:#64748b"><div style="font-size:18px;font-weight:600;margin-bottom:8px">Data not yet available</div><div style="font-size:13px">Please complete the full data upload from the Portal, then refresh.</div></div>`;
+    }
+  } catch(e) {
+    console.error(e);
+    setStatus('Error loading data: '+e.message+' — Please refresh and try again.');
+  }
 }
 // ── GENERATE REPORT ────────────────────────────────────────────────
 let _rpP='monthly';

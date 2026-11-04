@@ -1493,14 +1493,20 @@ function renderHome(resetDate=true){
       const isUpload=raw.startsWith('[UPLOAD')
       // Strip "[UPLOAD COMPLETE] " prefix for display
       const lbl=isUpload?raw.replace(/^\[UPLOAD[^\]]*\]\s*/,''):raw
-      let ts=r[4]||''
+      let ts=r[4]||''; let tsDate=''
       if(typeof ts==='number'){
         const totalMins=Math.round((ts%1)*24*60)
         const hh=String(Math.floor(totalMins/60)).padStart(2,'0')
         const mm=String(totalMins%60).padStart(2,'0')
         ts=`${hh}:${mm}`
       } else {
-        ts=String(ts).slice(11,16)
+        const tsStr=String(ts)
+        const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+        if(tsStr.length>=16){
+          const d=new Date(tsStr); const mn=isNaN(d)?null:months[d.getMonth()]
+          if(mn) tsDate=String(d.getDate()).padStart(2,'0')+'-'+mn+' · '
+        }
+        ts=tsStr.slice(11,16)
       }
       const initials=name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()
       const gradIdx=Math.abs(email.charCodeAt(0)||0)%4
@@ -1513,7 +1519,7 @@ function renderHome(resetDate=true){
         <div class="ai-av" style="background:${grads[gradIdx]}">${initials}</div>
         <div class="ai-body"><div class="ai-text"><strong>${name}</strong> ${verb} ${lbl}</div></div>
         ${badge}
-        <span class="ai-time">${ts}</span>
+        <span class="ai-time">${tsDate}${ts}</span>
       </div>`
     }).join('')
     if(!actHtml) actHtml=`<div style="padding:14px 13px;font-size:11px;color:#a1a1aa">No activity yet today.</div>`
