@@ -2490,7 +2490,8 @@ function renderSectionDay(sectionId){
       html+=groupHeader('Manure Sales (SFOM / LFOM)','Buyer-wise dispatch and revenue');
       html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead><tr style="background:var(--bg2);color:var(--text2)">
-          <th style="padding:8px 12px;text-align:left">Buyer</th>
+          <th style="padding:8px 12px;text-align:left">Farmer / Buyer</th>
+          <th style="padding:8px 12px;text-align:left">Vehicle</th>
           <th style="padding:8px 12px;text-align:center">Type</th>
           <th style="padding:8px 12px;text-align:right">Quantity</th>
           <th style="padding:8px 12px;text-align:right">Revenue</th>
@@ -2498,6 +2499,7 @@ function renderSectionDay(sectionId){
       md.forEach((r,i)=>{
         html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
           <td style="padding:8px 12px;font-weight:600">${r.buyer||'—'}</td>
+          <td style="padding:8px 12px;color:var(--text2)">${r.vehicle||'—'}</td>
           <td style="padding:8px 12px;text-align:center">${r.type}</td>
           <td style="padding:8px 12px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN')+' MT':'—'}</td>
           <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
@@ -6639,7 +6641,8 @@ async function buildAnalyticsD() {
   const manRows=getRows(manR,0); const gManD=r=>toDate(r[0]);
   // Daily manure sales lookup: Manure Sales col0=Date,col1=Buyer,col3=Type,col4=Rev(₹),col5=Qty
   const manureDay={};
-  manRows.forEach(r=>{const dk=dayKey(gManD(r));if(!dk)return;const type=(r[3]||'').toString().toUpperCase().trim();if(type!=='SFOM'&&type!=='LFOM')return;if(!manureDay[dk])manureDay[dk]=[];manureDay[dk].push({buyer:r[1]||'',type,qty:nv(r[5])||0,rev:nv(r[4])||0});});
+  // Manure Sales cols: col0=Date, col1=VehicleType, col2=FarmerName, col3=Type, col4=Amount(₹), col5=Month
+  manRows.forEach(r=>{const dk=dayKey(gManD(r));if(!dk)return;const type=(r[3]||'').toString().toUpperCase().trim();if(type!=='SFOM'&&type!=='LFOM')return;if(!manureDay[dk])manureDay[dk]=[];manureDay[dk].push({buyer:r[2]||r[1]||'',vehicle:r[1]||'',type,qty:nv(r[5])||0,rev:nv(r[4])||0});});
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   const mp_rc=aggMonth(rc,gD,8),emi_rc=aggMonth(rc,gD,9);
   M.mp_rc=mp_rc; M.emi_rc=emi_rc;
