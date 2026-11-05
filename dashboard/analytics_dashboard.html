@@ -2384,8 +2384,8 @@ function renderSectionDay(sectionId){
     // ── 1. Output Summary ─────────────────────────────────────
     html+=groupHeader('Digestate Output','D1 / D2 breakdown for today');
     html+=grid([
-      metricCard('D1 SFOM',d1Sfom>0?d1Sfom.toFixed(1):null,'T','g','Solid fraction D1'),
-      metricCard('D2 SFOM',d2Sfom>0?d2Sfom.toFixed(1):null,'T','g','Solid fraction D2'),
+      metricCard('D1 SFOM',d1Sfom>0?d1Sfom.toFixed(1):null,'T','','Solid fraction D1'),
+      metricCard('D2 SFOM',d2Sfom>0?d2Sfom.toFixed(1):null,'T','','Solid fraction D2'),
       metricCard('D1 LFOM',d1Lfom>0?d1Lfom.toFixed(1):null,'KL','c','Liquid fraction D1'),
       metricCard('D2 LFOM',d2Lfom>0?d2Lfom.toFixed(1):null,'KL','c','Liquid fraction D2'),
     ]);
