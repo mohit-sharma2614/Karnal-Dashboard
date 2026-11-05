@@ -1441,6 +1441,7 @@ function latestHealthSnapshot(dateKey){
   const selMo=MNAMES.indexOf(dp[1]),selD=parseInt(dp[0]);
   const before=k=>{const p=k.split('-');const mi=MNAMES.indexOf(p[1]);return mi<selMo||(mi===selMo&&parseInt(p[0])<=selD);};
   const cmpDesc=(a,b)=>{const pa=a.split('-'),pb=b.split('-');const ma=MNAMES.indexOf(pa[1]),mb=MNAMES.indexOf(pb[1]);return ma!==mb?mb-ma:parseInt(pb[0])-parseInt(pa[0]);};
+  const nv=v=>(v==null||v===''||isNaN(+v))?null:+v;
   const latestVal=(map,fieldMap)=>{
     const keys=Object.keys(map||{}).filter(before).sort(cmpDesc);
     for(const k of keys){
@@ -7440,6 +7441,14 @@ function _buildRpBody(p){
   const moIdx=MONTHS.indexOf(mo);
   const today=new Date();
   const genDate=today.getDate()+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][today.getMonth()]+' '+today.getFullYear();
+  // Compute rpSnap for this period
+  const _rpAnchorB=(()=>{
+    if(p==='daily'&&da)return da;
+    if(p==='monthly'){const d=MDAYS[mo]||30;return d+'-'+mo;}
+    if(p==='quarterly'){const lm=_qtrMonths(_moToQtr(mo)).filter(m=>MONTHS.includes(m));const lmo=lm[lm.length-1]||mo;return(MDAYS[lmo]||30)+'-'+lmo;}
+    return null;
+  })();
+  const rpSnap=_rpAnchorB?latestHealthSnapshot(_rpAnchorB):{ph_d1:D.kpis.ph_d1,ph_d2:D.kpis.ph_d2,tp_d1:D.kpis.temp_d1,tp_d2:D.kpis.temp_d2};
 
   // ── helpers ──────────────────────────────────────────────────────
   const nv=v=>(v==null||v===''||isNaN(+v))?null:+v;
