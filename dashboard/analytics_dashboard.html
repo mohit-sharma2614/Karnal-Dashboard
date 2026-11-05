@@ -2882,7 +2882,8 @@ function _renderOVSections(mo){
   const cbgHr=tCH>0?(tCBG/tCH).toFixed(0)+' kg/hr':'—';
   const drainD=(mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac'))[i]||0));
   const tDrain=sumA(drainD);
-  const drAchPct=tDrain>0&&tExp>0?tDrain/tExp*100:null;
+  const tDrainExp=sumA((mo==='ALL'?mArr('d1_drain_exp'):dArr('d1','drain_exp')))+sumA((mo==='ALL'?mArr('d2_drain_exp'):dArr('d2','drain_exp')));
+  const drAchPct=tDrain>0&&tDrainExp>0?tDrain/tDrainExp*100:null;
   // S6 manure revenue
   const manRev=sumA(sfRevD)+sumA(lfRevD);
   // S7 realized price & cylinder stock
