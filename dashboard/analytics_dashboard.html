@@ -2384,49 +2384,39 @@ function renderSectionDay(sectionId){
     // ── 1. Output Summary ─────────────────────────────────────
     html+=groupHeader('Digestate Output','D1 / D2 breakdown for today');
     html+=grid([
-      metricCard('D1 SFOM',fN(d1Sfom),'T','g','Solid fraction D1'),
-      metricCard('D2 SFOM',fN(d2Sfom),'T','g','Solid fraction D2'),
-      metricCard('D1 LFOM',fN(d1Lfom),'KL','c','Liquid fraction D1'),
-      metricCard('D2 LFOM',fN(d2Lfom),'KL','c','Liquid fraction D2'),
+      metricCard('D1 SFOM',d1Sfom>0?d1Sfom.toFixed(1):null,'T','g','Solid fraction D1'),
+      metricCard('D2 SFOM',d2Sfom>0?d2Sfom.toFixed(1):null,'T','g','Solid fraction D2'),
+      metricCard('D1 LFOM',d1Lfom>0?d1Lfom.toFixed(1):null,'KL','c','Liquid fraction D1'),
+      metricCard('D2 LFOM',d2Lfom>0?d2Lfom.toFixed(1):null,'KL','c','Liquid fraction D2'),
     ]);
 
-    // ── 2. D1 / D2 Comparison Table ───────────────────────────
-    html+=`<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:4px">D1 vs D2 Comparison</div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px">
-      <thead><tr style="color:var(--text2)">
-        <th style="padding:5px 8px;text-align:left">Parameter</th>
-        <th style="padding:5px 8px;text-align:right">D1</th><th style="padding:5px 8px;text-align:right">D2</th>
-        <th style="padding:5px 8px;text-align:right">Total</th>
+    // ── 2. D1 / D2 Comparison Table (matches year/month .tbl design) ──
+    const expCell=(v,u)=>v>0?`${fmtN(Math.round(v))} ${u}`:'—';
+    const clrPct=p=>p!=null?(p>=90?'class="tg"':p>=70?'class="ta"':'class="tr"'):'';
+    html+=`<table class="tbl">
+      <thead><tr>
+        <th>Parameter</th>
+        <th>D1 Expected</th><th>D1 Actual</th><th>D1 %</th>
+        <th>D2 Expected</th><th>D2 Actual</th><th>D2 %</th>
       </tr></thead><tbody>
-      <tr style="border-top:1px solid var(--bdr)">
-        <td style="padding:5px 8px">Drain — Expected (m³)</td>
-        <td style="padding:5px 8px;text-align:right">${d1DrainExp>0?fN(d1DrainExp):'—'}</td>
-        <td style="padding:5px 8px;text-align:right">${d2DrainExp>0?fN(d2DrainExp):'—'}</td>
-        <td style="padding:5px 8px;text-align:right">${(d1DrainExp+d2DrainExp)>0?fN(d1DrainExp+d2DrainExp):'—'}</td>
+      <tr>
+        <td><b>Drain (m³)</b></td>
+        <td>${expCell(d1DrainExp,'m³')}</td>
+        <td ${clrPct(d1DrainPct)}>${fN(d1Drain)}</td>
+        <td ${clrPct(d1DrainPct)}>${d1DrainPct!=null?d1DrainPct.toFixed(0)+'%':'—'}</td>
+        <td>${expCell(d2DrainExp,'m³')}</td>
+        <td ${clrPct(d2DrainPct)}>${fN(d2Drain)}</td>
+        <td ${clrPct(d2DrainPct)}>${d2DrainPct!=null?d2DrainPct.toFixed(0)+'%':'—'}</td>
       </tr>
-      <tr style="border-top:1px solid var(--bdr)">
-        <td style="padding:5px 8px">Drain — Actual (m³)</td>
-        <td class="${pctCls(d1DrainPct)}" style="padding:5px 8px;text-align:right;font-weight:700">${fN(d1Drain)}</td>
-        <td class="${pctCls(d2DrainPct)}" style="padding:5px 8px;text-align:right;font-weight:700">${fN(d2Drain)}</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:700">${fN((d1Drain||0)+(d2Drain||0))}</td>
+      <tr>
+        <td><b>SFOM (MT)</b></td>
+        <td>—</td><td>${d1Sfom>0?d1Sfom.toFixed(1):'—'}</td><td>—</td>
+        <td>—</td><td>${d2Sfom>0?d2Sfom.toFixed(1):'—'}</td><td>—</td>
       </tr>
-      <tr style="border-top:1px solid var(--bdr);background:var(--bg2)">
-        <td style="padding:5px 8px">Drain % of Expected</td>
-        <td class="${pctCls(d1DrainPct)}" style="padding:5px 8px;text-align:right">${d1DrainPct!=null?d1DrainPct.toFixed(0)+'%':'—'}</td>
-        <td class="${pctCls(d2DrainPct)}" style="padding:5px 8px;text-align:right">${d2DrainPct!=null?d2DrainPct.toFixed(0)+'%':'—'}</td>
-        <td style="padding:5px 8px;text-align:right">—</td>
-      </tr>
-      <tr style="border-top:1px solid var(--bdr)">
-        <td style="padding:5px 8px">SFOM (MT)</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:600">${d1Sfom>0?d1Sfom.toFixed(1):'—'}</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:600">${d2Sfom>0?d2Sfom.toFixed(1):'—'}</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:700">${totalSfom>0?totalSfom.toFixed(1):'—'}</td>
-      </tr>
-      <tr style="border-top:1px solid var(--bdr)">
-        <td style="padding:5px 8px">LFOM (KL)</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:600">${d1Lfom>0?d1Lfom.toFixed(1):'—'}</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:600">${d2Lfom>0?d2Lfom.toFixed(1):'—'}</td>
-        <td style="padding:5px 8px;text-align:right;font-weight:700">${totalLfom>0?totalLfom.toFixed(1):'—'}</td>
+      <tr>
+        <td><b>LFOM (KL)</b></td>
+        <td>—</td><td>${d1Lfom>0?d1Lfom.toFixed(1):'—'}</td><td>—</td>
+        <td>—</td><td>${d2Lfom>0?d2Lfom.toFixed(1):'—'}</td><td>—</td>
       </tr>
       </tbody>
     </table>`;
