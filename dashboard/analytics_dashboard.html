@@ -7262,6 +7262,14 @@ function _buildRp(p){
   const da=curDay!=='ALL'?curDay:'—';
   const curQ=_moToQtr(mo);
   let pillTxt=p==='daily'?da:p==='monthly'?mo+' 2026':p==='quarterly'?curQ+' 2026':'FY 2026';
+  // Health snapshot anchored to the period's last day (not global latest)
+  const _rpAnchor=(()=>{
+    if(p==='daily'&&da&&da!=='—')return da;
+    if(p==='monthly'){const d=MDAYS[mo]||30;return d+'-'+mo;}
+    if(p==='quarterly'){const lm=_qtrMonths(curQ).filter(m=>MONTHS.includes(m));const lmo=lm[lm.length-1]||mo;return (MDAYS[lmo]||30)+'-'+lmo;}
+    return null; // yearly: use D.kpis (latest overall is fine)
+  })();
+  const rpSnap=_rpAnchor?latestHealthSnapshot(_rpAnchor):{ph_d1:D.kpis.ph_d1,ph_d2:D.kpis.ph_d2,tp_d1:D.kpis.temp_d1,tp_d2:D.kpis.temp_d2};
   return`<div class="rp-toolbar">
     <div class="rp-tb-mark">CBG</div>
     <div class="rp-tb-name">LREKPL — Karnal Plant</div>
@@ -7346,7 +7354,7 @@ function _buildRpBody(p){
     statusChips=[
       {t:'CBG Achievement',v:tgtAch!=null?tgtAch+'%':'—',sub:'vs '+fNI(tgtCBG)+' kg target',cls:tgtAch>=90?'g':tgtAch>=75?'a':'r'},
       {t:'Total Prod. Cost',v:ytdCost>0?fL(ytdCost):'—',sub:'YTD total',cls:'r'},
-      {t:'pH Status',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(1):'—',sub:'D1 latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'pH Status',v:rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(1):'—',sub:'D1 reading (year-end)',cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'Months Tracked',v:MONTHS.length+' / 12',sub:'Data completeness',cls:'b'},
     ];
   } else if(p==='quarterly'){
@@ -7357,7 +7365,7 @@ function _buildRpBody(p){
     statusChips=[
       {t:'CBG Achievement',v:qTgtAch!=null?qTgtAch+'%':'—',sub:'vs '+fNI(qTgt)+' kg target',cls:qTgtAch>=90?'g':qTgtAch>=75?'a':'r'},
       {t:'Total Prod. Cost',v:qCost>0?fL(qCost):'—',sub:'Quarter total',cls:'r'},
-      {t:'pH D1 Latest',v:D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—',sub:'Range 6.5–7.5',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'pH D1 (end of '+curQ+')',v:rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(2):'—',sub:'Range 6.5–7.5',cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'Avg OLR D1',v:qAvg('d1_olr')!=null?qAvg('d1_olr').toFixed(2)+' kg/m³/d':'—',sub:'Target ≥ 3.5',cls:qAvg('d1_olr')>=3.5?'g':qAvg('d1_olr')?'a':'b'},
     ];
   } else if(p==='monthly'){
@@ -7368,7 +7376,7 @@ function _buildRpBody(p){
     statusChips=[
       {t:'CBG Achievement',v:moTgtAch!=null?moTgtAch+'%':'—',sub:'vs '+fNI(TGT.cbg_month)+' kg target',cls:moTgtAch>=90?'g':moTgtAch>=75?'a':'r'},
       {t:'Total Prod. Cost',v:moCost>0?fL(moCost):'—',sub:'Month total',cls:'r'},
-      {t:'pH D1 / D2',v:(D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—')+' / '+(D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'),sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
+      {t:'pH D1 / D2',v:(rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(2):'—')+' / '+(rpSnap.ph_d2!=null?rpSnap.ph_d2.toFixed(2):'—'),sub:'Last reading in '+mo,cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'OLR D1 / D2',v:((D.M.d1_olr||[])[moIdx]!=null?((D.M.d1_olr||[])[moIdx]).toFixed(2):'—')+' / '+((D.M.d2_olr||[])[moIdx]!=null?((D.M.d2_olr||[])[moIdx]).toFixed(2):'—')+' kg/m³/d',sub:'Target ≥ 3.5',cls:(D.M.d1_olr||[])[moIdx]>=3.5?'g':(D.M.d1_olr||[])[moIdx]?'a':'b'},
     ];
   } else {
@@ -7381,8 +7389,8 @@ function _buildRpBody(p){
     statusChips=[
       {t:'Daily Achievement',v:dAch!=null?dAch+'%':'—',sub:'Daily target: '+fNI(dTgtDay)+' kg',cls:dAch>=90?'g':dAch>=75?'a':'r'},
       {t:'Total Prod. Cost',v:dCost>0?fL(dCost):'—',sub:'Day total',cls:'r'},
-      {t:'pH D1 / D2',v:(D.kpis.ph_d1!=null?D.kpis.ph_d1.toFixed(2):'—')+' / '+(D.kpis.ph_d2!=null?D.kpis.ph_d2.toFixed(2):'—'),sub:'Latest reading',cls:D.kpis.ph_d1&&D.kpis.ph_d1>=6.5&&D.kpis.ph_d1<=7.5?'g':D.kpis.ph_d1?'a':'b'},
-      {t:'Temp D1 / D2',v:(D.kpis.temp_d1!=null?D.kpis.temp_d1.toFixed(1):'—')+' / '+(D.kpis.temp_d2!=null?D.kpis.temp_d2.toFixed(1):'—')+' °C',sub:'Latest reading',cls:D.kpis.temp_d1&&D.kpis.temp_d1>=33?'g':D.kpis.temp_d1?'a':'b'},
+      {t:'pH D1 / D2',v:(rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(2):'—')+' / '+(rpSnap.ph_d2!=null?rpSnap.ph_d2.toFixed(2):'—'),sub:'Reading on '+daLabel,cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
+      {t:'Temp D1 / D2',v:(rpSnap.tp_d1!=null?rpSnap.tp_d1.toFixed(1):'—')+' / '+(rpSnap.tp_d2!=null?rpSnap.tp_d2.toFixed(1):'—')+' °C',sub:'Reading on '+daLabel,cls:rpSnap.tp_d1&&rpSnap.tp_d1>=33?'g':rpSnap.tp_d1?'a':'b'},
     ];
   }
 
