@@ -7508,10 +7508,10 @@ function _buildRpBody(p){
     coverEyebrow='LREKPL · Annual Performance Report';
     coverTitle='Full Year Review — FY 2026';
     coverSub=`${MONTHS[0]} – ${MONTHS[MONTHS.length-1]} 2026 · ${MONTHS.length} months of data · Generated ${genDate}`;
-    coverMeta=[{l:'Capacity',v:'5.4 TPD'},{l:'Months',v:MONTHS.length+' / 12'},{l:'CBG Produced',v:fNI(ytdCBG)+' kg'},{l:'Revenue YTD',v:fL(ytdRev)}];
+    coverMeta=[{l:'Capacity',v:'5.4 TPD'},{l:'Months',v:MONTHS.length+' / 12'},{l:'CBG Produced',v:fNI(ytdCBG)+' kg'},{l:'Revenue YTD',v:ytdRev?fmtR(ytdRev):'—'}];
     statusChips=[
       {t:'CBG Achievement',v:tgtAch!=null?tgtAch+'%':'—',sub:'vs '+fNI(tgtCBG)+' kg target',cls:tgtAch>=90?'g':tgtAch>=75?'a':'r'},
-      {t:'Total Prod. Cost',v:ytdCost>0?fL(ytdCost):'—',sub:'YTD total',cls:'r'},
+      {t:'Total Prod. Cost',v:ytdCost>0?fmtR(ytdCost):'—',sub:'YTD total',cls:'r'},
       {t:'pH Status',v:rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(1):'—',sub:'D1 reading (year-end)',cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'Months Tracked',v:MONTHS.length+' / 12',sub:'Data completeness',cls:'b'},
     ];
@@ -7519,10 +7519,10 @@ function _buildRpBody(p){
     coverEyebrow='LREKPL · Quarterly Performance Report';
     coverTitle=curQ+' 2026 — '+qMos[0]+' to '+(qMos[qMos.length-1]||qMos[0]);
     coverSub=`${qMos.join(', ')} 2026 · ${qDays} days · ${qMos.length} months · Generated ${genDate}`;
-    coverMeta=[{l:'Quarter',v:curQ+' 2026'},{l:'Months',v:qMos.join(', ')},{l:'CBG Produced',v:fNI(qCBG)+' kg'},{l:'Revenue',v:fL(qRev)}];
+    coverMeta=[{l:'Quarter',v:curQ+' 2026'},{l:'Months',v:qMos.join(', ')},{l:'CBG Produced',v:fNI(qCBG)+' kg'},{l:'Revenue',v:qRev?fmtR(qRev):'—'}];
     statusChips=[
       {t:'CBG Achievement',v:qTgtAch!=null?qTgtAch+'%':'—',sub:'vs '+fNI(qTgt)+' kg target',cls:qTgtAch>=90?'g':qTgtAch>=75?'a':'r'},
-      {t:'Total Prod. Cost',v:qCost>0?fL(qCost):'—',sub:'Quarter total',cls:'r'},
+      {t:'Total Prod. Cost',v:qCost>0?fmtR(qCost):'—',sub:'Quarter total',cls:'r'},
       {t:'pH D1 (end of '+curQ+')',v:rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(2):'—',sub:'Range 6.5–7.5',cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'Avg OLR D1',v:qAvg('d1_olr')!=null?qAvg('d1_olr').toFixed(2)+' kg/m³/d':'—',sub:'Target ≥ 3.5',cls:qAvg('d1_olr')>=3.5?'g':qAvg('d1_olr')?'a':'b'},
     ];
@@ -7530,10 +7530,10 @@ function _buildRpBody(p){
     coverEyebrow='LREKPL · Monthly Operations Report';
     coverTitle=mo+' 2026 — Performance Summary';
     coverSub=`${dim} days · CBG Plant, Karnal · Generated ${genDate}`;
-    coverMeta=[{l:'Month',v:mo+' 2026'},{l:'Days',v:dim},{l:'CBG Produced',v:fNI(moCBG)+' kg'},{l:'Revenue',v:fL(moRev)}];
+    coverMeta=[{l:'Month',v:mo+' 2026'},{l:'Days',v:dim},{l:'CBG Produced',v:fNI(moCBG)+' kg'},{l:'Revenue',v:moRev?fmtR(moRev):'—'}];
     statusChips=[
       {t:'CBG Achievement',v:moTgtAch!=null?moTgtAch+'%':'—',sub:'vs '+fNI(TGT.cbg_month)+' kg target',cls:moTgtAch>=90?'g':moTgtAch>=75?'a':'r'},
-      {t:'Total Prod. Cost',v:moCost>0?fL(moCost):'—',sub:'Month total',cls:'r'},
+      {t:'Total Prod. Cost',v:moCost>0?fmtR(moCost):'—',sub:'Month total',cls:'r'},
       {t:'pH D1 / D2',v:(rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(2):'—')+' / '+(rpSnap.ph_d2!=null?rpSnap.ph_d2.toFixed(2):'—'),sub:'Last reading in '+mo,cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'OLR D1 / D2',v:((D.M.d1_olr||[])[moIdx]!=null?((D.M.d1_olr||[])[moIdx]).toFixed(2):'—')+' / '+((D.M.d2_olr||[])[moIdx]!=null?((D.M.d2_olr||[])[moIdx]).toFixed(2):'—')+' kg/m³/d',sub:'Target ≥ 3.5',cls:(D.M.d1_olr||[])[moIdx]>=3.5?'g':(D.M.d1_olr||[])[moIdx]?'a':'b'},
     ];
@@ -7546,7 +7546,7 @@ function _buildRpBody(p){
     coverMeta=[{l:'Date',v:daLabel},{l:'Plant',v:'Karnal CBG'},{l:'CBG Produced',v:fNI(dCBG)+' kg'},{l:'Est. Revenue',v:dRev?fmtR(dRev):'—'}];
     statusChips=[
       {t:'Daily Achievement',v:dAch!=null?dAch+'%':'—',sub:'Daily target: '+fNI(dTgtDay)+' kg',cls:dAch>=90?'g':dAch>=75?'a':'r'},
-      {t:'Total Prod. Cost',v:dCost>0?fL(dCost):'—',sub:'Day total',cls:'r'},
+      {t:'Total Prod. Cost',v:dCost>0?fmtR(dCost):'—',sub:'Day total',cls:'r'},
       {t:'pH D1 / D2',v:(rpSnap.ph_d1!=null?rpSnap.ph_d1.toFixed(2):'—')+' / '+(rpSnap.ph_d2!=null?rpSnap.ph_d2.toFixed(2):'—'),sub:'Reading on '+daLabel,cls:rpSnap.ph_d1&&rpSnap.ph_d1>=6.5&&rpSnap.ph_d1<=7.5?'g':rpSnap.ph_d1?'a':'b'},
       {t:'Temp D1 / D2',v:(rpSnap.tp_d1!=null?rpSnap.tp_d1.toFixed(1):'—')+' / '+(rpSnap.tp_d2!=null?rpSnap.tp_d2.toFixed(1):'—')+' °C',sub:'Reading on '+daLabel,cls:rpSnap.tp_d1&&rpSnap.tp_d1>=33?'g':rpSnap.tp_d1?'a':'b'},
     ];
@@ -7670,15 +7670,16 @@ function _buildRpBody(p){
   // ── 4: production metrics (4-column) ─────────────────────────────
   let cbgV,cbgTgt,cbgAch,biogasV,psaEff,cbgKg;
   if(p==='yearly'){
-    cbgV=fNI(ytdCBG)+' kg';cbgTgt=fNI(tgtCBG)+' kg';cbgAch=tgtAch;biogasV=fN(sumA(D.M.raw_biogas||[]))+' m³';psaEff=null;cbgKg=fN(ytdCBG/Math.max(MONTHS.length,1))+' kg/mo';
+    cbgV=fNI(ytdCBG)+' kg';cbgTgt=fNI(tgtCBG)+' kg';cbgAch=tgtAch;biogasV=fN(sumA(D.M.raw_biogas||[]))+' m³';
+    const _yEff=av(D.M.psa_eff_day||[]);psaEff=_yEff!=null?((_yEff/0.4583)*100).toFixed(1)+'%':null;cbgKg=fN(ytdCBG/Math.max(MONTHS.length,1))+' kg/mo';
   } else if(p==='quarterly'){
     cbgV=fNI(qCBG)+' kg';cbgTgt=fNI(qTgt)+' kg';cbgAch=qTgtAch;
     biogasV=fN(qIdxs.reduce((s,qi)=>s+((D.M.raw_biogas||[])[qi]||0),0))+' m³';
-    const qEff=qAvg('psa_eff');psaEff=qEff!=null?qEff.toFixed(1)+'%':null;
+    const qEff=qAvg('psa_eff_day');psaEff=qEff!=null?((qEff/0.4583)*100).toFixed(1)+'%':null;
     cbgKg=fNI(qCBG/Math.max(qDays,1))+' kg/d avg';
   } else if(p==='monthly'){
     cbgV=fNI(moCBG)+' kg';cbgTgt=fNI(TGT.cbg_month)+' kg';cbgAch=moTgtAch;biogasV=fN((D.M.raw_biogas||[])[moIdx])+' m³';
-    const eff=(D.M.psa_eff||[])[moIdx];psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg=fNI(moCBG/Math.max(dim,1))+' kg/d avg';
+    const eff=(D.M.psa_eff_day||[])[moIdx];psaEff=eff!=null?((eff/0.4583)*100).toFixed(1)+'%':null;cbgKg=fNI(moCBG/Math.max(dim,1))+' kg/d avg';
   } else {
     cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.rbg_tot))+' m³';
     const effDay=nv(dRec?.psa?.psa_eff_day);
@@ -7713,22 +7714,22 @@ function _buildRpBody(p){
   // ── 5: sales dispatched / invoiced ───────────────────────────────
   let dspV,dspSub,invV,invSub,dspPct,invPct;
   if(p==='yearly'){
-    dspV=fL(ytdRev);dspSub='Total CBG + Manure revenue YTD';dspPct=Math.min(tgtAch||0,100);
-    invV=fL(ytdRev);invSub='All customers combined';invPct=ytdMgn||0;
+    dspV=fmtR(ytdRev);dspSub='Total CBG + Manure revenue YTD';dspPct=Math.min(tgtAch||0,100);
+    invV=fmtR(ytdRev);invSub='All customers combined';invPct=ytdMgn||0;
   } else if(p==='quarterly'){
-    dspV=fL(qRev);dspSub=curQ+' total revenue ('+qMos.join(', ')+')';dspPct=Math.min(qTgtAch||0,100);
+    dspV=fmtR(qRev);dspSub=curQ+' total revenue ('+qMos.join(', ')+')';dspPct=Math.min(qTgtAch||0,100);
     const qVeer=qIdxs.reduce((s,qi)=>s+((D.M.veer_rev||[])[qi]||0),0);
     const qAdi=qIdxs.reduce((s,qi)=>s+((D.M.adi_rev||[])[qi]||0),0);
     const qGail=qIdxs.reduce((s,qi)=>s+((D.M.gail_rev||[])[qi]||0),0);
     const qSps=qIdxs.reduce((s,qi)=>s+((D.M.sps_rev||[])[qi]||0),0);
     const qCbgRev=qVeer+qAdi+qGail+qSps;
-    invV=fL(qCbgRev);invSub='Veer + Adinath + GAIL + SPS (CBG customers) '+curQ;invPct=qRev>0?Math.round(qCbgRev/qRev*100):0;
+    invV=fmtR(qCbgRev);invSub='Veer + Adinath + GAIL + SPS (CBG customers) '+curQ;invPct=qRev>0?Math.round(qCbgRev/qRev*100):0;
   } else if(p==='monthly'){
-    dspV=fL(moRev);dspSub=mo+' total revenue (CBG + Manure)';dspPct=Math.min(moTgtAch||0,100);
+    dspV=fmtR(moRev);dspSub=mo+' total revenue (CBG + Manure)';dspPct=Math.min(moTgtAch||0,100);
     const veer=(D.M.veer_rev||[])[moIdx]||0,adi=(D.M.adi_rev||[])[moIdx]||0;
     const gail=(D.M.gail_rev||[])[moIdx]||0,sps=(D.M.sps_rev||[])[moIdx]||0;
     const cbgRevMo=veer+adi+gail+sps;
-    invV=fL(cbgRevMo);invSub='Veer + Adinath + GAIL + SPS (CBG customers)';invPct=moRev>0?Math.round(cbgRevMo/moRev*100):0;
+    invV=fmtR(cbgRevMo);invSub='Veer + Adinath + GAIL + SPS (CBG customers)';invPct=moRev>0?Math.round(cbgRevMo/moRev*100):0;
   } else {
     const drv=dRec?.rev||{};
     dspV=fmtR(nv(drv.cbg_rev));dspSub='CBG sales today';dspPct=Math.min(dAch||0,100);
@@ -7848,18 +7849,18 @@ function _buildRpBody(p){
         const qi=MONTHS.indexOf(m);if(qi<0)return'';
         const c=(D.M.cbg||[])[qi]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;
         const r=(D.M.total_rev||[])[qi];const cost=(D.M.total_cost||[])[qi];
-        return`<tr><td>${m} 2026</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td>${fNI(t)}</td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td>${r!=null?fL(r):'—'}</td><td>${cost!=null?fL(cost):'—'}</td></tr>`;
+        return`<tr><td>${m} 2026</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td>${fNI(t)}</td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td>${r!=null?fmtR(r):'—'}</td><td>${cost!=null?fmtR(cost):'—'}</td></tr>`;
       }).join('')}
-      <tr><td><strong>${curQ} Total</strong></td><td><strong>${fNI(qCBG)}</strong></td><td><strong>${fNI(qTgt)}</strong></td><td>${qTgtAch!=null?chip(qTgtAch+'%',qTgtAch>=90?'up':qTgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(qRev)}</strong></td><td>${qCost>0?fL(qCost):'—'}</td></tr>
+      <tr><td><strong>${curQ} Total</strong></td><td><strong>${fNI(qCBG)}</strong></td><td><strong>${fNI(qTgt)}</strong></td><td>${qTgtAch!=null?chip(qTgtAch+'%',qTgtAch>=90?'up':qTgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fmtR(qRev)}</strong></td><td>${qCost>0?fmtR(qCost):'—'}</td></tr>
     </tbody></table></div>`;
   } else if(p==='yearly'){
     cmpHtml=`<div class="rp-cmp-wrap"><table class="rp-cmp"><thead><tr><th>Month</th><th>CBG (kg)</th><th>Target</th><th>Achiev.</th><th>Revenue</th><th>Total Cost</th></tr></thead><tbody>
       ${MONTHS.map((m,i)=>{
         const c=(D.M.cbg||[])[i]||0;const t=TGT.cbg_month;const a=t>0?Math.round(c/t*100):null;
         const r=(D.M.total_rev||[])[i];const cost=(D.M.total_cost||[])[i];
-        return`<tr><td>${m}</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(t)}</span></div></td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td><div class="rp-num-pair"><span class="rp-np-big">${r!=null?fL(r):'—'}</span></div></td><td>${cost!=null?fL(cost):'—'}</td></tr>`;
+        return`<tr><td>${m}</td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(c)}</span></div></td><td><div class="rp-num-pair"><span class="rp-np-big">${fNI(t)}</span></div></td><td>${a!=null?chip(a+'%',a>=90?'up':a>=75?'wa':'dn'):'—'}</td><td><div class="rp-num-pair"><span class="rp-np-big">${r!=null?fmtR(r):'—'}</span></div></td><td>${cost!=null?fmtR(cost):'—'}</td></tr>`;
       }).join('')}
-      <tr><td><strong>YTD Total</strong></td><td><strong>${fNI(ytdCBG)}</strong></td><td><strong>${fNI(tgtCBG)}</strong></td><td>${tgtAch!=null?chip(tgtAch+'%',tgtAch>=90?'up':tgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fL(ytdRev)}</strong></td><td>${ytdCost>0?fL(ytdCost):'—'}</td></tr>
+      <tr><td><strong>YTD Total</strong></td><td><strong>${fNI(ytdCBG)}</strong></td><td><strong>${fNI(tgtCBG)}</strong></td><td>${tgtAch!=null?chip(tgtAch+'%',tgtAch>=90?'up':tgtAch>=75?'wa':'dn'):'—'}</td><td><strong>${fmtR(ytdRev)}</strong></td><td>${ytdCost>0?fmtR(ytdCost):'—'}</td></tr>
     </tbody></table></div>`;
   } else if(p==='monthly'){
     const cbgDays=[];const cbgDates=[];
@@ -7929,8 +7930,8 @@ function renderReport(){
       meta:[{l:'Months',v:MONTHS.length+' of 12'},{l:'Days Covered',v:(D.meta&&D.meta.days)||'—'},{l:'Capacity',v:'5.4 TPD'},{l:'Target Ach.',v:tgtAch!=null?tgtAch+'%':'—'}],
       three:[
         {lbl:'Actual CBG Produced',val:fNI(ytdCBG)+' kg',sub:MONTHS[0]+'–'+MONTHS[MONTHS.length-1]+' 2026 · '+(tgtAch!=null?tgtAch+'% of target':''),pct:tgtAch||0,clr:tgtAch>=90?'#16a34a':tgtAch>=75?'#d97706':'#dc2626'},
-        {lbl:'Total Revenue',val:fL(ytdRev),sub:'CBG + SFOM + LFOM combined',pct:90,clr:'#16a34a'},
-        {lbl:'Total Production Cost YTD',val:ytdCost>0?fL(ytdCost):'—',sub:'All cost components combined',pct:0,clr:'#dc2626'},
+        {lbl:'Total Revenue',val:ytdRev?fmtR(ytdRev):'—',sub:'CBG + SFOM + LFOM combined',pct:90,clr:'#16a34a'},
+        {lbl:'Total Production Cost YTD',val:ytdCost>0?fmtR(ytdCost):'—',sub:'All cost components combined',pct:0,clr:'#dc2626'},
       ]
     };
   } else if(v==='monthly'){
