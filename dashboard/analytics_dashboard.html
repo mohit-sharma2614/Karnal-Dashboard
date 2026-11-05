@@ -3083,7 +3083,7 @@ function renderOV(){
       {bar:'#1b8a4a',l:'Total Revenue',v:dRev?fmtL(dRev):'—',s:'CBG + Manure'},
       {bar:'#c67c00',l:'Total Production Cost',v:dCost!=null?fmtR(dCost):'—',s:''},
       {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
-      {bar:'#c67c00',l:'Plant Uptime',v:dUpt!=null?dUpt.toFixed(1)+'%':'—',s:'Comp÷PSA hrs',dc:dUpt>=90?'g':dUpt>=70?'a':'r'},
+      {bar:'#9ca3af',l:'Plant Uptime',v:'In Progress',s:'Formula under review',d:null,dc:'b'},
     ]);
     // Render section cards with daily data
     _renderOVSectionsDa(da,rec);
@@ -3157,7 +3157,7 @@ function renderOV(){
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
     {bar:'#c67c00',l:'Total Production Cost',v:fmtR(totalCost),s:''},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
-    {bar:'#c67c00',l:'Plant Uptime',v:uptPct!=null?uptPct.toFixed(1)+'%':'—',s:'Comp ÷ PSA hrs · ≥90%',d:uptPct>=90?'On target':'▼ Below 90%',dc:uptPct>=90?'g':uptPct>=70?'a':'r'},
+    {bar:'#9ca3af',l:'Plant Uptime',v:'In Progress',s:'Formula under review',d:null,dc:'b'},
   ]);
 
   // Strip
