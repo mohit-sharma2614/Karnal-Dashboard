@@ -1965,7 +1965,7 @@ function renderSectionDay(sectionId){
     </div>
     <div style="text-align:right">
       <div style="font-size:11px;color:rgba(255,255,255,.7)">CBG Produced</div>
-      <div style="font-size:28px;font-weight:800;color:#fff">${p.act_cbg?fmtN(p.act_cbg)+' kg':'—'}</div>
+      <div style="font-size:28px;font-weight:800;color:#fff">${p.act_cbg?fmtR(p.act_cbg).replace('₹','')+' kg':'—'}</div>
     </div>
   </div>`;
 
@@ -2438,17 +2438,121 @@ function renderSectionDay(sectionId){
     ]);
   } else if(sectionId==='s8'){
     const totR=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0);
-    const totC=(rv.feed_cost||0)+(rv.trans_cost||0)+(rv.maint_cost||0);
-    const mg=totR>0?((totR-totC)/totR*100).toFixed(1):null;
-    const mgCls=mg!=null?(mg>=10?'g':mg>=0?'a':'r'):'';
-    const cpk=p.act_cbg&&totC>0?'₹'+(totC/p.act_cbg*1000).toFixed(1):null;
+    const totC=rv.total_cost||0;
+    const grossP=totR-totC;
+    const mg=totR>0?((grossP/totR)*100).toFixed(1):null;
+    const mgCls=mg!=null?(parseFloat(mg)>=10?'g':parseFloat(mg)>=0?'a':'r'):'';
+    const cbgKg=(p.dispatched||p.act_cbg)||0;
+    const cpkVal=cbgKg>0?totC/cbgKg:0;
+
+    // KPI cards
     html+=groupHeader('Financial Summary','P&L overview for the day');
     html+=grid([
-      metricCard('Total Revenue',fL2(totR),'','g','All products'),
-      metricCard('Total Variable Cost',fL2(totC),'','r','Feed + transport + maint'),
-      metricCard('Total Production Cost',fmtL(totC),'','r','Feed + transport + maint combined'),
-      metricCard('Cost per kg CBG',cpk,'','a','Variable cost ÷ CBG produced'),
+      metricCard('Total Revenue',fmtR(totR),'','g','CBG + SFOM + LFOM'),
+      metricCard('Total Cost',fmtR(totC),'','r','All 6 cost components'),
+      metricCard('Gross Profit',fmtR(grossP),mg!=null?mg+'% margin':'',(mgCls||'g'),'Revenue minus total cost'),
+      metricCard('Cost per kg CBG',cpkVal>0?fmtR(Math.round(cpkVal))+'/kg':'—','','a','Total cost ÷ CBG produced'),
     ]);
+
+    // CBG Revenue breakdown by vendor
+    const sd=D.salesDay&&D.salesDay[curDay];
+    if(sd){
+      const cbgRows=[];
+      if(sd.veer_qty||sd.veer_rev) cbgRows.push({name:'Veer Gas',qty:sd.veer_qty,rev:sd.veer_rev});
+      if(sd.adi_qty||sd.adi_rev) cbgRows.push({name:'Adinath',qty:sd.adi_qty,rev:sd.adi_rev});
+      if(sd.gail_qty||sd.gail_rev) cbgRows.push({name:'GAIL',qty:sd.gail_qty,rev:sd.gail_rev});
+      if(sd.sps_qty||sd.sps_rev) cbgRows.push({name:'SPS',qty:sd.sps_qty,rev:sd.sps_rev});
+      if(cbgRows.length){
+        html+=groupHeader('CBG Sales — Vendor Breakdown','Quantity and revenue per buyer');
+        html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead><tr style="background:var(--bg2);color:var(--text2)">
+            <th style="padding:8px 12px;text-align:left">Vendor</th>
+            <th style="padding:8px 12px;text-align:right">Quantity (kg)</th>
+            <th style="padding:8px 12px;text-align:right">Revenue</th>
+            <th style="padding:8px 12px;text-align:right">Rate (₹/kg)</th>
+          </tr></thead><tbody>`;
+        cbgRows.forEach((r,i)=>{
+          const rate=r.qty>0?(r.rev/r.qty).toFixed(2):'—';
+          html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
+            <td style="padding:8px 12px;font-weight:600">${r.name}</td>
+            <td style="padding:8px 12px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN'):'—'}</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
+            <td style="padding:8px 12px;text-align:right">₹${rate}</td>
+          </tr>`;
+        });
+        html+=`</tbody></table></div>`;
+      }
+    }
+
+    // SFOM/LFOM sales
+    const md=D.manureDay&&D.manureDay[curDay];
+    if(md&&md.length){
+      html+=groupHeader('Manure Sales (SFOM / LFOM)','Buyer-wise dispatch and revenue');
+      html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:var(--bg2);color:var(--text2)">
+          <th style="padding:8px 12px;text-align:left">Buyer</th>
+          <th style="padding:8px 12px;text-align:center">Type</th>
+          <th style="padding:8px 12px;text-align:right">Quantity</th>
+          <th style="padding:8px 12px;text-align:right">Revenue</th>
+        </tr></thead><tbody>`;
+      md.forEach((r,i)=>{
+        html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
+          <td style="padding:8px 12px;font-weight:600">${r.buyer||'—'}</td>
+          <td style="padding:8px 12px;text-align:center">${r.type}</td>
+          <td style="padding:8px 12px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN')+' MT':'—'}</td>
+          <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
+        </tr>`;
+      });
+      html+=`</tbody></table></div>`;
+    }
+
+    // Cost breakdown
+    html+=groupHeader('Cost Breakdown','All 6 components for the day');
+    const costItems=[
+      {label:'Feedstock',val:rv.feed_cost||0},
+      {label:'Electricity',val:rv.elec_cost||0},
+      {label:'Transport',val:rv.trans_cost||0},
+      {label:'Maintenance',val:rv.maint_cost||0},
+      {label:'Manpower (prorated)',val:rv.manpower_daily||0},
+      {label:'EMI (prorated)',val:rv.emi_daily||0},
+    ];
+    html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="background:var(--bg2);color:var(--text2)">
+        <th style="padding:8px 12px;text-align:left">Component</th>
+        <th style="padding:8px 12px;text-align:right">Amount</th>
+        <th style="padding:8px 12px;text-align:right">% of Total Cost</th>
+      </tr></thead><tbody>`;
+    costItems.forEach((c,i)=>{
+      const pct=totC>0?(c.val/totC*100).toFixed(1):'0.0';
+      html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
+        <td style="padding:8px 12px">${c.label}</td>
+        <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(c.val)}</td>
+        <td style="padding:8px 12px;text-align:right;color:var(--text2)">${pct}%</td>
+      </tr>`;
+    });
+    html+=`<tr style="background:var(--bg2);font-weight:700">
+      <td style="padding:8px 12px">Total</td>
+      <td style="padding:8px 12px;text-align:right">${fmtR(totC)}</td>
+      <td style="padding:8px 12px;text-align:right">100%</td>
+    </tr></tbody></table></div>`;
+
+    // P&L summary 3-box
+    const mgStr=mg!=null?mg+'%':'—';
+    html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">
+      <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Total Revenue</div>
+        <div style="font-size:20px;font-weight:800;color:var(--green)">${fmtR(totR)}</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Total Cost</div>
+        <div style="font-size:20px;font-weight:800;color:var(--red)">${fmtR(totC)}</div>
+      </div>
+      <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center">
+        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Gross Profit</div>
+        <div style="font-size:20px;font-weight:800;color:var(--${mgCls==='g'?'green':mgCls==='r'?'red':'amber'})">${fmtR(grossP)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:2px">Margin: ${mgStr}</div>
+      </div>
+    </div>`;
   }
   html+='<div style="margin-top:12px;font-size:10px;color:var(--text3);text-align:right">Day view — select "All days" to return to monthly trend charts</div>';
   el.innerHTML=html;
@@ -6513,6 +6617,9 @@ async function buildAnalyticsD() {
   const salesRows=getRows(salesR,0);
   M.veer_rev=aggMonth(salesRows,gD,2); M.adi_rev=aggMonth(salesRows,gD,4);
   M.gail_rev=aggMonth(salesRows,gD,6); M.sps_rev=aggMonth(salesRows,gD,8);
+  // Daily vendor lookup: Sales Detail col1=Veer_qty,2=Veer₹,3=Adi_qty,4=Adi₹,5=GAIL_qty,6=GAIL₹,7=SPS_qty,8=SPS₹
+  const salesDay={};
+  salesRows.forEach(r=>{const dk=dayKey(toDate(r[0]));if(!dk)return;salesDay[dk]={veer_qty:nv(r[1])||0,veer_rev:nv(r[2])||0,adi_qty:nv(r[3])||0,adi_rev:nv(r[4])||0,gail_qty:nv(r[5])||0,gail_rev:nv(r[6])||0,sps_qty:nv(r[7])||0,sps_rev:nv(r[8])||0};});
   M.d2_exp=M.d2_exp_exp||aggMonth(cbgExp,gD,12); M.d1_drain=aggMonth(d1,gD,IDX.D_drain_act); M.d2_drain=aggMonth(d2,gD,IDX.D_drain_act);
   M.d1_drain_exp=aggMonth(d1,gD,IDX.D_drain_exp); M.d2_drain_exp=aggMonth(d2,gD,IDX.D_drain_exp);
   M.d1_bg_est_exp=aggMonth(d1,gD,IDX.D_bg_est1); M.d1_bg_est_act=aggMonth(d1,gD,IDX.D_bg_psa);
@@ -6530,6 +6637,9 @@ async function buildAnalyticsD() {
   M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const manRows=getRows(manR,0); const gManD=r=>toDate(r[0]);
+  // Daily manure sales lookup: Manure Sales col0=Date,col1=Buyer,col3=Type,col4=Rev(₹),col5=Qty
+  const manureDay={};
+  manRows.forEach(r=>{const dk=dayKey(gManD(r));if(!dk)return;const type=(r[3]||'').toString().toUpperCase().trim();if(type!=='SFOM'&&type!=='LFOM')return;if(!manureDay[dk])manureDay[dk]=[];manureDay[dk].push({buyer:r[1]||'',type,qty:nv(r[5])||0,rev:nv(r[4])||0});});
   const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
   const mp_rc=aggMonth(rc,gD,8),emi_rc=aggMonth(rc,gD,9);
   M.mp_rc=mp_rc; M.emi_rc=emi_rc;
@@ -6724,7 +6834,7 @@ async function buildAnalyticsD() {
     manure:{ytd_sfom_rev:M.sfom_mn.reduce((s,v)=>s+(v||0),0),ytd_lfom_rev:M.lfom_mn.reduce((s,v)=>s+(v||0),0)},
     targets:tgts,heatmap,olr_trail,cost_per_kg,cpk_monthly:cost_per_kg,
     dispatch:{ytd_veer:aggMonth(psa,gD,IDX.P_veer).reduce((s,v)=>s+(v||0),0),ytd_adinath:aggMonth(psa,gD,IDX.P_adinath).reduce((s,v)=>s+(v||0),0),ytd_kfs:aggMonth(psa,gD,IDX.P_kfs).reduce((s,v)=>s+(v||0),0),ytd_ksk:aggMonth(psa,gD,IDX.P_ksk).reduce((s,v)=>s+(v||0),0),ytd_om:aggMonth(psa,gD,IDX.P_om).reduce((s,v)=>s+(v||0),0),ytd_sps:aggMonth(psa,gD,IDX.P_sps).reduce((s,v)=>s+(v||0),0)},
-    inv_days,cal,
+    inv_days,cal,salesDay,manureDay,
   };
 }
 async function initDashboard() {
