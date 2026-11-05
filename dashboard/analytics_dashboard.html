@@ -1980,6 +1980,7 @@ function renderSectionDay(sectionId){
       {nm:'CSL',        k:'csl_in',  u:'KL', clr:'#6A1B00'},
       {nm:'Cow Dung',   k:'cd_in',   u:'MT', clr:'#2E7D32'},
       {nm:'Spent Grain',k:'sg_in',   u:'MT', clr:'#E65100'},
+      {nm:'Apple Pomace',k:'ap_in',  u:'MT', clr:'#6A1B9A'},
     ];
     const hasProc=procDefs.some(r=>f[r.k]!=null&&f[r.k]!==0);
     if(!hasProc){
@@ -2006,6 +2007,7 @@ function renderSectionDay(sectionId){
       {nm:'CSL',        k1:'csl_act', kf:'csl_feed', u:'KL', clr:'#6A1B00'},
       {nm:'Grain Syrup',k1:'gs_act',  kf:'gs_feed',  u:'KL', clr:'#00695C'},
       {nm:'Spent Grain',k1:'sg_act',  kf:'sg_feed',  u:'MT', clr:'#E65100'},
+      {nm:'Apple Pomace',k1:'ap_act', kf:'ap_feed',  u:'MT', clr:'#6A1B9A'},
     ];
     const hasFed=fedDefs.some(r=>d1r[r.k1]||d2r[r.k1]||f[r.kf]);
     if(!hasFed){
@@ -2057,13 +2059,14 @@ function renderSectionDay(sectionId){
     }
 
     // ── 3. Inventory Balance ──────────────────────────────────────
-    const thresholds={pm:{v:500,u:'MT'},gs:{v:30,u:'KL'},csl:{v:30,u:'KL'},cd:{v:40,u:'MT'},sg:{v:30,u:'MT'}};
+    const thresholds={pm:{v:500,u:'MT'},gs:{v:30,u:'KL'},csl:{v:30,u:'KL'},cd:{v:40,u:'MT'},sg:{v:30,u:'MT'},ap:{v:50,u:'MT'}};
     const balDefs=[
       {nm:'Pressmud',   k:'pm_bal',  tk:'pm',  clr:'#1565C0'},
       {nm:'Grain Syrup',k:'gs_bal',  tk:'gs',  clr:'#00695C'},
       {nm:'CSL',        k:'csl_bal', tk:'csl', clr:'#6A1B00'},
       {nm:'Cow Dung',   k:'cd_bal',  tk:'cd',  clr:'#2E7D32'},
       {nm:'Spent Grain',k:'sg_bal',  tk:'sg',  clr:'#E65100'},
+      {nm:'Apple Pomace',k:'ap_bal', tk:'ap',  clr:'#6A1B9A'},
     ];
     // If today has no balance, carry forward from the most recent day that does
     let balSrc=f, balSrcDate=null;
@@ -2118,16 +2121,19 @@ function renderSectionDay(sectionId){
       {label:'CSL Received (KL)',         arr:_fa('csl_in'),  dates:_fd, isBal:false},
       {label:'Cow Dung Received (MT)',    arr:_fa('cd_in'),   dates:_fd, isBal:false},
       {label:'Spent Grain Received (MT)', arr:_fa('sg_in'),   dates:_fd, isBal:false},
+      {label:'Apple Pomace Received (MT)',arr:_fa('ap_in'),   dates:_fd, isBal:false},
       {label:'Pressmud Fed (MT)',         arr:_fa('pm_feed'), dates:_fd, isBal:false},
       {label:'Grain Syrup Fed (KL)',      arr:_fa('gs_feed'), dates:_fd, isBal:false},
       {label:'CSL Fed (KL)',              arr:_fa('csl_feed'),dates:_fd, isBal:false},
       {label:'Cow Dung Fed (MT)',         arr:_fa('cd_feed'), dates:_fd, isBal:false},
       {label:'Spent Grain Fed (MT)',      arr:_fa('sg_feed'), dates:_fd, isBal:false},
+      {label:'Apple Pomace Fed (MT)',     arr:_fa('ap_feed'), dates:_fd, isBal:false},
       {label:'Pressmud Balance (MT)',     arr:_fa('pm_bal'),  dates:_fd, isBal:true},
       {label:'Grain Syrup Balance (KL)',  arr:_fa('gs_bal'),  dates:_fd, isBal:true},
       {label:'CSL Balance (KL)',          arr:_fa('csl_bal'), dates:_fd, isBal:true},
       {label:'Cow Dung Balance (MT)',     arr:_fa('cd_bal'),  dates:_fd, isBal:true},
       {label:'Spent Grain Balance (MT)',  arr:_fa('sg_bal'),  dates:_fd, isBal:true},
+      {label:'Apple Pomace Balance (MT)', arr:_fa('ap_bal'),  dates:_fd, isBal:true},
     ];
     const moAnomalies=[];
     moChecks.forEach(c=>(c.arr||[]).forEach((v,i)=>{if(v!=null&&v<0)moAnomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal});}));
@@ -2893,12 +2899,14 @@ function _renderOVSections(mo){
        const fmtN2=v=>v!=null&&v>0?fmtN(Math.round(v)):'—';
        const fmtL2=v=>v!=null&&v>0?fmtL(v):'—';
        const sgFedR=sumA(mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed'));
+       const apFedR=sumA(mo==='ALL'?mArr('ap_feed'):dArr('feed','ap_feed'));
        const rows=[
          {nm:'Pressmud (PM)', u:'MT', in:getIn('pm_in'),fed:sumA(pmF)},
          {nm:'Cow Dung (CD)', u:'MT', in:getIn('cd_in'),fed:sumA(cdF)},
          {nm:'Grain Syrup (GS)',u:'KL',in:getIn('gs_in'),fed:sumA(gsF)},
          {nm:'CSL',            u:'KL', in:getIn('csl_in'),fed:sumA(cslF)},
          {nm:'Spent Grain (SG)',u:'MT',in:getIn('sg_in'),fed:sgFedR},
+         {nm:'Apple Pomace (AP)',u:'MT',in:getIn('ap_in'),fed:apFedR},
        ];
        const totIn=rows.reduce((s,r)=>s+(r.in||0),0);
        const totFed=rows.reduce((s,r)=>s+(r.fed||0),0);
@@ -2931,7 +2939,7 @@ function _renderOVSections(mo){
      })(),
      mx:[{l:'Pressmud Fed',v:fmtMT(sumA(pmF))},{l:'Cow Dung Fed',v:fmtMT(sumA(cdF))},{l:'CSL Fed',v:fmtN(Math.round(sumA(cslF)))+' KL'},{l:'GS Fed',v:fmtN(Math.round(sumA(gsF)))+' KL'},{l:'Feed Cost',v:fmtL(sumA(mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost')))}],
      cl:'Monthly Procured vs Fed (MT)',
-     ch:()=>bar('ov_ch_s1',mo==='ALL'?MONTHS:dDates('feed'),[bDS('Procured',mo==='ALL'?mArr('pm_in').map((v,i)=>(v||0)+(mArr('cd_in')[i]||0)+(mArr('gs_in')[i]||0)+(mArr('csl_in')[i]||0)):dArr('feed','pm_in').map((v,i)=>(v||0)+(dArr('feed','cd_in')[i]||0)),C.blue),bDS('Fed',pmF.map((v,i)=>(v||0)+(cdF[i]||0)),C.green)],true),
+     ch:()=>bar('ov_ch_s1',mo==='ALL'?MONTHS:dDates('feed'),[bDS('Procured',mo==='ALL'?mArr('pm_in').map((v,i)=>(v||0)+(mArr('cd_in')[i]||0)+(mArr('gs_in')[i]||0)+(mArr('csl_in')[i]||0)+(mArr('sg_in')[i]||0)+(mArr('ap_in')[i]||0)):dArr('feed','pm_in').map((v,i)=>(v||0)+(dArr('feed','cd_in')[i]||0)+(dArr('feed','gs_in')[i]||0)+(dArr('feed','csl_in')[i]||0)+(dArr('feed','sg_in')[i]||0)+(dArr('feed','ap_in')[i]||0)),C.blue),bDS('Fed',pmF.map((v,i)=>(v||0)+(cdF[i]||0)+(gsF[i]||0)+(cslF[i]||0)),C.green)],true),
      exploreLbl:'Feedstock Procurement',exploreHint:'Supply · Mix · Inventory · Utilization'},
     {id:'s2',tab:'s2',clr:'#1a56db',num:'S2',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin',swFlag:'winter',
      st:sOk(avgO1,2.0,1.5),
@@ -3327,6 +3335,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
     {nm:'Grain Syrup',u:'KL',proc:f.gs_in||0,fed:f.gs_feed||0},
     {nm:'CSL',      u:'KL', proc:f.csl_in||0,fed:f.csl_feed||0},
     {nm:'Spent Grain',u:'MT',proc:f.sg_in||0,fed:f.sg_feed||0},
+    {nm:'Apple Pomace',u:'MT',proc:f.ap_in||0,fed:f.ap_feed||0},
   ];
   const _th='<th style="padding:5px 8px;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
   const _td=(v,clr)=>`<td style="padding:5px 8px;font-size:12px;font-weight:600;${clr?'color:'+clr+';':''}white-space:nowrap">${v}</td>`;
@@ -3482,6 +3491,7 @@ function renderS1(){
     {nm:'CSL',k:'csl_in',u:'KL',clr:'#6A1B00'},
     {nm:'Cow Dung',k:'cd_in',u:'MT',clr:'#2E7D32'},
     {nm:'Spent Grain',k:'sg_in',u:'MT',clr:'#E65100'},
+    {nm:'Apple Pomace',k:'ap_in',u:'MT',clr:'#6A1B9A'},
   ];
   // vendor lookup for current period
   // Feed & Balance stores vendor quantities in MT/KL directly (no conversion needed)
@@ -3511,7 +3521,7 @@ function renderS1(){
       </tr>`;
     }).join('');
     // vendor blocks per feedstock (PM has most vendors)
-    const vCats=[{nm:'Pressmud',k:'pm',u:'MT'},{nm:'Cow Dung',k:'cd',u:'MT'},{nm:'CSL',k:'csl',u:'KL'},{nm:'Grain Syrup',k:'gs',u:'—'},{nm:'Spent Grain',k:'sg',u:'MT'}];
+    const vCats=[{nm:'Pressmud',k:'pm',u:'MT'},{nm:'Cow Dung',k:'cd',u:'MT'},{nm:'CSL',k:'csl',u:'KL'},{nm:'Grain Syrup',k:'gs',u:'—'},{nm:'Spent Grain',k:'sg',u:'MT'},{nm:'Apple Pomace',k:'ap',u:'MT'}];
     const vendorBlocks=vCats.map(c=>`
       <div style="margin-bottom:10px">
         <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid var(--bdr)">${c.nm}${c.k==='gs'?' <span style="font-weight:400;font-style:italic;text-transform:none">(direct procurement)</span>':''}</div>
@@ -3536,6 +3546,7 @@ function renderS1(){
     {nm:'CSL',k1:'csl_act',kf:'csl_feed',u:'KL',clr:'#6A1B00'},
     {nm:'Grain Syrup',k1:'gs_act',kf:'gs_feed',u:'KL',clr:'#00695C'},
     {nm:'Spent Grain',k1:'sg_act',kf:'sg_feed',u:'MT',clr:'#E65100'},
+    {nm:'Apple Pomace',k1:'ap_act',kf:'ap_feed',u:'MT',clr:'#6A1B9A'},
   ];
   const fedEl=document.getElementById('s1_fed_table');
   if(fedEl){
@@ -3595,11 +3606,11 @@ function renderS1(){
   bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan),bDS('Spent Grain',sgFeed,C.orange)],true);
 
   // ── 3. Inventory Balance — zone classification ────────────────
-  const thresholds={pm:{v:500,u:'MT'},cd:{v:40,u:'MT'},csl:{v:30,u:'KL'},sg:{v:30,u:'MT'},gs:{v:30,u:'KL'}};
+  const thresholds={pm:{v:500,u:'MT'},cd:{v:40,u:'MT'},csl:{v:30,u:'KL'},sg:{v:30,u:'MT'},gs:{v:30,u:'KL'},ap:{v:50,u:'MT'}};
   const balDefs=[
     {nm:'Pressmud',k:'pm',clr:'#1565C0'},{nm:'Grain Syrup',k:'gs',clr:'#00695C'},
     {nm:'CSL',k:'csl',clr:'#6A1B00'},{nm:'Cow Dung',k:'cd',clr:'#2E7D32'},
-    {nm:'Spent Grain',k:'sg',clr:'#E65100'},
+    {nm:'Spent Grain',k:'sg',clr:'#E65100'},{nm:'Apple Pomace',k:'ap',clr:'#6A1B9A'},
   ];
   const balEl=document.getElementById('s1_balance');
   const balHdr=document.getElementById('s1_bal_hdr');
@@ -3647,17 +3658,20 @@ function renderS1(){
       {label:'CSL Received (KL)',arr:_fa('csl_in'),dates:_fd},
       {label:'Cow Dung Received (MT)',arr:_fa('cd_in'),dates:_fd},
       {label:'Spent Grain Received (MT)',arr:_fa('sg_in'),dates:_fd},
+      {label:'Apple Pomace Received (MT)',arr:_fa('ap_in'),dates:_fd},
       {label:'Pressmud Fed (MT)',arr:_fa('pm_feed'),dates:_fd},
       {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
       {label:'CSL Fed (KL)',arr:_fa('csl_feed'),dates:_fd},
       {label:'Cow Dung Fed (MT)',arr:_fa('cd_feed'),dates:_fd},
       {label:'Spent Grain Fed (MT)',arr:_fa('sg_feed'),dates:_fd},
+      {label:'Apple Pomace Fed (MT)',arr:_fa('ap_feed'),dates:_fd},
       // Balance columns — negative means fed more than available stock
       {label:'Pressmud Balance (MT)',arr:_fa('pm_bal'),dates:_fd,isBal:true},
       {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
       {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
       {label:'Cow Dung Balance (MT)',arr:_fa('cd_bal'),dates:_fd,isBal:true},
       {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
+      {label:'Apple Pomace Balance (MT)',arr:_fa('ap_bal'),dates:_fd,isBal:true},
     ];
     const anomalies=[];
     checks.forEach(c=>{
@@ -3701,7 +3715,8 @@ function renderS1(){
   const cslBpp=mo==='ALL'?mArr('csl_bpp'):dArr('exp','d1_csl_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_csl_bpp')[i]||0));
   const gsBpp=mo==='ALL'?mArr('gs_bpp'):dArr('exp','d1_gs_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_gs_bpp')[i]||0));
   const sgBpp=mo==='ALL'?mArr('sg_bpp'):dArr('exp','d1_sg_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_sg_bpp')[i]||0));
-  bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange)],true);
+  const apBpp=mo==='ALL'?mArr('ap_bpp'):dArr('exp','d1_ap_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_ap_bpp')[i]||0));
+  bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange),bDS('Apple Pomace',apBpp,C.purple)],true);
   } // end if(!isDa) charts block
 }
 
@@ -4591,6 +4606,8 @@ function renderS4(){
   const d2cd=mo==='ALL'?mArr('d2_cd_bpp'):dArr('exp','d2_cd_bpp');
   const d2csl=mo==='ALL'?mArr('d2_csl_bpp'):dArr('exp','d2_csl_bpp');
   const d2gs=mo==='ALL'?mArr('d2_gs_bpp'):dArr('exp','d2_gs_bpp');
+  const d1ap=mo==='ALL'?mArr('ap_bpp'):dArr('exp','d1_ap_bpp');
+  const d2ap=mo==='ALL'?mArr('d2_ap_bpp'):dArr('exp','d2_ap_bpp');
   line('c_s4_exp',lblE,[lDS('Feedstock Expected (BPP)',expT,C.blue),lDS('Actual Purified',actP,C.green)]);
 
   // Conversion efficiency % trend (Task 2) — Actual Purified ÷ Actual RBG × 100
@@ -4601,9 +4618,9 @@ function renderS4(){
   bar('c_s4_suc_eff',lbl,[bDS('Conversion Efficiency %',convEffArr,C.cyan)],false,{min:0,max:100,annotation:{value:61.67,label:'Design 61.67%'}});
 
   // BPP breakdown — filter to selected digester
-  const bppDs=isD1?[bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan)]:
-              isD2?[bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink)]:
-              [bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan),bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink)];
+  const bppDs=isD1?[bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan),bDS('D1 AP',d1ap,C.purple)]:
+              isD2?[bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink),bDS('D2 AP',d2ap,C.violet||'#7c3aed')]:
+              [bDS('D1 Pressmud',d1pm,C.blue),bDS('D1 Cow Dung',d1cd,C.teal),bDS('D1 CSL',d1csl,C.indigo),bDS('D1 GS',d1gs,C.cyan),bDS('D1 AP',d1ap,C.purple),bDS('D2 Pressmud',d2pm,C.orange),bDS('D2 Cow Dung',d2cd,C.lime),bDS('D2 CSL',d2csl,C.purple),bDS('D2 GS',d2gs,C.pink),bDS('D2 AP',d2ap,C.violet||'#7c3aed')];
   bar('c_s4_bpp',lblE,bppDs,true);
 
   // ── Anomaly Detection (grouped — Task 6) ─────────────────────
@@ -4888,6 +4905,7 @@ function renderS8(){
   const cslCost= mo==='ALL'?mArr('csl_cost'):(idx>=0?[D.M.csl_cost?.[idx]||0]:[]);
   const cdCost = mo==='ALL'?mArr('cd_cost'):(idx>=0?[D.M.cd_cost?.[idx]||0]:[]);
   const sgCost = mo==='ALL'?mArr('sg_cost'):(idx>=0?[D.M.sg_cost?.[idx]||0]:[]);
+  const apCost = mo==='ALL'?mArr('ap_cost'):(idx>=0?[D.M.ap_cost?.[idx]||0]:[]);
 
   // ── Totals ─────────────────────────────────────────────────
   const totR = mo==='ALL'?fin.ytd_rev:(sumA(cbgR)+sumA(sfomR)+sumA(lfomR));
@@ -4981,6 +4999,7 @@ function renderS8(){
     {lbl:'↳ CSL',arr:cslCost,sub:true,cls:''},
     {lbl:'↳ Cow Dung',arr:cdCost,sub:true,cls:''},
     {lbl:'↳ Spent Grain',arr:sgCost,sub:true,cls:''},
+    {lbl:'↳ Apple Pomace',arr:apCost,sub:true,cls:''},
     {lbl:'Electricity',arr:elec,sub:false,cls:'ta'},
     {lbl:'Transport',arr:transM,sub:false,cls:''},
     {lbl:'Maintenance',arr:maintM,sub:false,cls:''},
@@ -5690,6 +5709,7 @@ function renderSIFeedstock(){
     {nm:'Spent Grain',qty:s.sg||0,days:id.sg||0, unit:'MT'},
     {nm:'CSL',        qty:s.csl||0,days:id.csl||0,unit:'KL'},
     {nm:'Grain Syrup',qty:s.gs||0, days:id.gs||0, unit:'KL'},
+    {nm:'Apple Pomace',qty:s.ap||0,days:id.ap||0, unit:'MT'},
   ];
   const clr=f=>f.days>=7?'var(--green)':f.days>=3?'var(--amber)':'var(--red)';
   el.innerHTML=`<div class="si-inv-title">Feedstock Inventory <span style="font-weight:400;color:var(--text3)">as of ${s.date||'latest'} · ${REF}-day reference bar</span></div>
@@ -5885,8 +5905,10 @@ function renderSI(){
     const bppCols=[
       {lbl:'D1 Pressmud',v:ex.d1_pm_bpp,c:C.blue},{lbl:'D1 Cow Dung',v:ex.d1_cd_bpp,c:C.teal},
       {lbl:'D1 CSL',v:ex.d1_csl_bpp,c:C.indigo},{lbl:'D1 GS',v:ex.d1_gs_bpp,c:C.cyan},
+      {lbl:'D1 AP BPP',v:ex.d1_ap_bpp,c:C.purple},
       {lbl:'D2 Pressmud',v:ex.d2_pm_bpp,c:C.orange},{lbl:'D2 Cow Dung',v:ex.d2_cd_bpp,c:C.lime},
-      {lbl:'D2 CSL',v:ex.d2_csl_bpp,c:C.purple},{lbl:'D2 GS',v:ex.d2_gs_bpp,c:C.pink}
+      {lbl:'D2 CSL',v:ex.d2_csl_bpp,c:C.purple},{lbl:'D2 GS',v:ex.d2_gs_bpp,c:C.pink},
+      {lbl:'D2 AP BPP',v:ex.d2_ap_bpp,c:'#7c3aed'}
     ].filter(b=>b.v);
     const maxBpp=bppCols.length?Math.max(...bppCols.map(b=>b.v)):1;
     document.getElementById('si_bpp_detail').innerHTML=
@@ -5986,7 +6008,13 @@ function _rMeta(){
   const dispMonths=mo==='ALL'?allMo:[mo];
   return{d,t,scope,mo,rn,dispMonths};
 }
-function _rOpen(html){const w=window.open('','_blank');if(!w){alert('Pop-up blocked — allow pop-ups and retry.');return;}w.document.write(html);w.document.close();}
+function _rOpen(html){
+  const blob=new Blob([html],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
+}
 function _rCSS(){return`*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Segoe UI',Arial,sans-serif;color:#263238;background:#fff;font-size:11.5px;line-height:1.5}@page{size:A4;margin:14mm 17mm 18mm 17mm}@media print{.pb{page-break-after:always}body{font-size:11px}}.hdr{border-top:4px solid #1a237e;padding:14px 0 10px;display:flex;align-items:flex-start;justify-content:space-between}.hdr h1{font-family:Georgia,serif;font-size:9px;font-weight:400;color:#9e9e9e;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:2px}.hdr h2{font-family:Georgia,serif;font-size:20px;font-weight:700;color:#1a237e;line-height:1.15}.hdr p{font-size:9.5px;color:#546e7a;margin-top:2px}.hdr-r{text-align:right;font-size:9.5px;color:#546e7a;line-height:1.9}.hdr-r strong{color:#263238;font-size:10.5px}.pt-bar{background:#f6f8fb;border:1px solid #e4e9f0;border-radius:6px;padding:9px 14px;display:flex;gap:20px;flex-wrap:wrap;margin:10px 0}.pt-f{font-size:10px}.pt-f span{display:block;color:#9e9e9e;font-size:8.5px;text-transform:uppercase;letter-spacing:.5px;margin-bottom:1px}.sec{font-family:Georgia,serif;font-size:12.5px;font-weight:700;color:#1a237e;border-bottom:1.5px solid #e4e9f0;padding-bottom:5px;margin:14px 0 9px;display:flex;align-items:center;gap:7px}.sec::before{content:'';display:block;width:3px;height:14px;background:#1a237e;border-radius:2px;flex-shrink:0}table.rpt{width:100%;border-collapse:collapse;font-size:10.5px}table.rpt th{background:#1a237e;color:#fff;padding:6px 8px;text-align:left;font-weight:600;font-size:9.5px;letter-spacing:.2px}table.rpt td{padding:5px 8px;border-bottom:1px solid #f0f3f6;vertical-align:middle;font-variant-numeric:tabular-nums}table.rpt tr:nth-child(even) td{background:#fafbfc}.ftr{border-top:1px solid #e4e9f0;padding:9px 0 0;display:flex;align-items:center;justify-content:space-between;margin-top:14px;font-size:8.5px;color:#9e9e9e}.kbar{display:grid;gap:8px;margin-bottom:12px}.kcard{border:1px solid #e4e9f0;border-radius:6px;padding:10px 12px;background:#fff}.klbl{font-size:8.5px;font-weight:600;color:#9e9e9e;text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}.kval{font-size:18px;font-weight:700;color:#263238;font-family:'Courier New',monospace}.kunit{font-size:9.5px;color:#9e9e9e;margin-left:3px}.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:9.5px;font-weight:700;font-family:'Courier New',monospace}.tg{background:#f1f8e9;color:#2e7d32}.ta{background:#fff8e1;color:#e65100}.tr{background:#ffebee;color:#c62828}.tn{background:#f5f5f5;color:#9e9e9e}.hs-wrap{display:flex;align-items:center;gap:20px;background:#fafbfd;border:1px solid #e4e9f0;border-radius:8px;padding:14px 18px;margin-bottom:6px}.vg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.vcard{border:1px solid #e4e9f0;border-radius:6px;padding:10px 12px;position:relative;background:#fff}.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block}`;
 }
 function _rHdr(title,rn,d,t,scope){
@@ -6137,23 +6165,23 @@ function _expFeedstock(){
   const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return(D.M[key]||[])[i]??null;});
   const getD=key=>mo!=='ALL'?dArr('feed',key):null;
 
-  const pmR=getM('pm_in'),gsR=getM('gs_in'),cslR=getM('csl_in'),cdR=getM('cd_in');
-  const pmF=getM('pm_feed'),gsF=getM('gs_feed'),cslF=getM('csl_feed'),cdF=getM('cd_feed');
+  const pmR=getM('pm_in'),gsR=getM('gs_in'),cslR=getM('csl_in'),cdR=getM('cd_in'),sgR=getM('sg_in'),apR=getM('ap_in');
+  const pmF=getM('pm_feed'),gsF=getM('gs_feed'),cslF=getM('csl_feed'),cdF=getM('cd_feed'),sgF=getM('sg_feed'),apF=getM('ap_feed');
   const fc=getM('feed_cost');
-  const pmBpp=getM('pm_bpp'),cdBpp=getM('cd_bpp'),gsBpp=getM('gs_bpp'),cslBpp=getM('csl_bpp');
+  const pmBpp=getM('pm_bpp'),cdBpp=getM('cd_bpp'),gsBpp=getM('gs_bpp'),cslBpp=getM('csl_bpp'),apBpp=getM('ap_bpp');
 
   const sum=arr=>arr.reduce((s,v)=>s+(v||0),0);
-  const kbarHTML=`<div class="kbar" style="grid-template-columns:repeat(4,1fr)">
-    ${[['Pressmud Stock',s.pm,'MT',inv.pm],['Grain Syrup Stock',s.gs,'KL',inv.gs],['CSL Stock',s.csl,'KL',inv.csl],['Cow Dung Stock',s.cd,'MT',inv.cd]].map(([nm,v,u,dy])=>`<div class="kcard"><div class="klbl">${nm}</div><div><span class="kval">${v.toFixed(1)}</span><span class="kunit">${u}</span></div><div style="font-size:9px;color:${dy>=15?'#2e7d32':dy>=7?'#e65100':'#c62828'};margin-top:3px;font-weight:600">${dy>0?Math.round(dy)+' days stock':'—'}</div></div>`).join('')}
+  const kbarHTML=`<div class="kbar" style="grid-template-columns:repeat(6,1fr)">
+    ${[['Pressmud',s.pm,'MT',inv.pm],['Grain Syrup',s.gs,'KL',inv.gs],['CSL',s.csl,'KL',inv.csl],['Cow Dung',s.cd,'MT',inv.cd],['Spent Grain',s.sg,'MT',inv.sg||0],['Apple Pomace',s.ap||0,'MT',inv.ap||0]].map(([nm,v,u,dy])=>`<div class="kcard"><div class="klbl">${nm}</div><div><span class="kval">${(v||0).toFixed(1)}</span><span class="kunit">${u}</span></div><div style="font-size:9px;color:${dy>=15?'#2e7d32':dy>=7?'#e65100':'#c62828'};margin-top:3px;font-weight:600">${dy>0?Math.round(dy)+' days stock':'—'}</div></div>`).join('')}
   </div>`;
 
   const tableRows=dispMonths.map((m,i)=>{
-    const pR=pmR[i],gR=gsR[i],cR=cslR[i],dR=cdR[i],pF=pmF[i],gF=gsF[i],cF=cslF[i],dF=cdF[i],fc_=fc[i];
-    return`<tr><td style="font-weight:600;white-space:nowrap">${m} 2026</td><td>${_fn(pR,1)}</td><td>${_fn(pF,1)}</td><td>${_fn(dR,1)}</td><td>${_fn(dF,1)}</td><td>${_fn(gR,1)}</td><td>${_fn(gF,1)}</td><td>${_fn(cR,1)}</td><td>${_fn(cF,1)}</td><td>${_fm(fc_)}</td></tr>`;
+    const pR=pmR[i],gR=gsR[i],cR=cslR[i],dR=cdR[i],sGR=sgR[i],aR=apR[i],pF=pmF[i],gF=gsF[i],cF=cslF[i],dF=cdF[i],sGF=sgF[i],aF=apF[i],fc_=fc[i];
+    return`<tr><td style="font-weight:600;white-space:nowrap">${m} 2026</td><td>${_fn(pR,1)}</td><td>${_fn(pF,1)}</td><td>${_fn(dR,1)}</td><td>${_fn(dF,1)}</td><td>${_fn(gR,1)}</td><td>${_fn(gF,1)}</td><td>${_fn(cR,1)}</td><td>${_fn(cF,1)}</td><td>${_fn(sGR,1)}</td><td>${_fn(sGF,1)}</td><td>${_fn(aR,1)}</td><td>${_fn(aF,1)}</td><td>${_fm(fc_)}</td></tr>`;
   }).join('');
-  const totRow=`<tr style="font-weight:700;background:#f6f8fb"><td>TOTAL</td><td>${_fn(sum(pmR),1)}</td><td>${_fn(sum(pmF),1)}</td><td>${_fn(sum(cdR),1)}</td><td>${_fn(sum(cdF),1)}</td><td>${_fn(sum(gsR),1)}</td><td>${_fn(sum(gsF),1)}</td><td>${_fn(sum(cslR),1)}</td><td>${_fn(sum(cslF),1)}</td><td>${_fm(sum(fc))}</td></tr>`;
+  const totRow=`<tr style="font-weight:700;background:#f6f8fb"><td>TOTAL</td><td>${_fn(sum(pmR),1)}</td><td>${_fn(sum(pmF),1)}</td><td>${_fn(sum(cdR),1)}</td><td>${_fn(sum(cdF),1)}</td><td>${_fn(sum(gsR),1)}</td><td>${_fn(sum(gsF),1)}</td><td>${_fn(sum(cslR),1)}</td><td>${_fn(sum(cslF),1)}</td><td>${_fn(sum(sgR),1)}</td><td>${_fn(sum(sgF),1)}</td><td>${_fn(sum(apR),1)}</td><td>${_fn(sum(apF),1)}</td><td>${_fm(sum(fc))}</td></tr>`;
 
-  const bppRows=dispMonths.map((m,i)=>`<tr><td style="font-weight:600;white-space:nowrap">${m} 2026</td><td>${_fn(pmBpp[i],1)}</td><td>${_fn(cdBpp[i],1)}</td><td>${_fn(gsBpp[i],1)}</td><td>${_fn(cslBpp[i],1)}</td></tr>`).join('');
+  const bppRows=dispMonths.map((m,i)=>`<tr><td style="font-weight:600;white-space:nowrap">${m} 2026</td><td>${_fn(pmBpp[i],1)}</td><td>${_fn(cdBpp[i],1)}</td><td>${_fn(gsBpp[i],1)}</td><td>${_fn(cslBpp[i],1)}</td><td>${_fn(apBpp[i],1)}</td></tr>`).join('');
 
   const calRows=[['Pressmud',cal.pm],['Grain Syrup',cal.gs],['CSL',cal.csl],['Cow Dung',cal.cd]].map(([nm,c])=>`<tr><td>${nm}</td><td>${c.date||'—'}</td><td>${c.ts??'—'}</td><td>${c.vs!=null?(c.vs<2?(c.vs*100).toFixed(2):c.vs.toFixed(2)):'—'}</td><td>${c.ts_t??'—'}</td><td>${c.vs_t??'—'}</td></tr>`).join('');
 
@@ -6162,9 +6190,9 @@ ${_rHdr('Feedstock Report',rn,d,t,scope)}
 <div class="sec">Current Inventory (Live)</div>
 ${kbarHTML}
 <div class="sec">Feedstock Procurement vs Usage — ${scope}</div>
-<table class="rpt"><thead><tr><th>Month</th><th>PM Recv (MT)</th><th>PM Fed (MT)</th><th>CD Recv (MT)</th><th>CD Fed (MT)</th><th>GS Recv (KL)</th><th>GS Fed (KL)</th><th>CSL Recv (KL)</th><th>CSL Fed (KL)</th><th>Feed Cost</th></tr></thead><tbody>${tableRows}${totRow}</tbody></table>
+<table class="rpt"><thead><tr><th>Month</th><th>PM Recv (MT)</th><th>PM Fed (MT)</th><th>CD Recv (MT)</th><th>CD Fed (MT)</th><th>GS Recv (KL)</th><th>GS Fed (KL)</th><th>CSL Recv (KL)</th><th>CSL Fed (KL)</th><th>SG Recv (MT)</th><th>SG Fed (MT)</th><th>AP Recv (MT)</th><th>AP Fed (MT)</th><th>Feed Cost</th></tr></thead><tbody>${tableRows}${totRow}</tbody></table>
 <div class="sec" style="margin-top:14px">BPP Contribution (Expected m³/MT) — ${scope}</div>
-<table class="rpt"><thead><tr><th>Month</th><th>Pressmud BPP</th><th>Cow Dung BPP</th><th>Grain Syrup BPP</th><th>CSL BPP</th></tr></thead><tbody>${bppRows}</tbody></table>
+<table class="rpt"><thead><tr><th>Month</th><th>Pressmud BPP</th><th>Cow Dung BPP</th><th>Grain Syrup BPP</th><th>CSL BPP</th><th>Apple Pomace BPP</th></tr></thead><tbody>${bppRows}</tbody></table>
 <div class="sec" style="margin-top:14px">Feedstock Lab Quality — Latest Samples</div>
 <table class="rpt"><thead><tr><th>Feedstock</th><th>Sample Date</th><th>TS %</th><th>VS %</th><th>TS (T)</th><th>VS (T)</th></tr></thead><tbody>${calRows}</tbody></table>
 ${_rFtr(rn,d,t)}
@@ -6927,7 +6955,7 @@ async function buildAnalyticsD() {
   DD.d2=buildDA(d2,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
     cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
-  DD.feed=buildDA(fb,gD,{pm_in:47,gs_in:71,csl_in:26,cd_in:18,sg_in:66,ap_in:76,pm_feed:80,gs_feed:82,csl_feed:81,cd_feed:79,sg_feed:83,ap_feed:84,feed_total:85,pm_cost:64,gs_cost:74,csl_cost:30,cd_cost:22,sg_cost:68,ap_cost:78,pm_bal:94,gs_bal:96,csl_bal:95,cd_bal:93,sg_bal:97,ap_bal:98});
+  DD.feed=buildDA(fb,gD,{pm_in:FB.pm_in,gs_in:FB.gs_in,csl_in:FB.csl_in,cd_in:FB.cd_in,sg_in:FB.sg_in,ap_in:FB.ap_in,pm_feed:FB.pm_feed,gs_feed:FB.gs_feed,csl_feed:FB.csl_feed,cd_feed:FB.cd_feed,sg_feed:FB.sg_feed,ap_feed:FB.ap_feed,feed_total:FB.feed_tot,pm_cost:FB.pm_cost,gs_cost:FB.gs_cost,csl_cost:FB.csl_cost,cd_cost:FB.cd_cost,sg_cost:FB.sg_cost,ap_cost:FB.ap_cost,pm_bal:FB.pm_bal,gs_bal:FB.gs_bal,csl_bal:FB.csl_bal,cd_bal:FB.cd_bal,sg_bal:FB.sg_bal,ap_bal:FB.ap_bal});
   // Daily cost = feedstock+transport+maint+elec only; manpower+EMI are monthly lump sums, not daily
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
   // Patch daily SFOM/LFOM from Manure Sales transactions (rc cols 2/3 are NULL for Aug-Sep 2026)
@@ -7360,11 +7388,14 @@ function exportReportPDF(){
     if(curDay!=='ALL')_rpP='daily';else if(curMonth!=='ALL')_rpP='monthly';else _rpP='yearly';
     body.innerHTML=_buildRp(_rpP);
   }
-  const w=window.open('','_blank','width=1000,height=700');
-  if(!w)return;
   const fonts=document.querySelector('link[href*="fonts.googleapis"]');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>CBG Karnal Report</title>${fonts?fonts.outerHTML:''}<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#f4f7f9;-webkit-print-color-adjust:exact;print-color-adjust:exact}#rp-modal-inner{max-width:960px;margin:0 auto;padding:0 0 40px}@media print{body{background:#fff}.rp-modal-close{display:none}}</style><style>${Array.from(document.styleSheets).filter(s=>{try{return!s.href||s.href.startsWith(location.origin);}catch(e){return true;}}).flatMap(s=>{try{return Array.from(s.cssRules).map(r=>r.cssText);}catch(e){return[];}}).join('\n')}</style></head><body><div id="rp-modal-inner">${document.getElementById('rp-modal-inner').innerHTML}</div><script>window.onload=()=>setTimeout(()=>window.print(),400);<\/script></body></html>`);
-  w.document.close();
+  const allCSS=Array.from(document.styleSheets).filter(s=>{try{return!s.href||s.href.startsWith(location.origin);}catch(e){return true;}}).flatMap(s=>{try{return Array.from(s.cssRules).map(r=>r.cssText);}catch(e){return[];}}).join('\n');
+  const pdfHTML=`<!DOCTYPE html><html><head><meta charset="utf-8"><title>CBG Karnal Report</title>${fonts?fonts.outerHTML:''}<style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#f4f7f9;-webkit-print-color-adjust:exact;print-color-adjust:exact}#rp-modal-inner{max-width:960px;margin:0 auto;padding:0 0 40px}@media print{body{background:#fff}.rp-modal-close{display:none}}</style><style>${allCSS}</style></head><body><div id="rp-modal-inner">${document.getElementById('rp-modal-inner').innerHTML}</div><script>window.onload=()=>setTimeout(()=>window.print(),400);<\/script></body></html>`;
+  const blob=new Blob([pdfHTML],{type:'text/html'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.target='_blank';a.rel='noopener';
+  document.body.appendChild(a);a.click();document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url),30000);
 }
 function switchRpPeriod(p,btn){
   _rpP=p;
