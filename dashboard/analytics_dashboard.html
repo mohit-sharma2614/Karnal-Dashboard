@@ -7671,7 +7671,7 @@ function _buildRpBody(p){
   let cbgV,cbgTgt,cbgAch,biogasV,psaEff,cbgKg;
   if(p==='yearly'){
     cbgV=fNI(ytdCBG)+' kg';cbgTgt=fNI(tgtCBG)+' kg';cbgAch=tgtAch;biogasV=fN(sumA(D.M.raw_biogas||[]))+' m³';
-    const _yEff=av(D.M.psa_eff_day||[]);psaEff=_yEff!=null?((_yEff/0.4583)*100).toFixed(1)+'%':null;cbgKg=fN(ytdCBG/Math.max(MONTHS.length,1))+' kg/mo';
+    const _yEff=avgA(D.M.psa_eff_day||[]);psaEff=_yEff!=null?((_yEff/0.4583)*100).toFixed(1)+'%':null;cbgKg=fN(ytdCBG/Math.max(MONTHS.length,1))+' kg/mo';
   } else if(p==='quarterly'){
     cbgV=fNI(qCBG)+' kg';cbgTgt=fNI(qTgt)+' kg';cbgAch=qTgtAch;
     biogasV=fN(qIdxs.reduce((s,qi)=>s+((D.M.raw_biogas||[])[qi]||0),0))+' m³';
