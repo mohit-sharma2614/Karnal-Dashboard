@@ -7576,7 +7576,7 @@ function _buildRpBody(p){
   const sales=`${secH('5','Sales — Dispatch & Revenue')}
   <div class="rp-dvs-row">
     ${dvsCard('var(--rp-bl)','CBG Revenue / Dispatch',dspV,dspSub,dspPct,'var(--rp-bl)',p==='monthly'?`Target: ${fNI(TGT.cbg_month)} kg · Gap: ${fNI(Math.max((TGT.cbg_month||0)-moCBG,0))} kg`:'—')}
-    ${dvsCard('var(--rp-gr)','Invoiced Revenue',invV,invSub,invPct,'var(--rp-gr)',p==='monthly'?'Veer Gas + Adinath Gas (primary customers)':'—')}
+    ${dvsCard('var(--rp-gr)',p==='daily'?'Manure Sales':'Invoiced Revenue',invV,invSub,invPct,'var(--rp-gr)',p==='monthly'?'Veer Gas + Adinath Gas (primary customers)':'—')}
   </div>`;
 
   // ── 6: P&L ───────────────────────────────────────────────────────
