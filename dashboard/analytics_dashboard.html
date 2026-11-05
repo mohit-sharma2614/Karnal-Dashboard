@@ -7682,7 +7682,7 @@ function _buildRpBody(p){
   } else {
     cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.rbg_tot))+' m³';
     const effDay=nv(dRec?.psa?.psa_eff_day);
-    psaEff=effDay!=null?(effDay*100).toFixed(1)+'%':null;
+    psaEff=effDay!=null?((effDay/0.4583)*100).toFixed(1)+'%':null;
     cbgKg=fNI(nv(dRec?.psa?.dispatched))+' kg dispatched';
   }
   const mc2=(stripe,lbl,v,cls,dl,drc,proof1,proof2)=>`<div class="rp-mc2">
