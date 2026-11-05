@@ -2370,21 +2370,92 @@ function renderSectionDay(sectionId){
       html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No customer dispatch data for this date.</div>`;
     }
   } else if(sectionId==='s6'){
-    const totalSfom=(d1r.sfom||0)+(d2r.sfom||0);
-    const totalLfom=(d1r.lfom||0)+(d2r.lfom||0);
-    html+=groupHeader('Digestate / Manure Output','Organic fertilizer produced today');
+    const d1Sfom=d1r.sfom||0,d2Sfom=d2r.sfom||0;
+    const d1Lfom=d1r.lfom||0,d2Lfom=d2r.lfom||0;
+    const d1Drain=d1r.drain_ac,d2Drain=d2r.drain_ac;
+    const d1DrainExp=d1r.drain_exp||0,d2DrainExp=d2r.drain_exp||0;
+    const totalSfom=d1Sfom+d2Sfom,totalLfom=d1Lfom+d2Lfom;
+    const sfomRev=rv.sfom_rev||0,lfomRev=rv.lfom_rev||0;
+    const totalRev=sfomRev+lfomRev;
+    const d1DrainPct=d1DrainExp>0?((d1Drain||0)/d1DrainExp*100):null;
+    const d2DrainPct=d2DrainExp>0?((d2Drain||0)/d2DrainExp*100):null;
+    const pctCls=p=>p!=null?(p>=90?'tg':p>=70?'ta':'tr'):'';
+
+    // ── 1. Output Summary ─────────────────────────────────────
+    html+=groupHeader('Digestate Output','D1 / D2 breakdown for today');
     html+=grid([
-      metricCard('D1 SFOM (Solid)',fN(d1r.sfom),'T','g'),
-      metricCard('D2 SFOM (Solid)',fN(d2r.sfom),'T','g'),
-      metricCard('D1 LFOM (Liquid)',fN(d1r.lfom),'KL','c'),
-      metricCard('D2 LFOM (Liquid)',fN(d2r.lfom),'KL','c'),
+      metricCard('D1 SFOM',fN(d1Sfom),'T','g','Solid fraction D1'),
+      metricCard('D2 SFOM',fN(d2Sfom),'T','g','Solid fraction D2'),
+      metricCard('D1 LFOM',fN(d1Lfom),'KL','c','Liquid fraction D1'),
+      metricCard('D2 LFOM',fN(d2Lfom),'KL','c','Liquid fraction D2'),
     ]);
+
+    // ── 2. D1 / D2 Comparison Table ───────────────────────────
+    html+=`<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:4px">D1 vs D2 Comparison</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px">
+      <thead><tr style="color:var(--text2)">
+        <th style="padding:5px 8px;text-align:left">Parameter</th>
+        <th style="padding:5px 8px;text-align:right">D1</th><th style="padding:5px 8px;text-align:right">D2</th>
+        <th style="padding:5px 8px;text-align:right">Total</th>
+      </tr></thead><tbody>
+      <tr style="border-top:1px solid var(--bdr)">
+        <td style="padding:5px 8px">Drain — Expected (m³)</td>
+        <td style="padding:5px 8px;text-align:right">${d1DrainExp>0?fN(d1DrainExp):'—'}</td>
+        <td style="padding:5px 8px;text-align:right">${d2DrainExp>0?fN(d2DrainExp):'—'}</td>
+        <td style="padding:5px 8px;text-align:right">${(d1DrainExp+d2DrainExp)>0?fN(d1DrainExp+d2DrainExp):'—'}</td>
+      </tr>
+      <tr style="border-top:1px solid var(--bdr)">
+        <td style="padding:5px 8px">Drain — Actual (m³)</td>
+        <td class="${pctCls(d1DrainPct)}" style="padding:5px 8px;text-align:right;font-weight:700">${fN(d1Drain)}</td>
+        <td class="${pctCls(d2DrainPct)}" style="padding:5px 8px;text-align:right;font-weight:700">${fN(d2Drain)}</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:700">${fN((d1Drain||0)+(d2Drain||0))}</td>
+      </tr>
+      <tr style="border-top:1px solid var(--bdr);background:var(--bg2)">
+        <td style="padding:5px 8px">Drain % of Expected</td>
+        <td class="${pctCls(d1DrainPct)}" style="padding:5px 8px;text-align:right">${d1DrainPct!=null?d1DrainPct.toFixed(0)+'%':'—'}</td>
+        <td class="${pctCls(d2DrainPct)}" style="padding:5px 8px;text-align:right">${d2DrainPct!=null?d2DrainPct.toFixed(0)+'%':'—'}</td>
+        <td style="padding:5px 8px;text-align:right">—</td>
+      </tr>
+      <tr style="border-top:1px solid var(--bdr)">
+        <td style="padding:5px 8px">SFOM (MT)</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:600">${d1Sfom>0?d1Sfom.toFixed(1):'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:600">${d2Sfom>0?d2Sfom.toFixed(1):'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:700">${totalSfom>0?totalSfom.toFixed(1):'—'}</td>
+      </tr>
+      <tr style="border-top:1px solid var(--bdr)">
+        <td style="padding:5px 8px">LFOM (KL)</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:600">${d1Lfom>0?d1Lfom.toFixed(1):'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:600">${d2Lfom>0?d2Lfom.toFixed(1):'—'}</td>
+        <td style="padding:5px 8px;text-align:right;font-weight:700">${totalLfom>0?totalLfom.toFixed(1):'—'}</td>
+      </tr>
+      </tbody>
+    </table>`;
+
+    // ── 3. Manure Revenue ──────────────────────────────────────
+    html+=groupHeader('Manure Revenue','SFOM + LFOM sales for today');
     html+=grid([
-      metricCard('Total SFOM Today',fN(totalSfom),'T','g','D1 + D2 combined'),
-      metricCard('Total LFOM Today',fN(totalLfom),'KL','c','D1 + D2 combined'),
-      metricCard('SFOM Revenue',fL2(rv.sfom_rev),'','a'),
-      metricCard('LFOM Revenue',fL2(rv.lfom_rev),'','b'),
-    ]);
+      metricCard('SFOM Revenue',fL2(sfomRev),'','a','Solid fraction sales'),
+      metricCard('LFOM Revenue',fL2(lfomRev),'','b','Liquid fraction sales'),
+      metricCard('Total Manure Rev',fL2(totalRev),'','g','SFOM + LFOM combined'),
+    ],3);
+
+    // Manure buyer detail
+    const mdS6=D.manureDay&&D.manureDay[curDay];
+    if(mdS6&&mdS6.length){
+      html+=`<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:4px">Manure Buyer Detail</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="color:var(--text2)"><th style="padding:5px 8px;text-align:left">Buyer</th><th style="padding:5px 8px;text-align:left">Vehicle</th><th style="padding:5px 8px;text-align:center">Type</th><th style="padding:5px 8px;text-align:right">Qty</th><th style="padding:5px 8px;text-align:right">Revenue</th></tr></thead><tbody>`;
+      mdS6.forEach((r,i)=>{
+        html+=`<tr style="border-top:1px solid var(--bdr);background:${i%2?'var(--bg2)':''}">
+          <td style="padding:5px 8px;font-weight:600">${r.buyer||'—'}</td>
+          <td style="padding:5px 8px;color:var(--text2)">${r.vehicle||'—'}</td>
+          <td style="padding:5px 8px;text-align:center">${r.type||'—'}</td>
+          <td style="padding:5px 8px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN')+' MT':'—'}</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
+        </tr>`;
+      });
+      html+=`</tbody></table>`;
+    }
   } else if(sectionId==='s7'){
     const cbgRev=rv.cbg_rev||0,sfomRev=rv.sfom_rev||0,lfomRev=rv.lfom_rev||0;
     const totR=cbgRev+sfomRev+lfomRev;
