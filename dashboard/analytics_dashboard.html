@@ -4648,7 +4648,7 @@ function renderS8(){
     data:{labels:lbl,datasets:[
       {label:'Total Production Cost (₹)',data:costArr,backgroundColor:a(C.rose,0.7),borderColor:C.rose,borderWidth:1}
     ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true}},
-      scales:{y:{ticks:{callback:v=>'₹'+(v>=1e5?(v/1e5).toFixed(1)+'L':v>=1e3?(v/1e3).toFixed(0)+'k':v)},suggestedMin:0}}}});
+      scales:{y:{ticks:{callback:v=>fmtR(v)},suggestedMin:0}}}});
   if(charts['c_s8_cpk_chart'])charts['c_s8_cpk_chart'].destroy();
   charts['c_s8_cpk_chart']=new Chart(document.getElementById('c_s8_cpk_chart'),{type:'line',
     data:{labels:lbl,datasets:[
@@ -4818,10 +4818,10 @@ function renderS8(){
       ]},
       options:{responsive:true,maintainAspectRatio:false,
         plugins:{legend:{display:true,position:'bottom'},
-          tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': ₹'+fmtN(Math.round(ctx.parsed.y||0))}}},
+          tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+fmtR(Math.round(ctx.parsed.y||0))}}},
         scales:{x:{stacked:true,grid:{display:false}},
-          y:{stacked:true,ticks:{callback:v=>'₹'+(v>=1e5?(v/1e5).toFixed(1)+'L':v>=1e3?(v/1e3).toFixed(0)+'k':v)},suggestedMin:0}}}});
-    const fmtD=v=>v>0?'₹'+fmtN(Math.round(v)):'—';
+          y:{stacked:true,ticks:{callback:v=>fmtR(v)},suggestedMin:0}}}});
+    const fmtD=v=>v>0?fmtR(v):'—';
     const dayRows=dDts.map((dt,i)=>{
       const tot=dTot[i]||0;
       return`<tr><td>${dt}</td>
@@ -4856,15 +4856,15 @@ function renderS8(){
   const emiHead=`<thead><tr><th>EMI Type</th><th>Description</th>${MONTHS.map(m=>`<th>${m}</th>`).join('')}<th>Total</th></tr></thead>`;
   const emiBody=emiData.map(e=>{
     const ytd=e.vals.reduce((s,v)=>s+(v||0),0);
-    return`<tr><td>${e.type}</td><td>${e.desc}</td>${e.vals.map(v=>`<td>${v?'₹'+(v/1000).toFixed(0)+'k':'—'}</td>`).join('')}<td style="font-weight:700">₹${(ytd/1e5).toFixed(2)}L</td></tr>`;
+    return`<tr><td>${e.type}</td><td>${e.desc}</td>${e.vals.map(v=>`<td>${v?fmtR(v):'—'}</td>`).join('')}<td style="font-weight:700">${fmtR(ytd)}</td></tr>`;
   });
   const emiTotals=MONTHS.map((_,i)=>emiData.reduce((s,e)=>s+(e.vals[i]||0),0));
   const emiGrand=emiTotals.reduce((s,v)=>s+v,0);
   document.getElementById('s8_emi_tbl').innerHTML=emiHead+
     `<tbody>${emiBody.join('')}
     <tr style="font-weight:700;border-top:2px solid var(--bdr)">
-      <td colspan="2">Total EMI</td>${emiTotals.map(v=>`<td>₹${(v/1000).toFixed(0)}k</td>`).join('')}
-      <td>₹${(emiGrand/1e5).toFixed(2)}L</td></tr>
+      <td colspan="2">Total EMI</td>${emiTotals.map(v=>`<td>${fmtR(v)}</td>`).join('')}
+      <td>${fmtR(emiGrand)}</td></tr>
     </tbody>`;
 
   // ── P&L Summary Table ──────────────────────────────────────
