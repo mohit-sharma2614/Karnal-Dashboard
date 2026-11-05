@@ -2858,7 +2858,9 @@ function _renderOVSections(mo){
   const drPct=tCBG>0?tDisp/tCBG*100:null;
   const uptP=tPH>0?tCH/tPH*100:null;
   const ch4V=av(ch4D);const ch4P=ch4V!=null?(ch4V>1?ch4V:ch4V*100):null;
-  const purEff=tExp>0?tPur/tExp*100:null;
+  const _psaEffArr=mo==='ALL'?D.M.psa_eff_day||[]:[D.M.psa_eff_day?.[MONTHS.indexOf(mo)]];
+  const _psaAvg=av(_psaEffArr);
+  const purEff=_psaAvg!=null?(_psaAvg/0.4583)*100:null;
   const avgO1=av(olrD1),avgO2=av(olrD2);
   const mrg=tRev>0?(tRev-tCost)/tRev*100:null;
   const cpkMoV=D.cpk_monthly||{};
@@ -2961,7 +2963,7 @@ function _renderOVSections(mo){
      stat:[{l:'PSA '+(ch4P>=90?'OK':ch4P>=80?'Caution':'Alert'),c:ch4P>=90?'g':ch4P>=80?'a':'r'}],
      mx:[{l:'Total CBG',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Efficiency',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4 Purity',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hours',v:fmtN(Math.round(tPH))+' hrs'},{l:'Top Issue',v:'Moisture',vc:'r'}],
      cl:'Monthly PSA Efficiency % — Target 90%',
-     ch:()=>line('ov_ch_s4',lbls,[lDS('PSA Eff %',purD.map((v,i)=>expD[i]>0?v/expD[i]*100:null),C.purple)]),
+     ch:()=>line('ov_ch_s4',mo==='ALL'?MONTHS:lbls,[lDS('PSA Eff %',(mo==='ALL'?D.M.psa_eff_day||[]:([D.M.psa_eff_day?.[MONTHS.indexOf(mo)]])).map(v=>v!=null?(v/0.4583)*100:null),C.purple)]),
      exploreLbl:'Purification',exploreHint:'PSA efficiency · CH4 purity · hours'},
     {id:'s5',tab:'s5',clr:'#0e7490',num:'S5',nm:'Compressor',person:'Mr. Rajendra Kumar',swFlag:'',
      st:sOk(drPct,95,80),
