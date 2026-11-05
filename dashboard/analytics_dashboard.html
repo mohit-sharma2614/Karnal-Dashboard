@@ -1268,7 +1268,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
   <div class="kg k4">
     <div class="kc g"><div class="kl">Total Revenue</div><div class="kv g" id="s8_rev_kpi">₹448.5 L</div><div class="ks">CBG + Manure</div></div>
     <div class="kc r"><div class="kl">Total Cost</div><div class="kv r" id="s8_cost_kpi">₹237.0 L</div><div class="ks">Feedstock + Fixed</div></div>
-    <div class="kc a"><div class="kl">Total Production Cost</div><div class="kv a" id="s8_margin_kpi">—</div><div class="ks"></div></div>
+    <div class="kc g"><div class="kl">Gross Profit</div><div class="kv g" id="s8_margin_kpi">—</div><div class="ks">Revenue − Cost</div></div>
     <div class="kc a"><div class="kl">Cost per kg CBG</div><div class="kv a" id="s8_cpk">—</div><div class="ks" id="s8_cpk_tgt">Target: ₹75/kg</div></div>
   </div>
   <div class="kg" style="grid-template-columns:repeat(3,1fr)">
@@ -4733,7 +4733,7 @@ function renderS8(){
   // ── KPI cards ──────────────────────────────────────────────
   document.getElementById('s8_rev_kpi').textContent=fmtR(totR);
   document.getElementById('s8_cost_kpi').textContent=fmtR(totC);
-  document.getElementById('s8_margin_kpi').textContent=fmtR(totC);
+  document.getElementById('s8_margin_kpi').textContent=fmtR(totR-totC);
   document.getElementById('s8_cpk').textContent=cpk?'₹'+cpk+'/kg':'—';
   {const el=document.getElementById('s8_cpk_tgt');if(el)el.textContent='Target: ₹'+TGT.cost_kg+'/kg';}
   document.getElementById('s8_cbg_rev').textContent=fmtR(mo==='ALL'?fin.ytd_cbg_rev:sumA(cbgR));
@@ -4782,7 +4782,10 @@ function renderS8(){
     return`<tr><td>${m} 2026</td><td class="tg">${fmtL(v)}</td><td class="tc">${fmtL(ad)}</td>
       <td class="ta">${fmtL(g)}</td><td>${fmtL(sp)}</td><td class="tg" style="font-weight:700">${fmtL(tot)}</td></tr>`;
   });
-  const vTot=sumA(D.M.veer_rev),aTot=sumA(D.M.adi_rev),gTot=sumA(D.M.gail_rev),sTot=sumA(D.M.sps_rev);
+  const vTot=mo==='ALL'?sumA(D.M.veer_rev):(D.M.veer_rev?.[idx]||0);
+  const aTot=mo==='ALL'?sumA(D.M.adi_rev):(D.M.adi_rev?.[idx]||0);
+  const gTot=mo==='ALL'?sumA(D.M.gail_rev):(D.M.gail_rev?.[idx]||0);
+  const sTot=mo==='ALL'?sumA(D.M.sps_rev):(D.M.sps_rev?.[idx]||0);
   document.getElementById('s8_cust_tbl').innerHTML=
     `<thead><tr><th>Month</th><th>Veer Filling (₹)</th><th>Adinath Auto (₹)</th><th>GAIL/LREVPL (₹)</th><th>SPS Bio Chem (₹)</th><th>Total (₹)</th></tr></thead>
     <tbody>${custRows.join('')}
