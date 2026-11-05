@@ -2403,7 +2403,7 @@ function renderSectionDay(sectionId){
       metricCard('Total Revenue',fmtR(totR),'','g','CBG + SFOM + LFOM'),
       metricCard('CBG Dispatched',fN(disp),'kg','c','Cylinders dispatched'),
       metricCard('Dispatch Rate',dispRate!=null?dispRate.toFixed(1):null,'%',dispRate!=null?(dispRate>=90?'g':dispRate>=70?'a':'r'):'',' Dispatched ÷ produced'),
-      metricCard('Realized Price',realPrice!=null?'₹'+realPrice.toFixed(2)+'/kg':'—','','a','CBG revenue ÷ kg dispatched'),
+      metricCard('Manure Sales',fmtR((D.manureDay&&D.manureDay[curDay]||[]).reduce((s,r)=>s+(r.rev||0),0)||0),'','p','Total SFOM + LFOM revenue'),
     ]);
 
     // ── 2. Revenue Breakdown ───────────────────────────────────
