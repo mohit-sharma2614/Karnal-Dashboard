@@ -4659,7 +4659,7 @@ function renderS8(){
   // Cost structure pie — all 6 cost components
   pie('c_s8_pie',
     ['Feedstock','Electricity','Transport','Maintenance','Manpower','EMI / Loan'],
-    [sumA(fc),sumA(elec),sumA(trans),sumA(maint_),sumA(mp),sumA(emi)],
+    [sumA(fc),sumA(elec),sumA(trans),sumA(maint_),sumA(mp_s8),sumA(emi_s8)],
     [C.orange,C.lime,C.teal,C.amber,C.purple,C.pink]);
   bar('c_s8_cust',lbl,[
     bDS('Veer Filling',veerR,C.green),bDS('Adinath Auto',adiR,C.blue),
