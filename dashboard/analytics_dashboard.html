@@ -7543,7 +7543,7 @@ function _buildRpBody(p){
     coverEyebrow='LREKPL · Daily Operations Report';
     coverTitle=(parts[0]+' '+parts[1]+' 2026 — Daily Summary');
     coverSub=`Single day view · Generated ${genDate}`;
-    coverMeta=[{l:'Date',v:daLabel},{l:'Plant',v:'Karnal CBG'},{l:'CBG',v:fNI(dCBG)+' kg'},{l:'Est. Revenue',v:fL(dRev)}];
+    coverMeta=[{l:'Date',v:daLabel},{l:'Plant',v:'Karnal CBG'},{l:'CBG Produced',v:fNI(dCBG)+' kg'},{l:'Est. Revenue',v:dRev?fmtR(dRev):'—'}];
     statusChips=[
       {t:'Daily Achievement',v:dAch!=null?dAch+'%':'—',sub:'Daily target: '+fNI(dTgtDay)+' kg',cls:dAch>=90?'g':dAch>=75?'a':'r'},
       {t:'Total Prod. Cost',v:dCost>0?fL(dCost):'—',sub:'Day total',cls:'r'},
@@ -7593,33 +7593,36 @@ function _buildRpBody(p){
   const fsKeys=['pm_feed','cd_feed','gs_feed','csl_feed','sg_feed','ap_feed'];
   const fsCostKeys=['pm_cost','cd_cost','gs_cost','csl_cost','sg_cost','ap_cost'];
   const fsProcKeys=['pm_in','cd_in','gs_in','csl_in','sg_in','ap_in'];
+  const fsBalKeys=['pm_bal','cd_bal','gs_bal','csl_bal','sg_bal','ap_bal'];
   const fsNames=['Pressmud','Cow Dung','Grain Syrup','CSL','Spent Grain','Apple Pomace'];
+  const fsUnits=['MT','MT','KL','KL','MT','MT'];
   let fsTotalFed=0,fsTotalCost=0,fsTotalProc=0;
   const fsRows2=fsNames.map((nm,i)=>{
-    let fed=0,cost=0,proc=0;
-    if(p==='daily'&&da){const f=dRec?.feed||{};fed=nv(f[fsKeys[i]])||0;proc=nv(f[fsProcKeys[i]])||0;cost=nv(f[fsCostKeys[i]])||0;}
+    let fed=0,cost=0,proc=0,bal=null;
+    if(p==='daily'&&da){const f=dRec?.feed||{};fed=nv(f[fsKeys[i]])||0;proc=nv(f[fsProcKeys[i]])||0;cost=nv(f[fsCostKeys[i]])||0;bal=nv(f[fsBalKeys[i]]);}
     else if(p==='monthly'){fed=nv((D.M[fsKeys[i]]||[])[moIdx])||0;cost=nv((D.M[fsCostKeys[i]]||[])[moIdx])||0;proc=nv((D.M[fsProcKeys[i]]||[])[moIdx])||0;}
     else if(p==='quarterly'){fed=qIdxs.reduce((s,qi)=>s+(nv((D.M[fsKeys[i]]||[])[qi])||0),0);cost=qIdxs.reduce((s,qi)=>s+(nv((D.M[fsCostKeys[i]]||[])[qi])||0),0);proc=qIdxs.reduce((s,qi)=>s+(nv((D.M[fsProcKeys[i]]||[])[qi])||0),0);}
     else{fed=sumA(D.M[fsKeys[i]]||[]);cost=sumA(D.M[fsCostKeys[i]]||[]);proc=sumA(D.M[fsProcKeys[i]]||[]);}
     fsTotalFed+=fed;fsTotalCost+=cost;fsTotalProc+=proc||fed;
     const util=proc>0?Math.round(fed/proc*100):null;
     const utlClr=util==null?'nt':util>=90?'g':util>=75?'a':'r';
+    const balCell=p==='daily'?(bal!=null?fNI(bal)+' '+fsUnits[i]:'—'):'';
     return`<tr>
       <td>${nm}</td>
-      <td>${proc>0?fNI(proc):'—'}</td>
-      <td>${fed>0?fNI(fed):'—'}</td>
+      <td>${proc>0?fNI(proc)+' '+fsUnits[i]:'—'}</td>
+      <td>${fed>0?fNI(fed)+' '+fsUnits[i]:'—'}</td>
+      ${p==='daily'?`<td>${balCell}</td>`:''}
       <td><div class="rp-fs-pct"><span class="rp-fs-pct-v ${utlClr}">${util!=null?util+'%':'—'}</span></div></td>
-      <td>${cost>0&&fed>0?fL(cost/fed):'—'}</td>
-      <td>${cost>0?fL(cost):'—'}</td>
+      <td>${cost>0?fmtR(cost):'—'}</td>
     </tr>`;
   });
   const fsUtil=fsTotalProc>0?Math.round(fsTotalFed/fsTotalProc*100):null;
   const feedstock=`${secH('2','Feedstock — Procurement & Utilization')}
   <div class="rp-fs-wrap">
     <table class="rp-fs-table">
-      <thead><tr><th>Feedstock</th><th>Procured</th><th>Fed</th><th>Util %</th><th>₹/MT</th><th>Total Cost</th></tr></thead>
+      <thead><tr><th>Feedstock</th><th>Procured</th><th>Fed</th>${p==='daily'?'<th>Balance</th>':''}<th>Util %</th><th>Total Cost</th></tr></thead>
       <tbody>${fsRows2.join('')}
-        <tr><td>Total</td><td>${fsTotalProc>0?fNI(fsTotalProc):'—'}</td><td>${fsTotalFed>0?fNI(fsTotalFed):'—'}</td><td><span class="rp-fs-pct-v ${fsUtil==null?'nt':fsUtil>=90?'g':fsUtil>=75?'a':'r'}">${fsUtil!=null?fsUtil+'%':'—'}</span></td><td>—</td><td>${fsTotalCost>0?fL(fsTotalCost):'—'}</td></tr>
+        <tr><td>Total</td><td>${fsTotalProc>0?fNI(fsTotalProc):'—'}</td><td>${fsTotalFed>0?fNI(fsTotalFed):'—'}</td>${p==='daily'?'<td>—</td>':''}<td><span class="rp-fs-pct-v ${fsUtil==null?'nt':fsUtil>=90?'g':fsUtil>=75?'a':'r'}">${fsUtil!=null?fsUtil+'%':'—'}</span></td><td>${fsTotalCost>0?fmtR(fsTotalCost):'—'}</td></tr>
       </tbody>
     </table>
   </div>`;
@@ -7678,9 +7681,9 @@ function _buildRpBody(p){
     const eff=(D.M.psa_eff||[])[moIdx];psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg=fNI(moCBG/Math.max(dim,1))+' kg/d avg';
   } else {
     cbgV=fNI(dCBG)+' kg';cbgTgt=fNI(dTgtDay)+' kg';cbgAch=dAch;biogasV=fN(nv(dRec?.psa?.rbg_tot))+' m³';
-    const _e1=nv(dRec?.psa?.d1_eff),_e2=nv(dRec?.psa?.d2_eff);
-    const eff=_e1!=null&&_e2!=null?(_e1+_e2)/2:_e1??_e2;
-    psaEff=eff!=null?eff.toFixed(1)+'%':null;cbgKg='—';
+    const effDay=nv(dRec?.psa?.psa_eff_day);
+    psaEff=effDay!=null?(effDay*100).toFixed(1)+'%':null;
+    cbgKg=fNI(nv(dRec?.psa?.dispatched))+' kg dispatched';
   }
   const mc2=(stripe,lbl,v,cls,dl,drc,proof1,proof2)=>`<div class="rp-mc2">
     <div class="rp-mc-stripe" style="background:${stripe}"></div>
@@ -7696,12 +7699,15 @@ function _buildRpBody(p){
     </div>
   </div>`;
   const achClr=a=>a==null?'n':a>=90?'g':a>=75?'a':'r';
+  const dStorage=p==='daily'?nv(dRec?.psa?.storage):null;
   const production=`${secH('4','Production — Biogas & CBG Output')}
   <div class="rp-metric-grid">
-    ${mc2('var(--rp-gr)','CBG Produced',cbgV,achClr(cbgAch)+'',cbgAch!=null?cbgAch+'% of target':'—',cbgAch>=90?'g':cbgAch>=75?'a':'r',cbgTgt,cbgAch!=null?cbgAch+'%':'—')}
-    ${mc2('var(--rp-bl)','Biogas Inlet',biogasV,'b','Raw biogas volume','nt','PSA Feed',psaEff||'—')}
-    ${mc2('var(--rp-am)','PSA Efficiency',psaEff||'—',psaEff?'n':'n',psaEff||'No data','nt','Target','>85%')}
-    ${mc2('var(--rp-ink3)','Avg Daily CBG',cbgKg,'n',p==='yearly'?'Monthly avg':'Daily avg','nt','Period',p==='yearly'?MONTHS.length+'mo':p==='monthly'?dim+'d':'1d')}
+    ${mc2('var(--rp-gr)','CBG Produced',cbgV,achClr(cbgAch)+'',cbgAch!=null?cbgAch+'% of target':'—',cbgAch>=90?'g':cbgAch>=75?'a':'r','Target',cbgTgt)}
+    ${mc2('var(--rp-bl)','Biogas Inlet',biogasV,'b','Raw biogas volume (RBG)','nt','CBG Produced',cbgV)}
+    ${mc2('var(--rp-am)','PSA Efficiency',psaEff!=null?psaEff:'No data',psaEff?'n':'n',psaEff!=null?'CBG / RBG ratio':'No PSA eff data recorded','nt','Target','>85%')}
+    ${p==='daily'
+      ?mc2('var(--rp-ink3)','CBG Dispatched',cbgKg,'n',dStorage!=null?fNI(dStorage)+' kg in storage':'Storage not recorded','nt','Storage',dStorage!=null?fNI(dStorage)+' kg':'—')
+      :mc2('var(--rp-ink3)',p==='yearly'?'Monthly Avg CBG':p==='quarterly'?'Daily Avg CBG':'Daily Avg CBG',cbgKg,'n',p==='yearly'?'Per month average':'Per day average','nt','Period',p==='yearly'?MONTHS.length+' months':p==='monthly'?dim+' days':qDays+' days')}
   </div>`;
 
   // ── 5: sales dispatched / invoiced ───────────────────────────────
@@ -7784,25 +7790,24 @@ function _buildRpBody(p){
   }
   const pnlMgn=pnlRev&&pnlCost&&pnlRev>0?pnlRev-pnlCost:null;
   const pnlMgnPct=pnlRev&&pnlMgn!=null?Math.round(pnlMgn/pnlRev*100):null;
-  const pRow=(lbl,v,pct,type,sub)=>`<div class="rp-pnl-row ${type||''}">
+  const pRow=(lbl,v,type,sub)=>`<div class="rp-pnl-row ${type||''}">
     <div class="rp-pnl-lbl">${lbl}</div>
     <div class="rp-pnl-v-wrap">
       <div class="rp-pnl-v">${v}</div>
       ${sub?`<div class="rp-pnl-sub">${sub}</div>`:''}
     </div>
-    ${pct!=null?`<div class="rp-pnl-pct ${pct>=40?'g':pct>=20?'a':'nt'}">${pct}%</div>`:''}
   </div>`;
   const fRX=v=>v!=null&&v>0?fmtR(v):'—';
   const pnl=`${secH('6','P&L — Cost Structure & Total Production Cost')}
   <div class="rp-pnl-wrap">
-    ${pRow('Total Revenue',fRX(pnlRev),pnlRev?100:'','',pnlRev?'CBG + Manure combined':null)}
-    ${pnlFeed!=null?pRow('Feedstock Cost',fRX(pnlFeed),pnlRev&&pnlFeed?Math.round(pnlFeed/pnlRev*100):null,'','Pressmud, GS, CD, CSL, SG, AP'):''}
-    ${pnlTrans!=null?pRow('Transportation',fRX(pnlTrans),null,'','Feedstock transport cost'):''}
-    ${pnlMaintOp!=null?pRow('Maintenance',fRX(pnlMaintOp),null,'','Equipment & plant maintenance'):''}
-    ${pnlElec!=null?pRow('Power & Utilities',fRX(pnlElec),null,'','Electricity & utility costs'):''}
-    ${pnlMaint!=null?pRow('Manpower',fRX(pnlMaint),null,'','Salaries & wages'):''}
-    ${pnlEMI!=null?pRow('EMI / Debt Service',fRX(pnlEMI),null,'','Loan repayment (from REVCOST)'):''}
-    ${pRow('Total Production Cost',fRX(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'total','Feed + Transport + Maint + Elec + Manpower + EMI')}
+    ${pRow('Total Revenue',fRX(pnlRev),'',pnlRev?'CBG + Manure combined':null)}
+    ${pnlFeed!=null?pRow('Feedstock Cost',fRX(pnlFeed),'','Pressmud, GS, CD, CSL, SG, AP'):''}
+    ${pnlTrans!=null?pRow('Transportation',fRX(pnlTrans),'','Feedstock transport cost'):''}
+    ${pnlMaintOp!=null?pRow('Maintenance',fRX(pnlMaintOp),'','Equipment & plant maintenance'):''}
+    ${pnlElec!=null?pRow('Power & Utilities',fRX(pnlElec),'','Electricity & utility costs'):''}
+    ${pnlMaint!=null?pRow('Manpower',fRX(pnlMaint),'','Salaries & wages'):''}
+    ${pnlEMI!=null?pRow('EMI / Debt Service',fRX(pnlEMI),'','Loan repayment (from REVCOST)'):''}
+    ${pRow('Total Production Cost',fRX(pnlCost),'total','Feed + Transport + Maint + Elec + Manpower + EMI')}
   </div>`;
 
   // ── 7: findings (3 columns) ───────────────────────────────────────
