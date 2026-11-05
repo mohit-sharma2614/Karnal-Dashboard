@@ -2874,8 +2874,8 @@ function _renderOVSections(mo){
   const vsD1=D.kpis.vs_d1!=null?D.kpis.vs_d1.toFixed(1)+'%':'—';
   const tsD2=D.kpis.ts_d2!=null?D.kpis.ts_d2.toFixed(1)+'%':'—';
   const vsD2=D.kpis.vs_d2!=null?D.kpis.vs_d2.toFixed(1)+'%':'—';
-  const iaD1=D.kpis.ia_d1!=null?D.kpis.ia_d1.toFixed(2):'—';
-  const iaD2=D.kpis.ia_d2!=null?D.kpis.ia_d2.toFixed(2):'—';
+  const iaD1=D.kpis.iapa_d1!=null?D.kpis.iapa_d1.toFixed(2):'—';
+  const iaD2=D.kpis.iapa_d2!=null?D.kpis.iapa_d2.toFixed(2):'—';
   // S5 CBG/hr and trips
   const cbgHr=tCH>0?(tCBG/tCH).toFixed(0)+' kg/hr':'—';
   const drainD=(mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac'))[i]||0));
