@@ -6720,18 +6720,75 @@ async function buildAnalyticsD() {
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
   M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
-  // Feed_and_Balance verified col indices (0-based, from A1:DZ3 header fetch 2026-11-02):
-  // Procurement totals: cd=18, csl=26, pm=47, sg=66, gs=71, ap=76
-  // Procurement costs:  cd=22, csl=30, pm=64, sg=68, gs=74, ap=78
-  // Feedstock fed:      cd=79, pm=80, csl=81, gs=82, sg=83, ap=84
-  // Balance:            cd=93, pm=94, csl=95, gs=96, sg=97, ap=98
-  M.pm_in=aggMonth(fb,gD,47); M.gs_in=aggMonth(fb,gD,71); M.csl_in=aggMonth(fb,gD,26); M.cd_in=aggMonth(fb,gD,18); M.sg_in=aggMonth(fb,gD,66); M.ap_in=aggMonth(fb,gD,76);
-  M.pm_feed=aggMonth(fb,gD,80); M.gs_feed=aggMonth(fb,gD,82); M.csl_feed=aggMonth(fb,gD,81); M.cd_feed=aggMonth(fb,gD,79); M.sg_feed=aggMonth(fb,gD,83); M.ap_feed=aggMonth(fb,gD,84); M.feed_total=aggMonth(fb,gD,85);
-  M.pm_cost=aggMonth(fb,gD,64); M.gs_cost=aggMonth(fb,gD,74); M.csl_cost=aggMonth(fb,gD,30); M.cd_cost=aggMonth(fb,gD,22); M.sg_cost=aggMonth(fb,gD,68); M.ap_cost=aggMonth(fb,gD,78);
+  // Header-name based column lookup — safe against future column additions
+  // findCol: search header row for exact name match; fallback to hardcoded idx if not found
+  const findCol=(hdrRow,name,fallback)=>{
+    const i=(hdrRow||[]).findIndex(h=>typeof h==='string'&&h.trim()===name.trim());
+    if(i>=0)return i;
+    console.warn('[findCol] header "'+name+'" not found — using fallback idx '+fallback);
+    return fallback;
+  };
+  // FB: row 0 of fbR.values is the header row (sheet hrow=2, fetched from A3)
+  const fbHdr=(fbR?.values||[])[0]||[];
+  const FB={
+    cd_in:   findCol(fbHdr,'Cow Dung~2',18),
+    cd_cost: findCol(fbHdr,'Cow Dung~3',22),
+    csl_in:  findCol(fbHdr,'CSL~2',26),
+    csl_cost:findCol(fbHdr,'CSL~3',30),
+    pm_in:   findCol(fbHdr,'Pressmud~2',47),
+    pm_cost: findCol(fbHdr,'Pressmud~3',64),
+    sg_in:   findCol(fbHdr,'Spent Grain',66),
+    sg_cost: findCol(fbHdr,'Spent Grain~2',68),
+    gs_in:   findCol(fbHdr,'Grain Syrup~2',71),
+    gs_cost: findCol(fbHdr,'Grain Syrup~3',74),
+    ap_in:   findCol(fbHdr,'Apple Pomace',76),
+    ap_cost: findCol(fbHdr,'Apple Pomace~2',78),
+    cd_feed: findCol(fbHdr,'Cow Dung (Fed)',79),
+    pm_feed: findCol(fbHdr,'Pressmud (Fed)',80),
+    csl_feed:findCol(fbHdr,'CSL Feed (Fed)',81),
+    gs_feed: findCol(fbHdr,'Grain Syrup (Fed)',82),
+    sg_feed: findCol(fbHdr,'Spent grain (Fed)',83),
+    ap_feed: findCol(fbHdr,'Apple pomace',84),
+    feed_tot:findCol(fbHdr,'Total Feed (MT)',85),
+    cd_bal:  findCol(fbHdr,'Cow Dung~4',93),
+    pm_bal:  findCol(fbHdr,'Pressmud~4',94),
+    csl_bal: findCol(fbHdr,'CSL Feed~2',95),
+    gs_bal:  findCol(fbHdr,'Grain Syrup~5',96),
+    sg_bal:  findCol(fbHdr,'Spent grain~3',97),
+    ap_bal:  findCol(fbHdr,'Apple pomace~2',98),
+  };
+  // RC (Daily Revenue & Costs): row 0 of rcR.values is header (fetched from A4)
+  const rcHdr=(rcR?.values||[])[0]||[];
+  const RC={
+    cbg_rev:  findCol(rcHdr,'CBG Sales (Rs)',1),
+    sfom_rev: findCol(rcHdr,'SFOM Revenue (Rs)',2),
+    lfom_rev: findCol(rcHdr,'LFOM Revenue (Rs)',3),
+    feed_cost:findCol(rcHdr,'Feedstock Cost (Rs)',4),
+    transport:findCol(rcHdr,'Transport Cost (Rs)',5),
+    maint:    findCol(rcHdr,'Maintenance Cost (Rs)',6),
+    elec:     findCol(rcHdr,'Electricity Cost (Rs)',7),
+    manpower: findCol(rcHdr,'Manpower Cost (Rs)',8),
+    emi:      findCol(rcHdr,'Loan EMI (Rs)',9),
+  };
+  // Sales Detail: row 0 of salesR.values is header (fetched from A4)
+  const sdHdr=(salesR?.values||[])[0]||[];
+  const SD={
+    veer_qty: findCol(sdHdr,'Veer Gas Qty',1),
+    veer_rev: findCol(sdHdr,'Veer Gas Rev',2),
+    adi_qty:  findCol(sdHdr,'Adinath Qty',3),
+    adi_rev:  findCol(sdHdr,'Adinath Rev',4),
+    gail_qty: findCol(sdHdr,'GAIL Qty',5),
+    gail_rev: findCol(sdHdr,'GAIL Rev',6),
+    sps_qty:  findCol(sdHdr,'SPS Qty',7),
+    sps_rev:  findCol(sdHdr,'SPS Rev',8),
+  };
+  M.pm_in=aggMonth(fb,gD,FB.pm_in); M.gs_in=aggMonth(fb,gD,FB.gs_in); M.csl_in=aggMonth(fb,gD,FB.csl_in); M.cd_in=aggMonth(fb,gD,FB.cd_in); M.sg_in=aggMonth(fb,gD,FB.sg_in); M.ap_in=aggMonth(fb,gD,FB.ap_in);
+  M.pm_feed=aggMonth(fb,gD,FB.pm_feed); M.gs_feed=aggMonth(fb,gD,FB.gs_feed); M.csl_feed=aggMonth(fb,gD,FB.csl_feed); M.cd_feed=aggMonth(fb,gD,FB.cd_feed); M.sg_feed=aggMonth(fb,gD,FB.sg_feed); M.ap_feed=aggMonth(fb,gD,FB.ap_feed); M.feed_total=aggMonth(fb,gD,FB.feed_tot);
+  M.pm_cost=aggMonth(fb,gD,FB.pm_cost); M.gs_cost=aggMonth(fb,gD,FB.gs_cost); M.csl_cost=aggMonth(fb,gD,FB.csl_cost); M.cd_cost=aggMonth(fb,gD,FB.cd_cost); M.sg_cost=aggMonth(fb,gD,FB.sg_cost); M.ap_cost=aggMonth(fb,gD,FB.ap_cost);
   M.storage=aggMonthLast(psa,gD,IDX.P_storage);
-  M.pm_bal=aggMonth(fb,gD,94); M.gs_bal=aggMonth(fb,gD,96); M.csl_bal=aggMonth(fb,gD,95); M.cd_bal=aggMonth(fb,gD,93); M.sg_bal=aggMonth(fb,gD,97); M.ap_bal=aggMonth(fb,gD,98);
-  M.pm_bal_last=aggMonthLast(fb,gD,94); M.gs_bal_last=aggMonthLast(fb,gD,96); M.csl_bal_last=aggMonthLast(fb,gD,95); M.cd_bal_last=aggMonthLast(fb,gD,93); M.sg_bal_last=aggMonthLast(fb,gD,97); M.ap_bal_last=aggMonthLast(fb,gD,98);
-  M.pm_feed_avg=aggMonth(fb,gD,80,'avg'); M.gs_feed_avg=aggMonth(fb,gD,82,'avg'); M.csl_feed_avg=aggMonth(fb,gD,81,'avg'); M.cd_feed_avg=aggMonth(fb,gD,79,'avg'); M.sg_feed_avg=aggMonth(fb,gD,83,'avg'); M.ap_feed_avg=aggMonth(fb,gD,84,'avg');
+  M.pm_bal=aggMonth(fb,gD,FB.pm_bal); M.gs_bal=aggMonth(fb,gD,FB.gs_bal); M.csl_bal=aggMonth(fb,gD,FB.csl_bal); M.cd_bal=aggMonth(fb,gD,FB.cd_bal); M.sg_bal=aggMonth(fb,gD,FB.sg_bal); M.ap_bal=aggMonth(fb,gD,FB.ap_bal);
+  M.pm_bal_last=aggMonthLast(fb,gD,FB.pm_bal); M.gs_bal_last=aggMonthLast(fb,gD,FB.gs_bal); M.csl_bal_last=aggMonthLast(fb,gD,FB.csl_bal); M.cd_bal_last=aggMonthLast(fb,gD,FB.cd_bal); M.sg_bal_last=aggMonthLast(fb,gD,FB.sg_bal); M.ap_bal_last=aggMonthLast(fb,gD,FB.ap_bal);
+  M.pm_feed_avg=aggMonth(fb,gD,FB.pm_feed,'avg'); M.gs_feed_avg=aggMonth(fb,gD,FB.gs_feed,'avg'); M.csl_feed_avg=aggMonth(fb,gD,FB.csl_feed,'avg'); M.cd_feed_avg=aggMonth(fb,gD,FB.cd_feed,'avg'); M.sg_feed_avg=aggMonth(fb,gD,FB.sg_feed,'avg'); M.ap_feed_avg=aggMonth(fb,gD,FB.ap_feed,'avg');
   M.pm_bpp=aggMonth(d1,gD,IDX.D_pm_bpp); M.cd_bpp=aggMonth(d1,gD,IDX.D_cd_bpp); M.gs_bpp=aggMonth(d1,gD,IDX.D_gs_bpp); M.csl_bpp=aggMonth(d1,gD,IDX.D_csl_bpp); M.sg_bpp=aggMonth(d1,gD,IDX.D_sg_bpp); M.ap_bpp=aggMonth(d1,gD,IDX.D_ap_bpp);
   M.d2_pm_bpp=aggMonth(d2,gD,IDX.D_pm_bpp); M.d2_cd_bpp=aggMonth(d2,gD,IDX.D_cd_bpp); M.d2_gs_bpp=aggMonth(d2,gD,IDX.D_gs_bpp); M.d2_csl_bpp=aggMonth(d2,gD,IDX.D_csl_bpp); M.d2_sg_bpp=aggMonth(d2,gD,IDX.D_sg_bpp); M.d2_ap_bpp=aggMonth(d2,gD,IDX.D_ap_bpp); M.act_cbg=M.cbg;
   // D1 BPP from CBG Expected sheet (cols 1-5 = pm,cd,csl,gs,sg per D1)
@@ -6746,7 +6803,7 @@ async function buildAnalyticsD() {
   M.pm_proc_cost=mkA(); M.cd_proc_cost=mkA(); M.gs_proc_cost=mkA(); M.csl_proc_cost=mkA(); M.sg_proc_cost=mkA();
   M.veer=aggMonth(psa,gD,IDX.P_veer); M.adinath=aggMonth(psa,gD,IDX.P_adinath); M.kfs=aggMonth(psa,gD,IDX.P_kfs);
   M.ksk=aggMonth(psa,gD,IDX.P_ksk); M.om=aggMonth(psa,gD,IDX.P_om); M.sps=aggMonth(psa,gD,IDX.P_sps);
-  M.feed_cost=aggMonth(rc,gD,4); M.transport=aggMonth(rc,gD,5); M.maint=aggMonth(rc,gD,6); M.elec=aggMonth(rc,gD,7);
+  M.feed_cost=aggMonth(rc,gD,RC.feed_cost); M.transport=aggMonth(rc,gD,RC.transport); M.maint=aggMonth(rc,gD,RC.maint); M.elec=aggMonth(rc,gD,RC.elec);
   // Monthly Fixed Costs: row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols 3-14 = Jan-Dec
   const mfcVals=mfcR?.values||[];
   // MFC sheet (A3:P10): row0=header, row1=ElecUsage, row2=ElecCost, row3=Manpower, row4=EMI; cols: A=CostHead, B=Unit, C=Annual, D=Jan..O=Dec (ci+3)
@@ -6757,13 +6814,13 @@ async function buildAnalyticsD() {
   const emiDataRows=emiVals.slice(1).filter(r=>r&&r.length>=5&&typeof r[4]==='number');
   M.emi=months.map(m=>{const ci=MNAMES.indexOf(m);return emiDataRows.reduce((s,r)=>{const v=r[ci+4];return s+(typeof v==='number'?v:0);},0);});
   const emi_rows=emiDataRows.map(r=>({type:r[0]||'',desc:r[1]||'',vals:months.map(m=>{const ci=MNAMES.indexOf(m);return ci>=0&&typeof r[ci+4]==='number'?r[ci+4]:0;})}));
-  // Sales Detail: col0=Date, col2=Veer₹, col4=Adinath₹, col6=GAIL₹, col8=SPS₹
+  // Sales Detail: header-based column lookup (SD constants)
   const salesRows=getRows(salesR,0);
-  M.veer_rev=aggMonth(salesRows,gD,2); M.adi_rev=aggMonth(salesRows,gD,4);
-  M.gail_rev=aggMonth(salesRows,gD,6); M.sps_rev=aggMonth(salesRows,gD,8);
+  M.veer_rev=aggMonth(salesRows,gD,SD.veer_rev); M.adi_rev=aggMonth(salesRows,gD,SD.adi_rev);
+  M.gail_rev=aggMonth(salesRows,gD,SD.gail_rev); M.sps_rev=aggMonth(salesRows,gD,SD.sps_rev);
   // Daily vendor lookup: Sales Detail col1=Veer_qty,2=Veer₹,3=Adi_qty,4=Adi₹,5=GAIL_qty,6=GAIL₹,7=SPS_qty,8=SPS₹
   const salesDay={};
-  salesRows.forEach(r=>{const dk=dayKey(toDate(r[0]));if(!dk)return;salesDay[dk]={veer_qty:nv(r[1])||0,veer_rev:nv(r[2])||0,adi_qty:nv(r[3])||0,adi_rev:nv(r[4])||0,gail_qty:nv(r[5])||0,gail_rev:nv(r[6])||0,sps_qty:nv(r[7])||0,sps_rev:nv(r[8])||0};});
+  salesRows.forEach(r=>{const dk=dayKey(toDate(r[0]));if(!dk)return;salesDay[dk]={veer_qty:nv(r[SD.veer_qty])||0,veer_rev:nv(r[SD.veer_rev])||0,adi_qty:nv(r[SD.adi_qty])||0,adi_rev:nv(r[SD.adi_rev])||0,gail_qty:nv(r[SD.gail_qty])||0,gail_rev:nv(r[SD.gail_rev])||0,sps_qty:nv(r[SD.sps_qty])||0,sps_rev:nv(r[SD.sps_rev])||0};});
   M.d2_exp=M.d2_exp_exp||aggMonth(cbgExp,gD,12); M.d1_drain=aggMonth(d1,gD,IDX.D_drain_act); M.d2_drain=aggMonth(d2,gD,IDX.D_drain_act);
   M.d1_drain_exp=aggMonth(d1,gD,IDX.D_drain_exp); M.d2_drain_exp=aggMonth(d2,gD,IDX.D_drain_exp);
   M.d1_bg_est_exp=aggMonth(d1,gD,IDX.D_bg_est1); M.d1_bg_est_act=aggMonth(d1,gD,IDX.D_bg_psa);
@@ -6777,16 +6834,16 @@ async function buildAnalyticsD() {
   const _d1bg=aggMonth(d1,gD,IDX.D_bg_psa),_d2bg=aggMonth(d2,gD,IDX.D_bg_psa);
   M.d1_dig_eff=M.exp_tot.map((e,i)=>e&&_d1bg[i]?Math.round(_d1bg[i]/e*100):null);
   M.d2_dig_eff=M.d2_exp.map((e,i)=>e&&_d2bg[i]?Math.round(_d2bg[i]/e*100):null);
-  M.cbg_rev=aggMonth(rc,gD,1);
-  M.sfom_mn=aggMonth(rc,gD,2); M.lfom_mn=aggMonth(rc,gD,3);
+  M.cbg_rev=aggMonth(rc,gD,RC.cbg_rev);
+  M.sfom_mn=aggMonth(rc,gD,RC.sfom_rev); M.lfom_mn=aggMonth(rc,gD,RC.lfom_rev);
   M.sfom_rev=M.sfom_mn; M.lfom_rev=M.lfom_mn;
   const manRows=getRows(manR,0); const gManD=r=>toDate(r[0]);
   // Daily manure sales lookup: Manure Sales col0=Date,col1=Buyer,col3=Type,col4=Rev(₹),col5=Qty
   const manureDay={};
   // Manure Sales cols: col0=Date, col1=VehicleType, col2=FarmerName, col3=Type, col4=Amount(₹), col5=Month
   manRows.forEach(r=>{const dk=dayKey(gManD(r));if(!dk)return;const type=(r[3]||'').toString().toUpperCase().trim();if(type!=='SFOM'&&type!=='LFOM')return;if(!manureDay[dk])manureDay[dk]=[];manureDay[dk].push({buyer:r[2]||r[1]||'',vehicle:r[1]||'',type,qty:nv(r[5])||0,rev:nv(r[4])||0});});
-  const fc=aggMonth(rc,gD,4),tc=aggMonth(rc,gD,5),mc=aggMonth(rc,gD,6),ec=aggMonth(rc,gD,7);
-  const mp_rc=aggMonth(rc,gD,8),emi_rc=aggMonth(rc,gD,9);
+  const fc=aggMonth(rc,gD,RC.feed_cost),tc=aggMonth(rc,gD,RC.transport),mc=aggMonth(rc,gD,RC.maint),ec=aggMonth(rc,gD,RC.elec);
+  const mp_rc=aggMonth(rc,gD,RC.manpower),emi_rc=aggMonth(rc,gD,RC.emi);
   M.mp_rc=mp_rc; M.emi_rc=emi_rc;
   M.total_rev=months.map((_,i)=>(M.cbg_rev[i]||0)+(M.sfom_mn[i]||0)+(M.lfom_mn[i]||0));
   M.total_cost=months.map((_,i)=>(fc[i]||0)+(tc[i]||0)+(mc[i]||0)+(ec[i]||0)+(mp_rc[i]||0)+(emi_rc[i]||0));
