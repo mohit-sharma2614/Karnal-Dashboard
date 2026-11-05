@@ -7820,7 +7820,7 @@ function _buildRpBody(p){
   else allFindings.push({cls:'ok',badge:'OK',head:'CBG Production On Target',vals:[{l:'Achievement',v:(achKpi||'—')+(achKpi!=null?'%':''),c:'g'},{l:'Target',v:'≥90%',c:'nt'},{l:'Status',v:'On Track',c:'g'}]});
   // margin
   const costKpi=p==='yearly'?ytdCost:p==='quarterly'?qCost:p==='monthly'?moCost:dCost;
-  const fmtCostKpi=v=>v>0?fL(v):'—';
+  const fmtCostKpi=v=>v>0?fmtR(v):'—';
   if(costKpi>0)allFindings.push({cls:'ok',badge:'INFO',head:'Total Production Cost',vals:[{l:'Period Cost',v:fmtCostKpi(costKpi),c:'nt'},{l:'Period',v:p,c:'nt'},{l:'Status',v:'Tracked',c:'g'}]});
   else allFindings.push({cls:'ok',badge:'OK',head:'Production Cost Data Unavailable',vals:[{l:'Status',v:'No data',c:'nt'},{l:'Expected',v:'Enter costs',c:'nt'},{l:'Sheet',v:'Daily Rev & Costs',c:'nt'}]});
   // temperature
