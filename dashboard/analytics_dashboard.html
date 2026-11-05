@@ -2445,16 +2445,34 @@ function renderSectionDay(sectionId){
     const cbgKg=(p.dispatched||p.act_cbg)||0;
     const cpkVal=cbgKg>0?totC/cbgKg:0;
 
-    // KPI cards
+    // ── 1. Financial Summary (4 KPI cards) ────────────────────
     html+=groupHeader('Financial Summary','P&L overview for the day');
     html+=grid([
       metricCard('Total Revenue',fmtR(totR),'','g','CBG + SFOM + LFOM'),
-      metricCard('Total Cost',fmtR(totC),'','r','All 6 cost components'),
+      metricCard('Total Cost',fmtR(totC),'','r','Feed+Elec+Trans+Maint'),
       metricCard('Gross Profit',fmtR(grossP),mg!=null?mg+'% margin':'',(mgCls||'g'),'Revenue minus total cost'),
-      metricCard('Cost per kg CBG',cpkVal>0?fmtR(Math.round(cpkVal))+'/kg':'—','','a','Total cost ÷ CBG produced'),
+      metricCard('Cost / kg CBG',cpkVal>0?fmtR(Math.round(cpkVal))+'/kg':'—','','a','Total cost ÷ CBG produced'),
     ]);
 
-    // CBG Revenue breakdown by vendor
+    // ── 2. Revenue Breakdown ───────────────────────────────────
+    const cbgRev=rv.cbg_rev||0,sfomRev=rv.sfom_rev||0,lfomRev=rv.lfom_rev||0;
+    html+=groupHeader('Revenue Breakdown','CBG + Manure sales for the day');
+    html+=`<div style="display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center">
+      <div style="position:relative"><canvas id="sd_s8_rev_chart" height="180"></canvas></div>
+      <div style="font-size:13px">
+        ${[['CBG Sales',cbgRev,'var(--green,#16a34a)'],['SFOM Revenue',sfomRev,'var(--amber,#f59e0b)'],['LFOM Revenue',lfomRev,'var(--blue,#3b82f6)']].map(([lbl,val,clr])=>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr)">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span style="width:10px;height:10px;border-radius:50%;background:${clr};flex-shrink:0"></span>${lbl}
+            </span>
+            <span style="font-weight:700">${fmtR(val)||'—'}</span>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-weight:700;font-size:14px">
+          <span>Total Revenue</span><span style="color:var(--green,#16a34a)">${fmtR(totR)}</span>
+        </div>
+      </div>
+    </div>`;
+    // CBG vendor sub-table
     const sd=D.salesDay&&D.salesDay[curDay];
     if(sd){
       const cbgRows=[];
@@ -2463,101 +2481,111 @@ function renderSectionDay(sectionId){
       if(sd.gail_qty||sd.gail_rev) cbgRows.push({name:'GAIL',qty:sd.gail_qty,rev:sd.gail_rev});
       if(sd.sps_qty||sd.sps_rev) cbgRows.push({name:'SPS',qty:sd.sps_qty,rev:sd.sps_rev});
       if(cbgRows.length){
-        html+=groupHeader('CBG Sales — Vendor Breakdown','Quantity and revenue per buyer');
-        html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
-          <thead><tr style="background:var(--bg2);color:var(--text2)">
-            <th style="padding:8px 12px;text-align:left">Vendor</th>
-            <th style="padding:8px 12px;text-align:right">Quantity (kg)</th>
-            <th style="padding:8px 12px;text-align:right">Revenue</th>
-            <th style="padding:8px 12px;text-align:right">Rate (₹/kg)</th>
-          </tr></thead><tbody>`;
+        html+=`<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:4px">CBG Vendor Detail</div>
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead><tr style="color:var(--text2)"><th style="padding:5px 8px;text-align:left">Vendor</th><th style="padding:5px 8px;text-align:right">Qty (kg)</th><th style="padding:5px 8px;text-align:right">Revenue</th><th style="padding:5px 8px;text-align:right">Rate</th></tr></thead><tbody>`;
         cbgRows.forEach((r,i)=>{
-          const rate=r.qty>0?(r.rev/r.qty).toFixed(2):'—';
-          html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
-            <td style="padding:8px 12px;font-weight:600">${r.name}</td>
-            <td style="padding:8px 12px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN'):'—'}</td>
-            <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
-            <td style="padding:8px 12px;text-align:right">₹${rate}</td>
+          const rate=r.qty>0?'₹'+(r.rev/r.qty).toFixed(2):'—';
+          html+=`<tr style="border-top:1px solid var(--bdr);background:${i%2?'var(--bg2)':''}">
+            <td style="padding:5px 8px">${r.name}</td>
+            <td style="padding:5px 8px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN'):'—'}</td>
+            <td style="padding:5px 8px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
+            <td style="padding:5px 8px;text-align:right;color:var(--text2)">${rate}</td>
           </tr>`;
         });
-        html+=`</tbody></table></div>`;
+        html+=`</tbody></table>`;
       }
     }
-
-    // SFOM/LFOM sales
+    // Manure buyer sub-table
     const md=D.manureDay&&D.manureDay[curDay];
     if(md&&md.length){
-      html+=groupHeader('Manure Sales (SFOM / LFOM)','Buyer-wise dispatch and revenue');
-      html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead><tr style="background:var(--bg2);color:var(--text2)">
-          <th style="padding:8px 12px;text-align:left">Farmer / Buyer</th>
-          <th style="padding:8px 12px;text-align:left">Vehicle</th>
-          <th style="padding:8px 12px;text-align:center">Type</th>
-          <th style="padding:8px 12px;text-align:right">Quantity</th>
-          <th style="padding:8px 12px;text-align:right">Revenue</th>
-        </tr></thead><tbody>`;
+      html+=`<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:4px">Manure Buyer Detail</div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="color:var(--text2)"><th style="padding:5px 8px;text-align:left">Farmer / Buyer</th><th style="padding:5px 8px;text-align:left">Vehicle</th><th style="padding:5px 8px;text-align:center">Type</th><th style="padding:5px 8px;text-align:right">Qty</th><th style="padding:5px 8px;text-align:right">Revenue</th></tr></thead><tbody>`;
       md.forEach((r,i)=>{
-        html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
-          <td style="padding:8px 12px;font-weight:600">${r.buyer||'—'}</td>
-          <td style="padding:8px 12px;color:var(--text2)">${r.vehicle||'—'}</td>
-          <td style="padding:8px 12px;text-align:center">${r.type}</td>
-          <td style="padding:8px 12px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN')+' MT':'—'}</td>
-          <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
+        html+=`<tr style="border-top:1px solid var(--bdr);background:${i%2?'var(--bg2)':''}">
+          <td style="padding:5px 8px;font-weight:600">${r.buyer||'—'}</td>
+          <td style="padding:5px 8px;color:var(--text2)">${r.vehicle||'—'}</td>
+          <td style="padding:5px 8px;text-align:center">${r.type}</td>
+          <td style="padding:5px 8px;text-align:right">${r.qty?r.qty.toLocaleString('en-IN')+' MT':'—'}</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:600">${fmtR(r.rev)}</td>
         </tr>`;
       });
-      html+=`</tbody></table></div>`;
+      html+=`</tbody></table>`;
     }
 
-    // Cost breakdown
-    html+=groupHeader('Cost Breakdown','All 6 components for the day');
-    const costItems=[
-      {label:'Feedstock',val:rv.feed_cost||0},
-      {label:'Electricity',val:rv.elec_cost||0},
-      {label:'Transport',val:rv.trans_cost||0},
-      {label:'Maintenance',val:rv.maint_cost||0},
-      {label:'Manpower (prorated)',val:rv.manpower_daily||0},
-      {label:'EMI (prorated)',val:rv.emi_daily||0},
+    // ── 3. Cost Breakdown (4 daily items + note for Manpower/EMI) ──
+    const dailyCosts=[
+      {lbl:'Feedstock',val:rv.feed_cost||0,clr:'var(--orange,#f97316)'},
+      {lbl:'Electricity',val:rv.elec_cost||0,clr:'var(--lime,#84cc16)'},
+      {lbl:'Transport',val:rv.trans_cost||0,clr:'var(--purple,#8b5cf6)'},
+      {lbl:'Maintenance',val:rv.maint_cost||0,clr:'var(--amber,#f59e0b)'},
     ];
-    html+=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
-      <thead><tr style="background:var(--bg2);color:var(--text2)">
-        <th style="padding:8px 12px;text-align:left">Component</th>
-        <th style="padding:8px 12px;text-align:right">Amount</th>
-        <th style="padding:8px 12px;text-align:right">% of Total Cost</th>
-      </tr></thead><tbody>`;
-    costItems.forEach((c,i)=>{
-      const pct=totC>0?(c.val/totC*100).toFixed(1):'0.0';
-      html+=`<tr style="border-bottom:1px solid var(--border);background:${i%2?'var(--bg2)':'var(--bg)'}">
-        <td style="padding:8px 12px">${c.label}</td>
-        <td style="padding:8px 12px;text-align:right;font-weight:600">${fmtR(c.val)}</td>
-        <td style="padding:8px 12px;text-align:right;color:var(--text2)">${pct}%</td>
-      </tr>`;
-    });
-    html+=`<tr style="background:var(--bg2);font-weight:700">
-      <td style="padding:8px 12px">Total</td>
-      <td style="padding:8px 12px;text-align:right">${fmtR(totC)}</td>
-      <td style="padding:8px 12px;text-align:right">100%</td>
-    </tr></tbody></table></div>`;
+    html+=groupHeader('Cost Breakdown','Daily cost components');
+    html+=`<div style="display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center">
+      <div style="position:relative"><canvas id="sd_s8_cost_chart" height="180"></canvas></div>
+      <div style="font-size:13px">
+        ${dailyCosts.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr)">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;background:${c.clr};flex-shrink:0"></span>${c.lbl}
+          </span>
+          <span style="font-weight:700">${fmtR(c.val)||'—'}</span>
+        </div>`).join('')}
+        <div style="padding:7px 0;font-size:11px;color:var(--text2);font-style:italic">Manpower + EMI: monthly values only — shown in monthly view</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-weight:700;font-size:14px;border-top:2px solid var(--bdr)">
+          <span>Total Cost</span><span style="color:var(--red,#dc2626)">${fmtR(totC)}</span>
+        </div>
+      </div>
+    </div>`;
 
-    // P&L summary 3-box
+    // ── 4. P&L Summary ────────────────────────────────────────
     const mgStr=mg!=null?mg+'%':'—';
-    html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px">
-      <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Total Revenue</div>
-        <div style="font-size:20px;font-weight:800;color:var(--green)">${fmtR(totR)}</div>
+    const pnlClr=mgCls==='g'?'var(--green,#16a34a)':mgCls==='r'?'var(--red,#dc2626)':'var(--amber,#f59e0b)';
+    html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+      <div style="background:var(--bg2);border-left:4px solid var(--green,#16a34a);border-radius:8px;padding:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Revenue</div>
+        <div style="font-size:22px;font-weight:800;color:var(--green,#16a34a)">${fmtR(totR)}</div>
       </div>
-      <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Total Cost</div>
-        <div style="font-size:20px;font-weight:800;color:var(--red)">${fmtR(totC)}</div>
+      <div style="background:var(--bg2);border-left:4px solid var(--red,#dc2626);border-radius:8px;padding:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Total Cost</div>
+        <div style="font-size:22px;font-weight:800;color:var(--red,#dc2626)">${fmtR(totC)}</div>
       </div>
-      <div style="background:var(--bg2);border-radius:8px;padding:14px;text-align:center">
-        <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Gross Profit</div>
-        <div style="font-size:20px;font-weight:800;color:var(--${mgCls==='g'?'green':mgCls==='r'?'red':'amber'})">${fmtR(grossP)}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:2px">Margin: ${mgStr}</div>
+      <div style="background:var(--bg2);border-left:4px solid ${pnlClr};border-radius:8px;padding:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Gross Profit (${mgStr})</div>
+        <div style="font-size:22px;font-weight:800;color:${pnlClr}">${fmtR(grossP)}</div>
       </div>
     </div>`;
   }
   html+='<div style="margin-top:12px;font-size:10px;color:var(--text3);text-align:right">Day view — select "All days" to return to monthly trend charts</div>';
   el.innerHTML=html;
+  // S8 day view charts (drawn after DOM insertion)
+  if(sectionId==='s8'){
+    const _rv=rec.rev||{};
+    const _rCtx=document.getElementById('sd_s8_rev_chart');
+    if(_rCtx){
+      if(charts['sd_s8_rev'])charts['sd_s8_rev'].destroy();
+      charts['sd_s8_rev']=new Chart(_rCtx,{type:'doughnut',
+        data:{labels:['CBG Sales','SFOM','LFOM'],
+          datasets:[{data:[_rv.cbg_rev||0,_rv.sfom_rev||0,_rv.lfom_rev||0],
+            backgroundColor:[a(C.green,0.85),a(C.amber,0.85),a(C.blue,0.85)],
+            borderWidth:2,borderColor:'var(--bg)'}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+          plugins:{legend:{display:false},
+            tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtR(Math.round(ctx.parsed||0))}}}}});
+    }
+    const _cCtx=document.getElementById('sd_s8_cost_chart');
+    if(_cCtx){
+      if(charts['sd_s8_cost'])charts['sd_s8_cost'].destroy();
+      charts['sd_s8_cost']=new Chart(_cCtx,{type:'doughnut',
+        data:{labels:['Feedstock','Electricity','Transport','Maintenance'],
+          datasets:[{data:[_rv.feed_cost||0,_rv.elec_cost||0,_rv.trans_cost||0,_rv.maint_cost||0],
+            backgroundColor:[a(C.orange,0.85),a(C.lime,0.85),a(C.purple,0.85),a(C.amber,0.85)],
+            borderWidth:2,borderColor:'var(--bg)'}]},
+        options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+          plugins:{legend:{display:false},
+            tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtR(Math.round(ctx.parsed||0))}}}}});
+    }
+  }
   return true;
 }
 
