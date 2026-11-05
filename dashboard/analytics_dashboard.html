@@ -7549,13 +7549,15 @@ function _buildRpBody(p){
     const qAdi=qIdxs.reduce((s,qi)=>s+((D.M.adi_rev||[])[qi]||0),0);
     invV=fL(qVeer+qAdi);invSub='Veer + Adinath CBG '+curQ;invPct=qRev>0?Math.round((qVeer+qAdi)/qRev*100):0;
   } else if(p==='monthly'){
-    dspV=fL(moRev);dspSub=mo+' total revenue';dspPct=Math.min(moTgtAch||0,100);
+    dspV=fL(moRev);dspSub=mo+' total revenue (CBG + Manure)';dspPct=Math.min(moTgtAch||0,100);
     const veer=(D.M.veer_rev||[])[moIdx]||0,adi=(D.M.adi_rev||[])[moIdx]||0;
-    invV=fL(veer+adi);invSub='Veer + Adinath CBG';invPct=moRev>0?Math.round((veer+adi)/moRev*100):0;
+    const gail=(D.M.gail_rev||[])[moIdx]||0,sps=(D.M.sps_rev||[])[moIdx]||0;
+    const cbgRevMo=veer+adi+gail+sps;
+    invV=fL(cbgRevMo);invSub='Veer + Adinath + GAIL + SPS (CBG customers)';invPct=moRev>0?Math.round(cbgRevMo/moRev*100):0;
   } else {
     const drv=dRec?.rev||{};
-    dspV=fmtR(nv(drv.cbg_rev));dspSub='CBG dispatched today';dspPct=Math.min(dAch||0,100);
-    invV=fmtR((nv(drv.sfom_rev)||0)+(nv(drv.lfom_rev)||0));invSub='SFOM + LFOM';invPct=50;
+    dspV=fmtR(nv(drv.cbg_rev));dspSub='CBG sales today';dspPct=Math.min(dAch||0,100);
+    invV=fmtR((nv(drv.sfom_rev)||0)+(nv(drv.lfom_rev)||0));invSub='SFOM + LFOM (Manure sales)';invPct=dRev>0?Math.round(((nv(drv.sfom_rev)||0)+(nv(drv.lfom_rev)||0))/dRev*100):0;
   }
   const dvsCard=(stripe,lbl,v,sub,pct,pctClr,gap)=>`<div class="rp-dvs-card">
     <div class="rp-dvs-stripe" style="background:${stripe}"></div>
@@ -7575,17 +7577,42 @@ function _buildRpBody(p){
   </div>`;
 
   // ── 6: P&L ───────────────────────────────────────────────────────
-  let pnlRev,pnlCost,pnlFeed,pnlMaint,pnlElec,pnlEMI,pnlFixed;
-  if(p==='yearly'){pnlRev=ytdRev;pnlCost=ytdCost;pnlFeed=D.finance.ytd_feed_cost||sumA(D.M.feed_cost||[]);pnlMaint=D.finance.ytd_manpower||sumA(D.M.manpower||[]);pnlElec=D.finance.ytd_elec||sumA(D.M.elec||[]);pnlFixed=sumA(D.M.fixed_cost||[]);pnlEMI=sumA(D.M.emi||[]);}
-  else if(p==='quarterly'){
+  let pnlRev,pnlCost,pnlFeed,pnlMaint,pnlMaintOp,pnlElec,pnlEMI,pnlTrans;
+  if(p==='yearly'){
+    pnlRev=ytdRev;pnlCost=ytdCost;
+    pnlFeed=D.finance.ytd_feed_cost||sumA(D.M.feed_cost||[]);
+    pnlTrans=sumA(D.M.transport||[]);
+    pnlMaintOp=sumA(D.M.maint||[]);
+    pnlElec=D.finance.ytd_elec||sumA(D.M.elec||[]);
+    pnlMaint=D.finance.ytd_manpower||sumA(D.M.manpower||[]);
+    pnlEMI=sumA(D.M.emi_rc||[]);
+  } else if(p==='quarterly'){
     pnlRev=qRev;pnlCost=qCost;
     pnlFeed=qIdxs.reduce((s,qi)=>s+((D.M.feed_cost||[])[qi]||0),0)||null;
-    pnlMaint=qIdxs.reduce((s,qi)=>s+((D.M.manpower||[])[qi]||0),0)||null;
+    pnlTrans=qIdxs.reduce((s,qi)=>s+((D.M.transport||[])[qi]||0),0)||null;
+    pnlMaintOp=qIdxs.reduce((s,qi)=>s+((D.M.maint||[])[qi]||0),0)||null;
     pnlElec=qIdxs.reduce((s,qi)=>s+((D.M.elec||[])[qi]||0),0)||null;
-    pnlFixed=qIdxs.reduce((s,qi)=>s+((D.M.fixed_cost||[])[qi]||0),0)||null;
-    pnlEMI=qIdxs.reduce((s,qi)=>s+((D.M.emi||[])[qi]||0),0)||null;
-  } else if(p==='monthly'){pnlRev=(D.M.total_rev||[])[moIdx];pnlCost=(D.M.total_cost||[])[moIdx];pnlFeed=(D.M.feed_cost||[])[moIdx];pnlMaint=(D.M.manpower||[])[moIdx];pnlElec=(D.M.elec||[])[moIdx];pnlFixed=(D.M.fixed_cost||[])[moIdx];pnlEMI=(D.M.emi||[])[moIdx];}
-  else{const rv3=dRec?.rev||{};pnlRev=(nv(rv3.cbg_rev)||0)+(nv(rv3.sfom_rev)||0)+(nv(rv3.lfom_rev)||0)||(nv(rv3.total_rev)||null);pnlCost=nv(rv3.total_cost);pnlFeed=null;pnlMaint=null;pnlElec=null;pnlFixed=null;pnlEMI=null;}
+    pnlMaint=qIdxs.reduce((s,qi)=>s+((D.M.manpower||[])[qi]||0),0)||null;
+    pnlEMI=qIdxs.reduce((s,qi)=>s+((D.M.emi_rc||[])[qi]||0),0)||null;
+  } else if(p==='monthly'){
+    pnlRev=(D.M.total_rev||[])[moIdx];pnlCost=(D.M.total_cost||[])[moIdx];
+    pnlFeed=(D.M.feed_cost||[])[moIdx];
+    pnlTrans=(D.M.transport||[])[moIdx];
+    pnlMaintOp=(D.M.maint||[])[moIdx];
+    pnlElec=(D.M.elec||[])[moIdx];
+    pnlMaint=(D.M.manpower||[])[moIdx];
+    pnlEMI=(D.M.emi_rc||[])[moIdx];
+  } else {
+    const rv3=dRec?.rev||{};
+    pnlRev=(nv(rv3.cbg_rev)||0)+(nv(rv3.sfom_rev)||0)+(nv(rv3.lfom_rev)||0)||(nv(rv3.total_rev)||null);
+    pnlCost=nv(rv3.total_cost);
+    pnlFeed=nv(rv3.feed_cost)||null;
+    pnlTrans=nv(rv3.trans_cost)||null;
+    pnlMaintOp=nv(rv3.maint_cost)||null;
+    pnlElec=nv(rv3.elec_cost)||null;
+    pnlMaint=nv(rv3.manpower_daily)||null;
+    pnlEMI=nv(rv3.emi_daily)||null;
+  }
   const pnlMgn=pnlRev&&pnlCost&&pnlRev>0?pnlRev-pnlCost:null;
   const pnlMgnPct=pnlRev&&pnlMgn!=null?Math.round(pnlMgn/pnlRev*100):null;
   const pRow=(lbl,v,pct,type,sub)=>`<div class="rp-pnl-row ${type||''}">
@@ -7600,13 +7627,13 @@ function _buildRpBody(p){
   const pnl=`${secH('6','P&L — Cost Structure & Total Production Cost')}
   <div class="rp-pnl-wrap">
     ${pRow('Total Revenue',fRX(pnlRev),pnlRev?100:'','',pnlRev?'CBG + Manure combined':null)}
-    ${pnlFeed!=null?pRow('Feedstock Cost',fRX(pnlFeed),pnlRev&&pnlFeed?-Math.round(pnlFeed/pnlRev*100):null,'','Pressmud, GS, CD, CSL, SG'):''}
-    ${pnlMaint!=null?pRow('Manpower & O&M',fRX(pnlMaint),null,'','Operations & maintenance'):''}
+    ${pnlFeed!=null?pRow('Feedstock Cost',fRX(pnlFeed),pnlRev&&pnlFeed?Math.round(pnlFeed/pnlRev*100):null,'','Pressmud, GS, CD, CSL, SG, AP'):''}
+    ${pnlTrans!=null?pRow('Transportation',fRX(pnlTrans),null,'','Feedstock transport cost'):''}
+    ${pnlMaintOp!=null?pRow('Maintenance',fRX(pnlMaintOp),null,'','Equipment & plant maintenance'):''}
     ${pnlElec!=null?pRow('Power & Utilities',fRX(pnlElec),null,'','Electricity & utility costs'):''}
-    ${pnlFixed!=null?pRow('Fixed Overheads',fRX(pnlFixed),null,'','Monthly fixed ₹3,00,000'):''}
-    ${pnlEMI!=null?pRow('EMI / Debt Service',fRX(pnlEMI),null,'','Loan repayment'):''}
-    ${pRow('Total Operating Cost',fRX(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'subtotal',null)}
-    ${pRow('Total Production Cost',fRX(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'total',null)}
+    ${pnlMaint!=null?pRow('Manpower',fRX(pnlMaint),null,'','Salaries & wages'):''}
+    ${pnlEMI!=null?pRow('EMI / Debt Service',fRX(pnlEMI),null,'','Loan repayment (from REVCOST)'):''}
+    ${pRow('Total Production Cost',fRX(pnlCost),pnlRev&&pnlCost?Math.round(pnlCost/pnlRev*100):null,'total','Feed + Transport + Maint + Elec + Manpower + EMI')}
   </div>`;
 
   // ── 7: findings (3 columns) ───────────────────────────────────────
