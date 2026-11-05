@@ -4931,32 +4931,59 @@ function renderS8(){
         scales:{x:{stacked:true,grid:{display:false}},
           y:{stacked:true,ticks:{callback:v=>fmtR(v)},suggestedMin:0}}}});
     const fmtD=v=>v>0?fmtR(v):'—';
-    const dayRows=dDts.map((dt,i)=>{
-      const tot=dTot[i]||0;
-      return`<tr><td>${dt}</td>
-        <td class="tr" style="font-weight:700">${fmtD(tot)}</td>
-        <td>${fmtD(dFc[i])}</td>
-        <td>${fmtD(dTr[i])}</td>
-        <td>${fmtD(dMa[i])}</td>
-        <td>${fmtD(dEl[i])}</td>
-      </tr>`;
-    });
+    // Group daily rows into weeks (7 days each)
+    const weeks=[];
+    for(let i=0;i<dDts.length;i+=7){
+      const sl=(arr)=>arr.slice(i,Math.min(i+7,arr.length));
+      const sm=(arr)=>arr.reduce((s,v)=>s+(v||0),0);
+      const wDts=sl(dDts),wFc=sl(dFc),wTot=sl(dTot);
+      weeks.push({n:Math.floor(i/7)+1,dts:wDts,fc:wFc,tot:wTot,sfc:sm(wFc),stot:sm(wTot)});
+    }
+    const fixTr=dTr[0]||0,fixMa=dMa[0]||0,fixEl=dEl[0]||0;
     const dTotSum=dTot.reduce((s,v)=>s+(v||0),0);
     const dFcSum=dFc.reduce((s,v)=>s+(v||0),0);
-    const dTrSum=dTr.reduce((s,v)=>s+(v||0),0);
-    const dMaSum=dMa.reduce((s,v)=>s+(v||0),0);
-    const dElSum=dEl.reduce((s,v)=>s+(v||0),0);
-    document.getElementById('s8_growth_tbl').innerHTML=
-      `<thead><tr>
-        <th>Date</th><th>Total Cost</th>
-        <th>Feedstock</th><th>Transport</th><th>Maintenance</th><th>Electricity</th>
-      </tr></thead>
-      <tbody>${dayRows.join('')}
+    const tbl=document.getElementById('s8_growth_tbl');
+    // Fixed-cost chips above table
+    const prevChip=tbl.previousElementSibling;
+    if(prevChip&&prevChip.dataset.fixChips) prevChip.remove();
+    if(fixTr||fixMa||fixEl){
+      const cd=document.createElement('div');
+      cd.dataset.fixChips='1';
+      cd.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;margin-top:4px';
+      const chip=(lbl,val,bg,tc)=>`<span style="background:${bg};color:${tc};padding:4px 12px;border-radius:14px;font-size:11px;font-weight:600">${lbl} ${fmtR(val)}/day</span>`;
+      cd.innerHTML=(fixTr?chip('Transport',fixTr,'var(--purple,#8b5cf6)','#fff'):'')+
+        (fixMa?chip('Maintenance',fixMa,'var(--amber,#f59e0b)','#fff'):'')+
+        (fixEl?chip('Electricity',fixEl,'var(--lime,#84cc16)','#1a1a1a'):'');
+      tbl.before(cd);
+    }
+    // Weekly expandable rows
+    const pfx='swk_'+mo;
+    window._twk=function(el,cls){
+      const rows=document.querySelectorAll('.'+cls);
+      const open=!rows[0]||rows[0].style.display==='none'||rows[0].style.display==='';
+      rows.forEach(r=>r.style.display=open?'table-row':'none');
+      el.querySelector('.wa').textContent=open?'▲':'▼';
+    };
+    const wkRows=weeks.map((w,wi)=>{
+      const cls=pfx+'_'+wi;
+      const lbl=`Week ${w.n}  <span style="font-weight:400;font-size:11px;opacity:0.6">${w.dts[0]} – ${w.dts[w.dts.length-1]}</span>`;
+      const subs=w.dts.map((dt,di)=>
+        `<tr class="${cls}" style="display:none;background:var(--bg2,rgba(128,128,128,0.05))">
+          <td style="padding-left:32px;color:var(--text2);font-size:12px">${dt}</td>
+          <td class="tr" style="font-size:12px">${fmtD(w.fc[di])}</td>
+          <td class="tr" style="font-size:12px;font-weight:600">${fmtD(w.tot[di])}</td>
+        </tr>`).join('');
+      return`<tr style="cursor:pointer;font-weight:600" onclick="_twk(this,'${cls}')">
+        <td><span class="wa" style="margin-right:8px;font-size:10px;color:var(--text2)">▼</span>${lbl}</td>
+        <td class="tr">${fmtD(w.sfc)}</td>
+        <td class="tr" style="font-weight:700">${fmtD(w.stot)}</td>
+      </tr>${subs}`;
+    }).join('');
+    tbl.innerHTML=`<thead><tr><th>Week / Date</th><th>Feedstock (₹)</th><th>Total Cost (₹)</th></tr></thead>
+      <tbody>${wkRows}
       <tr style="font-weight:700;border-top:2px solid var(--bdr)">
-        <td>${mo} Total</td>
+        <td>${mo} Total</td><td class="tr">${fmtD(dFcSum)}</td>
         <td class="tr">${fmtD(dTotSum)}</td>
-        <td>${fmtD(dFcSum)}</td><td>${fmtD(dTrSum)}</td>
-        <td>${fmtD(dMaSum)}</td><td>${fmtD(dElSum)}</td>
       </tr></tbody>`;
   }
 
