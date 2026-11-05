@@ -2386,56 +2386,109 @@ function renderSectionDay(sectionId){
       metricCard('LFOM Revenue',fL2(rv.lfom_rev),'','b'),
     ]);
   } else if(sectionId==='s7'){
-    const totR=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0);
+    const cbgRev=rv.cbg_rev||0,sfomRev=rv.sfom_rev||0,lfomRev=rv.lfom_rev||0;
+    const totR=cbgRev+sfomRev+lfomRev;
     const totC=(rv.feed_cost||0)+(rv.trans_cost||0)+(rv.maint_cost||0);
-    const mg=totR>0?((totR-totC)/totR*100).toFixed(1):null;
-    const mgCls=mg!=null?(mg>=10?'g':mg>=0?'a':'r'):'';
-    const cbgProd=p.act_cbg||p.cbg_tot;
-    const disp=p.dispatched;
+    const grossP=totR-totC;
+    const mg=totR>0?((grossP/totR)*100).toFixed(1):null;
+    const mgCls=mg!=null?(parseFloat(mg)>=10?'g':parseFloat(mg)>=0?'a':'r'):'';
+    const cbgProd=p.act_cbg||p.cbg_tot||0;
+    const disp=p.dispatched||0;
     const dispRate=cbgProd>0&&disp!=null?disp/cbgProd*100:null;
-    html+=groupHeader('CBG Sales','Dispatch & revenue for the day');
+    const realPrice=disp>0?cbgRev/disp:null;
+
+    // ── 1. Sales Summary (4 KPI cards) ────────────────────────
+    html+=groupHeader('Sales Summary','Dispatch & revenue for the day');
     html+=grid([
-      metricCard('CBG Produced',fN(cbgProd),'kg','g'),
-      metricCard('Total Dispatched',fN(disp),'kg','c','Cylinders dispatched'),
-      metricCard('Dispatch Rate',dispRate!=null?dispRate.toFixed(1):null,'%',dispRate!=null?(dispRate>=90?'g':dispRate>=70?'a':'r'):'','Dispatched ÷ produced'),
-      metricCard('CBG Revenue',fL2(rv.cbg_rev),'','b','Sales revenue'),
+      metricCard('Total Revenue',fmtR(totR),'','g','CBG + SFOM + LFOM'),
+      metricCard('CBG Dispatched',fN(disp),'kg','c','Cylinders dispatched'),
+      metricCard('Dispatch Rate',dispRate!=null?dispRate.toFixed(1):null,'%',dispRate!=null?(dispRate>=90?'g':dispRate>=70?'a':'r'):'',' Dispatched ÷ produced'),
+      metricCard('Realized Price',realPrice!=null?'₹'+realPrice.toFixed(2)+'/kg':'—','','a','CBG revenue ÷ kg dispatched'),
     ]);
+
+    // ── 2. Revenue Breakdown ───────────────────────────────────
+    html+=groupHeader('Revenue Breakdown','CBG + Manure sales for the day');
+    html+=`<div style="display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center">
+      <div><canvas id="sd_s7_rev_chart" height="180"></canvas></div>
+      <div style="font-size:13px">
+        ${[['CBG Sales',cbgRev,'var(--cyan,#06b6d4)'],['SFOM Revenue',sfomRev,'var(--amber,#f59e0b)'],['LFOM Revenue',lfomRev,'var(--green,#16a34a)']].map(([lbl,val,clr])=>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr)">
+            <span style="display:flex;align-items:center;gap:8px">
+              <span style="width:10px;height:10px;border-radius:50%;background:${clr};flex-shrink:0"></span>${lbl}
+            </span>
+            <span style="font-weight:700">${fmtR(val)||'—'}</span>
+          </div>`).join('')}
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-weight:700;font-size:14px">
+          <span>Total Revenue</span><span style="color:var(--cyan,#06b6d4)">${fmtR(totR)}</span>
+        </div>
+      </div>
+    </div>`;
+    // Customer dispatch sub-table
     const custData=[['Veer',p.veer],['Adinath',p.adinath],['KFS Sonipat',p.kfs],['KSK Sonipat',p.ksk],['OM Filling',p.om],['SPS Yamuna Nagar',p.sps]];
     const custTot=custData.reduce((s,[,v])=>s+(v||0),0);
     const hasCust=custData.some(([,v])=>v!=null&&v>0);
-    html+=groupHeader('Customer Dispatch','kg dispatched by customer today');
+    html+=`<div style="margin-top:10px;font-size:11px;font-weight:700;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;padding-bottom:4px">Customer Dispatch Detail</div>`;
     if(!hasCust){
-      html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No dispatch data for this date.</div>`;
+      html+=`<div style="padding:8px 10px;color:var(--text3);font-size:11px;font-style:italic">No dispatch data for this date.</div>`;
     } else {
-      const custRows=custData.map(([nm,v])=>{
-        if(!v||v===0) return`<tr><td style="font-weight:700">${nm}</td><td colspan="2" style="color:var(--text3)">—</td></tr>`;
+      html+=`<table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="color:var(--text2)"><th style="padding:5px 8px;text-align:left">Customer</th><th style="padding:5px 8px;text-align:right">Dispatch (kg)</th><th style="padding:5px 8px">Share</th></tr></thead><tbody>`;
+      custData.forEach(([nm,v])=>{
+        if(!v||v===0){html+=`<tr><td style="padding:5px 8px">${nm}</td><td colspan="2" style="padding:5px 8px;color:var(--text3)">—</td></tr>`;return;}
         const pct=custTot>0?v/custTot*100:0;
-        return`<tr><td style="font-weight:700">${nm}</td>
-          <td style="font-variant-numeric:tabular-nums;font-weight:700;text-align:right">${fmtN(Math.round(v))} kg</td>
-          <td style="width:30%"><div style="display:flex;align-items:center;gap:5px">
+        html+=`<tr style="border-top:1px solid var(--bdr)">
+          <td style="padding:5px 8px;font-weight:600">${nm}</td>
+          <td style="padding:5px 8px;text-align:right;font-weight:700">${fmtN(Math.round(v))} kg</td>
+          <td style="padding:5px 8px;width:35%"><div style="display:flex;align-items:center;gap:5px">
             <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
-              <div style="width:${pct.toFixed(0)}%;height:100%;background:var(--cyan);border-radius:3px"></div></div>
-            <span style="font-size:10px;min-width:30px">${pct.toFixed(1)}%</span>
+              <div style="width:${pct.toFixed(0)}%;height:100%;background:var(--cyan,#06b6d4);border-radius:3px"></div></div>
+            <span style="font-size:10px;min-width:28px">${pct.toFixed(1)}%</span>
           </div></td></tr>`;
-      }).join('');
-      html+=`<table class="tbl" style="margin-bottom:14px"><thead><tr><th>Customer</th><th style="text-align:right">Dispatch</th><th>Share</th></tr></thead>
-        <tbody>${custRows}
-        <tr style="border-top:2px solid var(--bdr);font-weight:800"><td>TOTAL</td><td style="text-align:right;font-variant-numeric:tabular-nums">${fmtN(Math.round(custTot))} kg</td><td></td></tr>
-        </tbody></table>`;
+      });
+      html+=`<tr style="border-top:2px solid var(--bdr);font-weight:800"><td style="padding:5px 8px">TOTAL</td><td style="padding:5px 8px;text-align:right">${fmtN(Math.round(custTot))} kg</td><td></td></tr>
+      </tbody></table>`;
     }
-    html+=groupHeader('Revenue & Costs','Financial summary for the day');
-    html+=grid([
-      metricCard('CBG Revenue',fL2(rv.cbg_rev),'','g','Primary revenue'),
-      metricCard('SFOM Revenue',fL2(rv.sfom_rev),'','b'),
-      metricCard('LFOM Revenue',fL2(rv.lfom_rev),'','c'),
-      metricCard('Total Revenue',totR>0?fL2(totR):null,'','g','All streams combined'),
-    ]);
-    html+=grid([
-      metricCard('Feedstock Cost',fL2(rv.feed_cost),'','r'),
-      metricCard('Transport Cost',fL2(rv.trans_cost),'','a'),
-      metricCard('Maintenance Cost',fL2(rv.maint_cost),'','a'),
-      metricCard('Total Production Cost',totC>0?fL(totC):null,'','r','Variable costs total'),
-    ]);
+
+    // ── 3. Cost Breakdown (3 daily items) ─────────────────────
+    const dailyCosts=[
+      {lbl:'Feedstock',val:rv.feed_cost||0,clr:'var(--orange,#f97316)'},
+      {lbl:'Transport',val:rv.trans_cost||0,clr:'var(--purple,#8b5cf6)'},
+      {lbl:'Maintenance',val:rv.maint_cost||0,clr:'var(--amber,#f59e0b)'},
+    ];
+    html+=groupHeader('Cost Breakdown','Daily variable costs');
+    html+=`<div style="display:grid;grid-template-columns:180px 1fr;gap:20px;align-items:center">
+      <div><canvas id="sd_s7_cost_chart" height="180"></canvas></div>
+      <div style="font-size:13px">
+        ${dailyCosts.map(c=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--bdr)">
+          <span style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;background:${c.clr};flex-shrink:0"></span>${c.lbl}
+          </span>
+          <span style="font-weight:700">${fmtR(c.val)||'—'}</span>
+        </div>`).join('')}
+        <div style="padding:7px 0;font-size:11px;color:var(--text2);font-style:italic">Electricity, Manpower + EMI: monthly values only</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;font-weight:700;font-size:14px;border-top:2px solid var(--bdr)">
+          <span>Total Cost</span><span style="color:var(--red,#dc2626)">${fmtR(totC)}</span>
+        </div>
+      </div>
+    </div>`;
+
+    // ── 4. P&L Summary ────────────────────────────────────────
+    const mgStr=mg!=null?mg+'%':'—';
+    const pnlClr=mgCls==='g'?'var(--green,#16a34a)':mgCls==='r'?'var(--red,#dc2626)':'var(--amber,#f59e0b)';
+    html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:4px">
+      <div style="background:var(--bg2);border-left:4px solid var(--green,#16a34a);border-radius:8px;padding:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Revenue</div>
+        <div style="font-size:22px;font-weight:800;color:var(--green,#16a34a)">${fmtR(totR)}</div>
+      </div>
+      <div style="background:var(--bg2);border-left:4px solid var(--red,#dc2626);border-radius:8px;padding:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Total Cost</div>
+        <div style="font-size:22px;font-weight:800;color:var(--red,#dc2626)">${fmtR(totC)}</div>
+      </div>
+      <div style="background:var(--bg2);border-left:4px solid ${pnlClr};border-radius:8px;padding:16px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:var(--text2);text-transform:uppercase;margin-bottom:8px">Gross Profit (${mgStr})</div>
+        <div style="font-size:22px;font-weight:800;color:${pnlClr}">${fmtR(grossP)}</div>
+      </div>
+    </div>`;
   } else if(sectionId==='s8'){
     const totR=(rv.cbg_rev||0)+(rv.sfom_rev||0)+(rv.lfom_rev||0);
     const totC=rv.total_cost||0;
@@ -2558,6 +2611,16 @@ function renderSectionDay(sectionId){
   }
   html+='<div style="margin-top:12px;font-size:10px;color:var(--text3);text-align:right">Day view — select "All days" to return to monthly trend charts</div>';
   el.innerHTML=html;
+  // S7 day view charts
+  if(sectionId==='s7'){
+    const _rv7=rec.rev||{};
+    const _r7=document.getElementById('sd_s7_rev_chart');
+    if(_r7){if(charts['sd_s7_rev'])charts['sd_s7_rev'].destroy();
+      charts['sd_s7_rev']=new Chart(_r7,{type:'doughnut',data:{labels:['CBG Sales','SFOM','LFOM'],datasets:[{data:[_rv7.cbg_rev||0,_rv7.sfom_rev||0,_rv7.lfom_rev||0],backgroundColor:[a(C.cyan,0.85),a(C.amber,0.85),a(C.green,0.85)],borderWidth:2,borderColor:'var(--bg)'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtR(Math.round(ctx.parsed||0))}}}}});}
+    const _c7=document.getElementById('sd_s7_cost_chart');
+    if(_c7){if(charts['sd_s7_cost'])charts['sd_s7_cost'].destroy();
+      charts['sd_s7_cost']=new Chart(_c7,{type:'doughnut',data:{labels:['Feedstock','Transport','Maintenance'],datasets:[{data:[_rv7.feed_cost||0,_rv7.trans_cost||0,_rv7.maint_cost||0],backgroundColor:[a(C.orange,0.85),a(C.purple,0.85),a(C.amber,0.85)],borderWidth:2,borderColor:'var(--bg)'}]},options:{responsive:true,maintainAspectRatio:false,cutout:'62%',plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>ctx.label+': '+fmtR(Math.round(ctx.parsed||0))}}}}});}
+  }
   // S8 day view charts (drawn after DOM insertion)
   if(sectionId==='s8'){
     const _rv=rec.rev||{};
