@@ -7547,7 +7547,10 @@ function _buildRpBody(p){
     dspV=fL(qRev);dspSub=curQ+' total revenue ('+qMos.join(', ')+')';dspPct=Math.min(qTgtAch||0,100);
     const qVeer=qIdxs.reduce((s,qi)=>s+((D.M.veer_rev||[])[qi]||0),0);
     const qAdi=qIdxs.reduce((s,qi)=>s+((D.M.adi_rev||[])[qi]||0),0);
-    invV=fL(qVeer+qAdi);invSub='Veer + Adinath CBG '+curQ;invPct=qRev>0?Math.round((qVeer+qAdi)/qRev*100):0;
+    const qGail=qIdxs.reduce((s,qi)=>s+((D.M.gail_rev||[])[qi]||0),0);
+    const qSps=qIdxs.reduce((s,qi)=>s+((D.M.sps_rev||[])[qi]||0),0);
+    const qCbgRev=qVeer+qAdi+qGail+qSps;
+    invV=fL(qCbgRev);invSub='Veer + Adinath + GAIL + SPS (CBG customers) '+curQ;invPct=qRev>0?Math.round(qCbgRev/qRev*100):0;
   } else if(p==='monthly'){
     dspV=fL(moRev);dspSub=mo+' total revenue (CBG + Manure)';dspPct=Math.min(moTgtAch||0,100);
     const veer=(D.M.veer_rev||[])[moIdx]||0,adi=(D.M.adi_rev||[])[moIdx]||0;
