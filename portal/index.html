@@ -2380,17 +2380,24 @@ const COLUMN_NAME_MAP = {
   },
   // FS removed — Feedstock Supply merged into Feed_and_Balance; upload only via FB
   // Feed & Balance (FB) → Feed_and_Balance (hrow=2) — full 99-col mapping
-  // Covers: vendor received (cols 1-77) + fed (cols 80-85) + balance (cols 94-99)
-  // Total/blank cols (8,15,19,23,27,31,48,65,67,69,72,75,77,79,86,93) have NULL header — skipped
+  // All fields matched by column NAME (with ~N for Nth occurrence). Never by index.
+  // Total/blank cols (8,15,19,23,27,31,48,65,67,69,72,75,77,79,86,93) have NULL header — skipped automatically.
   FB: {
-    // Poultry Wastewater received (cols 1-6)
+    // Poultry Wastewater received qty (occ1: Lather/Narwal/Subhash/GK Hatchery/Dry Poultry/Nazim)
     pw_lather:'Lather', pw_narwal:'Narwal', pw_subhash:'Subhash',
     pw_gk:'GK Hatchery', pw_dry:'Dry Poultry', pw_nazim:'Nazim',
-    // Cow Dung received (cols 15-17)
+    // Poultry Wastewater cost (occ2)
+    pw_lather_cost:'Lather~2', pw_narwal_cost:'Narwal~2', pw_subhash_cost:'Subhash~2',
+    pw_gk_cost:'GK Hatchery~2', pw_dry_cost:'Dry Poultry~2', pw_nazim_cost:'Nazim~2',
+    // Cow Dung received qty (occ1)
     cd_gharaunda:'Gharaunda', cd_phoosgarh:'Phoosgarh', cd_radhakrishna:'Radha Krishna',
-    // CSL received (cols 23-25)
+    // Cow Dung cost (occ2)
+    cd_gharaunda_cost:'Gharaunda~2', cd_phoosgarh_cost:'Phoosgarh~2', cd_radhakrishna_cost:'Radha Krishna~2',
+    // CSL received qty (occ1)
     csl_sadasat:'Sadasat', csl_pantnagar:'Pant Nagar', csl_virangam:'Virangam',
-    // Pressmud received (cols 31-46)
+    // CSL cost (occ2)
+    csl_sadasat_cost:'Sadasat~2', csl_pantnagar_cost:'Pant Nagar~2', csl_virangam_cost:'Virangam~2',
+    // Pressmud received qty (occ1)
     pm_sonipat:'Sonipat',
     pm_malakpur:'Malakpur Sugar Mill, Baraut',
     pm_ramala:'Ramala , Bhagpat_    vaibhav',
@@ -2407,16 +2414,37 @@ const COLUMN_NAME_MAP = {
     pm_rathi:'Rathi_kathuali Sugar Mill',
     pm_unn:'Unn Sugar mill',
     pm_devom:'Devom',
-    // Spent Grain received (col 65)
-    carlsberg:'Calsberg',
-    // Grain Syrup received (cols 69-70)
+    // Pressmud cost (occ2)
+    pm_sonipat_cost:'Sonipat~2',
+    pm_malakpur_cost:'Malakpur Sugar Mill, Baraut~2',
+    pm_ramala_cost:'Ramala , Bhagpat_    vaibhav~2',
+    pm_thana_cost:'Thana  Bhavan~2',
+    pm_tikuala_cost:'Tikuala~2',
+    pm_shamli_cost:'Shmali Sugar Mill-Naveen Contractor~2',
+    pm_laknour_cost:'Laknour, Biogas plant- Vaibhav~2',
+    pm_balyan_cost:'Balyan Tikuala~2',
+    pm_singh_cost:'Singh Associate~2',
+    pm_naveen_cost:'Naveen~2',
+    pm_gs_cost:'G.S~2',
+    pm_sbec_cost:'SBEC~2',
+    pm_sahakumbri_cost:'Sahakumbri~2',
+    pm_rathi_cost:'Rathi_kathuali Sugar Mill~2',
+    pm_unn_cost:'Unn Sugar mill~2',
+    pm_devom_cost:'Devom~2',
+    // Spent Grain received qty (occ1) + cost (occ2)
+    carlsberg:'Calsberg', carlsberg_cost:'Calsberg~2',
+    // Grain Syrup received qty (occ1 & occ1 for Shreeji) + cost (occ2 & occ2 for Shreeji)
     gs_rcv:'Grain Syrup', gs_shreeji:'Shreeji',
-    // Apple Pomace received (col 75)
-    ap_aaditya:'Aaditya Solar',
-    // Fed section (cols 80-85)
+    gs_rcv_cost:'Grain Syrup~2', gs_shreeji_cost:'Shreeji~2',
+    // Apple Pomace received qty (occ1) + cost (occ2)
+    ap_aaditya:'Aaditya Solar', ap_aaditya_cost:'Aaditya Solar~2',
+    // Feed Stock Fed qty (occ1 for each feedstock)
     cd_fed:'Cow Dung', pm_fed:'Pressmud', csl_fed:'CSL Feed',
     gs_fed:'Grain Syrup~3', sg_fed:'Spent grain', ap_fed:'Apple pomace',
-    // Balance section (cols 94-99)
+    // Cost - Feedstock Fed (occ2 for each; CSL header here is 'CSL' not 'CSL Feed')
+    cd_fed_cost:'Cow Dung~2', pm_fed_cost:'Pressmud~2', csl_fed_cost:'CSL',
+    gs_fed_cost:'Grain Syrup~4', sg_fed_cost:'Spent grain~2', ap_fed_cost:'Apple pomace~2',
+    // Feed Stock Balance (occ3 for CD/PM/SG/AP; occ2 for CSL Feed; occ5 for GS)
     fb_cd_bal:'Cow Dung~3', fb_pm_bal:'Pressmud~3', fb_csl_bal:'CSL Feed~2',
     fb_gs_bal:'Grain Syrup~5', fb_sg_bal:'Spent grain~3', fb_ap_bal:'Apple pomace~3',
   },
@@ -4259,7 +4287,7 @@ function showBulkQueueView(files){
   cur=null
   const hb=document.getElementById('homeBtn'); if(hb) hb.style.display='flex'
   document.getElementById('saveBarEl').style.display='none'
-  document.getElementById('main').padding='16px 20px'
+  document.getElementById('main').style.padding='16px 20px'
   document.getElementById('main').innerHTML=`
     <div class="bq-header">
       <div>
@@ -4429,11 +4457,10 @@ function bqRenderPreview(idx){
     const first=fmtDs(dates[0]), last=fmtDs(dates[dates.length-1])
     const dateRange=first===last?first:`${first} → ${last}`
     const isSkip=skipped.has(sName)
-    // Build mini data table (first 5 rows)
+    // Build mini data table (last 10 rows, all columns)
     const cols=hdrMap[sName]||[]
-    const previewRows=sRows.slice(0,5)
-    const maxCols=Math.min(cols.length,8)
-    const visibleCols=cols.slice(0,maxCols)
+    const previewRows=sRows.slice(-10)
+    const visibleCols=cols
     const thCells=['<th>Date</th>',...visibleCols.map(c=>`<th>${c}</th>`)].join('')
     const tBodyRows=previewRows.map(r=>{
       const tds=['<td>'+fmtDs(r.dateStr)+'</td>',...visibleCols.map(c=>`<td>${r.rowData[c]!=null?r.rowData[c]:''}</td>`)].join('')
@@ -4443,7 +4470,7 @@ function bqRenderPreview(idx){
       <summary>▸ preview rows</summary>
       <div class="bq-data-scroll">
         <table class="bq-data-table"><thead><tr>${thCells}</tr></thead><tbody>${tBodyRows}</tbody></table>
-        ${sRows.length>5?`<div class="bq-data-more">showing 5 of ${sRows.length} rows</div>`:''}
+        <div class="bq-data-more">showing last 10 of ${sRows.length} rows</div>
       </div>
     </details>`:''
     return `<div class="bq-preview-sheet${isSkip?' skipped':''}">
