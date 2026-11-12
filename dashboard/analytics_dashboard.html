@@ -6680,7 +6680,7 @@ function applyRole(role) {
   if (role === 'operator') {
     // Hide S8 Sales tab and S9 Finance tab from nav
     document.querySelectorAll('.tb').forEach(btn => {
-      if (btn.textContent.trim().startsWith('8 ·') || btn.textContent.trim().startsWith('9 ·')) {
+      if (btn.textContent.trim().startsWith('7 ·') || btn.textContent.trim().startsWith('8 ·') || btn.textContent.trim().startsWith('9 ·')) {
         btn.style.display = 'none';
       }
     });
