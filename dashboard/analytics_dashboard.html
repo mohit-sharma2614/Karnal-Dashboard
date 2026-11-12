@@ -1433,8 +1433,13 @@ function lDS(lbl,data,c,fill=false){
     pointBackgroundColor:'#fff',pointBorderColor:c,pointBorderWidth:2};
 }
 
-// helper: get monthly or daily array for a key
-function mArr(key){ return D.M[key]||[]; }
+// helper: get monthly or daily array for a key — filtered to active year
+function mArr(key){
+  const full=D.M[key]||[];
+  if(curYear==='ALL') return full;
+  // MONTHS is already filtered to the active year — map each active month to its index in ALL_MONTHS
+  return MONTHS.map(m=>{const i=ALL_MONTHS.indexOf(m);return i>=0?(full[i]??null):null;});
+}
 function dArr(section, key){
   const mo=curMonth;
   return (D.D[section]?.[mo]?.[key])||[];
@@ -1756,6 +1761,12 @@ function setYear(yr,btn){
   curYear=yr;
   document.querySelectorAll('#year_filter .mb').forEach(b=>b.classList.remove('on'));
   if(btn) btn.classList.add('on'); else document.getElementById('yr_'+yr)?.classList.add('on');
+  // Update MONTHS to only include months belonging to selected year
+  if(yr==='ALL'){
+    MONTHS=ALL_MONTHS.slice();
+  } else {
+    MONTHS=ALL_MONTHS.filter(m=>D.monthYear?.[m]===yr);
+  }
   // Show/hide month buttons based on selected year
   const mf=document.getElementById('month_filter');
   mf.querySelectorAll('.mb[data-year]').forEach(b=>{
@@ -3492,9 +3503,9 @@ function renderS1(){
   // helpers — single day or month/YTD
   const getIn=(k)=>isDa?(dayFeed[k]||0):sumA(mo==='ALL'?mArr(k):dArr('feed',k));
   const getFed=(k)=>isDa?(dayFeed[k]||0):sumA(mo==='ALL'?mArr(k):dArr('feed',k));
-  const getD1=(k)=>isDa?(dayD1[k]||0):mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d1?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
+  const getD1=(k)=>isDa?(dayD1[k]||0):mo==='ALL'?MONTHS.reduce((s,m)=>(s+(D.D.d1?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
                               :sumA(dArr('d1',k));
-  const getD2=(k)=>isDa?(dayD2[k]||0):mo==='ALL'?D.months.reduce((s,m)=>(s+(D.D.d2?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
+  const getD2=(k)=>isDa?(dayD2[k]||0):mo==='ALL'?MONTHS.reduce((s,m)=>(s+(D.D.d2?.[m]?.[k]||[]).reduce((a,v)=>a+(v||0),0)),0)
                               :sumA(dArr('d2',k));
   const vendMo=isDa?(dayRec.mo||mo):mo; // use day's month for vendor lookup
 
@@ -3775,10 +3786,10 @@ function renderS2(){
   const _mSumOrNull=key=>{const a=mArr(key);const s=a.reduce((t,v)=>t+(v||0),0);return s>0?s:null;};
   const _mAvgOrLast=key=>{
     if(mo==='ALL'){const a=mArr(key);const v=a.filter(x=>x!=null&&x!==0);return v.length?v[v.length-1]:null;}
-    else{const mi=D.months.indexOf(mo);return mi>=0&&(mArr(key)[mi]||0)>0?mArr(key)[mi]:null;}
+    else{const mi=MONTHS.indexOf(mo);return mi>=0&&(mArr(key)[mi]||0)>0?mArr(key)[mi]:null;}
   };
   const bppPeriod=mo==='ALL'?'Annual sum':'Month total';
-  const getMoBpp=k=>mo==='ALL'?_mSumOrNull(k):(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
+  const getMoBpp=k=>mo==='ALL'?_mSumOrNull(k):(()=>{const mi=MONTHS.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const bppData={
     d1_pm_bpp:getMoBpp('pm_bpp'),d1_cd_bpp:getMoBpp('cd_bpp'),d1_gs_bpp:getMoBpp('gs_bpp'),
     d1_csl_bpp:getMoBpp('csl_bpp'),d1_sg_bpp:getMoBpp('sg_bpp'),
@@ -3811,7 +3822,7 @@ function renderS2(){
   const fqEl=document.getElementById('s2_feed_quality');
   if(fqEl) fqEl.innerHTML=_feedQualityHtml(calView,bppData,bppPeriod);
   // ── Section 3: Biogas Prediction ──────────────────────────────────────
-  const getSum=k=>mo==='ALL'?mArr(k).reduce((s,v)=>s+(v||0),0)||null:(()=>{const mi=D.months.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
+  const getSum=k=>mo==='ALL'?mArr(k).reduce((s,v)=>s+(v||0),0)||null:(()=>{const mi=MONTHS.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const predD1={bg_est_exp:getSum('d1_bg_est_exp'),bg_est_act:getSum('d1_bg_est_act'),bg_total:getSum('d1_bg_total'),bg_act:getSum('d1_bg_psa'),bg_vent:getSum('d1_bg_vent')};
   const predD2={bg_est_exp:getSum('d2_bg_est_exp'),bg_est_act:getSum('d2_bg_est_act'),bg_total:getSum('d2_bg_total'),bg_act:getSum('d2_bg_psa'),bg_vent:getSum('d2_bg_vent')};
   const predEl=document.getElementById('s2_pred_panel');
@@ -3879,7 +3890,7 @@ function _renderS3(){
   if(pb) pb.textContent=mo==='ALL'?'All Months':mo;
 
   const sumMo=(sect,field)=>
-    D.months.map(m=>(D.D[sect]?.[m]?.[field]||[]).reduce((s,v)=>s+(v||0),0));
+    MONTHS.map(m=>(D.D[sect]?.[m]?.[field]||[]).reduce((s,v)=>s+(v||0),0));
 
   if(curDay!=='ALL'){
     // ── Day view ─────────────────────────────────────────────
@@ -6016,7 +6027,7 @@ function _rMeta(){
   const now=new Date(),pad=n=>String(n).padStart(2,'0');
   const mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const d=`${pad(now.getDate())}-${mn[now.getMonth()]}-${now.getFullYear()}`,t=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
-  const mo=curMonth,allMo=D.months;
+  const mo=curMonth,allMo=MONTHS;
   const scope=mo!=='ALL'?mo+' 2026':'Period: '+(D.meta?.period||allMo[0]+' – '+allMo[allMo.length-1]+' 2026');
   const rn=`RPT-${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}-${mo==='ALL'?allMo.length:1}M`;
   const dispMonths=mo==='ALL'?allMo:[mo];
@@ -6044,7 +6055,7 @@ function _tagMax(v,hi){if(v==null)return`<span class="tag tn">N/A</span>`;return
 // ── 1. OVERVIEW — Plant Health Report (fixed) ─────────────────────
 function _expOverview(){
   const{d,t,scope,mo,rn,dispMonths}=_rMeta();
-  const cbgArr=D.M.cbg||[], tgt=TGT.cbg_month, allMo=D.months;
+  const cbgArr=mArr('cbg'), tgt=TGT.cbg_month, allMo=MONTHS;
 
   // Find last month that actually has CBG data
   let di=allMo.length-1; while(di>0&&!(cbgArr[di]>0))di--;
@@ -6175,8 +6186,8 @@ function _expOverview(){
 // ── 2. FEEDSTOCK REPORT ────────────────────────────────────────────
 function _expFeedstock(){
   const{d,t,scope,mo,rn,dispMonths}=_rMeta();
-  const allMo=D.months,s=D.stock,inv=D.inv_days||{},cal=D.cal;
-  const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return(D.M[key]||[])[i]??null;});
+  const allMo=MONTHS,s=D.stock,inv=D.inv_days||{},cal=D.cal;
+  const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return mArr(key)[i]??null;});
   const getD=key=>mo!=='ALL'?dArr('feed',key):null;
 
   const pmR=getM('pm_in'),gsR=getM('gs_in'),cslR=getM('csl_in'),cdR=getM('cd_in'),sgR=getM('sg_in'),apR=getM('ap_in');
@@ -6216,8 +6227,8 @@ ${_rFtr(rn,d,t)}
 // ── 3. LAB & PROCESS REPORT ────────────────────────────────────────
 function _expLab(){
   const{d,t,scope,mo,rn,dispMonths}=_rMeta();
-  const allMo=D.months,k=D.kpis;
-  const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return(D.M[key]||[])[i]??null;});
+  const allMo=MONTHS,k=D.kpis;
+  const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return mArr(key)[i]??null;});
 
   // Latest KPI cards
   const latCards=[
@@ -6261,8 +6272,8 @@ ${_rFtr(rn,d,t)}
 // ── 4. DIGESTION REPORT ────────────────────────────────────────────
 function _expDigestion(){
   const{d,t,scope,mo,rn,dispMonths}=_rMeta();
-  const allMo=D.months;
-  const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return(D.M[key]||[])[i]??null;});
+  const allMo=MONTHS;
+  const getM=key=>dispMonths.map(m=>{const i=allMo.indexOf(m);return mArr(key)[i]??null;});
   const sum=arr=>arr.reduce((s,v)=>s+(v||0),0);
 
   const d1bg=getM('d1_bg'),d2bg=getM('d2_bg'),d1fe=getM('d1_feed'),d2fe=getM('d2_feed');
