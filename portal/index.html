@@ -3620,7 +3620,7 @@ async function loadUplFile(file){
     setParseStep('Parsing sheets…', 2)
     // Yield to browser so UI updates before heavy XLSX parse
     await new Promise(r=>setTimeout(r,0))
-    _uplWb = XLSX.read(buf, {type:'array', raw:true})
+    _uplWb = XLSX.read(buf, {type:'array', raw:true, cellFormula:false})
     setParseStep('Building preview…', 3)
     await new Promise(r=>setTimeout(r,0))
     parseUplWorkbook()
@@ -4275,7 +4275,7 @@ async function submitUpload(opts={}){
 async function parseSingleFile(file, {fullYear=false}={}){
   const buf = await file.arrayBuffer()
   await new Promise(r=>setTimeout(r,0))
-  const wb = XLSX.read(buf, {type:'array', raw:true})
+  const wb = XLSX.read(buf, {type:'array', raw:true, cellFormula:false})
   const now = new Date()
   const minSer = fullYear
     ? toExcelSerial('2026-01-01')
