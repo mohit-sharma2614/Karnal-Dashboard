@@ -2448,6 +2448,7 @@ const COLUMN_NAME_MAP = {
     // Feed Stock Balance (occ3 for CD/PM/SG/AP; occ2 for CSL Feed; occ5 for GS)
     fb_cd_bal:'Cow Dung~3', fb_pm_bal:'Pressmud~3', fb_csl_bal:'CSL Feed~2',
     fb_gs_bal:'Grain Syrup~5', fb_sg_bal:'Spent grain~3', fb_ap_bal:'Apple pomace~3',
+    remarks:'Remarks',
   },
   // Cal sheets — append-mode, date in col B (col 1 = Sr.No auto)
   PMCAL: {
@@ -2504,6 +2505,28 @@ const COLUMN_NAME_MAP = {
     remarks:'Remarks',
   },
   // FIXED and EMI use month columns — handled separately, no name map needed
+}
+
+// Exception: FB Total columns have no unique row-2 header in either input or master workbook
+// (they are merged across rows 1-2 with just "Total"). Mapped by fixed column index only.
+// Same indices apply to both input workbook and master (identical structure).
+const FB_TOTAL_COLS = {
+  pw_rcv_total:  8,   // Total PW Received (KL)
+  pw_cost_total: 15,  // Total PW Cost (Rs)
+  cd_rcv_total:  19,  // Total CD Received (Kgs)
+  cd_cost_total: 23,  // Total CD Cost (Rs)
+  csl_rcv_total: 27,  // Total CSL Received (KL)
+  csl_cost_total:31,  // Total CSL Cost (Rs)
+  pm_rcv_total:  48,  // Total PM Received (Kgs)
+  pm_cost_total: 65,  // Total PM Cost (Rs)
+  sg_rcv_total:  67,  // Total SG Received (Kgs)
+  sg_cost_total: 69,  // Total SG Cost (Rs)
+  gs_rcv_total:  72,  // Total GS Received (KL)
+  gs_cost_total: 75,  // Total GS Cost (Rs)
+  ap_rcv_total:  77,  // Total AP Received (MT)
+  ap_cost_total: 79,  // Total AP Cost (Rs)
+  fed_total:     86,  // Total Fed (MT)
+  fed_cost_total:93,  // Total Fed Cost (Rs)
 }
 
 // Master sheet name and header row per portal sheet id
@@ -4037,8 +4060,10 @@ async function submitUpload(opts={}){
           const cols = hmap[name]
           if(cols&&cols.length>=occ) masterCols[fk] = cols[occ-1]
         }
+        // Exception: FB Total columns have no unique header — inject by fixed index
+        if(cfg.cmKey==='FB') Object.assign(masterCols, FB_TOTAL_COLS)
         const mappedFields = Object.keys(masterCols).length
-        const totalFields = Object.keys(nameMap).length
+        const totalFields = Object.keys(nameMap).length + (cfg.cmKey==='FB' ? Object.keys(FB_TOTAL_COLS).length : 0)
         uplLog(`  Headers read ✓ — ${mappedFields}/${totalFields} fields mapped${mappedFields===0?' ⚠️ 0 FIELDS — header mismatch!':''}`, false, logEl)
       } catch(e){
         uplLog(`  ERROR resolving master columns for ${mSheet}: ${e.message} — skipping sheet`, true, logEl)
@@ -4250,6 +4275,8 @@ async function parseSingleFile(file, {fullYear=false}={}){
     // has an extra group-header row (e.g. Digester sheets have D1/D2 labels at row 2)
     const srcDs = cfg.srcDataStart || cfg.dataStart
     const cm=buildCmFromHeaders(all[srcDs-2]||[], nameMap)
+    // Exception: FB Total columns have no unique header — inject by fixed index
+    if(cfg.cmKey==='FB') Object.assign(cm, FB_TOTAL_COLS)
     const dataRows=all.slice(srcDs-1)
     const rows=[]; let rej=0
     for(const row of dataRows){
