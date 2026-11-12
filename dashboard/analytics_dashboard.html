@@ -6659,7 +6659,32 @@ const CFG = {
   driveId:  'b!lwSJs3g0SU-eJPxpXLyBQY-LeEFYrGxFj8s5iYGGS57bRR6p1guPRb0ucPoLeK4c',
   fileId:   '017HLDFZY5WPVD5W73ORDJHMBRYCXS4A5O',
   allowed:  ['it@elanenergy.in','ekas@elanenergy.in','shikha@elanenergy.in','ea@elanenergy.in','ceo@elanenergy.in'],
+  roles: {
+    'it@elanenergy.in':    'admin',
+    'ekas@elanenergy.in':  'admin',
+    'shikha@elanenergy.in':'admin',
+    'ea@elanenergy.in':    'admin',
+    'ceo@elanenergy.in':   'admin',
+  },
 };
+function getRole(acct) {
+  if (!acct) return 'operator';
+  const email = (acct.username||'').toLowerCase();
+  return CFG.roles[email] || 'operator';
+}
+function applyRole(role) {
+  if (role === 'operator') {
+    // Hide S8 Sales tab and S9 Finance tab from nav
+    document.querySelectorAll('.tb').forEach(btn => {
+      if (btn.textContent.trim().startsWith('8 ·') || btn.textContent.trim().startsWith('9 ·')) {
+        btn.style.display = 'none';
+      }
+    });
+    // If currently on a hidden section, switch to Overview
+    const active = document.querySelector('.tb.active');
+    if (!active || active.style.display === 'none') show('ov', document.querySelector('.tb'));
+  }
+}
 let _msalApp = null;
 async function getMsalApp() {
   if (_msalApp) return _msalApp;
@@ -7132,7 +7157,7 @@ async function buildAnalyticsD() {
     inv_days,cal,salesDay,manureDay,
   };
 }
-async function initDashboard() {
+async function initDashboard(acct) {
   const overlay=document.getElementById('authOverlay');
   try {
     D=await buildAnalyticsD();
@@ -7167,6 +7192,7 @@ async function initDashboard() {
     document.getElementById('nav_updated').textContent=D.meta.updated;
     overlay.style.display='none';
     document.getElementById('mainNav').style.display='';
+    applyRole(getRole(acct));
     try{ renderOV(); }catch(e){
       console.error('OV init error',e);
       const sec=document.getElementById('sec_ov');
@@ -8195,9 +8221,9 @@ window.addEventListener('DOMContentLoaded', async function(){
   try {
     const app=await getMsalApp();
     const result=await app.handleRedirectPromise();
-    if(result&&isAllowed(result.account)){ initDashboard(); return; }
+    if(result&&isAllowed(result.account)){ initDashboard(result.account); return; }
     const accounts=app.getAllAccounts();
-    if(accounts.length&&isAllowed(accounts[0])){ initDashboard(); return; }
+    if(accounts.length&&isAllowed(accounts[0])){ initDashboard(accounts[0]); return; }
     document.getElementById('authStatus').textContent='Please sign in to access Analytics Dashboard.';
     document.getElementById('signInBtn').style.display='block';
   } catch(e) { document.getElementById('authStatus').textContent='Auth error: '+e.message; document.getElementById('signInBtn').style.display='block'; }
