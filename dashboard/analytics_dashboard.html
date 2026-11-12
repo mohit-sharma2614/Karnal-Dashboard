@@ -723,10 +723,16 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb" onclick="show('s7',this)">8 · Sales</button>
       <button class="tb" onclick="show('s8',this)">9 · Finance</button>
     </div>
-    <div class="nav-right" style="display:flex;align-items:center;gap:8px">
-      <span id="nav_user" style="font-size:10px;color:var(--text3);white-space:nowrap"></span>
-      <button id="nav_signout" onclick="signOut()" style="display:none;font-size:10px;padding:2px 8px;border:1px solid var(--text3);border-radius:4px;background:transparent;color:var(--text3);cursor:pointer">Sign Out</button>
+    <div class="nav-right" style="display:flex;align-items:center;gap:10px">
       <span id="nav_updated" style="font-size:10px;color:var(--text3);white-space:nowrap"></span>
+      <div id="nav_user_chip" style="display:none;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--bdr);border-radius:20px;padding:3px 10px 3px 4px">
+        <div id="nav_avatar" style="width:22px;height:22px;border-radius:50%;background:var(--acc);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0"></div>
+        <span id="nav_user_email" style="font-size:10px;font-weight:500;color:var(--text2);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis"></span>
+        <span id="nav_role_badge" style="font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;white-space:nowrap;text-transform:uppercase;letter-spacing:.4px"></span>
+        <button onclick="signOut()" title="Sign Out" style="margin-left:2px;border:none;background:transparent;cursor:pointer;color:var(--text3);padding:0;display:flex;align-items:center;line-height:1" onmouseover="this.style.color='#c0392b'" onmouseout="this.style.color='var(--text3)'">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        </button>
+      </div>
     </div>
   </div>
   <div class="nav-row2">
@@ -7205,8 +7211,15 @@ async function initDashboard(acct) {
     if (acct) {
       const email = acct.username || '';
       const role = getRole(acct);
-      document.getElementById('nav_user').textContent = email + ' (' + role + ')';
-      document.getElementById('nav_signout').style.display = '';
+      const initial = email.charAt(0).toUpperCase();
+      document.getElementById('nav_avatar').textContent = initial;
+      document.getElementById('nav_user_email').textContent = email;
+      const badge = document.getElementById('nav_role_badge');
+      badge.textContent = role;
+      if (role === 'admin') { badge.style.background='#e3f0ff'; badge.style.color='#1565C0'; }
+      else { badge.style.background='#e8f5e9'; badge.style.color='#2e7d32'; }
+      const chip = document.getElementById('nav_user_chip');
+      chip.style.display = 'flex';
     }
     try{ renderOV(); }catch(e){
       console.error('OV init error',e);
