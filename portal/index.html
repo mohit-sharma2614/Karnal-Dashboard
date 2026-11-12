@@ -1719,7 +1719,10 @@ async function loadCbgToday(){
     const subEl=document.getElementById('hCbgSub')
     if(valEl) valEl.innerHTML=kg>0?`${Math.round(kg).toLocaleString()}<span class="hu">kg</span>`:'—<span class="hu">kg</span>'
     if(subEl){ subEl.textContent=kg>0?'Yesterday':'No entry yet'; subEl.style.color=kg>0?'#16a34a':'#a1a1aa' }
-  }catch(e){}
+  }catch(e){
+    const v=document.getElementById('hCbgVal'); if(v) v.innerHTML='—<span class="hu">kg</span>'
+    const s=document.getElementById('hCbgSub'); if(s){s.textContent='No entry yet';s.style.color='#a1a1aa'}
+  }
 }
 
 // tracks which workbook rows are expanded in the audit matrix
