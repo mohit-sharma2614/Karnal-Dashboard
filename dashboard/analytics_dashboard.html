@@ -723,7 +723,11 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb" onclick="show('s7',this)">8 · Sales</button>
       <button class="tb" onclick="show('s8',this)">9 · Finance</button>
     </div>
-    <span id="nav_updated" class="nav-right"></span>
+    <div class="nav-right" style="display:flex;align-items:center;gap:8px">
+      <span id="nav_user" style="font-size:10px;color:var(--text3);white-space:nowrap"></span>
+      <button id="nav_signout" onclick="signOut()" style="display:none;font-size:10px;padding:2px 8px;border:1px solid var(--text3);border-radius:4px;background:transparent;color:var(--text3);cursor:pointer">Sign Out</button>
+      <span id="nav_updated" style="font-size:10px;color:var(--text3);white-space:nowrap"></span>
+    </div>
   </div>
   <div class="nav-row2">
     <div id="year_filter" class="mf" style="margin-right:0">
@@ -6685,6 +6689,11 @@ function applyRole(role) {
     if (!active || active.style.display === 'none') show('ov', document.querySelector('.tb'));
   }
 }
+async function signOut() {
+  const app = await getMsalApp();
+  const accounts = app.getAllAccounts();
+  await app.logoutRedirect({ account: accounts[0] || null });
+}
 let _msalApp = null;
 async function getMsalApp() {
   if (_msalApp) return _msalApp;
@@ -7193,6 +7202,12 @@ async function initDashboard(acct) {
     overlay.style.display='none';
     document.getElementById('mainNav').style.display='';
     applyRole(getRole(acct));
+    if (acct) {
+      const email = acct.username || '';
+      const role = getRole(acct);
+      document.getElementById('nav_user').textContent = email + ' (' + role + ')';
+      document.getElementById('nav_signout').style.display = '';
+    }
     try{ renderOV(); }catch(e){
       console.error('OV init error',e);
       const sec=document.getElementById('sec_ov');
