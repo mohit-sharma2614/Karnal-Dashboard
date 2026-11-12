@@ -4295,7 +4295,8 @@ async function parseSingleFile(file, {fullYear=false}={}){
     if(cfg.cmKey==='FB') Object.assign(cm, FB_TOTAL_COLS)
     const dataRows=all.slice(srcDs-1)
     const rows=[]; let rej=0
-    for(const row of dataRows){
+    for(let ri=0;ri<dataRows.length;ri++){
+      const row=dataRows[ri]
       if(!row||row.length===0) continue
       const rawDate=row[0]; if(rawDate==null||rawDate==='') continue
       let serial
@@ -4306,9 +4307,19 @@ async function parseSingleFile(file, {fullYear=false}={}){
       }
       if(!serial) continue
       if(serial<minSer||serial>maxSer){ rej++; continue }
+      const excelRowNum = srcDs + ri  // 1-based Excel row number for this data row
       const rowData={}
       for(const [fk,sc] of Object.entries(cm)){
-        let v=row[sc-1]; if(typeof v==='string') v=v.trim(); if(v!=null&&v!=='') rowData[fk]=v
+        let v
+        if(cfg.cmKey==='FB'&&FB_TOTAL_COLS[fk]!==undefined){
+          // Read directly from worksheet cell to bypass sheet_to_json row-length truncation
+          const cellRef=XLSX.utils.encode_cell({r:excelRowNum-1, c:sc-1})
+          const cell=ws[cellRef]
+          v=cell!=null?cell.v:null
+        } else {
+          v=row[sc-1]
+        }
+        if(typeof v==='string') v=v.trim(); if(v!=null&&v!==''&&v!==undefined) rowData[fk]=v
       }
       if(Object.keys(rowData).length===0) continue
       rows.push({serial, dateStr:fromExcelSerial(serial)||String(serial), rowData})
