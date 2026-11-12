@@ -1572,7 +1572,8 @@ function renderHome(resetDate=true){
           </div>
         </div>
         <div class="hero-right">
-          <div class="hstat c1"><div class="hv" id="hCbgVal">—<span class="hu">kg</span></div><div class="hl">CBG produced yesterday</div><div class="hs" id="hCbgSub" style="color:#a1a1aa">${_user?'Loading…':'Sign in'}</div></div>
+          <div class="hstat c1"><div class="hv" id="hCbgVal">—<span class="hu">kg</span></div><div class="hl">CBG yesterday (n‑1)</div><div class="hs" id="hCbgSub" style="color:#a1a1aa">${_user?'Loading…':'Sign in'}</div></div>
+          <div class="hstat c1"><div class="hv" id="hCbgVal2">—<span class="hu">kg</span></div><div class="hl">CBG day before (n‑2)</div><div class="hs" id="hCbgSub2" style="color:#a1a1aa">${_user?'Loading…':'Sign in'}</div></div>
           <div class="hstat c3"><div class="hv">${todayDone}<span class="hu">done</span></div><div class="hl">Today's entries</div><div class="hs" style="color:#d97706">${todayDone} of ${todayTotal}</div></div>
           <div class="hstat c4"><div class="hv">${todayTotal-todayDone}<span class="hu">left</span></div><div class="hl">Pending sheets</div><div class="hs" style="color:${todayTotal-todayDone>0?'#dc2626':'#16a34a'}">${dateLbl}</div></div>
         </div>
@@ -1698,31 +1699,43 @@ async function loadBiogasToday(){
   }catch(e){}
 }
 
-// Fetch Total CBG Production (in Kg) from PSA Production sheet for yesterday
+// Fetch Total CBG Production (in Kg) from PSA Production sheet for n-1 and n-2
 async function loadCbgToday(){
-  try{
-    const yd=new Date(); yd.setDate(yd.getDate()-1)
-    const yesterday=`${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`
-    const serial=toExcelSerial(yesterday)
-    const row=await findRow('PSA Production', serial, 3)
-    if(!row){
-      const v=document.getElementById('hCbgVal'); if(v) v.innerHTML='—<span class="hu">kg</span>'
-      const s=document.getElementById('hCbgSub'); if(s){s.textContent='No entry yet';s.style.color='#a1a1aa'}
-      return
-    }
-    const col=await getColByName('PSA Production',2,'Total CBG Production (in Kg)')
-    if(!col) return
-    const res=await gGet(`/worksheets('PSA%20Production')/range(address='${colLetter(col)}${row}')`)
-    const val=res&&res.values&&res.values[0]&&res.values[0][0]
-    const kg=parseFloat(val)||0
-    const valEl=document.getElementById('hCbgVal')
-    const subEl=document.getElementById('hCbgSub')
-    if(valEl) valEl.innerHTML=kg>0?`${Math.round(kg).toLocaleString()}<span class="hu">kg</span>`:'—<span class="hu">kg</span>'
-    if(subEl){ subEl.textContent=kg>0?'Yesterday':'No entry yet'; subEl.style.color=kg>0?'#16a34a':'#a1a1aa' }
-  }catch(e){
-    const v=document.getElementById('hCbgVal'); if(v) v.innerHTML='—<span class="hu">kg</span>'
-    const s=document.getElementById('hCbgSub'); if(s){s.textContent='No entry yet';s.style.color='#a1a1aa'}
+  const fmtDate=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+  const setTile=(valId,subId,kg,label)=>{
+    const v=document.getElementById(valId); if(v) v.innerHTML=kg>0?`${Math.round(kg).toLocaleString()}<span class="hu">kg</span>`:'—<span class="hu">kg</span>'
+    const s=document.getElementById(subId); if(s){s.textContent=kg>0?label:'No entry yet';s.style.color=kg>0?'#16a34a':'#a1a1aa'}
   }
+  const setErr=(valId,subId)=>{
+    const v=document.getElementById(valId); if(v) v.innerHTML='—<span class="hu">kg</span>'
+    const s=document.getElementById(subId); if(s){s.textContent='No entry yet';s.style.color='#a1a1aa'}
+  }
+  // get col index once, reuse for both rows
+  let col
+  try{ col=await getColByName('PSA Production',2,'Total CBG Production (in Kg)') }catch(e){}
+  if(!col){ setErr('hCbgVal','hCbgSub'); setErr('hCbgVal2','hCbgSub2'); return }
+
+  // n-1 (yesterday)
+  try{
+    const d1=new Date(); d1.setDate(d1.getDate()-1)
+    const row=await findRow('PSA Production', toExcelSerial(fmtDate(d1)), 3)
+    if(!row){ setErr('hCbgVal','hCbgSub') }
+    else{
+      const res=await gGet(`/worksheets('PSA%20Production')/range(address='${colLetter(col)}${row}')`)
+      setTile('hCbgVal','hCbgSub', parseFloat(res?.values?.[0]?.[0])||0, fmtDate(d1))
+    }
+  }catch(e){ setErr('hCbgVal','hCbgSub') }
+
+  // n-2 (day before yesterday)
+  try{
+    const d2=new Date(); d2.setDate(d2.getDate()-2)
+    const row=await findRow('PSA Production', toExcelSerial(fmtDate(d2)), 3)
+    if(!row){ setErr('hCbgVal2','hCbgSub2') }
+    else{
+      const res=await gGet(`/worksheets('PSA%20Production')/range(address='${colLetter(col)}${row}')`)
+      setTile('hCbgVal2','hCbgSub2', parseFloat(res?.values?.[0]?.[0])||0, fmtDate(d2))
+    }
+  }catch(e){ setErr('hCbgVal2','hCbgSub2') }
 }
 
 // tracks which workbook rows are expanded in the audit matrix
