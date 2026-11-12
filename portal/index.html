@@ -3876,7 +3876,9 @@ function renderUplPreview(){
     const _ws2  = _uplWb.Sheets[sName]
     const _all2 = XLSX.utils.sheet_to_json(_ws2, {header:1, raw:true, defval:null})
     const cm = buildCmFromHeaders(_all2[_cfg2.dataStart - 2] || [], COLUMN_NAME_MAP[_cfg2.cmKey])
-    const keys = Object.keys(cm)
+    const keys = _cfg2.cmKey==='FB'
+      ? [...Object.keys(cm), ...Object.keys(FB_TOTAL_COLS)]
+      : Object.keys(cm)
     const showRows = rows.length > 10 ? rows.slice(-10) : rows
     const hiddenCount = rows.length - showRows.length
     html += `<div class="sec"><div class="sec-title-row">
