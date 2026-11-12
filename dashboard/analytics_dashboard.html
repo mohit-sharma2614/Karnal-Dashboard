@@ -2864,8 +2864,8 @@ function _renderOVSections(mo){
   const purD=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   const compH=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
   const psaH=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
-  const olrD1=mo==='ALL'?(D.M.d1_olr||[]):dArr('d1','olr');
-  const olrD2=mo==='ALL'?(D.M.d2_olr||[]):dArr('d2','olr');
+  const olrD1=mo==='ALL'?mArr('d1_olr'):dArr('d1','olr');
+  const olrD2=mo==='ALL'?mArr('d2_olr'):dArr('d2','olr');
   const ch4D=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
   const sfomD=(mo==='ALL'?mArr('d1_sfom'):dArr('d1','sfom')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_sfom'):dArr('d2','sfom'))[i]||0));
   const lfomD=(mo==='ALL'?mArr('d1_lfom'):dArr('d1','lfom')).map((v,i)=>(v||0)+((mo==='ALL'?mArr('d2_lfom'):dArr('d2','lfom'))[i]||0));
@@ -2879,7 +2879,7 @@ function _renderOVSections(mo){
   const drPct=tCBG>0?tDisp/tCBG*100:null;
   const uptP=tPH>0?tCH/tPH*100:null;
   const ch4V=av(ch4D);const ch4P=ch4V!=null?(ch4V>1?ch4V:ch4V*100):null;
-  const _psaEffArr=mo==='ALL'?D.M.psa_eff_day||[]:[D.M.psa_eff_day?.[MONTHS.indexOf(mo)]];
+  const _psaEffArr=mo==='ALL'?mArr('psa_eff_day'):[mArr('psa_eff_day')[MONTHS.indexOf(mo)]];
   const _psaAvg=av(_psaEffArr);
   const purEff=_psaAvg!=null?(_psaAvg/0.4583)*100:null;
   const avgO1=av(olrD1),avgO2=av(olrD2);
@@ -2985,7 +2985,7 @@ function _renderOVSections(mo){
      stat:[{l:'PSA '+(ch4P>=90?'OK':ch4P>=80?'Caution':'Alert'),c:ch4P>=90?'g':ch4P>=80?'a':'r'}],
      mx:[{l:'Total CBG',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Efficiency',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4 Purity',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hours',v:fmtN(Math.round(tPH))+' hrs'},{l:'Top Issue',v:'Moisture',vc:'r'}],
      cl:'Monthly PSA Efficiency % — Target 90%',
-     ch:()=>line('ov_ch_s4',mo==='ALL'?MONTHS:lbls,[lDS('PSA Eff %',(mo==='ALL'?D.M.psa_eff_day||[]:([D.M.psa_eff_day?.[MONTHS.indexOf(mo)]])).map(v=>v!=null?(v/0.4583)*100:null),C.purple)]),
+     ch:()=>line('ov_ch_s4',mo==='ALL'?MONTHS:lbls,[lDS('PSA Eff %',(mo==='ALL'?mArr('psa_eff_day'):([mArr('psa_eff_day')[MONTHS.indexOf(mo)]])).map(v=>v!=null?(v/0.4583)*100:null),C.purple)]),
      exploreLbl:'Purification',exploreHint:'PSA efficiency · CH4 purity · hours'},
     {id:'s5',tab:'s5',clr:'#0e7490',num:'S5',nm:'Compressor',person:'Mr. Rajendra Kumar',swFlag:'',
      st:sOk(drPct,95,80),
@@ -3123,8 +3123,8 @@ function renderOV(){
   const compA=mo==='ALL'?mArr('comp_hrs'):dArr('psa','comp_hrs');
   const psaA=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
   const ch4a=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
-  const olrD1a=mo==='ALL'?(D.M.d1_olr||[]):dArr('d1','olr');
-  const olrD2a=mo==='ALL'?(D.M.d2_olr||[]):dArr('d2','olr');
+  const olrD1a=mo==='ALL'?mArr('d1_olr'):dArr('d1','olr');
+  const olrD2a=mo==='ALL'?mArr('d2_olr'):dArr('d2','olr');
   const tDisp=sumA(dispD),tPH=sumA(psaA),tCH=sumA(compA);
   // Use dispatched as the actual offtake CBG figure
   const tCBG=tDisp;
@@ -3140,14 +3140,14 @@ function renderOV(){
   const cpkVal=mo==='ALL'?(tCBG>0?totalCost/tCBG:null):(cpkMo[mo]||null);
 
   // Health ring — 3 components: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (PSA col R÷0.4583×100)
-  const rbgD1M=sumA(mo==='ALL'?(D.M.d1_bg_total||[]):dArr('d1','bg_total'));
-  const rbgD2M=sumA(mo==='ALL'?(D.M.d2_bg_total||[]):dArr('d2','bg_total'));
+  const rbgD1M=sumA(mo==='ALL'?mArr('d1_bg_total'):dArr('d1','bg_total'));
+  const rbgD2M=sumA(mo==='ALL'?mArr('d2_bg_total'):dArr('d2','bg_total'));
   // Count actual working days (not months) for correct denominator
-  const rbgDaysArr=mo==='ALL'?(D.M.rbg_days||[]):dArr('d1','bg_total').map(v=>v!=null&&v>0?1:0);
+  const rbgDaysArr=mo==='ALL'?mArr('rbg_days'):dArr('d1','bg_total').map(v=>v!=null&&v>0?1:0);
   const rbgDaysM=rbgDaysArr.reduce((s,v)=>s+(v||0),0)||1;
   const rbgPct=(rbgD1M+rbgD2M)>0?(rbgD1M+rbgD2M)/(13200*rbgDaysM)*100:null;
   // PSA Eff: PSA sheet col R (psa_eff_day) ÷ 0.4583 × 100
-  const psaEffDayAvg=av(mo==='ALL'?(D.M.psa_eff_day||[]):dArr('psa','psa_eff_day'));
+  const psaEffDayAvg=av(mo==='ALL'?mArr('psa_eff_day'):dArr('psa','psa_eff_day'));
   const psaEffPct=psaEffDayAvg!=null?(psaEffDayAvg/0.4583)*100:null;
   const hComps=[
     {l:'RBG',v:rbgPct,ok:rbgPct>=85?1:rbgPct>=70?0:-1},
@@ -3209,7 +3209,7 @@ function renderOV(){
   if(mo==='ALL'){
     const bv=cbgMAll[bestIdx]||0,wv=cbgMAll[worstIdx]||0;
     const bp=bv>0?Math.round(bv/TGT.cbg_month*100):0,wp=wv>0?Math.round(wv/TGT.cbg_month*100):0;
-    const bRev=(D.M.total_rev||[])[bestIdx],wRev=(D.M.total_rev||[])[worstIdx];
+    const bRev=mArr('total_rev')[bestIdx],wRev=mArr('total_rev')[worstIdx];
     document.getElementById('ov_hl1_tag').textContent='Best Month';
     document.getElementById('ov_hl2_tag').textContent='Worst Month';
     const f1=document.querySelector('.hlc-best .hl-foot span:first-child');if(f1)f1.textContent='vs monthly target';
@@ -4719,7 +4719,7 @@ function renderS5(){
   const avgCh4Pct=avgCh4Raw!=null?(avgCh4Raw>1?avgCh4Raw:avgCh4Raw*100):null;
 
   // CBG in storage — latest non-null reading
-  const storageArr=mo==='ALL'?D.M.storage:dArr('psa','storage');
+  const storageArr=mo==='ALL'?mArr('storage'):dArr('psa','storage');
   const latestStor=[...(storageArr||[])].reverse().find(v=>v!=null&&v>0);
 
   const sv=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
@@ -4784,8 +4784,8 @@ function renderS6(){
   const lblD1=mo==='ALL'?MONTHS:dDates('d1');
 
   const _s6idx=MONTHS.indexOf(mo);
-  const sfomR=mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[_s6idx]||0];
-  const lfomR=mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[_s6idx]||0];
+  const sfomR=mo==='ALL'?mArr('sfom_mn'):[mArr('sfom_mn')[_s6idx]||0];
+  const lfomR=mo==='ALL'?mArr('lfom_mn'):[mArr('lfom_mn')[_s6idx]||0];
   const d1d=mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac');
   const d2d=mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac');
   const d1dExp=mo==='ALL'?mArr('d1_drain_exp'):dArr('d1','drain_exp');
@@ -4849,8 +4849,8 @@ function renderS7(){
 
   const cbgR=mo==='ALL'?mArr('cbg_rev'):dArr('rev','cbg_rev');
   const _s7idx=MONTHS.indexOf(mo);
-  const sfomR=mo==='ALL'?mArr('sfom_mn'):[D.M.sfom_mn?.[_s7idx]||0];
-  const lfomR=mo==='ALL'?mArr('lfom_mn'):[D.M.lfom_mn?.[_s7idx]||0];
+  const sfomR=mo==='ALL'?mArr('sfom_mn'):[mArr('sfom_mn')[_s7idx]||0];
+  const lfomR=mo==='ALL'?mArr('lfom_mn'):[mArr('lfom_mn')[_s7idx]||0];
   const cbgProd=mo==='ALL'?mArr('cbg'):dArr('psa','cbg_tot');
   const disp=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
   const veer=mo==='ALL'?mArr('veer'):dArr('psa','veer');
@@ -4910,20 +4910,20 @@ function renderS8(){
   const cbgR  = mo==='ALL'?mArr('cbg_rev'):dArr('rev','cbg_rev');
   const sfomR = mo==='ALL'?mArr('sfom_mn'):dArr('rev','sfom_rev');
   const lfomR = mo==='ALL'?mArr('lfom_mn'):dArr('rev','lfom_rev');
-  const veerR = mo==='ALL'?D.M.veer_rev:[D.M.veer_rev[idx]];
-  const adiR  = mo==='ALL'?D.M.adi_rev:[D.M.adi_rev[idx]];
-  const gailR = mo==='ALL'?D.M.gail_rev:[D.M.gail_rev[idx]];
-  const spsR  = mo==='ALL'?D.M.sps_rev:[D.M.sps_rev[idx]];
+  const veerR = mo==='ALL'?mArr('veer_rev'):[mArr('veer_rev')[idx]];
+  const adiR  = mo==='ALL'?mArr('adi_rev'):[mArr('adi_rev')[idx]];
+  const gailR = mo==='ALL'?mArr('gail_rev'):[mArr('gail_rev')[idx]];
+  const spsR  = mo==='ALL'?mArr('sps_rev'):[mArr('sps_rev')[idx]];
 
   // ── Cost arrays ────────────────────────────────────────────
   // For monthly view use pre-aggregated monthly totals so chart labels match (lbl=['Jan'] = 1 element)
   const fc   = mo==='ALL'?mArr('feed_cost'):[D.M.feed_cost?.[idx]||0];
   const trans = mo==='ALL'?mArr('transport'):[D.M.transport?.[idx]||0];
   const maint_ = mo==='ALL'?mArr('maint'):[D.M.maint?.[idx]||0];
-  const elec  = mo==='ALL'?D.M.elec:[D.M.elec?.[idx]||0];
+  const elec  = mo==='ALL'?mArr('elec'):[mArr('elec')[idx]||0];
   // mp/emi read from Daily Revenue sheet (cols I/J) via M.total_cost
-  const mp_s8 = mo==='ALL'?D.M.mp_rc:[D.M.mp_rc?.[idx]||0];
-  const emi_s8= mo==='ALL'?D.M.emi_rc:[D.M.emi_rc?.[idx]||0];
+  const mp_s8 = mo==='ALL'?mArr('mp_rc'):[mArr('mp_rc')[idx]||0];
+  const emi_s8= mo==='ALL'?mArr('emi_rc'):[mArr('emi_rc')[idx]||0];
   // Individual feedstock costs (from Feed & Balance sheet)
   const pmCost = mo==='ALL'?mArr('pm_cost'):(idx>=0?[D.M.pm_cost?.[idx]||0]:[]);
   const gsCost = mo==='ALL'?mArr('gs_cost'):(idx>=0?[D.M.gs_cost?.[idx]||0]:[]);
@@ -4935,9 +4935,9 @@ function renderS8(){
   // ── Totals ─────────────────────────────────────────────────
   const totR = mo==='ALL'?fin.ytd_rev:(sumA(cbgR)+sumA(sfomR)+sumA(lfomR));
   // Use pre-computed M.total_cost directly — avoids dependency on separate MFC/EMI sheets
-  const totC = mo==='ALL'?fin.ytd_cost:(D.M.total_cost?.[idx]||0);
+  const totC = mo==='ALL'?fin.ytd_cost:(mArr('total_cost')[idx]||0);
   const mg   = totR>0?((totR-totC)/totR*100).toFixed(1):0;
-  const margins = mo==='ALL'?D.M.margin:[D.M.margin[idx]];
+  const margins = mo==='ALL'?mArr('margin'):[mArr('margin')[idx]];
   const cpkMonthly=D.cpk_monthly||{};
   const cpk_arr = mo==='ALL'?MONTHS.map(m=>cpkMonthly[m]||null):[cpkMonthly[mo]||null];
   const totalCBG = mo==='ALL'?D.kpis.ytd_cbg:sumA(dArr('psa','cbg_tot'));
@@ -4965,7 +4965,7 @@ function renderS8(){
     bDS('Manpower',mp_s8,C.purple),bDS('EMI / Loan',emi_s8,C.pink)
   ],true);
   if(charts['c_s8_margin'])charts['c_s8_margin'].destroy();
-  const costArr=mo==='ALL'?D.M.total_cost:[D.M.total_cost?.[idx]||null];
+  const costArr=mo==='ALL'?mArr('total_cost'):[mArr('total_cost')[idx]??null];
   charts['c_s8_margin']=new Chart(document.getElementById('c_s8_margin'),{type:'bar',
     data:{labels:lbl,datasets:[
       {label:'Total Production Cost (₹)',data:costArr,backgroundColor:a(C.rose,0.7),borderColor:C.rose,borderWidth:1}
@@ -4993,15 +4993,15 @@ function renderS8(){
   const rowIdxs=mo==='ALL'?MONTHS.map((_,i)=>i):[idx];
   const custRows=rowMonths.map((m,ri)=>{
     const i=rowIdxs[ri];
-    const v=D.M.veer_rev[i]||0,ad=D.M.adi_rev[i]||0,g=D.M.gail_rev[i]||0,sp=D.M.sps_rev[i]||0;
+    const v=mArr('veer_rev')[i]||0,ad=mArr('adi_rev')[i]||0,g=mArr('gail_rev')[i]||0,sp=mArr('sps_rev')[i]||0;
     const tot=v+ad+g+sp;
     return`<tr><td>${m} 2026</td><td class="tg">${fmtL(v)}</td><td class="tc">${fmtL(ad)}</td>
       <td class="ta">${fmtL(g)}</td><td>${fmtL(sp)}</td><td class="tg" style="font-weight:700">${fmtL(tot)}</td></tr>`;
   });
-  const vTot=mo==='ALL'?sumA(D.M.veer_rev):(D.M.veer_rev?.[idx]||0);
-  const aTot=mo==='ALL'?sumA(D.M.adi_rev):(D.M.adi_rev?.[idx]||0);
-  const gTot=mo==='ALL'?sumA(D.M.gail_rev):(D.M.gail_rev?.[idx]||0);
-  const sTot=mo==='ALL'?sumA(D.M.sps_rev):(D.M.sps_rev?.[idx]||0);
+  const vTot=mo==='ALL'?sumA(mArr('veer_rev')):(mArr('veer_rev')[idx]||0);
+  const aTot=mo==='ALL'?sumA(mArr('adi_rev')):(mArr('adi_rev')[idx]||0);
+  const gTot=mo==='ALL'?sumA(mArr('gail_rev')):(mArr('gail_rev')[idx]||0);
+  const sTot=mo==='ALL'?sumA(mArr('sps_rev')):(mArr('sps_rev')[idx]||0);
   document.getElementById('s8_cust_tbl').innerHTML=
     `<thead><tr><th>Month</th><th>Veer Filling (₹)</th><th>Adinath Auto (₹)</th><th>GAIL/LREVPL (₹)</th><th>SPS Bio Chem (₹)</th><th>Total (₹)</th></tr></thead>
     <tbody>${custRows.join('')}
@@ -5014,9 +5014,9 @@ function renderS8(){
   // ── Expense Breakdown Table (9 items) ──────────────────────
   const noData='<span style="font-size:10px;color:var(--text3);font-style:italic">No data available</span>';
   // Expense table needs monthly totals (1-element for month view), not daily arrays
-  const fcM   = mo==='ALL'?fc:[D.M.feed_cost?.[idx]||0];
-  const transM= mo==='ALL'?trans:[D.M.transport?.[idx]||0];
-  const maintM= mo==='ALL'?maint_:[D.M.maint?.[idx]||0];
+  const fcM   = mo==='ALL'?fc:[mArr('feed_cost')[idx]||0];
+  const transM= mo==='ALL'?trans:[mArr('transport')[idx]||0];
+  const maintM= mo==='ALL'?maint_:[mArr('maint')[idx]||0];
   const expItems=[
     {lbl:'Feedstock — Total',arr:fcM,sub:false,cls:'tr'},
     {lbl:'↳ Pressmud',arr:pmCost,sub:true,cls:''},
@@ -5075,11 +5075,11 @@ function renderS8(){
       const cur=arr[i]||0, prv=arr[i-1]||0;
       return prv>0?+((cur-prv)/prv*100).toFixed(1):null;
     });
-    const fcG   = momPct(D.M.feed_cost||[]);
-    const transG= momPct(D.M.transport||[]);
-    const elecG = momPct(D.M.elec||[]);
-    const maintG= momPct(D.M.maint||[]);
-    const totG  = momPct(D.M.total_cost||[]);
+    const fcG   = momPct(mArr('feed_cost'));
+    const transG= momPct(mArr('transport'));
+    const elecG = momPct(mArr('elec'));
+    const maintG= momPct(mArr('maint'));
+    const totG  = momPct(mArr('total_cost'));
     if(cgEl) cgEl.textContent='Cost Contributors — Month-over-Month Growth Rate (%)';
     if(charts['c_s8_cost_growth']) charts['c_s8_cost_growth'].destroy();
     const ds=(lbl,data,clr,dash)=>({label:lbl,data,borderColor:clr,backgroundColor:a(clr,0.07),
