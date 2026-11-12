@@ -4293,6 +4293,17 @@ async function parseSingleFile(file, {fullYear=false}={}){
     const cm=buildCmFromHeaders(all[srcDs-2]||[], nameMap)
     // Exception: FB Total columns have no unique header — inject by fixed index
     if(cfg.cmKey==='FB') Object.assign(cm, FB_TOTAL_COLS)
+    // DEBUG: log first FB data row's Total col values to console
+    if(cfg.cmKey==='FB'){
+      const firstDataRow=all[srcDs-1]||[]
+      const dbg={}
+      for(const [fk,sc] of Object.entries(FB_TOTAL_COLS)){
+        const cellRef=XLSX.utils.encode_cell({r:srcDs-1,c:sc-1})
+        const cell=ws[cellRef]
+        dbg[fk]={row_arr:firstDataRow[sc-1], cell_v:cell!=null?cell.v:'NO_CELL', cell_exists:cell!=null}
+      }
+      console.table(dbg)
+    }
     const dataRows=all.slice(srcDs-1)
     const rows=[]; let rej=0
     for(let ri=0;ri<dataRows.length;ri++){
