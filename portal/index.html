@@ -4020,9 +4020,10 @@ async function submitUpload(opts={}){
     ? (allDates[0]===allDates[allDates.length-1] ? allDates[0] : `${allDates[0]}→${allDates[allDates.length-1]}`)
     : 'no dates'
 
+  let sid = null
   try {
     uplLog('Opening workbook session…', false, logEl)
-    const sid = opts.sid || await getSession()
+    sid = opts.sid || await getSession()
     uplLog(sid ? `Session opened ✓ (${sid.substring(0,12)}…)` : 'No session (will write without session) ⚠️', false, logEl)
 
     // Verify master workbook is reachable — list sheet names (skip in bulk mode after first file)
