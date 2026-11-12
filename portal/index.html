@@ -3722,6 +3722,25 @@ function parseUplWorkbook(){
         }
         if(v != null && v !== '' && v !== undefined) rowData[key] = v
       }
+      if(cfg.cmKey === 'FB'){
+        const _n = k => parseFloat(rowData[k]) || 0
+        rowData.pw_rcv_total   = _n('pw_lather')+_n('pw_narwal')+_n('pw_subhash')+_n('pw_gk')+_n('pw_dry')+_n('pw_nazim')
+        rowData.pw_cost_total  = _n('pw_lather_cost')+_n('pw_narwal_cost')+_n('pw_subhash_cost')+_n('pw_gk_cost')+_n('pw_dry_cost')+_n('pw_nazim_cost')
+        rowData.cd_rcv_total   = _n('cd_gharaunda')+_n('cd_phoosgarh')+_n('cd_radhakrishna')
+        rowData.cd_cost_total  = _n('cd_gharaunda_cost')+_n('cd_phoosgarh_cost')+_n('cd_radhakrishna_cost')
+        rowData.csl_rcv_total  = _n('csl_sadasat')+_n('csl_pantnagar')+_n('csl_virangam')
+        rowData.csl_cost_total = _n('csl_sadasat_cost')+_n('csl_pantnagar_cost')+_n('csl_virangam_cost')
+        rowData.pm_rcv_total   = _n('pm_sonipat')+_n('pm_malakpur')+_n('pm_ramala')+_n('pm_thana')+_n('pm_tikuala')+_n('pm_shamli')+_n('pm_laknour')+_n('pm_balyan')+_n('pm_singh')+_n('pm_naveen')+_n('pm_gs')+_n('pm_sbec')+_n('pm_sahakumbri')+_n('pm_rathi')+_n('pm_unn')+_n('pm_devom')
+        rowData.pm_cost_total  = _n('pm_sonipat_cost')+_n('pm_malakpur_cost')+_n('pm_ramala_cost')+_n('pm_thana_cost')+_n('pm_tikuala_cost')+_n('pm_shamli_cost')+_n('pm_laknour_cost')+_n('pm_balyan_cost')+_n('pm_singh_cost')+_n('pm_naveen_cost')+_n('pm_gs_cost')+_n('pm_sbec_cost')+_n('pm_sahakumbri_cost')+_n('pm_rathi_cost')+_n('pm_unn_cost')+_n('pm_devom_cost')
+        rowData.sg_rcv_total   = _n('carlsberg')
+        rowData.sg_cost_total  = _n('carlsberg_cost')
+        rowData.gs_rcv_total   = _n('gs_rcv')+_n('gs_shreeji')
+        rowData.gs_cost_total  = _n('gs_rcv_cost')+_n('gs_shreeji_cost')
+        rowData.ap_rcv_total   = _n('ap_aaditya')
+        rowData.ap_cost_total  = _n('ap_aaditya_cost')
+        rowData.fed_total      = _n('cd_fed')+_n('pm_fed')+_n('csl_fed')+_n('gs_fed')+_n('sg_fed')+_n('ap_fed')
+        rowData.fed_cost_total = _n('cd_fed_cost')+_n('pm_fed_cost')+_n('csl_fed_cost')+_n('gs_fed_cost')+_n('sg_fed_cost')+_n('ap_fed_cost')
+      }
       rows.push({serial, dateStr, rowData})
     }
     if(rows.length > 0) _uplParsed[sName] = rows
@@ -4344,6 +4363,25 @@ async function parseSingleFile(file, {fullYear=false}={}){
         if(typeof v==='string') v=v.trim(); if(v!=null&&v!==''&&v!==undefined) rowData[fk]=v
       }
       if(Object.keys(rowData).length===0) continue
+      if(cfg.cmKey==='FB'){
+        const _n = k => parseFloat(rowData[k]) || 0
+        rowData.pw_rcv_total   = _n('pw_lather')+_n('pw_narwal')+_n('pw_subhash')+_n('pw_gk')+_n('pw_dry')+_n('pw_nazim')
+        rowData.pw_cost_total  = _n('pw_lather_cost')+_n('pw_narwal_cost')+_n('pw_subhash_cost')+_n('pw_gk_cost')+_n('pw_dry_cost')+_n('pw_nazim_cost')
+        rowData.cd_rcv_total   = _n('cd_gharaunda')+_n('cd_phoosgarh')+_n('cd_radhakrishna')
+        rowData.cd_cost_total  = _n('cd_gharaunda_cost')+_n('cd_phoosgarh_cost')+_n('cd_radhakrishna_cost')
+        rowData.csl_rcv_total  = _n('csl_sadasat')+_n('csl_pantnagar')+_n('csl_virangam')
+        rowData.csl_cost_total = _n('csl_sadasat_cost')+_n('csl_pantnagar_cost')+_n('csl_virangam_cost')
+        rowData.pm_rcv_total   = _n('pm_sonipat')+_n('pm_malakpur')+_n('pm_ramala')+_n('pm_thana')+_n('pm_tikuala')+_n('pm_shamli')+_n('pm_laknour')+_n('pm_balyan')+_n('pm_singh')+_n('pm_naveen')+_n('pm_gs')+_n('pm_sbec')+_n('pm_sahakumbri')+_n('pm_rathi')+_n('pm_unn')+_n('pm_devom')
+        rowData.pm_cost_total  = _n('pm_sonipat_cost')+_n('pm_malakpur_cost')+_n('pm_ramala_cost')+_n('pm_thana_cost')+_n('pm_tikuala_cost')+_n('pm_shamli_cost')+_n('pm_laknour_cost')+_n('pm_balyan_cost')+_n('pm_singh_cost')+_n('pm_naveen_cost')+_n('pm_gs_cost')+_n('pm_sbec_cost')+_n('pm_sahakumbri_cost')+_n('pm_rathi_cost')+_n('pm_unn_cost')+_n('pm_devom_cost')
+        rowData.sg_rcv_total   = _n('carlsberg')
+        rowData.sg_cost_total  = _n('carlsberg_cost')
+        rowData.gs_rcv_total   = _n('gs_rcv')+_n('gs_shreeji')
+        rowData.gs_cost_total  = _n('gs_rcv_cost')+_n('gs_shreeji_cost')
+        rowData.ap_rcv_total   = _n('ap_aaditya')
+        rowData.ap_cost_total  = _n('ap_aaditya_cost')
+        rowData.fed_total      = _n('cd_fed')+_n('pm_fed')+_n('csl_fed')+_n('gs_fed')+_n('sg_fed')+_n('ap_fed')
+        rowData.fed_cost_total = _n('cd_fed_cost')+_n('pm_fed_cost')+_n('csl_fed_cost')+_n('gs_fed_cost')+_n('sg_fed_cost')+_n('ap_fed_cost')
+      }
       rows.push({serial, dateStr:fromExcelSerial(serial)||String(serial), rowData})
     }
     if(rows.length) parsed[sName]=rows
