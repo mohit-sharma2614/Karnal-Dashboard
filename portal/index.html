@@ -4299,7 +4299,8 @@ async function parseSingleFile(file, {fullYear=false}={}){
     }
     if(rows.length) parsed[sName]=rows
     if(rej) rejected[sName]=rej
-    headers[sName]=Object.keys(cm)
+    // Sort field keys by their col index so preview shows columns in positional order
+    headers[sName]=Object.entries(cm).sort((a,b)=>a[1]-b[1]).map(([k])=>k)
   }
   return {parsed, rejected, sheetNames:wb.SheetNames, headers:headers||{}}
 }
