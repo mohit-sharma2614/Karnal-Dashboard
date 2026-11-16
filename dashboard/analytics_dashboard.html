@@ -2208,9 +2208,9 @@ function renderSectionDay(sectionId){
       🌾 Feedstock Monitoring <span style="font-size:10px;font-weight:400;letter-spacing:0;opacity:.75;text-transform:none">Latest lab quality data</span></div>`;
     const dayBppData={
       d1_pm_bpp:ex.d1_pm_bpp,d1_cd_bpp:ex.d1_cd_bpp,d1_gs_bpp:ex.d1_gs_bpp,
-      d1_csl_bpp:ex.d1_csl_bpp,d1_sg_bpp:ex.d1_sg_bpp,
+      d1_csl_bpp:ex.d1_csl_bpp,d1_sg_bpp:ex.d1_sg_bpp,d1_ap_bpp:ex.d1_ap_bpp,
       d2_pm_bpp:ex.d2_pm_bpp,d2_cd_bpp:ex.d2_cd_bpp,d2_gs_bpp:ex.d2_gs_bpp,
-      d2_csl_bpp:ex.d2_csl_bpp,d2_sg_bpp:ex.d2_sg_bpp,
+      d2_csl_bpp:ex.d2_csl_bpp,d2_sg_bpp:ex.d2_sg_bpp,d2_ap_bpp:ex.d2_ap_bpp,
     };
     html+=_feedQualityHtml(D.cal,dayBppData,'Today\'s BPP');
     // Section 3: Biogas Prediction
@@ -3793,9 +3793,9 @@ function renderS2(){
   const getMoBpp=k=>mo==='ALL'?_mSumOrNull(k):(()=>{const mi=MONTHS.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const bppData={
     d1_pm_bpp:getMoBpp('pm_bpp'),d1_cd_bpp:getMoBpp('cd_bpp'),d1_gs_bpp:getMoBpp('gs_bpp'),
-    d1_csl_bpp:getMoBpp('csl_bpp'),d1_sg_bpp:getMoBpp('sg_bpp'),
+    d1_csl_bpp:getMoBpp('csl_bpp'),d1_sg_bpp:getMoBpp('sg_bpp'),d1_ap_bpp:getMoBpp('ap_bpp'),
     d2_pm_bpp:getMoBpp('d2_pm_bpp'),d2_cd_bpp:getMoBpp('d2_cd_bpp'),d2_gs_bpp:getMoBpp('d2_gs_bpp'),
-    d2_csl_bpp:getMoBpp('d2_csl_bpp'),d2_sg_bpp:getMoBpp('d2_sg_bpp'),
+    d2_csl_bpp:getMoBpp('d2_csl_bpp'),d2_sg_bpp:getMoBpp('d2_sg_bpp'),d2_ap_bpp:getMoBpp('d2_ap_bpp'),
   };
   // Build cal view: latest for ALL, monthly average for specific month
   const calView={};
@@ -7107,17 +7107,23 @@ async function buildAnalyticsD() {
     return vsRaw<2?vsRaw*100:vsRaw;
   };
   const parseCalSheet=(raw,key)=>{
-    // Col layout (0-based, fetch A3:J400): 0=Date,1=SampleName,2=Location,3=TS%,4=VS%,5=AvgTS%,6=AvgVS%,7=QtyD1,8=QtyD2
+    // Two layouts (0-based, fetch A3:J400):
+    // Layout A — Pressmud Cal. (12 cols): 0=Date,1=Sample,2=Loc,3=TS%,4=VS%,5=AvgTS%,6=AvgVS%,7=QtyD1,8=QtyD2,9=TS(T),10=VS(T)
+    // Layout B — CSL/CD/SG/AP/GS Cal. (9 cols): 0=Date,1=Sample,2=Loc,3=TS%,4=VS%,5=Qty,6=TS(T),7=VS(T),8=Remarks
+    const isA=key==='pm';
+    const iQty=isA?7:5, iTsT=isA?9:6, iVsT=isA?10:7;
     const rows=(raw?.values||[]).filter(r=>r[0]!==null&&r[0]!==''&&r[3]!==null&&r[3]!=='');
     if(!rows.length) return{key,hasData:false,ts:null,vs:null,ts_t:null,vs_t:null,qty:null,date:null,rows:[]};
     const last=rows[rows.length-1];
     const dt=toDate(last[0]);
-    return{key,hasData:true,
-      ts:nv(last[3]),
-      vs:normaliseVs(nv(last[4]),nv(last[5]),nv(last[6])),
-      ts_t:nv(last[5]),vs_t:nv(last[6]),qty:nv(last[7]),
-      date:dayKey(dt)||'—',
-      rows:rows.map(r=>({date:dayKey(toDate(r[0])),ts:nv(r[3]),vs:normaliseVs(nv(r[4]),nv(r[5]),nv(r[6])),ts_t:nv(r[5]),vs_t:nv(r[6]),qty:nv(r[7])}))};
+    const parseRow=r=>{
+      const tsT=nv(r[iTsT]),vsT=nv(r[iVsT]);
+      const vs=isA?normaliseVs(nv(r[4]),nv(r[5]),nv(r[6])):normaliseVs(nv(r[4]),tsT,vsT);
+      return{date:dayKey(toDate(r[0])),ts:nv(r[3]),vs,ts_t:tsT,vs_t:vsT,qty:nv(r[iQty])};
+    };
+    const lr=parseRow(last);
+    return{key,hasData:true,ts:lr.ts,vs:lr.vs,ts_t:lr.ts_t,vs_t:lr.vs_t,qty:lr.qty,
+      date:dayKey(dt)||'—',rows:rows.map(parseRow)};
   };
   const cal={
     pm:parseCalSheet(pmCalR,'pm'),
