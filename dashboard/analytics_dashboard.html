@@ -7105,16 +7105,17 @@ async function buildAnalyticsD() {
     return vsRaw<2?vsRaw*100:vsRaw;
   };
   const parseCalSheet=(raw,key)=>{
-    const rows=(raw?.values||[]).filter(r=>r[1]!==null&&r[1]!==''&&r[4]!==null&&r[4]!=='');
+    // Col layout (0-based, fetch A3:J400): 0=Date,1=SampleName,2=Location,3=TS%,4=VS%,5=AvgTS%,6=AvgVS%,7=QtyD1,8=QtyD2
+    const rows=(raw?.values||[]).filter(r=>r[0]!==null&&r[0]!==''&&r[3]!==null&&r[3]!=='');
     if(!rows.length) return{key,hasData:false,ts:null,vs:null,ts_t:null,vs_t:null,qty:null,date:null,rows:[]};
     const last=rows[rows.length-1];
-    const dt=toDate(last[1]);
+    const dt=toDate(last[0]);
     return{key,hasData:true,
-      ts:nv(last[4]),
-      vs:normaliseVs(nv(last[5]),nv(last[6]),nv(last[7])),
-      ts_t:nv(last[6]),vs_t:nv(last[7]),qty:nv(last[9]),
+      ts:nv(last[3]),
+      vs:normaliseVs(nv(last[4]),nv(last[5]),nv(last[6])),
+      ts_t:nv(last[5]),vs_t:nv(last[6]),qty:nv(last[7]),
       date:dayKey(dt)||'—',
-      rows:rows.map(r=>({date:dayKey(toDate(r[1])),ts:nv(r[4]),vs:normaliseVs(nv(r[5]),nv(r[6]),nv(r[7])),ts_t:nv(r[6]),vs_t:nv(r[7]),qty:nv(r[9])}))};
+      rows:rows.map(r=>({date:dayKey(toDate(r[0])),ts:nv(r[3]),vs:normaliseVs(nv(r[4]),nv(r[5]),nv(r[6])),ts_t:nv(r[5]),vs_t:nv(r[6]),qty:nv(r[7])}))};
   };
   const cal={
     pm:parseCalSheet(pmCalR,'pm'),
