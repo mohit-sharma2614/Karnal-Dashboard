@@ -1497,12 +1497,29 @@ function _labTableHtml(tv, periodNote){
     if(v==null) return '';
     const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
     const pct=x=>((clamp(x,scMin,scMax)-scMin)/(scMax-scMin)*100).toFixed(1);
-    const szL=pct(szMin),szW=(pct(szMax)-pct(szMin)),tickP=pct(v);
-    const col=cv[rag]||'#888';
-    return `<div style="flex:1;position:relative;height:3px;background:var(--bg3);border-radius:2px;min-width:30px"><div style="position:absolute;left:${szL}%;width:${szW}%;height:100%;background:rgba(46,125,50,.22);border-radius:1px"></div><div style="position:absolute;left:${tickP}%;top:-4px;width:3px;height:11px;background:${col};border-radius:1px;transform:translateX(-50%);box-shadow:0 0 0 1px #fff"></div></div>`;
+    const szL=parseFloat(pct(szMin)),szR=parseFloat(pct(szMax)),tickP=pct(v);
+    const t1=Math.max(0,szL-8).toFixed(1),t2=Math.min(100,szR+8).toFixed(1);
+    const grad=`linear-gradient(90deg,#ef4444 0%,#f97316 ${t1}%,#22c55e ${szL}%,#22c55e ${szR}%,#f97316 ${t2}%,#ef4444 100%)`;
+    return `<div style="flex:1;position:relative;height:4px;border-radius:2px;background:${grad};min-width:30px"><div style="position:absolute;left:${tickP}%;top:-4px;width:2.5px;height:12px;background:#1a1a1a;border-radius:1px;transform:translateX(-50%);box-shadow:0 0 0 1.5px #fff"></div></div>`;
   };
-  const rangeTickLo=(v,scMax,szMax,rag)=>rangeTick(v,0,scMax,0,szMax,rag);
-  const rangeTickHi=(v,scMin,scMax,szMin,rag)=>rangeTick(v,scMin,scMax,szMin,scMax,rag);
+  const rangeTickLo=(v,scMax,szMax,rag)=>{
+    if(v==null) return '';
+    const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+    const pct=x=>(clamp(x,0,scMax)/scMax*100).toFixed(1);
+    const szR=parseFloat(pct(szMax)),tickP=pct(v);
+    const t=Math.min(100,szR+10).toFixed(1);
+    const grad=`linear-gradient(90deg,#22c55e 0%,#22c55e ${szR}%,#f97316 ${t}%,#ef4444 100%)`;
+    return `<div style="flex:1;position:relative;height:4px;border-radius:2px;background:${grad};min-width:30px"><div style="position:absolute;left:${tickP}%;top:-4px;width:2.5px;height:12px;background:#1a1a1a;border-radius:1px;transform:translateX(-50%);box-shadow:0 0 0 1.5px #fff"></div></div>`;
+  };
+  const rangeTickHi=(v,scMin,scMax,szMin,rag)=>{
+    if(v==null) return '';
+    const clamp=(x,lo,hi)=>Math.max(lo,Math.min(hi,x));
+    const pct=x=>((clamp(x,scMin,scMax)-scMin)/(scMax-scMin)*100).toFixed(1);
+    const szL=parseFloat(pct(szMin)),tickP=pct(v);
+    const t=Math.max(0,szL-10).toFixed(1);
+    const grad=`linear-gradient(90deg,#ef4444 0%,#f97316 ${t}%,#22c55e ${szL}%,#22c55e 100%)`;
+    return `<div style="flex:1;position:relative;height:4px;border-radius:2px;background:${grad};min-width:30px"><div style="position:absolute;left:${tickP}%;top:-4px;width:2.5px;height:12px;background:#1a1a1a;border-radius:1px;transform:translateX(-50%);box-shadow:0 0 0 1.5px #fff"></div></div>`;
+  };
 
   const phBar=(v,r)=>rangeTick(v,6,8.5,6.8,7.5,r);
   const tpBar=(v,r)=>rangeTick(v,20,50,35,40,r);
