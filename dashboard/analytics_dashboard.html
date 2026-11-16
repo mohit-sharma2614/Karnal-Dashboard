@@ -1590,6 +1590,7 @@ function _feedQualityHtml(calData, bppData, periodLabel){
     {key:'gs', name:'Grain Syrup',    unit:'KL', clr:'#4527A0', tsRange:[30,48], vsRange:[85,98]},
     {key:'csl',name:'CSL',            unit:'KL', clr:'#6A1B00', tsRange:[38,58], vsRange:[75,92]},
     {key:'sg', name:'Dry Spent Grain',unit:'MT', clr:'#E65100', tsRange:[22,38], vsRange:[85,98]},
+    {key:'ap', name:'Apple Pomace',   unit:'MT', clr:'#6A1B9A', tsRange:[10,20], vsRange:[85,96]},
   ];
   const ragVal=(v,lo,hi)=>v==null?'':v>=lo&&v<=hi?'g':v>=(lo*.7)&&v<=(hi*1.3)?'a':'r';
   const ragClr={g:'#2E7D32',a:'#E65100',r:'#C62828'};
@@ -3798,7 +3799,7 @@ function renderS2(){
   };
   // Build cal view: latest for ALL, monthly average for specific month
   const calView={};
-  ['pm','cd','gs','csl','sg'].forEach(key=>{
+  ['pm','cd','gs','csl','sg','ap'].forEach(key=>{
     const base=D.cal[key]||{};
     if(mo==='ALL'||!base.rows){calView[key]=base;return;}
     const moRows=(base.rows||[]).filter(r=>{
@@ -6750,7 +6751,7 @@ async function gFetch(path) {
 function setStatus(msg) { const el=document.getElementById('authStatus'); if(el) el.textContent=msg; }
 async function buildAnalyticsD() {
   setStatus('Fetching plant data (15–30 seconds)…');
-  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,cbgExpR,mfcR,emiR] = await Promise.all([
+  const [psaR,d1R,d2R,phR,tmpR,tsvsR,iapaR,rcR,fbR,manR,salesR,pmCalR,cslCalR,cdCalR,gsCalR,sgCalR,apCalR,cbgExpR,mfcR,emiR] = await Promise.all([
     gFetch("/worksheets('PSA%20Production')/range(address='A3:AH700')"),
     gFetch("/worksheets('D1')/range(address='A3:BD700')"),
     gFetch("/worksheets('D2')/range(address='A3:BD700')"),
@@ -6767,6 +6768,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Cow%20Dung%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Rice%20Grain%20Syrup%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('Dry%20Spent%20Grain%20Cal')/range(address='A3:J400')"),
+    gFetch("/worksheets('Apple%20Pomace%20Cal.')/range(address='A3:J400')"),
     gFetch("/worksheets('CBG%20Expected')/range(address='A4:X700')"),
     gFetch("/worksheets('Monthly%20Fixed%20Costs')/range(address='A3:P10')"),
     gFetch("/worksheets('EMI%20Tracker')/range(address='A3:R10')"),
@@ -7123,6 +7125,7 @@ async function buildAnalyticsD() {
     cd:parseCalSheet(cdCalR,'cd'),
     gs:parseCalSheet(gsCalR,'gs'),
     sg:parseCalSheet(sgCalR,'sg'),
+    ap:parseCalSheet(apCalR,'ap'),
   };
   // ── Vendor supply parsing — reads from Feed_and_Balance sheet (fb rows)
   // Indices are 0-based from Feed_and_Balance col layout (verified from memory 2026-10-29)
