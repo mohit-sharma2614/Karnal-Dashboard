@@ -4362,9 +4362,15 @@ async function parseSingleFile(file, {fullYear=false}={}){
         } else {
           v=row[sc-1]
         }
-        if(typeof v==='string') v=v.trim(); if(v!=null&&v!==''&&v!==undefined) rowData[fk]=v
+        if(typeof v==='string') v=v.trim()
+        // '-' means "no measurement" — treat as no data
+        if(v==='-'||v==='–'||v==='—') v=null
+        if(v!=null&&v!==''&&v!==undefined) rowData[fk]=v
       }
       if(Object.keys(rowData).length===0) continue
+      // Skip rows where every value is a dash/placeholder with no actual numeric data
+      const hasNumeric = Object.values(rowData).some(v=>typeof v==='number'||(typeof v==='string'&&v!=='-'&&v!=='–'&&v!=='—'&&v.trim()!==''))
+      if(!hasNumeric) continue
       if(cfg.cmKey==='FB'){
         const _n = k => parseFloat(rowData[k]) || 0
         rowData.pw_rcv_total   = _n('pw_lather')+_n('pw_narwal')+_n('pw_subhash')+_n('pw_gk')+_n('pw_dry')+_n('pw_nazim')
