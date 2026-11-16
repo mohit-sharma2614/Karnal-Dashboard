@@ -3875,7 +3875,8 @@ function renderUplPreview(){
     const _cfg2 = UPL_CFG[sName]
     const _ws2  = _uplWb.Sheets[sName]
     const _all2 = XLSX.utils.sheet_to_json(_ws2, {header:1, raw:true, defval:null})
-    const cm = buildCmFromHeaders(_all2[_cfg2.dataStart - 2] || [], COLUMN_NAME_MAP[_cfg2.cmKey])
+    const _hRowIdx = (_cfg2.srcDataStart !== undefined ? _cfg2.srcDataStart : _cfg2.dataStart) - 2
+    const cm = buildCmFromHeaders(_all2[_hRowIdx] || [], COLUMN_NAME_MAP[_cfg2.cmKey])
     const keys = _cfg2.cmKey==='FB'
       ? Object.entries({...cm, ...FB_TOTAL_COLS}).sort((a,b)=>a[1]-b[1]).map(([k])=>k)
       : Object.keys(cm)
