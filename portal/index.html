@@ -3678,9 +3678,10 @@ function parseUplWorkbook(){
     if(!nameMap) continue
     const ws = _uplWb.Sheets[sName]
     const all = XLSX.utils.sheet_to_json(ws, {header:1, raw:true, defval:null})
-    const cm = buildCmFromHeaders(all[cfg.dataStart - 2] || [], nameMap)
+    const srcDs2 = cfg.srcDataStart || cfg.dataStart
+    const cm = buildCmFromHeaders(all[srcDs2 - 2] || [], nameMap)
     if(cfg.cmKey === 'FB') Object.assign(cm, FB_TOTAL_COLS)
-    const dataRows = all.slice(cfg.dataStart - 1)
+    const dataRows = all.slice(srcDs2 - 1)
     const rows = []
     let rejected = 0
 
@@ -3709,7 +3710,7 @@ function parseUplWorkbook(){
       if(!dateStr) continue
       // Store rowData by FIELD KEY (not input col number) so submitUpload can
       // resolve the MASTER column position independently via getColByName.
-      const excelRowNum = cfg.dataStart + ri
+      const excelRowNum = srcDs2 + ri
       const rowData = {}
       for(const [key, col] of Object.entries(cm)){
         let v
