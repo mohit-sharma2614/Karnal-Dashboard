@@ -3520,7 +3520,7 @@ function renderS1(){
   ];
   // vendor lookup for current period
   // Feed & Balance stores vendor quantities in MT/KL directly (no conversion needed)
-  const vendorUnits={pm:'MT',cd:'MT',csl:'KL',sg:'MT',ap:'MT'};
+  const vendorUnits={pm:'MT',cd:'MT',csl:'KL',gs:'KL',sg:'MT',ap:'MT'};
   const vend=D.vendors||{};
   const vendorForPeriod=(cat)=>{
     const list=vend[cat]||[];
@@ -3546,11 +3546,11 @@ function renderS1(){
       </tr>`;
     }).join('');
     // vendor blocks per feedstock (PM has most vendors)
-    const vCats=[{nm:'Pressmud',k:'pm',u:'MT'},{nm:'Cow Dung',k:'cd',u:'MT'},{nm:'CSL',k:'csl',u:'KL'},{nm:'Grain Syrup',k:'gs',u:'—'},{nm:'Spent Grain',k:'sg',u:'MT'},{nm:'Apple Pomace',k:'ap',u:'MT'}];
+    const vCats=[{nm:'Pressmud',k:'pm',u:'MT'},{nm:'Cow Dung',k:'cd',u:'MT'},{nm:'CSL',k:'csl',u:'KL'},{nm:'Grain Syrup',k:'gs',u:'KL'},{nm:'Spent Grain',k:'sg',u:'MT'},{nm:'Apple Pomace',k:'ap',u:'MT'}];
     const vendorBlocks=vCats.map(c=>`
       <div style="margin-bottom:10px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid var(--bdr)">${c.nm}${c.k==='gs'?' <span style="font-weight:400;font-style:italic;text-transform:none">(direct procurement)</span>':''}</div>
-        ${c.k==='gs'?'<span style="font-size:10px;color:var(--text3)">Vendor tracking not available in supply sheet</span>':vendorForPeriod(c.k)}
+        <div style="font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text2);margin-bottom:4px;padding-bottom:3px;border-bottom:2px solid var(--bdr)">${c.nm}</div>
+        ${vendorForPeriod(c.k)}
       </div>`).join('');
     procEl.innerHTML=`<div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start">
       <div>
@@ -7134,6 +7134,7 @@ async function buildAnalyticsD() {
     cd:[{n:'Gharaunda',i:15},{n:'Phoosgarh',i:16},{n:'Radha Krishna',i:17}],
     csl:[{n:'Sadasat',i:23},{n:'Pant Nagar',i:24},{n:'Virangam',i:25}],
     sg:[{n:'Carlsberg',i:65}],
+    gs:[{n:'Grain Syrup',i:69},{n:'Shreeji',i:70}],
     ap:[{n:'Aaditya Solar',i:75}],
   };
   const vendors={};
