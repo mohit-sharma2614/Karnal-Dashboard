@@ -3486,7 +3486,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
   // S6 Manure
   const s6={id:'s6',clr:'#3f6212',nm:'Manure',person:'Mr. Vivek Kumar'};
   const drFeed=f.pm_feed&&drainTot?drainTot/(f.pm_feed*1000)*100:null;
-  const s6rows=tbl(['Parameter','D1','D2'],[
+  const s6rows=tbl(['Parameter','D1','D2','Target D1','Target D2'],[
     tblRow('Drain Actual (m³)',fmtM3_(drainD1),fmtM3_(drainD2),fmtM3_(d1r.drain_exp),fmtM3_(d2r.drain_exp)),
     tblRow('Achievement (%)',drainAch!=null?fmtPct(drainAch):'—',undefined,undefined,undefined,drainAch!=null&&drainAch<80),
     tblRow('SFOM (MT)',fmtMT_(d1r.sfom),fmtMT_(d2r.sfom)),
