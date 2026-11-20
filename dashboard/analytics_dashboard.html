@@ -969,8 +969,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     Cost &amp; BPP Contribution <span class="s2-sub-sub">Monthly feedstock cost and biogas yield</span>
   </div>
   <div class="cg c2">
-    <div class="cc"><div class="ct">Monthly Feedstock Cost (₹)</div><div class="cw"><canvas id="c_s1_cost"></canvas></div></div>
-    <div class="cc"><div class="ct">Feedstock BPP Contribution — D1+D2 (m³)</div><div class="cw"><canvas id="c_s1_bpp"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s1_cost">Monthly Feedstock Cost (₹)</div><div class="cw"><canvas id="c_s1_cost"></canvas></div></div>
+    <div class="cc"><div class="ct" id="ct_s1_bpp">Feedstock BPP Contribution — D1+D2 (m³)</div><div class="cw"><canvas id="c_s1_bpp"></canvas></div></div>
   </div>
 
   </div><!-- /s1_main_content -->
@@ -3687,6 +3687,9 @@ function renderS1(){
   }
 
   if(!isDa){
+  const _ft=document.getElementById('ct_s1_feed');if(_ft)_ft.textContent='Feedstock Fed per Day/Month';
+  const _ct=document.getElementById('ct_s1_cost');if(_ct)_ct.textContent='Monthly Feedstock Cost (₹)';
+  const _bt=document.getElementById('ct_s1_bpp');if(_bt)_bt.textContent='Feedstock BPP Contribution — D1+D2 (m³)';
   const labels=mo==='ALL'?MONTHS:dDates('feed');
   const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
   const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
@@ -3807,7 +3810,30 @@ function renderS1(){
   const sgBpp=mo==='ALL'?mArr('sg_bpp'):dArr('exp','d1_sg_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_sg_bpp')[i]||0));
   const apBpp=mo==='ALL'?mArr('ap_bpp'):dArr('exp','d1_ap_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_ap_bpp')[i]||0));
   bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange),bDS('Apple Pomace',apBpp,C.purple)],true);
-  } // end if(!isDa) charts block
+  } else {
+  // ── Day View: Last 7 days for Feed / Cost / BPP charts ──────────
+  const _allDates=dDates('feed');
+  const _ci=_allDates.indexOf(curDay);
+  const _si=_ci>=0?Math.max(0,_ci-6):Math.max(0,_allDates.length-7);
+  const _ei=_ci>=0?_ci+1:_allDates.length;
+  const _sl=arr=>arr.slice(_si,_ei);
+  const _lbl=_allDates.slice(_si,_ei);
+  const _feedTitle=document.getElementById('ct_s1_feed');
+  if(_feedTitle) _feedTitle.textContent='Feedstock Fed — Last 7 Days';
+  const _costTitle=document.getElementById('ct_s1_cost');
+  if(_costTitle) _costTitle.textContent='Feedstock Cost — Last 7 Days (₹)';
+  const _bppTitle=document.getElementById('ct_s1_bpp');
+  if(_bppTitle) _bppTitle.textContent='BPP Contribution — Last 7 Days (m³)';
+  bar('c_s1_feed',_lbl,[bDS('Pressmud',_sl(dArr('feed','pm_feed')),C.blue),bDS('Cow Dung',_sl(dArr('feed','cd_feed')),C.teal),bDS('CSL',_sl(dArr('feed','csl_feed')),C.indigo),bDS('Grain Syrup',_sl(dArr('feed','gs_feed')),C.cyan),bDS('Spent Grain',_sl(dArr('feed','sg_feed')),C.orange)],true);
+  bar('c_s1_cost',_lbl,[bDS('Feed Cost (₹)',_sl(dArr('rev','feed_cost')),C.amber)]);
+  const _d1pm=dArr('exp','d1_pm_bpp'),_d2pm=dArr('exp','d2_pm_bpp');
+  const _d1cd=dArr('exp','d1_cd_bpp'),_d2cd=dArr('exp','d2_cd_bpp');
+  const _d1csl=dArr('exp','d1_csl_bpp'),_d2csl=dArr('exp','d2_csl_bpp');
+  const _d1gs=dArr('exp','d1_gs_bpp'),_d2gs=dArr('exp','d2_gs_bpp');
+  const _d1sg=dArr('exp','d1_sg_bpp'),_d2sg=dArr('exp','d2_sg_bpp');
+  const _d1ap=dArr('exp','d1_ap_bpp'),_d2ap=dArr('exp','d2_ap_bpp');
+  bar('c_s1_bpp',_lbl,[bDS('Pressmud',_sl(_d1pm.map((v,i)=>(v||0)+(_d2pm[i]||0))),C.blue),bDS('Cow Dung',_sl(_d1cd.map((v,i)=>(v||0)+(_d2cd[i]||0))),C.teal),bDS('CSL',_sl(_d1csl.map((v,i)=>(v||0)+(_d2csl[i]||0))),C.indigo),bDS('Grain Syrup',_sl(_d1gs.map((v,i)=>(v||0)+(_d2gs[i]||0))),C.cyan),bDS('Spent Grain',_sl(_d1sg.map((v,i)=>(v||0)+(_d2sg[i]||0))),C.orange),bDS('Apple Pomace',_sl(_d1ap.map((v,i)=>(v||0)+(_d2ap[i]||0))),C.purple)],true);
+  } // end charts block
 }
 
 // ═══ S2 LAB ══════════════════════════════════════════════════
