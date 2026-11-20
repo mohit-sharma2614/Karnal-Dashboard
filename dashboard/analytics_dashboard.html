@@ -3375,10 +3375,10 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const _s1totProc=_s1defs.reduce((s,r)=>s+r.proc,0),_s1totFed=_s1defs.reduce((s,r)=>s+r.fed,0);
   const _s1rows=_s1defs.map(r=>{const bal=r.proc-r.fed;const up=_uPct(r.fed,r.proc);
     return`<tr style="border-bottom:1px solid var(--bdr)">
-      ${_td('<b style="color:#0d7d5f">'+r.nm+'</b>')}
-      ${_td(_fmtU(r.proc,r.u))}
-      ${_td(_fmtU(r.fed,r.u))}
-      ${_td(r.proc>0?'<span style="color:'+(bal>=0?'#0e7490':'#dc2626')+'">'+(bal>=0?'+':'')+fmtN(Math.round(bal))+' '+r.u+'</span>':'—')}
+      ${_td('<b style="color:#0d7d5f">'+r.nm+' ('+r.u+')</b>')}
+      ${_td(r.proc>0?fmtN(Math.round(r.proc)):'—')}
+      ${_td(r.fed>0?fmtN(Math.round(r.fed)):'—')}
+      ${_td(r.proc>0?'<span style="color:'+(bal>=0?'#0e7490':'#dc2626')+'">'+(bal>=0?'+':'')+fmtN(Math.round(bal))+'</span>':'—')}
       ${_td(up!=null?'<span style="color:'+_uClr(up)+'">'+up+'%</span>':'—')}
     </tr>`;}).join('');
   const _s1totBal=_s1totProc-_s1totFed;const _s1up=_uPct(_s1totFed,_s1totProc);
