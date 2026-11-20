@@ -3293,22 +3293,29 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const tblRow=(p,d1,d2,e1,e2,d1r_flag,d2r_flag)=>{
     const d1c=d1r_flag?'color:#dc2626':'';const d2c=d2r_flag?'color:#dc2626':'';
     return`<tr style="border-bottom:1px solid var(--bdr)">
-      <td style="padding:4px 6px;font-size:11px;color:var(--text3);white-space:nowrap">${p}</td>
+      <td style="padding:4px 6px;font-size:11px;font-weight:600;color:var(--text2);white-space:nowrap">${p}</td>
       <td style="padding:4px 6px;font-size:12px;font-weight:600;${d1c}">${fmtV(d1)}</td>
       ${d2!==undefined?`<td style="padding:4px 6px;font-size:12px;font-weight:600;${d2c}">${fmtV(d2)}</td>`:''}
       ${e1!==undefined?`<td style="padding:4px 6px;font-size:11px;color:var(--text3)">${fmtV(e1)}</td>`:''}
       ${e2!==undefined?`<td style="padding:4px 6px;font-size:11px;color:var(--text3)">${fmtV(e2)}</td>`:''}
     </tr>`;
   };
-  const tblHdr=(cols)=>`<tr style="border-bottom:2px solid var(--bdr)">${cols.map(c=>`<th style="padding:4px 6px;font-size:10px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left">${c}</th>`).join('')}</tr>`;
+  const tblHdr=(cols)=>`<tr style="border-bottom:2px solid var(--bdr)">${cols.map(c=>`<th style="padding:4px 6px;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--ink);text-align:left">${c}</th>`).join('')}</tr>`;
   const tbl=(hdr,rows)=>`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead>${tblHdr(hdr)}</thead><tbody>${rows.join('')}</tbody></table></div>`;
 
-  // Spark mini-chart (inline SVG bar)
+  // Spark mini-chart — full-width, range-scaled so variation is always visible
   const sparkSVG=(vals,color)=>{
     if(!vals||vals.length<2)return'';
-    const mx=Math.max(...vals,1);
-    const bars=vals.map((v,i)=>{const h=Math.round((v/mx)*28)||2;const x=i*12+2;return`<rect x="${x}" y="${30-h}" width="9" height="${h}" rx="2" fill="${color}" opacity=".8"/>`;}).join('');
-    return`<svg width="${vals.length*12+4}" height="32" viewBox="0 0 ${vals.length*12+4} 32" style="margin-top:6px">${bars}</svg>`;
+    const mn=Math.min(...vals),mx=Math.max(...vals);
+    const range=mx-mn||1;
+    const W=200,H=36,gap=3;
+    const bw=(W-(vals.length-1)*gap)/vals.length;
+    const bars=vals.map((v,i)=>{
+      const h=Math.max(3,Math.round(((v-mn)/range)*(H-6))+3);
+      const x=(i*(bw+gap)).toFixed(1);
+      return`<rect x="${x}" y="${(H-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="2" fill="${color}" opacity=".85"/>`;
+    }).join('');
+    return`<svg width="100%" height="36" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="display:block;margin-top:4px">${bars}</svg>`;
   };
 
   // Card builder
@@ -3370,7 +3377,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
     {nm:'Spent Grain',u:'MT',proc:f.sg_in||0,fed:f.sg_feed||0},
     {nm:'Apple Pomace',u:'MT',proc:f.ap_in||0,fed:f.ap_feed||0},
   ];
-  const _th='<th style="padding:5px 8px;font-size:9px;font-weight:700;letter-spacing:.5px;color:var(--text3);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
+  const _th='<th style="padding:5px 8px;font-size:9px;font-weight:800;letter-spacing:.5px;color:var(--ink);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
   const _td=(v,clr)=>`<td style="padding:5px 8px;font-size:12px;font-weight:600;${clr?'color:'+clr+';':''}white-space:nowrap">${v}</td>`;
   const _s1totProc=_s1defs.reduce((s,r)=>s+r.proc,0),_s1totFed=_s1defs.reduce((s,r)=>s+r.fed,0);
   const _s1rows=_s1defs.map(r=>{const bal=r.proc-r.fed;const up=_uPct(r.fed,r.proc);
