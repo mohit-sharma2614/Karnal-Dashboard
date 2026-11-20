@@ -2839,7 +2839,7 @@ function _fillOVHealthRing(hscore,period,comps,spkVals){
 
 function _renderOVSections(mo){
   const sg=document.getElementById('ov_sgrid');if(!sg)return;
-  ['s1','s2','s3','s4','s5','s6','s7','s8'].forEach(id=>{const k='ov_ch_'+id;if(charts[k]){try{charts[k].destroy();}catch(e){}charts[k]=null;}});
+  ['s1','s2','s3','s4','s5','s6'].forEach(id=>{const k='ov_ch_'+id;if(charts[k]){try{charts[k].destroy();}catch(e){}charts[k]=null;}});
   const av=a=>{const f=(a||[]).filter(v=>v!=null&&v>0);return f.length?f.reduce((s,v)=>s+v,0)/f.length:null;};
   const per=mo==='ALL'?'Annual':mo;
   const lbls=mo==='ALL'?MONTHS:dDates('psa');
@@ -3009,7 +3009,7 @@ function _renderOVSections(mo){
   ];
   const stlblM={ok:'Good',warn:'Caution',alert:'Alert'};
   const badgeM={ok:'bg',warn:'ba',alert:'br'};
-  sg.innerHTML=SECS.map(s=>{
+  sg.innerHTML=SECS.filter(s=>s.id!=='s7'&&s.id!=='s8').map(s=>{
     let swClass='',swMicro='';
     if(s.swFlag==='winter'&&actWin){swClass=' sw-flag sw-winter';swMicro='<span class="sw-micro sw-winter">Winter Watch</span>';}
     else if(s.swFlag==='feedstock'&&actFeed){swClass=' sw-flag sw-feedstock';swMicro='<span class="sw-micro sw-feedstock">Feedstock Watch</span>';}
@@ -3486,7 +3486,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
     {sec:s7,content:s7rows,spk:s7spk,spkClr:'#b45309',spkLbl:'7-day Dispatch Rate'},
     {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Total Production Cost'},
   ];
-  sg.innerHTML=SECS_DA.map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
+  sg.innerHTML=SECS_DA.filter(({sec})=>sec.id!=='s7'&&sec.id!=='s8').map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
 } // end _renderOVSectionsDaInner
 
 // ═══ S1 FEEDSTOCK ════════════════════════════════════════════
