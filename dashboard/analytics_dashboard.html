@@ -3374,40 +3374,40 @@ function _renderOVSectionsDaInner(da,rec,sg){
     return[];
   };
 
-  // S1 Feedstock — daily values, same 5-col layout as monthly card
+  // S1 Feedstock — Opening Bal | Procured | Fed | Closing Bal
   const s1={id:'s1',clr:'#0d7d5f',nm:'Feedstock Procurement',person:'Mr. Vivek Kumar'};
-  const _fmtU=(v,u)=>v!=null&&v>0?fmtN(Math.round(v))+' '+u:'—';
-  const _uPct=(fed,proc)=>proc>0?Math.round(fed/proc*100):null;
-  const _uClr=(p)=>p==null?'var(--text2)':p>=90?'#16a34a':p>=70?'#d97706':'#dc2626';
   const _s1defs=[
-    {nm:'Pressmud', u:'MT', proc:f.pm_in||0, fed:f.pm_feed||0},
-    {nm:'Cow Dung', u:'MT', proc:f.cd_in||0, fed:f.cd_feed||0},
-    {nm:'Grain Syrup',u:'KL',proc:f.gs_in||0,fed:f.gs_feed||0},
-    {nm:'CSL',      u:'KL', proc:f.csl_in||0,fed:f.csl_feed||0},
-    {nm:'Spent Grain',u:'MT',proc:f.sg_in||0,fed:f.sg_feed||0},
-    {nm:'Apple Pomace',u:'MT',proc:f.ap_in||0,fed:f.ap_feed||0},
+    {nm:'Pressmud',    u:'MT', proc:f.pm_in||0,  fed:f.pm_feed||0,  cb:f.pm_bal},
+    {nm:'Cow Dung',    u:'MT', proc:f.cd_in||0,  fed:f.cd_feed||0,  cb:f.cd_bal},
+    {nm:'Grain Syrup', u:'KL', proc:f.gs_in||0,  fed:f.gs_feed||0,  cb:f.gs_bal},
+    {nm:'CSL',         u:'KL', proc:f.csl_in||0, fed:f.csl_feed||0, cb:f.csl_bal},
+    {nm:'Spent Grain', u:'MT', proc:f.sg_in||0,  fed:f.sg_feed||0,  cb:f.sg_bal},
+    {nm:'Apple Pomace',u:'MT', proc:f.ap_in||0,  fed:f.ap_feed||0,  cb:f.ap_bal},
   ];
   const _th='<th style="padding:5px 8px;font-size:9px;font-weight:800;letter-spacing:.5px;color:var(--ink);text-align:left;border-bottom:2px solid var(--bdr);white-space:nowrap">';
   const _td=(v,clr)=>`<td style="padding:5px 8px;font-size:12px;font-weight:600;${clr?'color:'+clr+';':''}white-space:nowrap">${v}</td>`;
-  const _s1totProc=_s1defs.reduce((s,r)=>s+r.proc,0),_s1totFed=_s1defs.reduce((s,r)=>s+r.fed,0);
-  const _s1rows=_s1defs.map(r=>{const bal=r.proc-r.fed;const up=_uPct(r.fed,r.proc);
+  const _fmtBal=(v)=>v!=null?'<span style="color:'+(v<0?'#dc2626':'inherit')+'">'+fmtN(Math.round(v))+'</span>':'—';
+  const _s1rows=_s1defs.map(r=>{
+    const ob=r.cb!=null?r.cb-r.proc+r.fed:null;
     return`<tr style="border-bottom:1px solid var(--bdr)">
       ${_td('<b style="color:#0d7d5f">'+r.nm+' ('+r.u+')</b>')}
+      ${_td(_fmtBal(ob))}
       ${_td(r.proc>0?fmtN(Math.round(r.proc)):'—')}
       ${_td(r.fed>0?fmtN(Math.round(r.fed)):'—')}
-      ${_td(r.proc>0?'<span style="color:'+(bal>=0?'#0e7490':'#dc2626')+'">'+(bal>=0?'+':'')+fmtN(Math.round(bal))+'</span>':'—')}
-      ${_td(up!=null?'<span style="color:'+_uClr(up)+'">'+up+'%</span>':'—')}
+      ${_td(_fmtBal(r.cb))}
     </tr>`;}).join('');
-  const _s1totBal=_s1totProc-_s1totFed;const _s1up=_uPct(_s1totFed,_s1totProc);
+  const _s1totProc=_s1defs.reduce((s,r)=>s+r.proc,0),_s1totFed=_s1defs.reduce((s,r)=>s+r.fed,0);
+  const _s1totOB=_s1defs.some(r=>r.cb!=null)?_s1defs.reduce((s,r)=>{const ob=r.cb!=null?r.cb-r.proc+r.fed:0;return s+ob;},0):null;
+  const _s1totCB=_s1defs.some(r=>r.cb!=null)?_s1defs.reduce((s,r)=>s+(r.cb!=null?r.cb:0),0):null;
   const s1rows=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr>${_th}FEEDSTOCK</th>${_th}PROCURED</th>${_th}FED</th>${_th}BALANCE</th>${_th}UTIL%</th></tr></thead>
+    <thead><tr>${_th}FEEDSTOCK</th>${_th}OPENING BAL</th>${_th}PROCURED</th>${_th}FED</th>${_th}CLOSING BAL</th></tr></thead>
     <tbody>${_s1rows}
     <tr style="border-top:2px solid var(--bdr);background:var(--bg3)">
       ${_td('<b>Total</b>')}
+      ${_td(_s1totOB!=null?'<b>'+_fmtBal(_s1totOB)+'</b>':'—')}
       ${_td('<b>'+fmtN(Math.round(_s1totProc))+'</b>')}
       ${_td('<b>'+fmtN(Math.round(_s1totFed))+'</b>')}
-      ${_td('<b style="color:'+(_s1totBal>=0?'#0e7490':'#dc2626')+'">'+(_s1totBal>=0?'+':'')+fmtN(Math.round(_s1totBal))+'</b>')}
-      ${_td(_s1up!=null?'<b style="color:'+_uClr(_s1up)+'">'+_s1up+'%</b>':'—')}
+      ${_td(_s1totCB!=null?'<b>'+_fmtBal(_s1totCB)+'</b>':'—')}
     </tr></tbody></table></div>`;
   // Sparkline: 7 days of TOTAL feed (all types) ending on selected day
   const curMoFeed=(D.D.feed?.[daMo]||{});
