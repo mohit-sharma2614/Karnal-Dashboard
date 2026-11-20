@@ -3408,11 +3408,13 @@ function _renderOVSectionsDaInner(da,rec,sg){
       ${_td('<b style="color:'+(_s1totBal>=0?'#0e7490':'#dc2626')+'">'+(_s1totBal>=0?'+':'')+fmtN(Math.round(_s1totBal))+'</b>')}
       ${_td(_s1up!=null?'<b style="color:'+_uClr(_s1up)+'">'+_s1up+'%</b>':'—')}
     </tr></tbody></table></div>`;
-  // Sparkline: 7 days of total feed ending on selected day
+  // Sparkline: 7 days of TOTAL feed (all types) ending on selected day
   const curMoFeed=(D.D.feed?.[daMo]||{});
-  const pmArr7=(curMoFeed.pm_feed||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
-  const cdArr7=(curMoFeed.cd_feed||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
-  const s1spkVals=pmArr7.length?pmArr7.map((v,i)=>v+(cdArr7[i]||0)):[];
+  const _spkSlice=key=>(curMoFeed[key]||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
+  const pmArr7=_spkSlice('pm_feed'),cdArr7=_spkSlice('cd_feed');
+  const gsArr7=_spkSlice('gs_feed'),cslArr7=_spkSlice('csl_feed');
+  const sgArr7=_spkSlice('sg_feed'),apArr7=_spkSlice('ap_feed');
+  const s1spkVals=pmArr7.length?pmArr7.map((_,i)=>pmArr7[i]+cdArr7[i]+gsArr7[i]+cslArr7[i]+sgArr7[i]+apArr7[i]):[];
 
   // S2 Lab & Process
   const s2={id:'s2',clr:'#1a56db',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin'};
@@ -3431,7 +3433,15 @@ function _renderOVSectionsDaInner(da,rec,sg){
     tblRow('VS (%)',_vs1!=null?fmtPct(_vs1):'—',_vs2!=null?fmtPct(_vs2):'—'),
     tblRow('Temp (°C)',d1Temp!=null?d1Temp.toFixed(1):'—',d2Temp!=null?d2Temp.toFixed(1)+'⚠':'—',undefined,undefined,false,d2Temp!=null&&d2Temp<35),
   ]);
-  const s2spk=spkFromMo('d1','temp_c');
+  // S2 temp lives in health_maps.tmp (date-keyed), not monthly arrays
+  const s2spk=(()=>{
+    const out=[];
+    for(let i=Math.max(1,daNum-6);i<=daNum;i++){
+      const r=D.health_maps?.tmp?.[i+'-'+daMo];
+      out.push(r?(r[1]??r['1']??0):0);
+    }
+    return out.some(v=>v>0)?out:[];
+  })();
 
   // S3 Production
   const s3={id:'s3',clr:'#0e7490',nm:'Production',person:'Mr. Sohan Lal'};
@@ -3456,7 +3466,12 @@ function _renderOVSectionsDaInner(da,rec,sg){
     tblRow('CH4 Purity (%)',dCH4v!=null?fmtPct(dCH4v):'—',undefined,'≥90%'),
     tblRow('PSA Hours (hrs)',dPsaHrs!=null?dPsaHrs.toFixed(1):'—'),
   ]);
-  const s4spk=spkFromMo('psa','cbg_tot');
+  // S4: PSA efficiency % (not cbg_tot — that's same as S3)
+  const s4spk=(()=>{
+    const arr=(D.D?.psa?.[daMo]?.psa_eff_day||[]).slice(Math.max(0,daIdx-6),daIdx+1);
+    const pct=arr.map(v=>v>0?Math.round(v/0.4583*100*10)/10:0);
+    return pct.some(v=>v>0)?pct:[];
+  })();
 
   // S5 Compressor & Dispatch
   const s5={id:'s5',clr:'#0e7490',nm:'Compressor',person:'Mr. Rajendra Kumar'};
@@ -3478,7 +3493,13 @@ function _renderOVSectionsDaInner(da,rec,sg){
     tblRow('LFOM (KL)',fmtKL_(d1r.lfom),fmtKL_(d2r.lfom)),
     tblRow('Drain % Feed (%)',drFeed!=null?fmtPct(drFeed):'—'),
   ]);
-  const s6spk=spkFromMo('d1','drain_ac');
+  // S6: D1+D2 combined drain actual
+  const s6spk=(()=>{
+    const d1a=(D.D?.d1?.[daMo]?.drain_ac||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
+    const d2a=(D.D?.d2?.[daMo]?.drain_ac||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
+    const tot=d1a.map((v,i)=>v+(d2a[i]||0));
+    return tot.some(v=>v>0)?tot:[];
+  })();
 
   // S7 Sales
   const s7={id:'s7',clr:'#b45309',nm:'Sales',person:'Mr. Vivek Kumar'};
@@ -3501,12 +3522,12 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s8spk=(D.M.total_cost||[]).filter(v=>v!=null&&v!==0).slice(-7);
 
   const SECS_DA=[
-    {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:`PM+CD Feed (MT) · ${spkRng}`},
+    {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:`Total Feed PM+CD+GS+CSL+SG+AP (MT) · ${spkRng}`},
     {sec:s2,content:s2rows,spk:s2spk,spkClr:'#d97706',spkLbl:`Digester Temp D1 (°C) · ${spkRng}`},
     {sec:s3,content:s3rows,spk:s3spk,spkClr:'#0e7490',spkLbl:`CBG Production (kg) · ${spkRng}`},
-    {sec:s4,content:s4rows,spk:s4spk,spkClr:'#6d28d9',spkLbl:`CBG Production (kg) · ${spkRng}`},
+    {sec:s4,content:s4rows,spk:s4spk,spkClr:'#6d28d9',spkLbl:`PSA Efficiency (%) · ${spkRng}`},
     {sec:s5,content:s5rows,spk:s5spk,spkClr:'#0e7490',spkLbl:`CBG Dispatched (kg) · ${spkRng}`},
-    {sec:s6,content:s6rows,spk:s6spk,spkClr:'#3f6212',spkLbl:`Drain Actual D1 (m³) · ${spkRng}`},
+    {sec:s6,content:s6rows,spk:s6spk,spkClr:'#3f6212',spkLbl:`Total Drain D1+D2 (m³) · ${spkRng}`},
     {sec:s7,content:s7rows,spk:s7spk,spkClr:'#b45309',spkLbl:`CBG Dispatched (kg) · ${spkRng}`},
     {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Total Production Cost'},
   ];
