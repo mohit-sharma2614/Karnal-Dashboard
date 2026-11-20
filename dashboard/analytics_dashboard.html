@@ -3350,8 +3350,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const dCBG=dp.cbg_tot,dDisp=dp.dispatched;
   const dCH4v=dp.ch4!=null?(dp.ch4>1?dp.ch4:dp.ch4*100):null;
   const dPsaHrs=dp.psa_hrs,dCompHrs=dp.comp_hrs;
-  const _psaEff1=d1r.psa_eff_pct,_psaEff2=d2r.psa_eff_pct;
-  const dPsaEff=_psaEff1!=null&&_psaEff2!=null?(_psaEff1+_psaEff2)/2:_psaEff1??_psaEff2??(dCBG&&ex.tot_exp>0?dCBG/ex.tot_exp*100:null);
+  const dPsaEff=dp.psa_eff_day!=null?(dp.psa_eff_day/0.4583)*100:null;
   const dDR=dCBG&&dDisp?dDisp/dCBG*100:null;
   const sfom=(d1r.sfom||0)+(d2r.sfom||0),lfom=(d1r.lfom||0)+(d2r.lfom||0);
   const drainD1=d1r.drain_ac,drainD2=d2r.drain_ac;
