@@ -3450,8 +3450,8 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const d1ach=d1bg&&d1bgExp>0?fmtPct(d1bg/d1bgExp*100):null;
   const d2ach=d2bg&&d2bgExp>0?fmtPct(d2bg/d2bgExp*100):null;
   const vent=dp.vent||0;
-  const s3rows=tbl(['Parameter','D1','D2'],[
-    tblRow('Biogas (m³)',fmtM3_(d1bg),fmtM3_(d2bg),fmtM3_(d1bgExp),fmtM3_(d2bgExp)),
+  const s3rows=tbl(['Parameter','D1','D2','Target D1','Target D2'],[
+    tblRow('Biogas (m³)',fmtM3_(d1bg),fmtM3_(d2bg),fmtM3_(6600),fmtM3_(6600)),
     tblRow('Achievement (%)',d1ach||'—',d2ach||'—'),
     tblRow('Vent/Flare (m³)',fmtM3_(vent),undefined,undefined,undefined,vent>0,false),
   ]);
