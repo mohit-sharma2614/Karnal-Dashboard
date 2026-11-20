@@ -855,7 +855,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
           <div class="hc-period" id="ov_hs_period">—</div>
         </div>
       </div>
-      <div class="hc-sparkline">
+      <div class="hc-sparkline" id="ov_hs_spk_wrap">
         <div class="hs-spk-label">7-Period Trend</div>
         <div id="ov_hs_spk"></div>
       </div>
@@ -2823,7 +2823,8 @@ function _fillOVHealthRing(hscore,period,comps,spkVals){
   const pdEl=document.getElementById('ov_hs_period');if(pdEl)pdEl.textContent=period||'';
   // sparkline
   const spkEl=document.getElementById('ov_hs_spk');
-  if(spkEl){if(spkVals&&spkVals.length>1)spkEl.innerHTML=spkSVG(spkVals,hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c',200,32);else spkEl.innerHTML='';}
+  const spkWrap=document.getElementById('ov_hs_spk_wrap');
+  if(spkEl){if(spkVals&&spkVals.length>1){spkEl.innerHTML=spkSVG(spkVals,hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c',200,32);if(spkWrap)spkWrap.style.display='';}else{spkEl.innerHTML='';if(spkWrap)spkWrap.style.display='none';}}
   // badge
   const bdEl=document.getElementById('ov_hs_badge');
   if(bdEl){const bc=hscore>=80?'#ecfdf5':hscore>=65?'#fffbeb':'#fff0f3';const tc=hscore>=80?'#065f46':hscore>=65?'#92400e':'#881337';bdEl.innerHTML=`<span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:700;background:${bc};color:${tc};letter-spacing:.3px">${hst}</span>`;}
