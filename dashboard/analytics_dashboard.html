@@ -3335,12 +3335,8 @@ function _renderOVSectionsDaInner(da,rec,sg){
     const ex=_exMap[sec.id]||{lbl:sec.nm,hint:''};
     const foot=`<div style="padding:10px 14px;background:var(--bg2);border-top:1px solid var(--bdr)"><button onclick="_goTab('${sec.id}')" onmouseover="this.style.opacity='.82'" onmouseout="this.style.opacity='1'" style="display:flex;align-items:center;justify-content:space-between;width:100%;padding:9px 13px;border-radius:8px;border:none;background:${sec.clr};color:#fff;font-family:inherit;cursor:pointer;transition:opacity .15s;text-align:left"><div style="display:flex;align-items:center;gap:9px"><div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0">↗</div><div><div style="font-size:11px;font-weight:700;line-height:1.2">Explore ${ex.lbl}</div><div style="font-size:9px;opacity:.75;font-weight:400;line-height:1.3;margin-top:1px">${ex.hint}</div></div></div><span style="font-size:15px;opacity:.7">→</span></button></div>`;
     return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${sec.clr};border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
-      <div style="padding:10px 14px;background:linear-gradient(135deg,${sec.clr}18,${sec.clr}06);border-bottom:1px solid ${sec.clr}28;display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:11px;font-weight:800;color:${sec.clr};letter-spacing:.4px;text-transform:uppercase">${sec.nm}</div>
-          <div style="font-size:9px;color:var(--text3);margin-top:1px;font-weight:500">${sec.person||''}</div>
-        </div>
-        <div style="font-size:9px;color:var(--text3);font-weight:600;background:var(--bg2);border:1px solid var(--bdr);border-radius:4px;padding:2px 6px">${da} 2026</div>
+      <div style="padding:10px 14px;background:linear-gradient(135deg,${sec.clr}18,${sec.clr}06);border-bottom:1px solid ${sec.clr}28">
+        <div style="font-size:11px;font-weight:800;color:${sec.clr};letter-spacing:.4px;text-transform:uppercase">${sec.nm}</div>
       </div>
       <div style="padding:12px 14px;display:flex;flex-direction:column;gap:6px;flex:1">
         ${content}
@@ -3404,10 +3400,8 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const _s1totOB=_s1defs.some(r=>r.cb!=null)?_s1defs.reduce((s,r)=>{const ob=r.cb!=null?r.cb-r.proc+r.fed:0;return s+ob;},0):null;
   const _s1totCB=_s1defs.some(r=>r.cb!=null)?_s1defs.reduce((s,r)=>s+(r.cb!=null?r.cb:0),0):null;
   const s1rows=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr>${_th}FEEDSTOCK</th>${_th}OPENING BAL</th>${_th}PROCURED</th>${_th}FED</th>${_th}CLOSING BAL</th></tr></thead>
-    <tbody>${_s1rows}
-    <tr style="border-top:2px solid var(--bdr);background:var(--bg3)">
-      ${_td('<b>Total</b>')}
+    <thead><tr>${_th}OPENING BAL</th>${_th}PROCURED</th>${_th}FED</th>${_th}CLOSING BAL</th></tr></thead>
+    <tbody><tr style="background:var(--bg3)">
       ${_td(_s1totOB!=null?'<b>'+_fmtBal(_s1totOB)+'</b>':'—')}
       ${_td('<b>'+fmtN(Math.round(_s1totProc))+'</b>')}
       ${_td('<b>'+fmtN(Math.round(_s1totFed))+'</b>')}
