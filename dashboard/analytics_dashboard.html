@@ -2953,7 +2953,7 @@ function _renderOVSections(mo){
        </tr>`;
        return`<div style="overflow-x:auto;margin-bottom:8px"><table style="width:100%;border-collapse:collapse"><thead>${hdr}</thead><tbody>${rowsHtml}${totRow}</tbody></table></div>`;
      })(),
-     mx:[{l:'Pressmud Fed (MT)',v:fmtMT(sumA(pmF))},{l:'Cow Dung Fed (MT)',v:fmtMT(sumA(cdF))},{l:'CSL Fed (KL)',v:fmtN(Math.round(sumA(cslF)))+' KL'},{l:'GS Fed (KL)',v:fmtN(Math.round(sumA(gsF)))+' KL'},{l:'Feed Cost (₹)',v:fmtL(sumA(mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost')))}],
+     mx:[{l:'Pressmud Fed (MT)',v:fmtMT(sumA(pmF)).replace(' MT','')},{l:'Cow Dung Fed (MT)',v:fmtMT(sumA(cdF)).replace(' MT','')},{l:'CSL Fed (KL)',v:fmtN(Math.round(sumA(cslF)))},{l:'GS Fed (KL)',v:fmtN(Math.round(sumA(gsF)))},{l:'Feed Cost (₹)',v:fmtL(sumA(mo==='ALL'?mArr('feed_cost'):dArr('rev','feed_cost')))}],
      cl:'Monthly Procured vs Fed (MT)',
      ch:()=>bar('ov_ch_s1',mo==='ALL'?MONTHS:dDates('feed'),[bDS('Procured',mo==='ALL'?mArr('pm_in').map((v,i)=>(v||0)+(mArr('cd_in')[i]||0)+(mArr('gs_in')[i]||0)+(mArr('csl_in')[i]||0)+(mArr('sg_in')[i]||0)+(mArr('ap_in')[i]||0)):dArr('feed','pm_in').map((v,i)=>(v||0)+(dArr('feed','cd_in')[i]||0)+(dArr('feed','gs_in')[i]||0)+(dArr('feed','csl_in')[i]||0)+(dArr('feed','sg_in')[i]||0)+(dArr('feed','ap_in')[i]||0)),C.blue),bDS('Fed',pmF.map((v,i)=>(v||0)+(cdF[i]||0)+(gsF[i]||0)+(cslF[i]||0)),C.green)],true),
      exploreLbl:'Feedstock Procurement',exploreHint:'Supply · Mix · Inventory · Utilization'},
@@ -2967,28 +2967,28 @@ function _renderOVSections(mo){
     {id:'s3',tab:'s3',clr:'#0e7490',num:'S3',nm:'Production',person:'Mr. Sohan Lal',swFlag:'',
      st:sOk(tD1+tD2>0?100:null,80,50),
      stat:[{l:'D1 '+(tD1>0?'Normal':'No Data'),c:tD1>0?'g':'a'},{l:'D2 '+(tD2>0?'Normal':'No Data'),c:tD2>0?'g':'a'}],
-     mx:[{l:'Total Biogas (m³)',v:fmtM3(tD1+tD2)},{l:'Avg Daily (m³/d)',v:MONTHS.length>0?fmtN(Math.round((tD1+tD2)/(MONTHS.length*30)))+' m³/d':'—'},{l:'D1 Biogas (m³)',v:fmtM3(tD1)},{l:'D2 Biogas (m³)',v:fmtM3(tD2)},{l:'Vent/Flare (m³)',v:'0 m³',vc:'g'}],
+     mx:[{l:'Total Biogas (m³)',v:fmtM3(tD1+tD2).replace(' m³','')},{l:'Avg Daily (m³/d)',v:MONTHS.length>0?fmtN(Math.round((tD1+tD2)/(MONTHS.length*30))):'—'},{l:'D1 Biogas (m³)',v:fmtM3(tD1).replace(' m³','')},{l:'D2 Biogas (m³)',v:fmtM3(tD2).replace(' m³','')},{l:'Vent/Flare (m³)',v:'0',vc:'g'}],
      cl:'Monthly Biogas D1 vs D2 (m³)',
      ch:()=>bar('ov_ch_s3',lbls,[bDS('D1 (m³)',d1bg,C.blue),bDS('D2 (m³)',d2bg,C.teal)]),
      exploreLbl:'Production',exploreHint:'Biogas · D1/D2 output · Vent/Flare'},
     {id:'s4',tab:'s4',clr:'#6d28d9',num:'S4',nm:'Purification',person:'Mr. Bobby',swFlag:'',
      st:sOk(ch4P,90,80),
      stat:[{l:'PSA '+(ch4P>=90?'OK':ch4P>=80?'Caution':'Alert'),c:ch4P>=90?'g':ch4P>=80?'a':'r'}],
-     mx:[{l:'Total CBG (kg)',v:fmtN(Math.round(tCBG))+' kg'},{l:'PSA Efficiency (%)',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4 Purity (%)',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hours (hrs)',v:fmtN(Math.round(tPH))+' hrs'},{l:'Top Issue',v:'Moisture',vc:'r'}],
+     mx:[{l:'Total CBG (kg)',v:fmtN(Math.round(tCBG))},{l:'PSA Efficiency (%)',v:purEff!=null?purEff.toFixed(1)+'%':'—',vc:purEff>=90?'g':purEff>=75?'a':'r'},{l:'CH4 Purity (%)',v:ch4P!=null?ch4P.toFixed(1)+'%':'—',vc:ch4P>=90?'g':ch4P>=80?'a':'r'},{l:'PSA Hours (hrs)',v:fmtN(Math.round(tPH))},{l:'Top Issue',v:'Moisture',vc:'r'}],
      cl:'Monthly PSA Efficiency % — Target 90%',
      ch:()=>line('ov_ch_s4',mo==='ALL'?MONTHS:lbls,[lDS('PSA Eff %',(mo==='ALL'?mArr('psa_eff_day'):([mArr('psa_eff_day')[MONTHS.indexOf(mo)]])).map(v=>v!=null?(v/0.4583)*100:null),C.purple)]),
      exploreLbl:'Purification',exploreHint:'PSA efficiency · CH4 purity · hours'},
     {id:'s5',tab:'s5',clr:'#0e7490',num:'S5',nm:'Compressor',person:'Mr. Rajendra Kumar',swFlag:'',
      st:sOk(drPct,95,80),
      stat:[{l:drPct>=90?'Running':'Dispatch Low',c:drPct>=90?'g':'a'}],
-     mx:[{l:'Total Dispatched (kg)',v:fmtN(Math.round(tDisp))+' kg'},{l:'Dispatch Rate (%)',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'Comp Util (%)',v:uptP!=null?uptP.toFixed(1)+'%':'—'},{l:'CBG/hr (kg)',v:cbgHr},{l:'Trips',v:'4 trips',vc:'r'}],
+     mx:[{l:'Total Dispatched (kg)',v:fmtN(Math.round(tDisp))},{l:'Dispatch Rate (%)',v:drPct!=null?drPct.toFixed(1)+'%':'—',vc:drPct>=95?'g':drPct>=80?'a':'r'},{l:'Comp Util (%)',v:uptP!=null?uptP.toFixed(1)+'%':'—'},{l:'CBG/hr (kg)',v:cbgHr},{l:'Trips',v:'4 trips',vc:'r'}],
      cl:'Monthly Produced vs Dispatched (kg)',
      ch:()=>bar('ov_ch_s5',lbls,[bDS('Produced (kg)',cbgD,C.teal),bDS('Dispatched (kg)',dispD,C.green)]),
      exploreLbl:'Compressor',exploreHint:'CBG dispatch · utilization · trips'},
     {id:'s6',tab:'s6',clr:'#3f6212',num:'S6',nm:'Manure',person:'Mr. Vivek Kumar',swFlag:'',
      st:sOk(tSfom+tLfom>0?100:null,80,50),
      stat:[{l:'On Track',c:tSfom+tLfom>0?'g':'a'}],
-     mx:[{l:'Total Drain (m³)',v:fmtM3(tDrain)},{l:'Drain Achiev. (%)',v:drAchPct!=null?drAchPct.toFixed(1)+'%':'—',vc:drAchPct>=90?'g':drAchPct>=75?'a':'r'},{l:'Total SFOM (MT)',v:fmtMT(tSfom)},{l:'Total LFOM (KL)',v:fmtN(Math.round(tLfom))+' KL'},{l:'Manure Rev (₹)',v:fmtL(manRev)}],
+     mx:[{l:'Total Drain (m³)',v:fmtM3(tDrain).replace(' m³','')},{l:'Drain Achiev. (%)',v:drAchPct!=null?drAchPct.toFixed(1)+'%':'—',vc:drAchPct>=90?'g':drAchPct>=75?'a':'r'},{l:'Total SFOM (MT)',v:fmtMT(tSfom).replace(' MT','')},{l:'Total LFOM (KL)',v:fmtN(Math.round(tLfom))},{l:'Manure Rev (₹)',v:fmtL(manRev)}],
      cl:'Monthly Revenue — SFOM + LFOM (₹L)',
      ch:()=>bar('ov_ch_s6',mo==='ALL'?MONTHS:dDates('d1'),[bDS('SFOM',sfomD,C.lime),bDS('LFOM',lfomD,C.green)]),
      exploreLbl:'Manure',exploreHint:'Drain · SFOM · LFOM · Revenue'},
@@ -3279,6 +3279,11 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const fmtKL=v=>v!=null?v.toFixed(1)+' KL':'—';
   const fmtM3=v=>v!=null?fmtN(Math.round(v))+' m³':'—';
   const fmtPct=v=>v!=null?v.toFixed(1)+'%':'—';
+  // Stripped versions — no unit suffix (unit already in Parameter column)
+  const fmtKg_=v=>v!=null?fmtN(Math.round(v)):'—';
+  const fmtMT_=v=>v!=null?v.toFixed(1):'—';
+  const fmtKL_=v=>v!=null?v.toFixed(1):'—';
+  const fmtM3_=v=>v!=null?fmtN(Math.round(v)):'—';
   const clr=(v,g,w)=>v==null?'var(--text2)':v>=g?'#16a34a':v>=w?'#d97706':'#dc2626';
 
   // Build last-7-days sparkline from monthly arrays (approximate)
@@ -3420,9 +3425,9 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const d2ach=d2bg&&d2bgExp>0?fmtPct(d2bg/d2bgExp*100):null;
   const vent=dp.vent||0;
   const s3rows=tbl(['Parameter','D1','D2'],[
-    tblRow('Biogas (m³)',fmtM3(d1bg),fmtM3(d2bg),fmtM3(d1bgExp),fmtM3(d2bgExp)),
+    tblRow('Biogas (m³)',fmtM3_(d1bg),fmtM3_(d2bg),fmtM3_(d1bgExp),fmtM3_(d2bgExp)),
     tblRow('Achievement (%)',d1ach||'—',d2ach||'—'),
-    tblRow('Vent/Flare (m³)',fmtM3(vent),undefined,undefined,undefined,vent>0,false),
+    tblRow('Vent/Flare (m³)',fmtM3_(vent),undefined,undefined,undefined,vent>0,false),
   ]);
   const s3spk=spkFromMo('psa','cbg_tot');
 
@@ -3430,18 +3435,18 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s4={id:'s4',clr:'#6d28d9',nm:'Purification',person:'Mr. Bobby'};
   const psaEffPct=dPsaEff!=null?fmtPct(dPsaEff):null;
   const s4rows=tbl(['Parameter','Actual','Target'],[
-    tblRow('CBG Produced (kg)',fmtKg(dCBG),undefined,fmtKg(ex.ideal_cbg)),
+    tblRow('CBG Produced (kg)',fmtKg_(dCBG),undefined,fmtKg_(ex.ideal_cbg)),
     tblRow('PSA Efficiency (%)',psaEffPct||'—',undefined,'≥90%',undefined,dPsaEff!=null&&dPsaEff<75),
     tblRow('CH4 Purity (%)',dCH4v!=null?fmtPct(dCH4v):'—',undefined,'≥90%'),
-    tblRow('PSA Hours (hrs)',dPsaHrs!=null?dPsaHrs.toFixed(1)+' hrs':'—'),
+    tblRow('PSA Hours (hrs)',dPsaHrs!=null?dPsaHrs.toFixed(1):'—'),
   ]);
   const s4spk=spkFromMo('psa','cbg_tot');
 
   // S5 Compressor & Dispatch
   const s5={id:'s5',clr:'#0e7490',nm:'Compressor',person:'Mr. Rajendra Kumar'};
   const s5rows=tbl(['Parameter','Actual','Target'],[
-    tblRow('Produced (kg)',fmtKg(dCBG)),
-    tblRow('Dispatched (kg)',fmtKg(dDisp)),
+    tblRow('Produced (kg)',fmtKg_(dCBG)),
+    tblRow('Dispatched (kg)',fmtKg_(dDisp)),
     tblRow('Dispatch Rate (%)',dDR!=null?fmtPct(dDR):'—',undefined,'≥95%',undefined,dDR!=null&&dDR<80),
     tblRow('Closing Stock (kg)',dStk),
   ]);
@@ -3451,10 +3456,10 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s6={id:'s6',clr:'#3f6212',nm:'Manure',person:'Mr. Vivek Kumar'};
   const drFeed=f.pm_feed&&drainTot?drainTot/(f.pm_feed*1000)*100:null;
   const s6rows=tbl(['Parameter','D1','D2'],[
-    tblRow('Drain Actual (m³)',fmtM3(drainD1),fmtM3(drainD2),fmtM3(d1r.drain_exp),fmtM3(d2r.drain_exp)),
+    tblRow('Drain Actual (m³)',fmtM3_(drainD1),fmtM3_(drainD2),fmtM3_(d1r.drain_exp),fmtM3_(d2r.drain_exp)),
     tblRow('Achievement (%)',drainAch!=null?fmtPct(drainAch):'—',undefined,undefined,undefined,drainAch!=null&&drainAch<80),
-    tblRow('SFOM (MT)',fmtMT(d1r.sfom),fmtMT(d2r.sfom)),
-    tblRow('LFOM (KL)',fmtKL(d1r.lfom),fmtKL(d2r.lfom)),
+    tblRow('SFOM (MT)',fmtMT_(d1r.sfom),fmtMT_(d2r.sfom)),
+    tblRow('LFOM (KL)',fmtKL_(d1r.lfom),fmtKL_(d2r.lfom)),
     tblRow('Drain % Feed (%)',drFeed!=null?fmtPct(drFeed):'—'),
   ]);
   const s6spk=spkFromMo('d1','drain_ac');
