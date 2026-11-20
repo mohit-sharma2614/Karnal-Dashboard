@@ -2005,7 +2005,7 @@ function renderSectionDay(sectionId){
       html+=`<div style="display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start;margin-bottom:14px">
         <div><table class="tbl"><thead><tr><th>Feedstock</th><th>Received</th></tr></thead><tbody>${procRows}</tbody></table></div>
         <div style="background:var(--bg2);border:1px solid var(--bdr);border-radius:8px;padding:12px 16px">
-          <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:6px">VENDOR-WISE SUPPLY${isDa?' <span style="font-size:9px;font-weight:400;color:var(--text3);text-transform:none">('+vendMo+' month totals)</span>':''}</div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:.6px;color:var(--text);margin-bottom:6px">VENDOR-WISE SUPPLY</div>
           ${vendorBlocks}
         </div>
       </div>`;
@@ -3589,9 +3589,11 @@ function renderS1(){
     const list=vend[cat]||[];
     const u=vendorUnits[cat]||'';
     if(!list.length) return '<span style="color:var(--text3);font-size:10px">—</span>';
-    const filtered=vendMo==='ALL'
-      ?list.map(v=>({name:v.name,total:v.total}))
-      :list.map(v=>({name:v.name,total:(v.byMonth?.[vendMo]||0)})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
+    const filtered=isDa
+      ?list.map(v=>({name:v.name,total:(v.byDay?.[curDay]||0)})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total)
+      :vendMo==='ALL'
+        ?list.map(v=>({name:v.name,total:v.total}))
+        :list.map(v=>({name:v.name,total:(v.byMonth?.[vendMo]||0)})).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
     if(!filtered.length) return '<span style="color:var(--text3);font-size:10px">No data this period</span>';
     return filtered.map(v=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:1px 0;border-bottom:1px solid var(--bdr)">
       <span style="font-size:10px;color:var(--text2)">${v.name}</span>
@@ -7222,14 +7224,15 @@ async function buildAnalyticsD() {
   const vendors={};
   for(const [cat,defs] of Object.entries(vendorDefs)){
     vendors[cat]=defs.map(v=>{
-      const byMonth={};
+      const byMonth={},byDay={};
       fb.forEach(r=>{
         const dt=toDate(r[0]); if(!dt) return;
         const mk=moKey(dt); if(!mk||!months.includes(mk)) return;
         byMonth[mk]=(byMonth[mk]||0)+(nv(r[v.i])||0);
+        const dk=dayKey(dt); if(dk) byDay[dk]=(byDay[dk]||0)+(nv(r[v.i])||0);
       });
       const total=Object.values(byMonth).reduce((s,x)=>s+x,0);
-      return{name:v.n,total,byMonth};
+      return{name:v.n,total,byMonth,byDay};
     }).filter(v=>v.total>0).sort((a,b)=>b.total-a.total);
   }
   const tgts={cbg_day:5400,cbg_month:162000,cbg_total:months.length*162000,cost_kg:75};
