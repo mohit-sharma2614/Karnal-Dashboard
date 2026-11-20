@@ -3083,7 +3083,7 @@ function renderOV(){
     ];
     const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.25,.45,.30][i])*100,0));
     _fillOVHealthRing(dHS,da+' 2026',dc,null);
-    const CBG_RATE=76; // ₹76/kg
+    const CBG_RATE=70.68; // ₹70.68/kg
     const dCapRev=Math.round(dDay*CBG_RATE);
     const dActRev=rv.cbg_rev||null;
     _fillOVKpis([
@@ -3153,7 +3153,7 @@ function renderOV(){
 
   // KPI panel
   const k2pct=tgtCBG>0?Math.round(tCBG/tgtCBG*100):null;
-  const CBG_RATE2=76; // ₹76/kg
+  const CBG_RATE2=70.68; // ₹70.68/kg
   const moCapRev=Math.round(tgtCBG*CBG_RATE2);
   // Actual Energy Revenue from Daily Revenue sheet (Total CBG Sale column)
   const moActRev=mo==='ALL'?D.finance.ytd_cbg_rev:(D.M.cbg_rev?.[MONTHS.indexOf(mo)]||null);
