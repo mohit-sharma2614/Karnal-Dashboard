@@ -3630,6 +3630,7 @@ function renderS1(){
   }
 
   // ── 2. Feedstock Fed — D1/D2 split table ─────────────────────
+  const s1CrossAnomalies=[];
   const fedDefs=[
     {nm:'Pressmud',k1:'pm_act',kf:'pm_feed',u:'MT',clr:'#1565C0'},
     {nm:'Cow Dung',k1:'cd_act',kf:'cd_feed',u:'MT',clr:'#2E7D32'},
@@ -3644,18 +3645,31 @@ function renderS1(){
     const fedRows=fedDefs.map(r=>{
       const d1v=getD1(r.k1), d2v=getD2(r.k1), tot=getFed(r.kf);
       d1Tot+=d1v; d2Tot+=d2v;
-      const pct=tot>0&&(d1v+d2v)>0?Math.min((d1v+d2v)/tot*100,200):0;
-      const bar60=Math.min(pct,100).toFixed(0);
-      const bClr=pct>=90?'#2E7D32':pct>=70?'#E65100':'#C62828';
-      return`<tr>
+      const actual=d1v+d2v;
+      const noActivity=tot===0&&actual===0;
+      const rawPct=tot>0&&actual>0?actual/tot*100:tot===0&&actual>0?999:0;
+      const bar60=Math.min(rawPct,100).toFixed(0);
+      // green 90–110%, amber 75–90% / 110–120%, red <75% or >120% or F&B=0 with actual>0
+      const bClr=noActivity?'var(--text3)':rawPct>=90&&rawPct<=110?'#2E7D32':rawPct>=75&&rawPct<=120?'#E65100':'#C62828';
+      const isAnom=!noActivity&&(rawPct<75||rawPct>120||rawPct===999);
+      if(isAnom){
+        const diff=actual-tot;
+        const note=rawPct===999?`D1+D2 reported ${actual.toFixed(1)} ${r.u} but F&B shows 0 — missing F&B entry`:
+          rawPct>110?`D1+D2 over-reports F&B by ${Math.abs(diff).toFixed(1)} ${r.u} (${rawPct.toFixed(0)}% of F&B)`:
+          `D1+D2 under-reports F&B by ${Math.abs(diff).toFixed(1)} ${r.u} (${rawPct.toFixed(0)}% of F&B)`;
+        s1CrossAnomalies.push({label:`${r.nm} (${r.u})`,date:isDa?curDay:mo,value:diff,pct:rawPct,note,isCross:true});
+      }
+      const anomBadge=isAnom?` <span style="font-size:9px;font-weight:800;background:#C62828;color:#fff;border-radius:3px;padding:1px 4px">⚠</span>`:'';
+      return`<tr${isAnom?` style="background:${rawPct>110?'rgba(198,40,40,.04)':'rgba(198,40,40,.04)'}"`:''}>
         <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
         <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1)+' '+r.u:'—'}</td>
         <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1)+' '+r.u:'—'}</td>
         <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
         <td style="width:25%"><div style="display:flex;align-items:center;gap:5px">
+          ${noActivity?'<span style="color:var(--text3);font-size:10px">—</span>':`
           <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
             <div style="width:${bar60}%;height:100%;background:${bClr};border-radius:3px"></div></div>
-          <span style="font-size:10px;color:${bClr};font-weight:700;min-width:30px">${pct.toFixed(0)}%</span>
+          <span style="font-size:10px;color:${bClr};font-weight:700;min-width:30px">${rawPct===999?'>999':rawPct.toFixed(0)}%${anomBadge}</span>`}
         </div></td>
       </tr>`;
     }).join('');
@@ -3740,46 +3754,65 @@ function renderS1(){
     </tr></thead><tbody>${balRows}</tbody></table>`;
   }
 
-  // ── 4. Anomaly Detection (month/YTD only) ────────────────────
+  // ── 4. Anomaly Detection ─────────────────────────────────────
   const anomalyEl=document.getElementById('s1_anomaly');
-  if(anomalyEl&&!isDa){
-    const _fd=mo==='ALL'?MONTHS:dDates('feed');
-    const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
-    const checks=[
-      {label:'Pressmud Received (MT)',arr:_fa('pm_in'),dates:_fd},
-      {label:'Grain Syrup Received (KL)',arr:_fa('gs_in'),dates:_fd},
-      {label:'CSL Received (KL)',arr:_fa('csl_in'),dates:_fd},
-      {label:'Cow Dung Received (MT)',arr:_fa('cd_in'),dates:_fd},
-      {label:'Spent Grain Received (MT)',arr:_fa('sg_in'),dates:_fd},
-      {label:'Apple Pomace Received (MT)',arr:_fa('ap_in'),dates:_fd},
-      {label:'Pressmud Fed (MT)',arr:_fa('pm_feed'),dates:_fd},
-      {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
-      {label:'CSL Fed (KL)',arr:_fa('csl_feed'),dates:_fd},
-      {label:'Cow Dung Fed (MT)',arr:_fa('cd_feed'),dates:_fd},
-      {label:'Spent Grain Fed (MT)',arr:_fa('sg_feed'),dates:_fd},
-      {label:'Apple Pomace Fed (MT)',arr:_fa('ap_feed'),dates:_fd},
-      // Balance columns — negative means fed more than available stock
-      {label:'Pressmud Balance (MT)',arr:_fa('pm_bal'),dates:_fd,isBal:true},
-      {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
-      {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
-      {label:'Cow Dung Balance (MT)',arr:_fa('cd_bal'),dates:_fd,isBal:true},
-      {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
-      {label:'Apple Pomace Balance (MT)',arr:_fa('ap_bal'),dates:_fd,isBal:true},
-    ];
-    const anomalies=[];
-    checks.forEach(c=>{
-      (c.arr||[]).forEach((v,i)=>{
-        if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal});
+  if(anomalyEl){
+    // start with cross-source discrepancies collected from fed table
+    const anomalies=[...s1CrossAnomalies];
+    // add negative-value checks (month/YTD only — per-day arrays not available in day view)
+    if(!isDa){
+      const _fd=mo==='ALL'?MONTHS:dDates('feed');
+      const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
+      const checks=[
+        {label:'Pressmud Received (MT)',arr:_fa('pm_in'),dates:_fd},
+        {label:'Grain Syrup Received (KL)',arr:_fa('gs_in'),dates:_fd},
+        {label:'CSL Received (KL)',arr:_fa('csl_in'),dates:_fd},
+        {label:'Cow Dung Received (MT)',arr:_fa('cd_in'),dates:_fd},
+        {label:'Spent Grain Received (MT)',arr:_fa('sg_in'),dates:_fd},
+        {label:'Apple Pomace Received (MT)',arr:_fa('ap_in'),dates:_fd},
+        {label:'Pressmud Fed (MT)',arr:_fa('pm_feed'),dates:_fd},
+        {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
+        {label:'CSL Fed (KL)',arr:_fa('csl_feed'),dates:_fd},
+        {label:'Cow Dung Fed (MT)',arr:_fa('cd_feed'),dates:_fd},
+        {label:'Spent Grain Fed (MT)',arr:_fa('sg_feed'),dates:_fd},
+        {label:'Apple Pomace Fed (MT)',arr:_fa('ap_feed'),dates:_fd},
+        {label:'Pressmud Balance (MT)',arr:_fa('pm_bal'),dates:_fd,isBal:true},
+        {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
+        {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
+        {label:'Cow Dung Balance (MT)',arr:_fa('cd_bal'),dates:_fd,isBal:true},
+        {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
+        {label:'Apple Pomace Balance (MT)',arr:_fa('ap_bal'),dates:_fd,isBal:true},
+      ];
+      checks.forEach(c=>{
+        (c.arr||[]).forEach((v,i)=>{
+          if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal});
+        });
       });
-    });
+    }
     if(!anomalies.length){
       anomalyEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px">
         <span style="font-size:18px">✓</span>
         <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
-        <div style="font-size:11px;color:var(--text3)">No negative values detected in received or fed data for this period.</div></div>
+        <div style="font-size:11px;color:var(--text3)">No discrepancies or negative values detected for this period.</div></div>
       </div>`;
     } else {
+      const crossCount=anomalies.filter(a=>a.isCross).length;
+      const negCount=anomalies.filter(a=>!a.isCross).length;
+      const summary=[];
+      if(crossCount) summary.push(`${crossCount} cross-source discrepanc${crossCount===1?'y':'ies'}`);
+      if(negCount) summary.push(`${negCount} negative value${negCount===1?'':'s'}`);
       const rows=anomalies.map(a=>{
+        if(a.isCross){
+          const pClr=a.pct>120||a.pct===999?'#C62828':a.pct<75?'#C62828':'#E65100';
+          const pTxt=a.pct===999?'>999%':a.pct!=null?a.pct.toFixed(0)+'%':'—';
+          return`<tr>
+            <td style="font-weight:700;color:${pClr}">${a.label}</td>
+            <td style="font-variant-numeric:tabular-nums">${a.date}</td>
+            <td style="color:${pClr};font-weight:700;font-variant-numeric:tabular-nums">${pTxt}</td>
+            <td style="font-size:10px;color:var(--text2)">${a.note}</td>
+            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#E65100;color:#fff;border-radius:3px;white-space:nowrap">⚠ CROSS-SOURCE</span></td>
+          </tr>`;
+        }
         const isB=a.isBal;
         const note=isB?'Stock overdrawn — fed more than available balance':'Negative received/fed entry — possible data entry error';
         return`<tr>
@@ -3791,9 +3824,9 @@ function renderS1(){
         </tr>`;
       }).join('');
       anomalyEl.innerHTML=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#B71C1C;font-size:11px;font-weight:700">
-        ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} detected — negative values in feedstock data. Verify with Mr. Vivek Kumar.
+        ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} detected: ${summary.join(', ')}.
       </div>
-      <table class="tbl"><thead><tr><th>Metric</th><th>Period</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
+      <table class="tbl"><thead><tr><th>Feedstock</th><th>Period</th><th>Value / %</th><th>Note</th><th>Type</th></tr></thead>
       <tbody>${rows}</tbody></table>`;
     }
   }
