@@ -3651,7 +3651,7 @@ function renderS1(){
       const bar60=Math.min(rawPct,100).toFixed(0);
       // green 90–110%, amber 75–90% / 110–120%, red <75% or >120% or F&B=0 with actual>0
       const bClr=noActivity?'var(--text3)':rawPct>=90&&rawPct<=110?'#2E7D32':rawPct>=75&&rawPct<=120?'#E65100':'#C62828';
-      const isAnom=!noActivity&&(rawPct<75||rawPct>120||rawPct===999);
+      const isAnom=!noActivity&&(rawPct<90||rawPct>110||rawPct===999);
       if(isAnom){
         const diff=actual-tot;
         const note=rawPct===999?`D1+D2 reported ${actual.toFixed(1)} ${r.u} but F&B shows 0 — missing F&B entry`:
