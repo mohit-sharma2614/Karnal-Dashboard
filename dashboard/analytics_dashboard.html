@@ -3303,25 +3303,29 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const tblHdr=(cols)=>`<tr style="border-bottom:2px solid var(--bdr)">${cols.map(c=>`<th style="padding:4px 6px;font-size:10px;font-weight:800;letter-spacing:.5px;color:var(--ink);text-align:left">${c}</th>`).join('')}</tr>`;
   const tbl=(hdr,rows)=>`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse"><thead>${tblHdr(hdr)}</thead><tbody>${rows.join('')}</tbody></table></div>`;
 
-  // Spark mini-chart — full-width, range-scaled so variation is always visible
+  // Spark mini-chart — full-width, range-scaled, with hover value tooltip
   const sparkSVG=(vals,color)=>{
     if(!vals||vals.length<2)return'';
     const mn=Math.min(...vals),mx=Math.max(...vals);
     const range=mx-mn||1;
     const W=200,H=36,gap=3;
     const bw=(W-(vals.length-1)*gap)/vals.length;
+    const fv=v=>{if(v==null)return'—';if(v>=1000)return Math.round(v).toLocaleString('en-IN');if(v>=100)return Math.round(v)+'';return v%1===0?v+'':v.toFixed(1);};
     const bars=vals.map((v,i)=>{
       const h=Math.max(3,Math.round(((v-mn)/range)*(H-6))+3);
       const x=(i*(bw+gap)).toFixed(1);
-      return`<rect x="${x}" y="${(H-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="2" fill="${color}" opacity=".85"/>`;
+      return`<rect class="spk-bar" data-v="${fv(v)}" x="${x}" y="${(H-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h}" rx="2" fill="${color}" opacity=".85"/>`;
     }).join('');
-    return`<svg width="100%" height="36" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="display:block;margin-top:4px">${bars}</svg>`;
+    return`<div class="spk-wrap" style="position:relative"><svg class="spk-chart" width="100%" height="36" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" style="display:block">${bars}</svg><div class="spk-tip" style="display:none;position:absolute;top:-26px;background:#1e293b;color:#fff;font-size:10px;font-weight:600;padding:3px 8px;border-radius:5px;pointer-events:none;white-space:nowrap;z-index:20;transform:translateX(-50%)"></div></div>`;
   };
 
   // Card builder
   const _exMap={s1:{lbl:'Feedstock Procurement',hint:'Supply · Mix · Inventory · Utilization'},s2:{lbl:'Lab & Process',hint:'OLR · pH · IA/PA · TS/VS · Temperature'},s3:{lbl:'Production',hint:'Biogas · D1/D2 output · Vent/Flare'},s4:{lbl:'Purification',hint:'PSA efficiency · CH4 purity · hours'},s5:{lbl:'Compressor',hint:'CBG dispatch · utilization · trips'},s6:{lbl:'Manure',hint:'Drain · SFOM · LFOM · Revenue'}};
   const card=(sec,content,sparkVals,sparkColor,sparkLabel)=>{
-    const spk=sparkVals&&sparkVals.length>1?`<div style="margin-top:4px"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">${sparkLabel||''}</div>${sparkSVG(sparkVals,sparkColor||'var(--blue)')}</div>`:'';
+    // Sparkline section is OUTSIDE flex:1 content so it always sits at the same height across card pairs
+    const spkSection=sparkVals&&sparkVals.length>1
+      ?`<div style="padding:0 14px 10px"><div style="font-size:9px;color:var(--text3);margin-bottom:2px">${sparkLabel||''}</div>${sparkSVG(sparkVals,sparkColor||'var(--blue)')}</div>`
+      :`<div style="padding:0 14px 10px;height:58px"></div>`;
     const ex=_exMap[sec.id]||{lbl:sec.nm,hint:''};
     const foot=`<div class="sc-foot"><button class="explore-btn" onclick="_goTab('${sec.id}')"><div class="eb-l"><span class="eb-dot" style="background:${sec.clr}"></span><div><div class="eb-ttl">Explore ${ex.lbl} Insights</div><div class="eb-hint">${ex.hint}</div></div></div><span class="eb-arrow">→</span></button></div>`;
     return`<div style="background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${sec.clr};border-radius:10px;overflow:hidden;display:flex;flex-direction:column">
@@ -3330,8 +3334,9 @@ function _renderOVSectionsDaInner(da,rec,sg){
           <div style="font-size:11px;font-weight:700;color:${sec.clr};letter-spacing:.3px">${sec.nm}</div>
           <div style="font-size:9px;color:var(--text3)">${da} 2026</div>
         </div>
-        ${content}${spk}
+        ${content}
       </div>
+      ${spkSection}
       ${foot}
     </div>`;
   };
@@ -3502,6 +3507,23 @@ function _renderOVSectionsDaInner(da,rec,sg){
     {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Total Production Cost'},
   ];
   sg.innerHTML=SECS_DA.filter(({sec})=>sec.id!=='s7'&&sec.id!=='s8').map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
+
+  // Wire sparkline hover tooltips
+  sg.querySelectorAll('.spk-chart').forEach(svg=>{
+    const wrap=svg.parentElement;
+    const tip=wrap.querySelector('.spk-tip');
+    if(!tip)return;
+    svg.querySelectorAll('.spk-bar').forEach(r=>{
+      r.addEventListener('mouseenter',()=>{
+        const x=parseFloat(r.getAttribute('x'));
+        const w=parseFloat(r.getAttribute('width'));
+        tip.textContent=r.dataset.v;
+        tip.style.left=((x+w/2)/200*100)+'%';
+        tip.style.display='block';
+      });
+      r.addEventListener('mouseleave',()=>{tip.style.display='none';});
+    });
+  });
 } // end _renderOVSectionsDaInner
 
 // ═══ S1 FEEDSTOCK ════════════════════════════════════════════
