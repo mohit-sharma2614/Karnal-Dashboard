@@ -2823,7 +2823,7 @@ function _fillOVHealthRing(hscore,period,comps,spkVals){
   const pdEl=document.getElementById('ov_hs_period');if(pdEl)pdEl.textContent=period||'';
   // sparkline
   const spkEl=document.getElementById('ov_hs_spk');
-  if(spkEl&&spkVals&&spkVals.length>1)spkEl.innerHTML=spkSVG(spkVals,hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c',200,32);
+  if(spkEl){if(spkVals&&spkVals.length>1)spkEl.innerHTML=spkSVG(spkVals,hscore>=80?'#0d7d5f':hscore>=65?'#b45309':'#be1c3c',200,32);else spkEl.innerHTML='';}
   // badge
   const bdEl=document.getElementById('ov_hs_badge');
   if(bdEl){const bc=hscore>=80?'#ecfdf5':hscore>=65?'#fffbeb':'#fff0f3';const tc=hscore>=80?'#065f46':hscore>=65?'#92400e':'#881337';bdEl.innerHTML=`<span style="display:inline-block;padding:2px 8px;border-radius:9999px;font-size:10px;font-weight:700;background:${bc};color:${tc};letter-spacing:.3px">${hst}</span>`;}
@@ -3094,7 +3094,7 @@ function renderOV(){
       {bar:'#1b8a4a',l:'Total Revenue',v:dRev?fmtL(dRev):'—',s:'CBG + Manure'},
       {bar:'#c67c00',l:'Total Production Cost',v:dCost!=null?fmtR(dCost):'—',s:''},
       {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
-      {bar:'#9ca3af',l:'Plant Uptime',v:'In Progress',s:'Formula under review',d:null,dc:'b'},
+      {bar:'#1b8a4a',l:'Total CBG Production',v:dp.cbg_tot!=null?fmtN(Math.round(dp.cbg_tot))+' kg':'—',s:da+' 2026'},
     ]);
     // Render section cards with daily data
     _renderOVSectionsDa(da,rec);
@@ -3147,8 +3147,16 @@ function renderOV(){
   const wts=[.25,.45,.30];
   const hs=Math.round(hComps.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*wts[i]*100,0));
   const hPeriod=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
-  // 7-period sparkline: last 7 months' health scores approximated by cbg achievement
-  const cbgMo=D.M.cbg||[];const spkRaw=cbgMo.filter(v=>v!=null&&v>0).slice(-7).map(v=>Math.min(100,v/TGT.cbg_month*100));
+  // 7-period sparkline: real 3-component health score per month, window ending at selected month
+  const _spkCbg=D.M.cbg||[],_spkRbg=D.M.rbg_tot||[],_spkPsa=D.M.psa_eff_day||[];
+  const hsPerMo=MONTHS.map((m,i)=>{
+    const r=_spkRbg[i]!=null?_spkRbg[i]/(13200*(MDAYS[m]||30))*100:0;
+    const c=_spkCbg[i]!=null?_spkCbg[i]/TGT.cbg_month*100:0;
+    const p=_spkPsa[i]!=null?(_spkPsa[i]/0.4583)*100:0;
+    return Math.round(Math.min(100,r)*0.25+Math.min(100,c)*0.45+Math.min(100,p)*0.30);
+  });
+  const _spkEnd=mo==='ALL'?hsPerMo.length-1:MONTHS.indexOf(mo);
+  const spkRaw=_spkEnd>=0?hsPerMo.slice(Math.max(0,_spkEnd-6),_spkEnd+1).filter(v=>v>0):[];
   _fillOVHealthRing(hs,hPeriod,hComps,spkRaw.length>1?spkRaw:null);
 
   // KPI panel
@@ -3168,7 +3176,7 @@ function renderOV(){
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
     {bar:'#c67c00',l:'Total Production Cost',v:fmtR(totalCost),s:''},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
-    {bar:'#9ca3af',l:'Plant Uptime',v:'In Progress',s:'Formula under review',d:null,dc:'b'},
+    {bar:'#1b8a4a',l:'Total CBG Production',v:(()=>{const p=mo==='ALL'?D.kpis.ytd_cbg:(D.M.cbg?.[MONTHS.indexOf(mo)]||null);return p!=null?fmtN(Math.round(p))+' kg':'—';})(),s:mo==='ALL'?'Annual total':mo+' 2026 total'},
   ]);
 
   // Strip
