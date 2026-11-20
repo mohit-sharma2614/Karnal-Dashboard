@@ -3700,66 +3700,10 @@ function renderS1(){
     </div>`:'';
   }
 
-  if(!isDa){
-  const _ft=document.getElementById('ct_s1_feed');if(_ft)_ft.textContent='Feedstock Fed per Day/Month';
-  const _ct=document.getElementById('ct_s1_cost');if(_ct)_ct.textContent='Monthly Feedstock Cost (₹)';
-  const _bt=document.getElementById('ct_s1_bpp');if(_bt)_bt.textContent='Feedstock BPP Contribution — D1+D2 (m³)';
-  const labels=mo==='ALL'?MONTHS:dDates('feed');
-  const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
-  const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
-  const cslFeed=mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
-  const cdFeed=mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed');
-  const sgFeed=mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed');
-  bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan),bDS('Spent Grain',sgFeed,C.orange)],true);
-
-  // ── 3. Inventory Balance — zone classification ────────────────
-  const thresholds={pm:{v:500,u:'MT'},cd:{v:40,u:'MT'},csl:{v:30,u:'KL'},sg:{v:30,u:'MT'},gs:{v:30,u:'KL'},ap:{v:50,u:'MT'}};
-  const balDefs=[
-    {nm:'Pressmud',k:'pm',clr:'#1565C0'},{nm:'Grain Syrup',k:'gs',clr:'#00695C'},
-    {nm:'CSL',k:'csl',clr:'#6A1B00'},{nm:'Cow Dung',k:'cd',clr:'#2E7D32'},
-    {nm:'Spent Grain',k:'sg',clr:'#E65100'},{nm:'Apple Pomace',k:'ap',clr:'#6A1B9A'},
-  ];
-  const balEl=document.getElementById('s1_balance');
-  const balHdr=document.getElementById('s1_bal_hdr');
-  if(balEl){
-    let worstZone=0; // 0=safe,1=warn,2=danger
-    const balRows=balDefs.map(r=>{
-      const bal=s[r.k]||0; const thr=thresholds[r.k];
-      const pct=thr.v>0?bal/thr.v*100:0;
-      const zone=pct>=60?0:pct>=45?1:2;
-      if(zone>worstZone) worstZone=zone;
-      const zClr=zone===0?'#2E7D32':zone===1?'#E65100':'#C62828';
-      const zTxt=zone===0?'SAFE ZONE':zone===1?'WARNING ZONE':'DANGER ZONE';
-      const barW=Math.min(pct,100).toFixed(0);
-      return`<tr>
-        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
-        <td style="font-weight:700;font-variant-numeric:tabular-nums">${bal.toFixed(1)} ${thr.u}</td>
-        <td style="color:var(--text3);font-variant-numeric:tabular-nums">${thr.v} ${thr.u}</td>
-        <td style="font-weight:700;font-variant-numeric:tabular-nums;color:${zClr}">${pct.toFixed(1)}%</td>
-        <td><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;background:${zClr};color:#fff;letter-spacing:.4px">${zTxt}</span></td>
-        <td style="width:22%"><div style="display:flex;align-items:center;gap:5px">
-          <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
-            <div style="width:${barW}%;height:100%;background:${zClr};border-radius:3px"></div></div>
-          <span style="font-size:10px;color:var(--text3);min-width:28px">${pct.toFixed(0)}%</span>
-        </div></td>
-      </tr>`;
-    }).join('');
-    // Update header color to worst zone
-    if(balHdr){
-      const hdrClr=worstZone===0?'linear-gradient(120deg,#2E7D32,#388E3C)':worstZone===1?'linear-gradient(120deg,#E65100,#F57C00)':'linear-gradient(120deg,#B71C1C,#C62828)';
-      balHdr.style.background=hdrClr;
-    }
-    balEl.innerHTML=`<table class="tbl"><thead><tr>
-      <th>Feedstock</th><th>Current Balance</th><th>Threshold</th><th>% of Threshold</th><th>Zone</th><th style="width:22%">Level</th>
-    </tr></thead><tbody>${balRows}</tbody></table>`;
-  }
-
-  // ── 4. Anomaly Detection ─────────────────────────────────────
+  // ── 4. Anomaly Detection (always runs — cross-source from fed table + month negatives) ──
   const anomalyEl=document.getElementById('s1_anomaly');
   if(anomalyEl){
-    // start with cross-source discrepancies collected from fed table
     const anomalies=[...s1CrossAnomalies];
-    // add negative-value checks (month/YTD only — per-day arrays not available in day view)
     if(!isDa){
       const _fd=mo==='ALL'?MONTHS:dDates('feed');
       const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
@@ -3829,6 +3773,60 @@ function renderS1(){
       <table class="tbl"><thead><tr><th>Feedstock</th><th>Period</th><th>Value / %</th><th>Note</th><th>Type</th></tr></thead>
       <tbody>${rows}</tbody></table>`;
     }
+  }
+
+  if(!isDa){
+  const _ft=document.getElementById('ct_s1_feed');if(_ft)_ft.textContent='Feedstock Fed per Day/Month';
+  const _ct=document.getElementById('ct_s1_cost');if(_ct)_ct.textContent='Monthly Feedstock Cost (₹)';
+  const _bt=document.getElementById('ct_s1_bpp');if(_bt)_bt.textContent='Feedstock BPP Contribution — D1+D2 (m³)';
+  const labels=mo==='ALL'?MONTHS:dDates('feed');
+  const pmFeed=mo==='ALL'?mArr('pm_feed'):dArr('feed','pm_feed');
+  const gsFeed=mo==='ALL'?mArr('gs_feed'):dArr('feed','gs_feed');
+  const cslFeed=mo==='ALL'?mArr('csl_feed'):dArr('feed','csl_feed');
+  const cdFeed=mo==='ALL'?mArr('cd_feed'):dArr('feed','cd_feed');
+  const sgFeed=mo==='ALL'?mArr('sg_feed'):dArr('feed','sg_feed');
+  bar('c_s1_feed',labels,[bDS('Pressmud',pmFeed,C.blue),bDS('Cow Dung',cdFeed,C.teal),bDS('CSL',cslFeed,C.indigo),bDS('Grain Syrup',gsFeed,C.cyan),bDS('Spent Grain',sgFeed,C.orange)],true);
+
+  // ── 3. Inventory Balance — zone classification ────────────────
+  const thresholds={pm:{v:500,u:'MT'},cd:{v:40,u:'MT'},csl:{v:30,u:'KL'},sg:{v:30,u:'MT'},gs:{v:30,u:'KL'},ap:{v:50,u:'MT'}};
+  const balDefs=[
+    {nm:'Pressmud',k:'pm',clr:'#1565C0'},{nm:'Grain Syrup',k:'gs',clr:'#00695C'},
+    {nm:'CSL',k:'csl',clr:'#6A1B00'},{nm:'Cow Dung',k:'cd',clr:'#2E7D32'},
+    {nm:'Spent Grain',k:'sg',clr:'#E65100'},{nm:'Apple Pomace',k:'ap',clr:'#6A1B9A'},
+  ];
+  const balEl=document.getElementById('s1_balance');
+  const balHdr=document.getElementById('s1_bal_hdr');
+  if(balEl){
+    let worstZone=0; // 0=safe,1=warn,2=danger
+    const balRows=balDefs.map(r=>{
+      const bal=s[r.k]||0; const thr=thresholds[r.k];
+      const pct=thr.v>0?bal/thr.v*100:0;
+      const zone=pct>=60?0:pct>=45?1:2;
+      if(zone>worstZone) worstZone=zone;
+      const zClr=zone===0?'#2E7D32':zone===1?'#E65100':'#C62828';
+      const zTxt=zone===0?'SAFE ZONE':zone===1?'WARNING ZONE':'DANGER ZONE';
+      const barW=Math.min(pct,100).toFixed(0);
+      return`<tr>
+        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+        <td style="font-weight:700;font-variant-numeric:tabular-nums">${bal.toFixed(1)} ${thr.u}</td>
+        <td style="color:var(--text3);font-variant-numeric:tabular-nums">${thr.v} ${thr.u}</td>
+        <td style="font-weight:700;font-variant-numeric:tabular-nums;color:${zClr}">${pct.toFixed(1)}%</td>
+        <td><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;background:${zClr};color:#fff;letter-spacing:.4px">${zTxt}</span></td>
+        <td style="width:22%"><div style="display:flex;align-items:center;gap:5px">
+          <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+            <div style="width:${barW}%;height:100%;background:${zClr};border-radius:3px"></div></div>
+          <span style="font-size:10px;color:var(--text3);min-width:28px">${pct.toFixed(0)}%</span>
+        </div></td>
+      </tr>`;
+    }).join('');
+    // Update header color to worst zone
+    if(balHdr){
+      const hdrClr=worstZone===0?'linear-gradient(120deg,#2E7D32,#388E3C)':worstZone===1?'linear-gradient(120deg,#E65100,#F57C00)':'linear-gradient(120deg,#B71C1C,#C62828)';
+      balHdr.style.background=hdrClr;
+    }
+    balEl.innerHTML=`<table class="tbl"><thead><tr>
+      <th>Feedstock</th><th>Current Balance</th><th>Threshold</th><th>% of Threshold</th><th>Zone</th><th style="width:22%">Level</th>
+    </tr></thead><tbody>${balRows}</tbody></table>`;
   }
 
   // ── Cost & BPP charts ─────────────────────────────────────────
