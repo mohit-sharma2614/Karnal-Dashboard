@@ -3286,8 +3286,13 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const fmtM3_=v=>v!=null?fmtN(Math.round(v)):'—';
   const clr=(v,g,w)=>v==null?'var(--text2)':v>=g?'#16a34a':v>=w?'#d97706':'#dc2626';
 
-  // Build last-7-days sparkline from monthly arrays (approximate)
-  const spk7=(arr)=>{if(!arr||!arr.length)return[];const a=arr.filter(v=>v!=null);return a.slice(-7);};
+  // Day-aware sparkline: 7 days ending on the selected day
+  const daMo=da.split('-')[1];                      // 'Oct'
+  const daIdx=parseInt(da.split('-')[0])-1;         // 0-based index (day 14 → 13)
+  const daNum=daIdx+1;
+  const spkStart=Math.max(1,daNum-6);
+  // Label suffix shows auditable date range, e.g. "8-Oct → 14-Oct"
+  const spkRng=spkStart===daNum?daNum+'-'+daMo:spkStart+'-'+daMo+' → '+daNum+'-'+daMo;
 
   // Row builder for D1/D2 comparison table
   const tblRow=(p,d1,d2,e1,e2,d1r_flag,d2r_flag)=>{
@@ -3359,14 +3364,13 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const dCpk=dCost&&dCBG&&dCBG>0?dCost/dCBG:null;
   const dStk=rv.cbg_stock!=null?fmtKg(rv.cbg_stock):'—';
 
-  // Helper: last 7 daily values for a key, scanning all months
+  // 7 daily values ending on the selected day, from that day's month
   const spkFromMo=(section,key)=>{
-    const mList=D.months||MONTHS;
-    for(const m of mList){
-      const arr=(D.D?.[section]?.[m]||{})[key];
-      if(arr&&arr.some(v=>v>0)) return arr.slice(-7).map(v=>v||0);
+    const arr=(D.D?.[section]?.[daMo]||{})[key];
+    if(arr&&arr.some(v=>v!=null&&v>0)){
+      return arr.slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
     }
-    return (D.M[key]||[]).slice(-7).map(v=>v||0);
+    return[];
   };
 
   // S1 Feedstock — daily values, same 5-col layout as monthly card
@@ -3404,11 +3408,11 @@ function _renderOVSectionsDaInner(da,rec,sg){
       ${_td('<b style="color:'+(_s1totBal>=0?'#0e7490':'#dc2626')+'">'+(_s1totBal>=0?'+':'')+fmtN(Math.round(_s1totBal))+'</b>')}
       ${_td(_s1up!=null?'<b style="color:'+_uClr(_s1up)+'">'+_s1up+'%</b>':'—')}
     </tr></tbody></table></div>`;
-  // Sparkline: last 7 days of total feed for this month
-  const curMoFeed=curMonth!=='ALL'?(D.D.feed?.[curMonth]||{}):{};
-  const pmArr7=(curMoFeed.pm_feed||[]).slice(-7).map(v=>v||0);
-  const cdArr7=(curMoFeed.cd_feed||[]).slice(-7).map(v=>v||0);
-  const s1spkVals=pmArr7.length?pmArr7.map((v,i)=>v+(cdArr7[i]||0)):spk7(D.M.pm_feed||[]);
+  // Sparkline: 7 days of total feed ending on selected day
+  const curMoFeed=(D.D.feed?.[daMo]||{});
+  const pmArr7=(curMoFeed.pm_feed||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
+  const cdArr7=(curMoFeed.cd_feed||[]).slice(Math.max(0,daIdx-6),daIdx+1).map(v=>v||0);
+  const s1spkVals=pmArr7.length?pmArr7.map((v,i)=>v+(cdArr7[i]||0)):[];
 
   // S2 Lab & Process
   const s2={id:'s2',clr:'#1a56db',nm:'Lab & Process',person:'Dr. Shikha / Mr. Jatin'};
@@ -3497,13 +3501,13 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s8spk=(D.M.total_cost||[]).filter(v=>v!=null&&v!==0).slice(-7);
 
   const SECS_DA=[
-    {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:'7-day PM+CD Feed (MT)'},
-    {sec:s2,content:s2rows,spk:s2spk,spkClr:'#d97706',spkLbl:'7-day Digester Temp D1 (°C)'},
-    {sec:s3,content:s3rows,spk:s3spk,spkClr:'#0e7490',spkLbl:'7-day Biogas (m³)'},
-    {sec:s4,content:s4rows,spk:s4spk,spkClr:'#6d28d9',spkLbl:'7-day PSA Efficiency %'},
-    {sec:s5,content:s5rows,spk:s5spk,spkClr:'#0e7490',spkLbl:'7-day Dispatch Rate'},
-    {sec:s6,content:s6rows,spk:s6spk,spkClr:'#3f6212',spkLbl:'7-day Drain Achievement %'},
-    {sec:s7,content:s7rows,spk:s7spk,spkClr:'#b45309',spkLbl:'7-day Dispatch Rate'},
+    {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:`PM+CD Feed (MT) · ${spkRng}`},
+    {sec:s2,content:s2rows,spk:s2spk,spkClr:'#d97706',spkLbl:`Digester Temp D1 (°C) · ${spkRng}`},
+    {sec:s3,content:s3rows,spk:s3spk,spkClr:'#0e7490',spkLbl:`CBG Production (kg) · ${spkRng}`},
+    {sec:s4,content:s4rows,spk:s4spk,spkClr:'#6d28d9',spkLbl:`CBG Production (kg) · ${spkRng}`},
+    {sec:s5,content:s5rows,spk:s5spk,spkClr:'#0e7490',spkLbl:`CBG Dispatched (kg) · ${spkRng}`},
+    {sec:s6,content:s6rows,spk:s6spk,spkClr:'#3f6212',spkLbl:`Drain Actual D1 (m³) · ${spkRng}`},
+    {sec:s7,content:s7rows,spk:s7spk,spkClr:'#b45309',spkLbl:`CBG Dispatched (kg) · ${spkRng}`},
     {sec:s8,content:s8rows,spk:s8spk,spkClr:'#9f1239',spkLbl:'Monthly Total Production Cost'},
   ];
   sg.innerHTML=SECS_DA.filter(({sec})=>sec.id!=='s7'&&sec.id!=='s8').map(({sec,content,spk,spkClr,spkLbl})=>card(sec,content,spk,spkClr,spkLbl)).join('');
