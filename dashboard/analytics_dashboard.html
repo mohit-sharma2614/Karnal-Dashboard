@@ -3607,7 +3607,7 @@ function renderS1(){
       const v=getIn(r.k);
       return`<tr>
         <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
-        <td style="font-variant-numeric:tabular-nums;font-weight:700">${v>0?fmtN(v)+' '+r.u:'—'}</td>
+        <td style="font-variant-numeric:tabular-nums;font-weight:700">${v>0?v.toFixed(1)+' '+r.u:'—'}</td>
       </tr>`;
     }).join('');
     // vendor blocks per feedstock (PM has most vendors)
