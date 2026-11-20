@@ -3400,8 +3400,10 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const _s1totOB=_s1defs.some(r=>r.cb!=null)?_s1defs.reduce((s,r)=>{const ob=r.cb!=null?r.cb-r.proc+r.fed:0;return s+ob;},0):null;
   const _s1totCB=_s1defs.some(r=>r.cb!=null)?_s1defs.reduce((s,r)=>s+(r.cb!=null?r.cb:0),0):null;
   const s1rows=`<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
-    <thead><tr>${_th}OPENING BAL</th>${_th}PROCURED</th>${_th}FED</th>${_th}CLOSING BAL</th></tr></thead>
-    <tbody><tr style="background:var(--bg3)">
+    <thead><tr>${_th}FEEDSTOCK</th>${_th}OPENING BAL</th>${_th}PROCURED</th>${_th}FED</th>${_th}CLOSING BAL</th></tr></thead>
+    <tbody>${_s1rows}
+    <tr style="border-top:2px solid var(--bdr);background:var(--bg3)">
+      ${_td('<b>Total</b>')}
       ${_td(_s1totOB!=null?'<b>'+_fmtBal(_s1totOB)+'</b>':'—')}
       ${_td('<b>'+fmtN(Math.round(_s1totProc))+'</b>')}
       ${_td('<b>'+fmtN(Math.round(_s1totFed))+'</b>')}
@@ -3521,7 +3523,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s8spk=(D.M.total_cost||[]).filter(v=>v!=null&&v!==0).slice(-7);
 
   const SECS_DA=[
-    {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:`Total Feed PM+CD+GS+CSL+SG+AP (MT) · ${spkRng}`},
+    {sec:s1,content:s1rows,spk:s1spkVals,spkClr:'#0d7d5f',spkLbl:`Total Feed (MT) · ${spkRng}`},
     {sec:s2,content:s2rows,spk:s2spk,spkClr:'#d97706',spkLbl:`Digester Temp D1 (°C) · ${spkRng}`},
     {sec:s3,content:s3rows,spk:s3spk,spkClr:'#0e7490',spkLbl:`CBG Production (kg) · ${spkRng}`},
     {sec:s4,content:s4rows,spk:s4spk,spkClr:'#6d28d9',spkLbl:`PSA Efficiency (%) · ${spkRng}`},
