@@ -3172,13 +3172,13 @@ function renderOV(){
   const contractSub=mo==='ALL'?'Full-year · ID: P-LEKPL':mo+' · ID: P-LEKPL';
   _fillOVKpis([
     {bar:'#1565C0',l:contractLbl,v:fmtN(tgtCBG)+' kg',s:contractSub},
-    {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'Annual total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of contract qty':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
     {bar:'#6d28d9',l:'Capacity Revenue',v:fmtR(moCapRev),s:''},
-    {bar:'#0e7490',l:'Actual Energy Revenue',v:moActRev!=null?fmtR(moActRev):'—',s:'',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#1b8a4a',l:'Total Revenue',v:fmtL(totalRev),s:'CBG + SFOM + LFOM',pb:totalRev>0&&D.finance.ytd_rev>0?Math.round(totalRev/D.finance.ytd_rev*100):null},
+    {bar:'#1b8a4a',l:'Total CBG Production',v:(()=>{const p=mo==='ALL'?D.kpis.ytd_cbg:(D.M.cbg?.[MONTHS.indexOf(mo)]||null);return p!=null?fmtN(Math.round(p))+' kg':'—';})(),s:mo==='ALL'?'Annual total':mo+' 2026 total'},
+    {bar:'#1b8a4a',l:'Actual Offtake : Actual CBG Dispatch',v:fmtN(Math.round(tCBG))+' kg',s:mo==='ALL'?'Annual total':mo+' 2026 total',d:k2pct!=null?k2pct+'% of contract qty':null,dc:k2pct>=90?'g':k2pct>=75?'a':'r'},
+    {bar:'#0e7490',l:'Actual Energy Revenue',v:moActRev!=null?fmtR(moActRev):'—',s:'',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#c67c00',l:'Total Production Cost',v:fmtR(totalCost),s:''},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
-    {bar:'#1b8a4a',l:'Total CBG Production',v:(()=>{const p=mo==='ALL'?D.kpis.ytd_cbg:(D.M.cbg?.[MONTHS.indexOf(mo)]||null);return p!=null?fmtN(Math.round(p))+' kg':'—';})(),s:mo==='ALL'?'Annual total':mo+' 2026 total'},
   ]);
 
   // Strip
