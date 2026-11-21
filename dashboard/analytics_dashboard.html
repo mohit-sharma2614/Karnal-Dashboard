@@ -3775,11 +3775,22 @@ function renderS1(){
         {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
         {label:'Apple Pomace Balance (MT)',arr:_fa('ap_bal'),dates:_fd,isBal:true},
       ];
-      negChecks.forEach(c=>{
-        (c.arr||[]).forEach((v,i)=>{
-          if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal,isNeg:true});
+      if(mo==='ALL'){
+        negChecks.forEach(c=>{
+          (c.arr||[]).forEach((v,i)=>{
+            if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal,isNeg:true});
+          });
         });
-      });
+      } else {
+        // Month view: consolidate per feedstock — 1 row per feedstock, not 1 per day
+        negChecks.forEach(c=>{
+          const negDays=(c.arr||[]).map((v,i)=>({v,d:c.dates?.[i]||'—'})).filter(x=>x.v!=null&&x.v<0);
+          if(!negDays.length) return;
+          const worst=negDays.reduce((a,b)=>a.v<b.v?a:b);
+          anomalies.push({label:c.label,date:`${negDays.length}d in ${mo}`,value:worst.v,isBal:!!c.isBal,isNeg:true,
+            note:`${negDays.length} day${negDays.length>1?'s':''} with negative value in ${mo}. Worst: ${worst.v.toFixed(1)} on ${worst.d}`});
+        });
+      }
     }
 
     // ── C. Procurement Cost vs Receipt ─────────────────────────
@@ -3836,11 +3847,26 @@ function renderS1(){
       const _fa3=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
       const totArr=_fa3('feed_total');
       const indArr=feedSumKeys.map(k=>_fa3(k));
-      (totArr||[]).forEach((fbTot,i)=>{
-        const sumI=indArr.reduce((s,arr)=>s+(arr?.[i]||0),0);
-        const diff2=Math.abs((fbTot||0)-sumI);
-        if(diff2>0.5) anomalies.push({label:'F&B Total Feed',date:_fd3[i]||'—',value:diff2,isTotal:true,note:`F&B total ${(fbTot||0).toFixed(1)} MT ≠ sum of feeds ${sumI.toFixed(1)} MT (gap: ${diff2.toFixed(1)} MT)`});
-      });
+      if(mo==='ALL'){
+        (totArr||[]).forEach((fbTot,i)=>{
+          const sumI=indArr.reduce((s,arr)=>s+(arr?.[i]||0),0);
+          const diff2=Math.abs((fbTot||0)-sumI);
+          if(diff2>0.5) anomalies.push({label:'F&B Total Feed',date:_fd3[i]||'—',value:diff2,isTotal:true,note:`F&B total ${(fbTot||0).toFixed(1)} MT ≠ sum of feeds ${sumI.toFixed(1)} MT (gap: ${diff2.toFixed(1)} MT)`});
+        });
+      } else {
+        // Month view: consolidate to 1 row
+        const mmDays=[];
+        (totArr||[]).forEach((fbTot,i)=>{
+          const sumI=indArr.reduce((s,arr)=>s+(arr?.[i]||0),0);
+          const diff2=Math.abs((fbTot||0)-sumI);
+          if(diff2>0.5) mmDays.push({d:_fd3[i]||'—',diff:diff2,tot:(fbTot||0),sum:sumI});
+        });
+        if(mmDays.length){
+          const worst=mmDays.reduce((a,b)=>a.diff>b.diff?a:b);
+          anomalies.push({label:'F&B Total Feed',date:`${mmDays.length}d in ${mo}`,value:worst.diff,isTotal:true,
+            note:`${mmDays.length} day${mmDays.length>1?'s':''} with total mismatch in ${mo}. Worst: ${worst.tot.toFixed(1)} MT vs ${worst.sum.toFixed(1)} MT on ${worst.d}`});
+        }
+      }
     }
 
     // ── E. D1 vs D2 Feed Imbalance ─────────────────────────────
