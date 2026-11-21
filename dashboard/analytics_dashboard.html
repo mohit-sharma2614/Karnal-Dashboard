@@ -3902,7 +3902,7 @@ function renderS1(){
           </tr>`;
         }
         if(a.isCost||a.isCostOnly){
-          const valTxt=a.isCost?(a.value.toFixed(1)):('₹'+fN(a.value));
+          const valTxt=a.isCost?(a.value.toFixed(1)):('₹'+fmtN(a.value));
           return`<tr>
             <td style="font-weight:700;color:#E65100">${a.label}</td>
             <td style="font-variant-numeric:tabular-nums">${a.date}</td>
