@@ -931,7 +931,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S1 FEEDSTOCK ══ -->
 <div id="s1" class="pg">
-  <div class="stitle">Feedstock Procurement & Management <span class="resp">— Mr. Vivek Kumar</span><span id="s1_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Feedstock Procurement & Management <span id="s1_period" class="mo-badge">All Months</span></div>
 
   <!-- Month/Year content — hidden in day view -->
   <div id="s1_main_content">
@@ -1213,7 +1213,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S6 MANURE ══ -->
 <div id="s6" class="pg">
-  <div class="stitle">Manure Section <span class="resp">— Mr. Vivek Kumar</span><span id="s6_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Manure Section <span id="s6_period" class="mo-badge">All Months</span></div>
   <div id="s6_main_content">
   <div class="kg" style="grid-template-columns:repeat(3,1fr)">
     <div class="kc a"><div class="kl">D1 Total Drain</div><div class="kv a" id="s6_d1d">—</div><div class="ks">m³</div></div>
@@ -1241,7 +1241,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S7 SALES ══ -->
 <div id="s7" class="pg">
-  <div class="stitle">Sale Section — CBG &amp; Digestate <span class="resp">— Mr. Vivek Kumar</span><span id="s7_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Sale Section — CBG &amp; Digestate <span id="s7_period" class="mo-badge">All Months</span></div>
   <div id="s7_main_content">
   <div class="stitle" style="font-size:11px;margin-bottom:8px;color:var(--text2)">CBG Sales</div>
   <div class="kg" style="grid-template-columns:repeat(3,1fr)">
@@ -2161,10 +2161,10 @@ function renderSectionDay(sectionId){
         <td style="font-variant-numeric:tabular-nums">${a.date}</td>
         <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(2)}</td>
         <td style="font-size:10px;color:var(--text2)">${a.isBal?'Stock overdrawn — fed more than available balance':'Negative received/fed entry — possible data entry error'}</td>
-        <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. VIVEK KUMAR</span></td>
+        <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ NEGATIVE VALUE</span></td>
       </tr>`).join('');
       html+=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#B71C1C;font-size:11px;font-weight:700">
-        ⚠ ${moAnomalies.length} anomal${moAnomalies.length===1?'y':'ies'} in ${dayMo} 2026 — verify with Mr. Vivek Kumar.
+        ⚠ ${moAnomalies.length} anomal${moAnomalies.length===1?'y':'ies'} in ${dayMo} 2026 — please verify data entries.
       </div>
       <table class="tbl"><thead><tr><th>Metric</th><th>Date</th><th>Value</th><th>Note</th><th>Action</th></tr></thead>
       <tbody>${aRows}</tbody></table>`;
@@ -3880,7 +3880,7 @@ function renderS1(){
             <td style="font-variant-numeric:tabular-nums">${a.date}</td>
             <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(2)}</td>
             <td style="font-size:10px;color:var(--text2)">${note}</td>
-            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. VIVEK KUMAR</span></td>
+            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ NEGATIVE VALUE</span></td>
           </tr>`;
         }
         if(a.isCost||a.isCostOnly){
