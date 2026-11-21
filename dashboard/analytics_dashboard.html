@@ -8577,14 +8577,16 @@ function renderReport(){
 }
 
 window.addEventListener('DOMContentLoaded', async function(){
+  let resolved=false;
+  const showSignIn=()=>{ document.getElementById('authStatus').textContent='Please sign in to access Analytics Dashboard.'; document.getElementById('signInBtn').style.display='block'; };
+  const authTimeout=setTimeout(()=>{ if(!resolved) showSignIn(); }, 3000);
   try {
     const app=await getMsalApp();
     const result=await app.handleRedirectPromise();
-    if(result&&isAllowed(result.account)){ initDashboard(result.account); return; }
+    if(result&&isAllowed(result.account)){ resolved=true; clearTimeout(authTimeout); document.getElementById('signInBtn').style.display='none'; initDashboard(result.account); return; }
     const accounts=app.getAllAccounts();
-    if(accounts.length&&isAllowed(accounts[0])){ initDashboard(accounts[0]); return; }
-    document.getElementById('authStatus').textContent='Please sign in to access Analytics Dashboard.';
-    document.getElementById('signInBtn').style.display='block';
-  } catch(e) { document.getElementById('authStatus').textContent='Auth error: '+e.message; document.getElementById('signInBtn').style.display='block'; }
+    if(accounts.length&&isAllowed(accounts[0])){ resolved=true; clearTimeout(authTimeout); document.getElementById('signInBtn').style.display='none'; initDashboard(accounts[0]); return; }
+    resolved=true; clearTimeout(authTimeout); showSignIn();
+  } catch(e) { resolved=true; clearTimeout(authTimeout); document.getElementById('authStatus').textContent='Auth error: '+e.message; document.getElementById('signInBtn').style.display='block'; }
 });
 </script></body></html>
