@@ -7035,7 +7035,7 @@ async function buildAnalyticsD() {
     gFetch("/worksheets('Digester%20TS-VS')/range(address='A4:N400')"),
     gFetch("/worksheets('Digester%20IA-PA')/range(address='A4:R400')"),
     gFetch("/worksheets('Daily%20Revenue%20%26%20Costs')/range(address='A4:K700')"),
-    gFetch("/worksheets('Feed_and_Balance')/range(address='A3:CU700')"),
+    gFetch("/worksheets('Feed_and_Balance')/range(address='A2:CU700')"),
     gFetch("/worksheets('Manure%20Sales')/range(address='A2:G600')"),
     gFetch("/worksheets('Sales%20Detail')/range(address='A4:K400')"),
     gFetch("/worksheets('Pressmud%20Cal.')/range(address='A3:J1500')"),
@@ -7183,12 +7183,12 @@ async function buildAnalyticsD() {
     sg_feed: findCol(fbHdr,'Spent grain (Fed)',83),
     ap_feed: findCol(fbHdr,'Apple pomace',84),
     feed_tot:findCol(fbHdr,'Total Feed (MT)',85),
-    cd_bal:  findCol(fbHdr,'Cow Dung~4',93),
-    pm_bal:  findCol(fbHdr,'Pressmud~4',94),
+    cd_bal:  findCol(fbHdr,'Cow Dung~3',93),
+    pm_bal:  findCol(fbHdr,'Pressmud~3',94),
     csl_bal: findCol(fbHdr,'CSL Feed~2',95),
     gs_bal:  findCol(fbHdr,'Grain Syrup~5',96),
     sg_bal:  findCol(fbHdr,'Spent grain~3',97),
-    ap_bal:  findCol(fbHdr,'Apple pomace~2',98),
+    ap_bal:  findCol(fbHdr,'Apple pomace~3',98),
   };
   // RC (Daily Revenue & Costs): row 0 of rcR.values is header (fetched from A4)
   const rcHdr=(rcR?.values||[])[0]||[];
