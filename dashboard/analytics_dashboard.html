@@ -2081,7 +2081,7 @@ function renderSectionDay(sectionId){
       {nm:'Apple Pomace',k:'ap_bal', tk:'ap',  clr:'#6A1B9A'},
     ];
     // If today has no balance, carry forward from the most recent day that does
-    let balSrc=f, balSrcDate=null;
+    let balSrc=f, balSrcDate=null, balFromStock=false;
     if(!balDefs.some(r=>f[r.k]!=null)){
       const allDayKeys=Object.keys(D.days).sort((a,b)=>{
         const [da,ma]=a.split('-'); const [db,mb]=b.split('-');
@@ -2093,9 +2093,17 @@ function renderSectionDay(sectionId){
         const cand=D.days[allDayKeys[i]]?.feed||{};
         if(balDefs.some(r=>cand[r.k]!=null)){balSrc=cand;balSrcDate=allDayKeys[i];break;}
       }
+      // Last resort: use D.stock (same source as monthly view)
+      if(!balDefs.some(r=>balSrc[r.k]!=null)&&D.stock){
+        const st=D.stock;
+        balSrc={pm_bal:st.pm,gs_bal:st.gs,csl_bal:st.csl,cd_bal:st.cd,sg_bal:st.sg,ap_bal:st.ap};
+        balSrcDate=st.date||null;
+        balFromStock=true;
+      }
     }
     const hasBal=balDefs.some(r=>balSrc[r.k]!=null);
-    html+=groupHeader('Inventory Balance', balSrcDate?`Last updated: ${balSrcDate}`:'Closing balance for this date');
+    const balSubtitle=balFromStock?`Latest available: ${balSrcDate||'—'}`:balSrcDate?`Last updated: ${balSrcDate}`:'Closing balance for this date';
+    html+=groupHeader('Inventory Balance', balSubtitle);
     if(!hasBal){
       html+=`<div style="padding:10px 14px;color:var(--text3);font-size:11px;border:1px solid var(--bdr);border-radius:8px;margin-bottom:14px">No data available for this date.</div>`;
     } else {
