@@ -2221,22 +2221,31 @@ function renderSectionDay(sectionId){
   } else if(sectionId==='s4'){
     const ch4v=p.ch4!=null?(p.ch4>1?+p.ch4.toFixed(2):+(p.ch4*100).toFixed(2)):null;
     const ch4Pct=ch4v!=null?Math.min(ch4v,100):0;
-    const effArr=[d1r.psa_eff_pct,d2r.psa_eff_pct].filter(v=>v!=null);
+    // ── Digester filter for day view ──────────────────────────────
+    const isD1day=s4Dig==='d1', isD2day=s4Dig==='d2';
+    const digLblDay=isD1day?' · D1':isD2day?' · D2':'';
+    const digShareDay=(isD1day||isD2day)&&(ex.tot_exp>0)?(isD1day?ex.d1_exp:ex.d2_exp)/ex.tot_exp:1;
+    const propDay=v=>(v!=null)?v*digShareDay:null;
+    const digExpDay=isD1day?ex.d1_exp:isD2day?ex.d2_exp:ex.tot_exp;
+    const effArr=isD1day?[d1r.psa_eff_pct].filter(v=>v!=null):isD2day?[d2r.psa_eff_pct].filter(v=>v!=null):[d1r.psa_eff_pct,d2r.psa_eff_pct].filter(v=>v!=null);
     const avgEff=effArr.length?+(effArr.reduce((a,b)=>a+b,0)/effArr.length).toFixed(1):null;
     const effCls=avgEff!=null?(avgEff>=45?'g':avgEff>=35?'a':'r'):'';
+    const effLblDay=isD1day?'D1 PSA Efficiency':isD2day?'D2 PSA Efficiency':'Avg PSA Efficiency';
 
     // ── Status bar (3 pills) ──────────────────────────────────────
-    // ex = rec.exp: tot_exp=cer[13], ideal_raw/pur/cbg from CBG Expected sheet, act_cbg=p[12]
-    const reqH=ex.tot_exp>0?ex.tot_exp/370:null; // hrs needed to purify all feedstock BPP gas
+    const reqH=digExpDay>0?digExpDay/370:null;
     const hrsGap=reqH!=null&&p.psa_hrs!=null?p.psa_hrs-reqH:null;
     const hrsGapPct=reqH>0?p.psa_hrs/reqH*100:null;
     const idealSuction=p.psa_hrs!=null?p.psa_hrs*600:null;
-    const actualRbg=p.rbg_tot!=null?p.rbg_tot:(p.rbg_d1||0)+(p.rbg_d2||0);
-    const sEff=idealSuction>0&&actualRbg>0?actualRbg/idealSuction*100:null;
-    const cbgTgt=ex.ideal_cbg||p.ideal_cbg; const actCBGD=ex.act_cbg||p.act_cbg||p.cbg_tot;
+    const actualRbg=isD1day?p.rbg_d1:isD2day?p.rbg_d2:(p.rbg_tot!=null?p.rbg_tot:(p.rbg_d1||0)+(p.rbg_d2||0));
+    const idealSuctionDig=propDay(idealSuction);
+    const sEff=idealSuctionDig>0&&actualRbg>0?actualRbg/idealSuctionDig*100:null;
+    const cbgTgt=propDay(ex.ideal_cbg||p.ideal_cbg);
+    const actCBGD=isD1day?p.cbg_d1:isD2day?p.cbg_d2:(ex.act_cbg||p.act_cbg||p.cbg_tot);
     const cbgGapPct=cbgTgt>0&&actCBGD!=null?actCBGD/cbgTgt*100:null;
-    const _idealPurD=ex.ideal_pur||p.ideal_pur; const _idealCbgD=cbgTgt;
-    const purPct=p.purified&&_idealPurD?Math.round(p.purified/_idealPurD*100):null;
+    const _idealPurD=propDay(ex.ideal_pur||p.ideal_pur); const _idealCbgD=cbgTgt;
+    const purifiedDay=propDay(p.purified);
+    const purPct=purifiedDay&&_idealPurD?Math.round(purifiedDay/_idealPurD*100):null;
     const cbgPct=actCBGD&&_idealCbgD?Math.round(actCBGD/_idealCbgD*100):null;
     const purCls=purPct!=null?(purPct>=90?'g':purPct>=70?'a':'r'):'';
     const cbgCls=cbgPct!=null?(cbgPct>=90?'g':cbgPct>=70?'a':'r'):'';
@@ -2253,17 +2262,17 @@ function renderSectionDay(sectionId){
     const cbgValD=actCBGD!=null?(fmtN(actCBGD)+' / '+fmtN(cbgTgt)+' kg'):'—';
     const cbgNoteD=cbgGapPct!=null?(cbgGapPct.toFixed(0)+'% of ideal · '+(cbgTgt>actCBGD?'−'+fmtN(cbgTgt-actCBGD)+' kg shortfall':'on target')):'';
     html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-      ${sbar('PSA Operating Hours',hrsValD,hrsNoteD,hrsClrD)}
-      ${sbar('Suction Dip Today',sEffValD,sEffNoteD,clr(sEff))}
-      ${sbar('CBG vs Target',cbgValD,cbgNoteD,clr(cbgGapPct))}
+      ${sbar('PSA Operating Hours'+(digLblDay?''+''),hrsValD,hrsNoteD,hrsClrD)}
+      ${sbar('Suction Dip Today'+digLblDay,sEffValD,sEffNoteD,clr(sEff))}
+      ${sbar('CBG vs Target'+digLblDay,cbgValD,cbgNoteD,clr(cbgGapPct))}
     </div>`;
 
     // ── Loss cascade (6 steps) ────────────────────────────────────
     const expPurFromSuction=actualRbg>0?actualRbg*(370/600):null;
-    const purGap=p.purified!=null&&expPurFromSuction!=null?p.purified-expPurFromSuction:null;
+    const purGap=purifiedDay!=null&&expPurFromSuction!=null?purifiedDay-expPurFromSuction:null;
     const cbgShortfall=cbgTgt>0&&actCBGD!=null?actCBGD-cbgTgt:null;
-    const suctionDip=idealSuction!=null&&actualRbg!=null?actualRbg-idealSuction:null;
-    const suctionDipPct=idealSuction>0&&suctionDip!=null?suctionDip/idealSuction*100:null;
+    const suctionDip=idealSuctionDig!=null&&actualRbg!=null?actualRbg-idealSuctionDig:null;
+    const suctionDipPct=idealSuctionDig>0&&suctionDip!=null?suctionDip/idealSuctionDig*100:null;
     const stepBox=(n,label,val,unit,cls,gapHtml,radius='')=>`<div style="flex:1;background:var(--bg2);border:1px solid var(--bdr);border-top:3px solid ${cls};padding:10px 10px 8px;min-width:0;${radius}">
       <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);margin-bottom:3px">${n} · ${label}</div>
       <div style="font-size:14px;font-weight:700;color:${cls};line-height:1.1">${val??'—'}<span style="font-size:10px;font-weight:400;color:var(--text2);margin-left:2px">${val!=null?unit:''}</span></div>
@@ -2273,7 +2282,7 @@ function renderSectionDay(sectionId){
     html+=`<div style="font-size:10px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);border-bottom:1.5px solid var(--bdr);padding-bottom:6px;margin:14px 0 10px">
       Production Loss Cascade <span style="font-size:9px;font-weight:500;text-transform:none;letter-spacing:0;color:var(--text3);margin-left:8px">Where exactly did we lose today?</span></div>`;
     html+=`<div style="overflow-x:auto;margin-bottom:14px"><div style="display:flex;align-items:stretch;min-width:600px">
-      ${stepBox(1,'Feed Expected Gas',fN(ex.tot_exp),'m³','#2563eb',ok('Feedstock BPP target'),'border-radius:8px 0 0 8px;')}
+      ${stepBox(1,'Feed Expected Gas'+digLblDay,fN(digExpDay),'m³','#2563eb',ok('Feedstock BPP target'),'border-radius:8px 0 0 8px;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
       ${stepBox(2,'Req. PSA Hrs',reqH!=null?reqH.toFixed(1):null,'hrs','#2563eb',ok('Feed exp ÷ 370 m³/hr'),'border-left:none;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
@@ -2281,9 +2290,9 @@ function renderSectionDay(sectionId){
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
       ${stepBox(4,'Actual RBG Sucked',fN(actualRbg),'m³',suctionDip!=null&&suctionDip<-50?'#dc2626':suctionDip!=null&&suctionDip<0?'#d97706':'#16a34a',suctionDip!=null?(suctionDip<0?gap('🔴 '+fmtN(suctionDip)+' m³ ('+Math.abs(suctionDipPct).toFixed(1)+'%)','#dc2626'):gap('✓ On target','#16a34a')):ok('—'),'border-left:none;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
-      ${stepBox(5,'Actual Purified',fN(p.purified),'m³',purGap!=null&&purGap>0?'#16a34a':purGap!=null?'#d97706':'#888',purGap!=null?(purGap>0?gap('✓ +'+fmtN(purGap)+' m³ above exp','#16a34a'):gap(fmtN(purGap)+' m³ vs exp','#d97706')):ok('—'),'border-left:none;')}
+      ${stepBox(5,'Actual Purified'+digLblDay,fN(purifiedDay),'m³',purGap!=null&&purGap>0?'#16a34a':purGap!=null?'#d97706':'#888',purGap!=null?(purGap>0?gap('✓ +'+fmtN(purGap)+' m³ above exp','#16a34a'):gap(fmtN(purGap)+' m³ vs exp','#d97706')):ok('—'),'border-left:none;')}
       <div style="display:flex;align-items:center;padding:0 3px;color:var(--text3);font-size:14px;align-self:center;flex-shrink:0">→</div>
-      ${stepBox(6,'Actual CBG Out',fN(actCBGD),'kg',clr(cbgGapPct),cbgShortfall!=null?(cbgShortfall<0?gap('🔴 '+fmtN(cbgShortfall)+' kg ('+cbgGapPct?.toFixed(1)+'%)','#dc2626'):gap('✓ On target','#16a34a')):ok('—'),'border-radius:0 8px 8px 0;border-left:none;')}
+      ${stepBox(6,'Actual CBG Out'+digLblDay,fN(actCBGD),'kg',clr(cbgGapPct),cbgShortfall!=null?(cbgShortfall<0?gap('🔴 '+fmtN(cbgShortfall)+' kg ('+cbgGapPct?.toFixed(1)+'%)','#dc2626'):gap('✓ On target','#16a34a')):ok('—'),'border-radius:0 8px 8px 0;border-left:none;')}
     </div></div>`;
 
     // ── Root cause banner ─────────────────────────────────────────
@@ -2305,11 +2314,12 @@ function renderSectionDay(sectionId){
     }
 
     // ── Paired KPI cards — day view (Tasks 1,4,5) ─────────────────
-    const idealRawD=ex.ideal_raw||p.ideal_raw;
-    const idealPurD=ex.ideal_pur||p.ideal_pur;
+    const idealRawD=propDay(ex.ideal_raw||p.ideal_raw);
+    const idealPurD=_idealPurD;
     const pRawD=idealRawD>0&&actualRbg>0?Math.round(actualRbg/idealRawD*100):null;
-    const pPurD=idealPurD>0&&p.purified>0?Math.round(p.purified/idealPurD*100):null;
+    const pPurD=idealPurD>0&&purifiedDay>0?Math.round(purifiedDay/idealPurD*100):null;
     const pCBGD=cbgPct;
+    const digSuffixKPI=(isD1day||isD2day)?' ('+s4Dig.toUpperCase()+' share)':'';
     const barRow=(pct,lbl)=>{if(pct==null)return'';const pp=Math.min(Math.max(pct,0),100);const bc=pp>=90?'#16a34a':pp>=70?'#d97706':'#dc2626';
       return`<div style="margin-top:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:10px;color:var(--text3)">${lbl}</span><span style="font-size:10px;font-weight:700;color:${bc}">${pp}%</span></div>
       <div style="background:var(--bg3);border-radius:3px;height:5px;overflow:hidden"><div style="width:${pp}%;height:5px;background:${bc};border-radius:3px;transition:width .4s"></div></div></div>`;};
@@ -2324,14 +2334,14 @@ function renderSectionDay(sectionId){
       <div style="font-size:9px;font-weight:700;letter-spacing:.7px;text-transform:uppercase;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bdr)">Operations</div>
       <div style="display:flex;flex-direction:column;gap:7px">
         <div><div style="font-size:9px;color:var(--text3)">PSA Hours</div><div style="font-size:16px;font-weight:800;color:var(--blue)">${p.psa_hrs!=null?p.psa_hrs.toFixed(2):'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${p.psa_hrs!=null?'hrs':''}</span></div></div>
-        <div><div style="font-size:9px;color:var(--text3)">Avg PSA Efficiency</div><div style="font-size:14px;font-weight:700;color:${effCls==='g'?'var(--green)':effCls==='a'?'var(--amber)':effCls==='r'?'var(--red)':'var(--text)'}">${avgEff!=null?avgEff.toFixed(1):'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${avgEff!=null?'% · Design 45.83%':''}</span></div></div>
+        <div><div style="font-size:9px;color:var(--text3)">${effLblDay}</div><div style="font-size:14px;font-weight:700;color:${effCls==='g'?'var(--green)':effCls==='a'?'var(--amber)':effCls==='r'?'var(--red)':'var(--text)'}">${avgEff!=null?avgEff.toFixed(1):'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${avgEff!=null?'% · Design 45.83%':''}</span></div></div>
         <div><div style="font-size:9px;color:var(--text3)">CH4 Purity</div><div style="font-size:14px;font-weight:700;color:${ch4v!=null&&ch4v>=90?'var(--green)':ch4v!=null&&ch4v>=80?'var(--amber)':'var(--red)'}">${ch4v!=null?ch4v:'—'}<span style="font-size:10px;color:var(--text2);margin-left:2px">${ch4v!=null?'%':''}</span></div></div>
       </div></div>`;
     html+=groupHeader('PSA Unit Performance','Ideal vs Actual — paired view');
     html+=`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:14px">
-      ${dPairedCard('Raw Gas Suction','Ideal (600 m³/hr × hrs)',fN(idealRawD),'m³','Actual RBG Sucked',fN(actualRbg),'m³',pRawD)}
-      ${dPairedCard('Purified Gas','Ideal (370 m³/hr × hrs)',fN(idealPurD),'m³','Actual Purified',fN(p.purified),'m³',pPurD)}
-      ${dPairedCard('CBG Output','CBG Target (275 kg/hr × hrs)',fN(cbgTgt),'kg','Actual CBG Produced',fN(actCBGD),'kg',pCBGD)}
+      ${dPairedCard('Raw Gas Suction','Ideal (600 m³/hr × hrs)'+digSuffixKPI,fN(idealRawD),'m³','Actual RBG Sucked'+digLblDay,fN(actualRbg),'m³',pRawD)}
+      ${dPairedCard('Purified Gas','Ideal (370 m³/hr × hrs)'+digSuffixKPI,fN(idealPurD),'m³','Actual Purified'+digLblDay,fN(purifiedDay),'m³',pPurD)}
+      ${dPairedCard('CBG Output','CBG Target (275 kg/hr × hrs)'+digSuffixKPI,fN(cbgTgt),'kg','Actual CBG Produced'+digLblDay,fN(actCBGD),'kg',pCBGD)}
       ${dOpsCard}
     </div>`;
     // ── Anomaly Detection — full month (grouped — Task 6) ───────
