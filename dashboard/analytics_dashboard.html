@@ -4028,6 +4028,50 @@ function renderS1(){
   const _d1sg=dArr('exp','d1_sg_bpp'),_d2sg=dArr('exp','d2_sg_bpp');
   const _d1ap=dArr('exp','d1_ap_bpp'),_d2ap=dArr('exp','d2_ap_bpp');
   bar('c_s1_bpp',_lbl,[bDS('Pressmud',_sl(_d1pm.map((v,i)=>(v||0)+(_d2pm[i]||0))),C.blue),bDS('Cow Dung',_sl(_d1cd.map((v,i)=>(v||0)+(_d2cd[i]||0))),C.teal),bDS('CSL',_sl(_d1csl.map((v,i)=>(v||0)+(_d2csl[i]||0))),C.indigo),bDS('Grain Syrup',_sl(_d1gs.map((v,i)=>(v||0)+(_d2gs[i]||0))),C.cyan),bDS('Spent Grain',_sl(_d1sg.map((v,i)=>(v||0)+(_d2sg[i]||0))),C.orange),bDS('Apple Pomace',_sl(_d1ap.map((v,i)=>(v||0)+(_d2ap[i]||0))),C.purple)],true);
+  // ── Day View: Inventory Balance — closing balance for selected day ──
+  {
+    const _df=D.days[curDay]?.feed||{};
+    const _dBalDefs=[
+      {nm:'Pressmud',   k:'pm_bal',  tk:'pm',  clr:'#1565C0'},
+      {nm:'Grain Syrup',k:'gs_bal',  tk:'gs',  clr:'#00695C'},
+      {nm:'CSL',        k:'csl_bal', tk:'csl', clr:'#6A1B00'},
+      {nm:'Cow Dung',   k:'cd_bal',  tk:'cd',  clr:'#2E7D32'},
+      {nm:'Spent Grain',k:'sg_bal',  tk:'sg',  clr:'#E65100'},
+      {nm:'Apple Pomace',k:'ap_bal', tk:'ap',  clr:'#6A1B9A'},
+    ];
+    const _dThr={pm:{v:500,u:'MT'},gs:{v:30,u:'KL'},csl:{v:30,u:'KL'},cd:{v:40,u:'MT'},sg:{v:30,u:'MT'},ap:{v:50,u:'MT'}};
+    const _dBalEl=document.getElementById('s1_balance');
+    const _dBalHdr=document.getElementById('s1_bal_hdr');
+    if(_dBalEl){
+      let _wz=0;
+      const _dRows=_dBalDefs.map(r=>{
+        const bal=_df[r.k]; const thr=_dThr[r.tk];
+        if(bal==null) return`<tr><td style="font-weight:700;color:${r.clr}">${r.nm}</td><td colspan="5" style="color:var(--text3);font-size:10px">—</td></tr>`;
+        const pct=thr.v>0?bal/thr.v*100:0;
+        const zone=pct>=60?0:pct>=45?1:2;
+        if(zone>_wz) _wz=zone;
+        const zClr=zone===0?'#2E7D32':zone===1?'#E65100':'#C62828';
+        const zTxt=zone===0?'SAFE ZONE':zone===1?'WARNING ZONE':'DANGER ZONE';
+        const barW=Math.max(0,Math.min(pct,100)).toFixed(0);
+        return`<tr>
+          <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
+          <td style="font-weight:700;font-variant-numeric:tabular-nums;color:${bal<0?'#C62828':'inherit'}">${bal.toFixed(1)} ${thr.u}</td>
+          <td style="color:var(--text3);font-variant-numeric:tabular-nums">${thr.v} ${thr.u}</td>
+          <td style="font-weight:700;color:${zClr};font-variant-numeric:tabular-nums">${pct.toFixed(1)}%</td>
+          <td><span style="font-size:9px;font-weight:800;padding:2px 7px;border-radius:3px;background:${zClr};color:#fff;letter-spacing:.4px">${zTxt}</span></td>
+          <td style="width:22%"><div style="display:flex;align-items:center;gap:5px">
+            <div style="flex:1;height:6px;background:var(--bg3);border-radius:3px;overflow:hidden">
+              <div style="width:${barW}%;height:100%;background:${zClr};border-radius:3px"></div></div>
+            <span style="font-size:10px;color:var(--text3);min-width:28px">${pct.toFixed(0)}%</span>
+          </div></td>
+        </tr>`;
+      }).join('');
+      if(_dBalHdr){const hc=_wz===0?'linear-gradient(120deg,#2E7D32,#388E3C)':_wz===1?'linear-gradient(120deg,#E65100,#F57C00)':'linear-gradient(120deg,#B71C1C,#C62828)';_dBalHdr.style.background=hc;}
+      _dBalEl.innerHTML=`<table class="tbl"><thead><tr>
+        <th>Feedstock</th><th>Closing Balance</th><th>Threshold</th><th>% of Threshold</th><th>Zone</th><th style="width:22%">Level</th>
+      </tr></thead><tbody>${_dRows}</tbody></table>`;
+    }
+  }
   } // end charts block
 }
 
