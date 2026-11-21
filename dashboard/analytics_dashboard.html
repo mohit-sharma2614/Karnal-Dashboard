@@ -7141,11 +7141,23 @@ async function buildAnalyticsD() {
   M.ia_ind_d1=aggMonth(iapa_,gD,2,'avg'); M.ia_ind_d2=aggMonth(iapa_,gD,10,'avg');
   M.ia_d1=aggMonth(iapa_,gD,4,'avg'); M.ia_d2=aggMonth(iapa_,gD,12,'avg');
   M.ta_d1=aggMonth(iapa_,gD,3,'avg'); M.ta_d2=aggMonth(iapa_,gD,11,'avg');
-  // Header-name based column lookup — safe against future column additions
-  // findCol: search header row for exact name match; fallback to hardcoded idx if not found
+  // Header-name based column lookup — supports Name~N for Nth occurrence of duplicate headers
   const findCol=(hdrRow,name,fallback)=>{
-    const i=(hdrRow||[]).findIndex(h=>typeof h==='string'&&h.trim()===name.trim());
-    if(i>=0)return i;
+    const row=hdrRow||[];
+    const tilde=name.indexOf('~');
+    if(tilde>=0){
+      const base=name.slice(0,tilde).trim();
+      const occ=parseInt(name.slice(tilde+1))||1;
+      let count=0;
+      for(let i=0;i<row.length;i++){
+        if(typeof row[i]==='string'&&row[i].trim()===base){
+          if(++count===occ)return i;
+        }
+      }
+    } else {
+      const i=row.findIndex(h=>typeof h==='string'&&h.trim()===name.trim());
+      if(i>=0)return i;
+    }
     console.warn('[findCol] header "'+name+'" not found — using fallback idx '+fallback);
     return fallback;
   };
