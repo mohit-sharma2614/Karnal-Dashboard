@@ -978,7 +978,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S2 LAB ══ -->
 <div id="s2" class="pg">
-  <div class="stitle">Process & Testing — Laboratory <span class="resp">— Dr. Shikha, Mr. Jatin</span><span id="s2_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Process & Testing — Laboratory <span id="s2_period" class="mo-badge">All Months</span></div>
   <!-- All static (non-day) content wrapped so it can be hidden during day view -->
   <div id="s2_static_content">
   <!-- Sub-section 1: Digester Health -->
@@ -1018,7 +1018,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S3 PRODUCTION ══ -->
 <div id="s3" class="pg">
-  <div class="stitle">Digester Production <span class="resp">— Sohan Lal</span><span id="s3_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Digester Production <span id="s3_period" class="mo-badge">All Months</span></div>
   <div id="s3_day_panel" style="display:none"></div>
   <div id="s3_charts_wrap">
     <div class="s3-sec-hdr">FEEDING <span class="s3-sec-sub">Feedstock input to digesters</span></div>
@@ -1056,7 +1056,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S4 PURIFICATION ══ -->
 <div id="s4" class="pg">
-  <div class="stitle">Purification — RBG to PBG <span class="resp">— Mr. Bobby</span><span id="s4_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Purification — RBG to PBG <span id="s4_period" class="mo-badge">All Months</span></div>
   <!-- D1/D2/Combined filter -->
   <div id="s4_dig_bar" style="display:flex;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
     <span style="font-size:9px;font-weight:600;letter-spacing:.6px;text-transform:uppercase;color:var(--text2)">View:</span>
@@ -1106,7 +1106,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S5 COMPRESSION ══ -->
 <div id="s5" class="pg">
-  <div class="stitle">Compressor &amp; Filling — PBG to CBG <span class="resp">— Mr. Rajendra Kumar</span><span id="s5_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Compressor &amp; Filling — PBG to CBG <span id="s5_period" class="mo-badge">All Months</span></div>
   <div id="s5_main_content">
   <div class="kg k4">
     <div class="kc"><div class="kl">Compressor Hours</div><div class="kv" id="s5_comp_hrs">—</div><div class="ks">hrs running</div></div>
@@ -2346,7 +2346,7 @@ function renderSectionDay(sectionId){
       if(dp.psa?.purified==null) dayAnoms.push({label:'Actual Purified Gas',date:k,value:'—',note:'No PSA purified gas data for this date',sev:'a'});
       if(dp.psa?.psa_hrs==null) dayAnoms.push({label:'PSA Operating Hours',date:k,value:'—',note:'No PSA runtime recorded for this date',sev:'a'});
     });
-    html+=renderGroupedAnomalies(dayAnoms,'Mr. Bobby','s4d');
+    html+=renderGroupedAnomalies(dayAnoms,'s4d');
   } else if(sectionId==='s5'){
     const dispRate=p.act_cbg&&p.dispatched!=null?+(p.dispatched/p.act_cbg*100).toFixed(1):null;
     const compUtil=p.psa_hrs&&p.comp_hrs!=null?+(p.comp_hrs/p.psa_hrs*100).toFixed(1):null;
@@ -4665,7 +4665,7 @@ function renderDiagTable(containerId, labels, totExp, idealPur, actPur, actCBG, 
 }
 
 // ── Grouped anomaly renderer (shared by S4 monthly + day view) ───────────────
-function renderGroupedAnomalies(anomalies, owner, pfx){
+function renderGroupedAnomalies(anomalies, pfx){
   if(!anomalies.length){
     return`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px;margin-bottom:12px">
       <span style="font-size:18px">✓</span>
@@ -4686,7 +4686,7 @@ function renderGroupedAnomalies(anomalies, owner, pfx){
   const bgH=critCount?'#FFF3F3':'#FFF8F0', bdrH=critCount?'#FFCDD2':'#FFE0B2', cH=critCount?'#B71C1C':'#BF360C';
   let html=`<div style="background:${bgH};border:1px solid ${bdrH};border-radius:8px;padding:10px 14px;margin-bottom:10px">
     <div style="font-size:12px;font-weight:700;color:${cH}">⚠ ${typeCount} issue type${typeCount>1?'s':''} · ${totalCount} occurrence${totalCount>1?'s':''}</div>
-    <div style="font-size:10px;color:var(--text2);margin-top:2px">${critCount} critical · ${warnCount} warning — verify with ${owner}</div>
+    <div style="font-size:10px;color:var(--text2);margin-top:2px">${critCount} critical · ${warnCount} warning — please verify data entries</div>
   </div>`;
   groups.forEach((g,gi)=>{
     const c=g.sev==='r'?'#C62828':'#E65100';
@@ -4942,7 +4942,7 @@ function renderS4(){
       if(isD1&&dp.psa?.rbg_d1==null&&dp.psa?.psa_hrs!=null) anomalies.push({label:'D1 RBG Suction',date:k,value:'—',note:'No D1 individual RBG data for this date',sev:'a'});
       if(isD2&&dp.psa?.rbg_d2==null&&dp.psa?.psa_hrs!=null) anomalies.push({label:'D2 RBG Suction',date:k,value:'—',note:'No D2 individual RBG data for this date',sev:'a'});
     });
-    anomEl.innerHTML=renderGroupedAnomalies(anomalies,'Mr. Bobby','s4m');
+    anomEl.innerHTML=renderGroupedAnomalies(anomalies,'s4m');
   }
 
 }
@@ -8238,9 +8238,9 @@ function _buildRpBody(p){
 
   // ── 9: actions ───────────────────────────────────────────────────
   const actData=[
-    {n:1,action:'Review PSA Efficiency — Root Cause Analysis',sub:'Biogas-to-CBG conversion below design spec. Check compressor performance and gas quality.',owner:'Mr. Bobby',deadline:'Ongoing',pri:'hi'},
-    {n:2,action:'Winter Temperature Protocol — Pre-emptive Heating',sub:'Digester temps approaching 33°C threshold. Activate insulation and heat-exchange protocol.',owner:'Dr. Shikha + Mr. Jatin',deadline:'Oct 2026',pri:'md'},
-    {n:3,action:'Optimise Feedstock Mix — Reduce Unit Cost',sub:'Evaluate higher VS% feedstocks (Pressmud, CSL) to improve OLR without cost increase.',owner:'Mr. Vivek Kumar',deadline:'End of Month',pri:'md'},
+    {n:1,action:'Review PSA Efficiency — Root Cause Analysis',sub:'Biogas-to-CBG conversion below design spec. Check compressor performance and gas quality.',owner:'PSA Section',deadline:'Ongoing',pri:'hi'},
+    {n:2,action:'Winter Temperature Protocol — Pre-emptive Heating',sub:'Digester temps approaching 33°C threshold. Activate insulation and heat-exchange protocol.',owner:'Lab & Process',deadline:'Oct 2026',pri:'md'},
+    {n:3,action:'Optimise Feedstock Mix — Reduce Unit Cost',sub:'Evaluate higher VS% feedstocks (Pressmud, CSL) to improve OLR without cost increase.',owner:'Procurement',deadline:'End of Month',pri:'md'},
     {n:4,action:'Complete Pending Data Entry — FlowMeter & Missing Rows',sub:'Sep 21–30 FlowMeter readings and Aug digester data missing from master workbook.',owner:'Data Team',deadline:'Immediate',pri:'hi'},
   ];
   const actions=`<div class="rp-action-hdr">
@@ -8514,9 +8514,9 @@ function renderReport(){
 
   // ── Section 10: Actions ──
   const actions=[
-    {n:'A1',clr:'#dc2626',t:'Review PSA Efficiency — Root Cause Analysis',o:'Owner: Mr. Bobby · Priority: High'},
-    {n:'A2',clr:'#d97706',t:'Digester Temperature — Winter Protocol Check',o:'Owner: Dr. Shikha + Mr. Jatin · Due: Oct 2026'},
-    {n:'A3',clr:'#d97706',t:'Optimize Feedstock Mix to Reduce Cost',o:'Owner: Mr. Vivek Kumar · Due: End of Month'},
+    {n:'A1',clr:'#dc2626',t:'Review PSA Efficiency — Root Cause Analysis',o:'Owner: PSA Section · Priority: High'},
+    {n:'A2',clr:'#d97706',t:'Digester Temperature — Winter Protocol Check',o:'Owner: Lab & Process · Due: Oct 2026'},
+    {n:'A3',clr:'#d97706',t:'Optimize Feedstock Mix to Reduce Cost',o:'Owner: Procurement · Due: End of Month'},
     {n:'A4',clr:'#1a56db',t:'Complete Pending Data Entry — FlowMeter & Missing Rows',o:'Owner: Data Team · Due: Immediate'},
   ];
 
