@@ -960,7 +960,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
   <!-- Sub-section 4: Anomaly Detection -->
   <div class="s2-sub-hdr" style="background:linear-gradient(120deg,#E65100,#F57C00)">
-    Anomaly Detection <span class="s2-sub-sub">Negative values in received / fed / balance</span>
+    Anomaly Detection <span class="s2-sub-sub">Cross-source · Negatives · Cost gaps · Total integrity · D1/D2 balance</span>
   </div>
   <div id="s1_anomaly" style="margin-bottom:14px"></div>
 
@@ -3655,6 +3655,7 @@ function renderS1(){
       if(isAnom){
         const diff=actual-tot;
         const note=rawPct===999?`D1+D2 reported ${actual.toFixed(1)} ${r.u} but F&B shows 0 — missing F&B entry`:
+          actual===0&&tot>0?`F&B shows ${tot.toFixed(1)} ${r.u} fed but digesters report zero — missing digester entry`:
           rawPct>110?`D1+D2 over-reports F&B by ${Math.abs(diff).toFixed(1)} ${r.u} (${rawPct.toFixed(0)}% of F&B)`:
           `D1+D2 under-reports F&B by ${Math.abs(diff).toFixed(1)} ${r.u} (${rawPct.toFixed(0)}% of F&B)`;
         s1CrossAnomalies.push({label:`${r.nm} (${r.u})`,date:isDa?curDay:mo,value:diff,pct:rawPct,note,isCross:true});
@@ -3700,51 +3701,166 @@ function renderS1(){
     </div>`:'';
   }
 
-  // ── 4. Anomaly Detection (always runs — cross-source from fed table + month negatives) ──
+  // ── 4. Anomaly Detection (all views: Day / Month / ALL) ───────
   const anomalyEl=document.getElementById('s1_anomaly');
   if(anomalyEl){
-    const anomalies=[...s1CrossAnomalies];
-    if(!isDa){
+    const anomalies=[...s1CrossAnomalies]; // Category A: cross-source (already built above)
+
+    // ── B. Negative values (received / fed / balance) ──────────
+    if(isDa){
+      // Day View: check specific day's feed record directly
+      const negDefs=[
+        {label:'Pressmud Balance (MT)',key:'pm_bal',isBal:true},
+        {label:'Cow Dung Balance (MT)',key:'cd_bal',isBal:true},
+        {label:'CSL Balance (KL)',key:'csl_bal',isBal:true},
+        {label:'Grain Syrup Balance (KL)',key:'gs_bal',isBal:true},
+        {label:'Spent Grain Balance (MT)',key:'sg_bal',isBal:true},
+        {label:'Apple Pomace Balance (MT)',key:'ap_bal',isBal:true},
+        {label:'Pressmud Received (MT)',key:'pm_in',isBal:false},
+        {label:'Cow Dung Received (MT)',key:'cd_in',isBal:false},
+        {label:'CSL Received (KL)',key:'csl_in',isBal:false},
+        {label:'Grain Syrup Received (KL)',key:'gs_in',isBal:false},
+        {label:'Spent Grain Received (MT)',key:'sg_in',isBal:false},
+        {label:'Apple Pomace Received (MT)',key:'ap_in',isBal:false},
+        {label:'Pressmud Fed (MT)',key:'pm_feed',isBal:false},
+        {label:'Cow Dung Fed (MT)',key:'cd_feed',isBal:false},
+        {label:'CSL Fed (KL)',key:'csl_feed',isBal:false},
+        {label:'Grain Syrup Fed (KL)',key:'gs_feed',isBal:false},
+        {label:'Spent Grain Fed (MT)',key:'sg_feed',isBal:false},
+        {label:'Apple Pomace Fed (MT)',key:'ap_feed',isBal:false},
+      ];
+      negDefs.forEach(c=>{
+        const v=dayFeed[c.key];
+        if(v!=null&&v<0) anomalies.push({label:c.label,date:curDay,value:v,isBal:c.isBal,isNeg:true});
+      });
+    } else {
+      // Month / ALL view: scan daily arrays
       const _fd=mo==='ALL'?MONTHS:dDates('feed');
       const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
-      const checks=[
+      const negChecks=[
         {label:'Pressmud Received (MT)',arr:_fa('pm_in'),dates:_fd},
-        {label:'Grain Syrup Received (KL)',arr:_fa('gs_in'),dates:_fd},
-        {label:'CSL Received (KL)',arr:_fa('csl_in'),dates:_fd},
         {label:'Cow Dung Received (MT)',arr:_fa('cd_in'),dates:_fd},
+        {label:'CSL Received (KL)',arr:_fa('csl_in'),dates:_fd},
+        {label:'Grain Syrup Received (KL)',arr:_fa('gs_in'),dates:_fd},
         {label:'Spent Grain Received (MT)',arr:_fa('sg_in'),dates:_fd},
         {label:'Apple Pomace Received (MT)',arr:_fa('ap_in'),dates:_fd},
         {label:'Pressmud Fed (MT)',arr:_fa('pm_feed'),dates:_fd},
-        {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
-        {label:'CSL Fed (KL)',arr:_fa('csl_feed'),dates:_fd},
         {label:'Cow Dung Fed (MT)',arr:_fa('cd_feed'),dates:_fd},
+        {label:'CSL Fed (KL)',arr:_fa('csl_feed'),dates:_fd},
+        {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
         {label:'Spent Grain Fed (MT)',arr:_fa('sg_feed'),dates:_fd},
         {label:'Apple Pomace Fed (MT)',arr:_fa('ap_feed'),dates:_fd},
         {label:'Pressmud Balance (MT)',arr:_fa('pm_bal'),dates:_fd,isBal:true},
-        {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
-        {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
         {label:'Cow Dung Balance (MT)',arr:_fa('cd_bal'),dates:_fd,isBal:true},
+        {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
+        {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
         {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
         {label:'Apple Pomace Balance (MT)',arr:_fa('ap_bal'),dates:_fd,isBal:true},
       ];
-      checks.forEach(c=>{
+      negChecks.forEach(c=>{
         (c.arr||[]).forEach((v,i)=>{
-          if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal});
+          if(v!=null&&v<0) anomalies.push({label:c.label,date:c.dates?.[i]||'—',value:v,isBal:!!c.isBal,isNeg:true});
         });
       });
     }
+
+    // ── C. Procurement Cost vs Receipt ─────────────────────────
+    const costDefs=[
+      {nm:'Pressmud',ki:'pm_in',kc:'pm_cost',u:'MT'},
+      {nm:'Cow Dung',ki:'cd_in',kc:'cd_cost',u:'MT'},
+      {nm:'CSL',ki:'csl_in',kc:'csl_cost',u:'KL'},
+      {nm:'Grain Syrup',ki:'gs_in',kc:'gs_cost',u:'KL'},
+      {nm:'Spent Grain',ki:'sg_in',kc:'sg_cost',u:'MT'},
+      {nm:'Apple Pomace',ki:'ap_in',kc:'ap_cost',u:'MT'},
+    ];
+    if(isDa){
+      costDefs.forEach(c=>{
+        const rec=dayFeed[c.ki]||0,cost=dayFeed[c.kc]||0;
+        if(rec>0&&cost===0) anomalies.push({label:`${c.nm} (${c.u})`,date:curDay,value:rec,isCost:true,note:`Received ${rec.toFixed(1)} ${c.u} but ₹0 cost — rate not entered`});
+        else if(cost>0&&rec===0) anomalies.push({label:`${c.nm} (${c.u})`,date:curDay,value:cost,isCostOnly:true,note:`₹${fN(cost)} cost recorded but no receipt entry`});
+      });
+    } else {
+      // Month/ALL: aggregate by feedstock to avoid row flood
+      const _fd2=mo==='ALL'?MONTHS:dDates('feed');
+      const _fa2=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
+      const costGapSummary={};
+      costDefs.forEach(c=>{
+        const inArr=_fa2(c.ki),costArr=_fa2(c.kc);
+        (inArr||[]).forEach((rec,i)=>{
+          const cost=costArr?.[i]||0;
+          if((rec||0)>0&&cost===0){
+            const key=c.nm+'_in';
+            if(!costGapSummary[key]) costGapSummary[key]={nm:c.nm,u:c.u,type:'in',count:0,total:0};
+            costGapSummary[key].count++; costGapSummary[key].total+=(rec||0);
+          } else if(cost>0&&(rec||0)===0){
+            const key=c.nm+'_cost';
+            if(!costGapSummary[key]) costGapSummary[key]={nm:c.nm,u:c.u,type:'cost',count:0,total:0};
+            costGapSummary[key].count++; costGapSummary[key].total+=cost;
+          }
+        });
+      });
+      const period=mo==='ALL'?'All Months':mo;
+      Object.values(costGapSummary).forEach(s=>{
+        if(s.type==='in') anomalies.push({label:`${s.nm} (${s.u})`,date:`${s.count}d in ${period}`,value:s.total,isCost:true,note:`${s.count} day${s.count>1?'s':''} with receipt (total ${s.total.toFixed(1)} ${s.u}) but ₹0 cost — rates not entered`});
+        else anomalies.push({label:`${s.nm} (${s.u})`,date:`${s.count}d in ${period}`,value:s.total,isCostOnly:true,note:`${s.count} day${s.count>1?'s':''} with cost (₹${fN(s.total)}) but no receipt entry`});
+      });
+    }
+
+    // ── D. F&B Internal Total Mismatch ─────────────────────────
+    const feedSumKeys=['pm_feed','cd_feed','csl_feed','gs_feed','sg_feed','ap_feed'];
+    if(isDa){
+      const fbTot=dayFeed.feed_total||0;
+      const sumI=feedSumKeys.reduce((s,k)=>s+(dayFeed[k]||0),0);
+      const diff2=Math.abs(fbTot-sumI);
+      if(diff2>0.5) anomalies.push({label:'F&B Total Feed',date:curDay,value:diff2,isTotal:true,note:`F&B total ${fbTot.toFixed(1)} MT ≠ sum of feeds ${sumI.toFixed(1)} MT (gap: ${diff2.toFixed(1)} MT)`});
+    } else {
+      const _fd3=mo==='ALL'?MONTHS:dDates('feed');
+      const _fa3=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
+      const totArr=_fa3('feed_total');
+      const indArr=feedSumKeys.map(k=>_fa3(k));
+      (totArr||[]).forEach((fbTot,i)=>{
+        const sumI=indArr.reduce((s,arr)=>s+(arr?.[i]||0),0);
+        const diff2=Math.abs((fbTot||0)-sumI);
+        if(diff2>0.5) anomalies.push({label:'F&B Total Feed',date:_fd3[i]||'—',value:diff2,isTotal:true,note:`F&B total ${(fbTot||0).toFixed(1)} MT ≠ sum of feeds ${sumI.toFixed(1)} MT (gap: ${diff2.toFixed(1)} MT)`});
+      });
+    }
+
+    // ── E. D1 vs D2 Feed Imbalance ─────────────────────────────
+    if(isDa){
+      const d1f=dayRec.d1?.feed_act||0,d2f=dayRec.d2?.feed_act||0,totF=d1f+d2f;
+      if(totF>5){
+        const heavy=d1f>=d2f?'D1':'D2',light=d1f>=d2f?'D2':'D1';
+        const hv=Math.max(d1f,d2f),lv=Math.min(d1f,d2f),pct=hv/totF*100;
+        if(pct>70) anomalies.push({label:'D1 vs D2 Feed Balance',date:curDay,value:pct,isImbal:true,note:`${heavy} gets ${hv.toFixed(1)} MT (${pct.toFixed(0)}%), ${light} gets ${lv.toFixed(1)} MT — asymmetric loading`});
+      }
+    } else {
+      const d1total=getD1('feed_act'),d2total=getD2('feed_act'),totF=d1total+d2total;
+      if(totF>5){
+        const heavy=d1total>=d2total?'D1':'D2',light=d1total>=d2total?'D2':'D1';
+        const hv=Math.max(d1total,d2total),lv=Math.min(d1total,d2total),pct=hv/totF*100;
+        if(pct>65) anomalies.push({label:'D1 vs D2 Feed Balance',date:mo==='ALL'?'All Months':mo,value:pct,isImbal:true,note:`${heavy} received ${hv.toFixed(1)} MT (${pct.toFixed(0)}%), ${light} received ${lv.toFixed(1)} MT over period`});
+      }
+    }
+
+    // ── RENDER ─────────────────────────────────────────────────
     if(!anomalies.length){
       anomalyEl.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg2);border:1px solid var(--bdr);border-left:4px solid #2E7D32;border-radius:8px">
         <span style="font-size:18px">✓</span>
         <div><div style="font-weight:700;color:#2E7D32">All records clean</div>
-        <div style="font-size:11px;color:var(--text3)">No discrepancies or negative values detected for this period.</div></div>
+        <div style="font-size:11px;color:var(--text3)">No anomalies detected for this period.</div></div>
       </div>`;
     } else {
       const crossCount=anomalies.filter(a=>a.isCross).length;
-      const negCount=anomalies.filter(a=>!a.isCross).length;
+      const negCount=anomalies.filter(a=>a.isNeg).length;
+      const costCount=anomalies.filter(a=>a.isCost||a.isCostOnly).length;
+      const totalCount=anomalies.filter(a=>a.isTotal).length;
+      const imbalCount=anomalies.filter(a=>a.isImbal).length;
       const summary=[];
       if(crossCount) summary.push(`${crossCount} cross-source discrepanc${crossCount===1?'y':'ies'}`);
       if(negCount) summary.push(`${negCount} negative value${negCount===1?'':'s'}`);
+      if(costCount) summary.push(`${costCount} cost gap${costCount===1?'':'s'}`);
+      if(totalCount) summary.push(`${totalCount} total mismatch${totalCount===1?'':'es'}`);
+      if(imbalCount) summary.push(`${imbalCount} loading imbalance${imbalCount===1?'':'s'}`);
       const rows=anomalies.map(a=>{
         if(a.isCross){
           const pClr=a.pct>120||a.pct===999?'#C62828':a.pct<75?'#C62828':'#E65100';
@@ -3757,15 +3873,45 @@ function renderS1(){
             <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#E65100;color:#fff;border-radius:3px;white-space:nowrap">⚠ CROSS-SOURCE</span></td>
           </tr>`;
         }
-        const isB=a.isBal;
-        const note=isB?'Stock overdrawn — fed more than available balance':'Negative received/fed entry — possible data entry error';
-        return`<tr>
-          <td style="font-weight:700;color:#C62828">${a.label}</td>
-          <td style="font-variant-numeric:tabular-nums">${a.date}</td>
-          <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(2)}</td>
-          <td style="font-size:10px;color:var(--text2)">${note}</td>
-          <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. VIVEK KUMAR</span></td>
-        </tr>`;
+        if(a.isNeg){
+          const note=a.isBal?'Stock overdrawn — fed more than available balance':'Negative entry — data entry error';
+          return`<tr>
+            <td style="font-weight:700;color:#C62828">${a.label}</td>
+            <td style="font-variant-numeric:tabular-nums">${a.date}</td>
+            <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(2)}</td>
+            <td style="font-size:10px;color:var(--text2)">${note}</td>
+            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ MR. VIVEK KUMAR</span></td>
+          </tr>`;
+        }
+        if(a.isCost||a.isCostOnly){
+          const valTxt=a.isCost?(a.value.toFixed(1)):('₹'+fN(a.value));
+          return`<tr>
+            <td style="font-weight:700;color:#E65100">${a.label}</td>
+            <td style="font-variant-numeric:tabular-nums">${a.date}</td>
+            <td style="color:#E65100;font-weight:700;font-variant-numeric:tabular-nums">${valTxt}</td>
+            <td style="font-size:10px;color:var(--text2)">${a.note}</td>
+            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#F57C00;color:#fff;border-radius:3px;white-space:nowrap">⚠ COST GAP</span></td>
+          </tr>`;
+        }
+        if(a.isTotal){
+          return`<tr>
+            <td style="font-weight:700;color:#C62828">${a.label}</td>
+            <td style="font-variant-numeric:tabular-nums">${a.date}</td>
+            <td style="color:#C62828;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(1)} MT</td>
+            <td style="font-size:10px;color:var(--text2)">${a.note}</td>
+            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#C62828;color:#fff;border-radius:3px;white-space:nowrap">⚠ TOTAL MISMATCH</span></td>
+          </tr>`;
+        }
+        if(a.isImbal){
+          return`<tr>
+            <td style="font-weight:700;color:#E65100">${a.label}</td>
+            <td style="font-variant-numeric:tabular-nums">${a.date}</td>
+            <td style="color:#E65100;font-weight:700;font-variant-numeric:tabular-nums">${a.value.toFixed(0)}%</td>
+            <td style="font-size:10px;color:var(--text2)">${a.note}</td>
+            <td><span style="font-size:9px;font-weight:800;padding:2px 8px;background:#E65100;color:#fff;border-radius:3px;white-space:nowrap">⚠ D1/D2 IMBAL.</span></td>
+          </tr>`;
+        }
+        return'';
       }).join('');
       anomalyEl.innerHTML=`<div style="background:#FFF3F3;border:1px solid #FFCDD2;border-radius:8px;padding:10px 14px;margin-bottom:8px;color:#B71C1C;font-size:11px;font-weight:700">
         ⚠ ${anomalies.length} anomal${anomalies.length===1?'y':'ies'} detected: ${summary.join(', ')}.
