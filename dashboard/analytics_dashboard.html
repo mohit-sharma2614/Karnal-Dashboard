@@ -2262,7 +2262,7 @@ function renderSectionDay(sectionId){
     const cbgValD=actCBGD!=null?(fmtN(actCBGD)+' / '+fmtN(cbgTgt)+' kg'):'—';
     const cbgNoteD=cbgGapPct!=null?(cbgGapPct.toFixed(0)+'% of ideal · '+(cbgTgt>actCBGD?'−'+fmtN(cbgTgt-actCBGD)+' kg shortfall':'on target')):'';
     html+=`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-      ${sbar('PSA Operating Hours'+(digLblDay?''+''),hrsValD,hrsNoteD,hrsClrD)}
+      ${sbar('PSA Operating Hours',hrsValD,hrsNoteD,hrsClrD)}
       ${sbar('Suction Dip Today'+digLblDay,sEffValD,sEffNoteD,clr(sEff))}
       ${sbar('CBG vs Target'+digLblDay,cbgValD,cbgNoteD,clr(cbgGapPct))}
     </div>`;
