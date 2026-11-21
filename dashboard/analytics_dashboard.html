@@ -3755,6 +3755,8 @@ function renderS1(){
       // Month / ALL view: scan daily arrays
       const _fd=mo==='ALL'?MONTHS:dDates('feed');
       const _fa=(k)=>mo==='ALL'?mArr(k):dArr('feed',k);
+      // For balance cols in ALL mode use month-end value (_last), not sum of daily balances
+      const _faBal=(k)=>mo==='ALL'?mArr(k+'_last'):dArr('feed',k);
       const negChecks=[
         {label:'Pressmud Received (MT)',arr:_fa('pm_in'),dates:_fd},
         {label:'Cow Dung Received (MT)',arr:_fa('cd_in'),dates:_fd},
@@ -3768,12 +3770,12 @@ function renderS1(){
         {label:'Grain Syrup Fed (KL)',arr:_fa('gs_feed'),dates:_fd},
         {label:'Spent Grain Fed (MT)',arr:_fa('sg_feed'),dates:_fd},
         {label:'Apple Pomace Fed (MT)',arr:_fa('ap_feed'),dates:_fd},
-        {label:'Pressmud Balance (MT)',arr:_fa('pm_bal'),dates:_fd,isBal:true},
-        {label:'Cow Dung Balance (MT)',arr:_fa('cd_bal'),dates:_fd,isBal:true},
-        {label:'CSL Balance (KL)',arr:_fa('csl_bal'),dates:_fd,isBal:true},
-        {label:'Grain Syrup Balance (KL)',arr:_fa('gs_bal'),dates:_fd,isBal:true},
-        {label:'Spent Grain Balance (MT)',arr:_fa('sg_bal'),dates:_fd,isBal:true},
-        {label:'Apple Pomace Balance (MT)',arr:_fa('ap_bal'),dates:_fd,isBal:true},
+        {label:'Pressmud Balance (MT)',arr:_faBal('pm_bal'),dates:_fd,isBal:true},
+        {label:'Cow Dung Balance (MT)',arr:_faBal('cd_bal'),dates:_fd,isBal:true},
+        {label:'CSL Balance (KL)',arr:_faBal('csl_bal'),dates:_fd,isBal:true},
+        {label:'Grain Syrup Balance (KL)',arr:_faBal('gs_bal'),dates:_fd,isBal:true},
+        {label:'Spent Grain Balance (MT)',arr:_faBal('sg_bal'),dates:_fd,isBal:true},
+        {label:'Apple Pomace Balance (MT)',arr:_faBal('ap_bal'),dates:_fd,isBal:true},
       ];
       if(mo==='ALL'){
         negChecks.forEach(c=>{
