@@ -2035,10 +2035,10 @@ function renderSectionDay(sectionId){
         const pct=tot>0&&(d1v+d2v)>0?Math.min((d1v+d2v)/tot*100,200):0;
         const bClr=pct>=90?'#2E7D32':pct>=70?'#E65100':'#C62828';
         return`<tr>
-          <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
-          <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1)+' '+r.u:'—'}</td>
-          <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1)+' '+r.u:'—'}</td>
-          <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right;${!fbHasData&&tot>0?'color:var(--text2)':''}">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
+          <td style="font-weight:700;color:${r.clr}">${r.nm} <span style="font-size:10px;font-weight:400;color:var(--text3)">(${r.u})</span></td>
+          <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1):'—'}</td>
+          <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1):'—'}</td>
+          <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right;${!fbHasData&&tot>0?'color:var(--text2)':''}">${tot>0?tot.toFixed(1):'—'}</td>
           <td style="width:25%"><div style="display:flex;align-items:center;gap:5px">
             <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
               <div style="width:${Math.min(pct,100).toFixed(0)}%;height:100%;background:${bClr};border-radius:3px"></div></div>
@@ -3662,10 +3662,10 @@ function renderS1(){
       }
       const anomBadge=isAnom?` <span style="font-size:9px;font-weight:800;background:#C62828;color:#fff;border-radius:3px;padding:1px 4px">⚠</span>`:'';
       return`<tr${isAnom?` style="background:${rawPct>110?'rgba(198,40,40,.04)':'rgba(198,40,40,.04)'}"`:''}>
-        <td style="font-weight:700;color:${r.clr}">${r.nm}</td>
-        <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1)+' '+r.u:'—'}</td>
-        <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1)+' '+r.u:'—'}</td>
-        <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${tot>0?tot.toFixed(1)+' '+r.u:'—'}</td>
+        <td style="font-weight:700;color:${r.clr}">${r.nm} <span style="font-size:10px;font-weight:400;color:var(--text3)">(${r.u})</span></td>
+        <td style="color:#1565C0;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d1v>0?d1v.toFixed(1):'—'}</td>
+        <td style="color:#2E7D32;font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${d2v>0?d2v.toFixed(1):'—'}</td>
+        <td style="font-weight:700;font-variant-numeric:tabular-nums;text-align:right">${tot>0?tot.toFixed(1):'—'}</td>
         <td style="width:25%"><div style="display:flex;align-items:center;gap:5px">
           ${noActivity?'<span style="color:var(--text3);font-size:10px">—</span>':`
           <div style="flex:1;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden">
