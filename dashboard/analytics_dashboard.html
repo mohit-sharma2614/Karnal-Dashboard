@@ -3993,7 +3993,7 @@ function renderS1(){
   const cslBpp=mo==='ALL'?mArr('csl_bpp'):dArr('exp','d1_csl_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_csl_bpp')[i]||0));
   const gsBpp=mo==='ALL'?mArr('gs_bpp'):dArr('exp','d1_gs_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_gs_bpp')[i]||0));
   const sgBpp=mo==='ALL'?mArr('sg_bpp'):dArr('exp','d1_sg_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_sg_bpp')[i]||0));
-  const apBpp=mo==='ALL'?mArr('ap_bpp'):dArr('exp','d1_ap_bpp').map((v,i)=>(v||0)+(dArr('exp','d2_ap_bpp')[i]||0));
+  const apBpp=mo==='ALL'?mArr('ap_bpp'):dArr('d1','ap_bpp').map((v,i)=>(v||0)+(dArr('d2','ap_bpp')[i]||0));
   bar('c_s1_bpp',bppLabels,[bDS('Pressmud',pmBpp,C.blue),bDS('Cow Dung',cdBpp,C.teal),bDS('CSL',cslBpp,C.indigo),bDS('Grain Syrup',gsBpp,C.cyan),bDS('Spent Grain',sgBpp,C.orange),bDS('Apple Pomace',apBpp,C.purple)],true);
   } else {
   // ── Day View: Last 7 days for Feed / Cost / BPP charts ──────────
@@ -4907,8 +4907,8 @@ function renderS4(){
   const d2cd=mo==='ALL'?mArr('d2_cd_bpp'):dArr('exp','d2_cd_bpp');
   const d2csl=mo==='ALL'?mArr('d2_csl_bpp'):dArr('exp','d2_csl_bpp');
   const d2gs=mo==='ALL'?mArr('d2_gs_bpp'):dArr('exp','d2_gs_bpp');
-  const d1ap=mo==='ALL'?mArr('ap_bpp'):dArr('exp','d1_ap_bpp');
-  const d2ap=mo==='ALL'?mArr('d2_ap_bpp'):dArr('exp','d2_ap_bpp');
+  const d1ap=mo==='ALL'?mArr('ap_bpp'):dArr('d1','ap_bpp');
+  const d2ap=mo==='ALL'?mArr('d2_ap_bpp'):dArr('d2','ap_bpp');
   line('c_s4_exp',lblE,[lDS('Feedstock Expected (BPP)',expT,C.blue),lDS('Actual Purified',actP,C.green)]);
 
   // Conversion efficiency % trend (Task 2) — Actual Purified ÷ Actual RBG × 100
@@ -7295,10 +7295,10 @@ async function buildAnalyticsD() {
   DD.psa=buildDA(psa,gD,{cbg_tot:IDX.P_cbg_tot,purified:IDX.P_pur_tot,dispatched:IDX.P_dispatched,psa_hrs:psaH,comp_hrs:r=>{const v=nv(r[3]);return v!==null&&v>0&&v<2?v*24:v;},storage:IDX.P_storage,rbg_d1:IDX.P_rbg_d1,rbg_d2:IDX.P_rbg_d2,rbg_tot:IDX.P_rbg_tot,cbg_d1:IDX.P_cbg_d1,cbg_d2:IDX.P_cbg_d2,ch4:IDX.P_ch4,psa_eff_day:IDX.P_psa_eff_day,veer:IDX.P_veer,adinath:IDX.P_adinath,kfs:IDX.P_kfs,ksk:IDX.P_ksk,om:IDX.P_om,sps:IDX.P_sps});
   DD.d1=buildDA(d1,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
-    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
+    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act,ap_bpp:IDX.D_ap_bpp});
   DD.d2=buildDA(d2,gD,{cbg:IDX.D_cbg,bg_act:IDX.D_bg_psa,olr:IDX.D_olr,sfom:IDX.D_sfom,lfom:IDX.D_lfom,drain_ac:IDX.D_drain_act,feed_act:IDX.D_feed_act,psa_eff_pct:IDX.D_psa_eff_pct,
     feed_exp:IDX.D_feed_exp,bg_total:IDX.D_bg_total,bg_vent:IDX.D_bg_vent,drain_exp:IDX.D_drain_exp,
-    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act});
+    cd_exp:IDX.D_cd_exp,pm_exp:IDX.D_pm_exp,csl_exp:IDX.D_csl_exp,gs_exp:IDX.D_gs_exp,sg_exp:IDX.D_sg_exp,ap_exp:IDX.D_ap_exp,cd_act:IDX.D_cd_act,pm_act:IDX.D_pm_act,csl_act:IDX.D_csl_act,gs_act:IDX.D_gs_act,sg_act:IDX.D_sg_act,ap_act:IDX.D_ap_act,ap_bpp:IDX.D_ap_bpp});
   DD.feed=buildDA(fb,gD,{pm_in:FB.pm_in,gs_in:FB.gs_in,csl_in:FB.csl_in,cd_in:FB.cd_in,sg_in:FB.sg_in,ap_in:FB.ap_in,pm_feed:FB.pm_feed,gs_feed:FB.gs_feed,csl_feed:FB.csl_feed,cd_feed:FB.cd_feed,sg_feed:FB.sg_feed,ap_feed:FB.ap_feed,feed_total:FB.feed_tot,pm_cost:FB.pm_cost,gs_cost:FB.gs_cost,csl_cost:FB.csl_cost,cd_cost:FB.cd_cost,sg_cost:FB.sg_cost,ap_cost:FB.ap_cost,pm_bal:FB.pm_bal,gs_bal:FB.gs_bal,csl_bal:FB.csl_bal,cd_bal:FB.cd_bal,sg_bal:FB.sg_bal,ap_bal:FB.ap_bal});
   // Daily cost = feedstock+transport+maint+elec only; manpower+EMI are monthly lump sums, not daily
   DD.rev=buildDA(rc,gD,{cbg_rev:1,sfom_rev:2,lfom_rev:3,feed_cost:4,trans_cost:5,maint_cost:6,elec_cost:7,total_rev:r=>(nv(r[1])||0)+(nv(r[2])||0)+(nv(r[3])||0),total_cost:r=>(nv(r[4])||0)+(nv(r[5])||0)+(nv(r[6])||0)+(nv(r[7])||0)});
