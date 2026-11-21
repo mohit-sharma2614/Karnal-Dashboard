@@ -3677,7 +3677,6 @@ function renderS1(){
           rawPct>110?`D1+D2 over-reports F&B by ${Math.abs(diff).toFixed(1)} ${r.u} (${rawPct.toFixed(0)}% of F&B)`:
           `D1+D2 under-reports F&B by ${Math.abs(diff).toFixed(1)} ${r.u} (${rawPct.toFixed(0)}% of F&B)`;
         s1CrossAnomalies.push({label:`${r.nm} (${r.u})`,date:isDa?curDay:mo,value:diff,pct:rawPct,note,isCross:true});
-        console.log('[S1_ANOM_PUSH]',r.nm,'tot=',tot,'actual=',actual,'rawPct=',rawPct,'isDa=',isDa,'mo=',mo,'array_len=',s1CrossAnomalies.length);
       }
       const anomBadge=isAnom?` <span style="font-size:9px;font-weight:800;background:#C62828;color:#fff;border-radius:3px;padding:1px 4px">⚠</span>`:'';
       return`<tr${isAnom?` style="background:${rawPct>110?'rgba(198,40,40,.04)':'rgba(198,40,40,.04)'}"`:''}>
@@ -3723,7 +3722,6 @@ function renderS1(){
   // ── 4. Anomaly Detection (all views: Day / Month / ALL) ───────
   const anomalyEl=document.getElementById('s1_anomaly');
   if(anomalyEl){
-    console.log('[S1_ANOM_READ] s1CrossAnomalies.length=',s1CrossAnomalies.length,'isDa=',isDa,'mo=',mo,'items=',JSON.stringify(s1CrossAnomalies.map(a=>a.label)));
     const anomalies=[...s1CrossAnomalies]; // Category A: cross-source (already built above)
 
     // ── B. Negative values (received / fed / balance) ──────────
@@ -3822,7 +3820,7 @@ function renderS1(){
       const period=mo==='ALL'?'All Months':mo;
       Object.values(costGapSummary).forEach(s=>{
         if(s.type==='in') anomalies.push({label:`${s.nm} (${s.u})`,date:`${s.count}d in ${period}`,value:s.total,isCost:true,note:`${s.count} day${s.count>1?'s':''} with receipt (total ${s.total.toFixed(1)} ${s.u}) but ₹0 cost — rates not entered`});
-        else anomalies.push({label:`${s.nm} (${s.u})`,date:`${s.count}d in ${period}`,value:s.total,isCostOnly:true,note:`${s.count} day${s.count>1?'s':''} with cost (₹${fN(s.total)}) but no receipt entry`});
+        else anomalies.push({label:`${s.nm} (${s.u})`,date:`${s.count}d in ${period}`,value:s.total,isCostOnly:true,note:`${s.count} day${s.count>1?'s':''} with cost (₹${fmtN(s.total)}) but no receipt entry`});
       });
     }
 
