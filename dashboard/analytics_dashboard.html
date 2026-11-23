@@ -4147,8 +4147,8 @@ function renderS2(){
     if(mo==='ALL'){const a=mArr(key);const v=a.filter(x=>x!=null&&x!==0);return v.length?v[v.length-1]:null;}
     else{const mi=MONTHS.indexOf(mo);return mi>=0&&(mArr(key)[mi]||0)>0?mArr(key)[mi]:null;}
   };
-  const bppPeriod=mo==='ALL'?'Annual sum':'Month total';
-  const getMoBpp=k=>mo==='ALL'?_mSumOrNull(k):(()=>{const mi=MONTHS.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
+  const bppPeriod=mo==='ALL'?'Annual avg':'Month avg';
+  const getMoBpp=k=>mo==='ALL'?(()=>{const a=mArr(k).filter(x=>x!=null&&x!==0);return a.length?a.reduce((s,v)=>s+v,0)/a.length:null;})():(()=>{const mi=MONTHS.indexOf(mo);return mi>=0?(mArr(k)[mi]||null):null;})();
   const bppData={
     d1_pm_bpp:getMoBpp('d1_pm_bpp'),d1_cd_bpp:getMoBpp('d1_cd_bpp'),d1_gs_bpp:getMoBpp('d1_gs_bpp'),
     d1_csl_bpp:getMoBpp('d1_csl_bpp'),d1_sg_bpp:getMoBpp('d1_sg_bpp'),d1_ap_bpp:null,
@@ -7308,8 +7308,8 @@ async function buildAnalyticsD() {
   M.pm_bpp=aggMonth(d1,gD,IDX.D_pm_bpp); M.cd_bpp=aggMonth(d1,gD,IDX.D_cd_bpp); M.gs_bpp=aggMonth(d1,gD,IDX.D_gs_bpp); M.csl_bpp=aggMonth(d1,gD,IDX.D_csl_bpp); M.sg_bpp=aggMonth(d1,gD,IDX.D_sg_bpp); M.ap_bpp=aggMonth(d1,gD,IDX.D_ap_bpp);
   M.d2_pm_bpp=aggMonth(d2,gD,IDX.D_pm_bpp); M.d2_cd_bpp=aggMonth(d2,gD,IDX.D_cd_bpp); M.d2_gs_bpp=aggMonth(d2,gD,IDX.D_gs_bpp); M.d2_csl_bpp=aggMonth(d2,gD,IDX.D_csl_bpp); M.d2_sg_bpp=aggMonth(d2,gD,IDX.D_sg_bpp); M.d2_ap_bpp=aggMonth(d2,gD,IDX.D_ap_bpp); M.act_cbg=M.cbg;
   // D1+D2 BPP from CBG Expected sheet (D1 cols 1-5, D2 cols 7-11)
-  M.d1_pm_bpp=aggMonth(cbgExp,gD,1); M.d1_cd_bpp=aggMonth(cbgExp,gD,2); M.d1_csl_bpp=aggMonth(cbgExp,gD,3); M.d1_gs_bpp=aggMonth(cbgExp,gD,4); M.d1_sg_bpp=aggMonth(cbgExp,gD,5);
-  M.d2_pm_bpp_cbg=aggMonth(cbgExp,gD,7); M.d2_cd_bpp_cbg=aggMonth(cbgExp,gD,8); M.d2_csl_bpp_cbg=aggMonth(cbgExp,gD,9); M.d2_gs_bpp_cbg=aggMonth(cbgExp,gD,10); M.d2_sg_bpp_cbg=aggMonth(cbgExp,gD,11);
+  M.d1_pm_bpp=aggMonth(cbgExp,gD,1,'avg'); M.d1_cd_bpp=aggMonth(cbgExp,gD,2,'avg'); M.d1_csl_bpp=aggMonth(cbgExp,gD,3,'avg'); M.d1_gs_bpp=aggMonth(cbgExp,gD,4,'avg'); M.d1_sg_bpp=aggMonth(cbgExp,gD,5,'avg');
+  M.d2_pm_bpp_cbg=aggMonth(cbgExp,gD,7,'avg'); M.d2_cd_bpp_cbg=aggMonth(cbgExp,gD,8,'avg'); M.d2_csl_bpp_cbg=aggMonth(cbgExp,gD,9,'avg'); M.d2_gs_bpp_cbg=aggMonth(cbgExp,gD,10,'avg'); M.d2_sg_bpp_cbg=aggMonth(cbgExp,gD,11,'avg');
   // Aliases used by generate report and S1 render (cost_per_kg moved after M.total_cost)
   M.raw_biogas=M.rbg_tot;
   M.psa_eff=M.d1_eff.map((v,i)=>{const v2=M.d2_eff[i];return(v!=null&&v2!=null)?(v+v2)/2:v!=null?v:v2!=null?v2:null;});
