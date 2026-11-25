@@ -1457,19 +1457,23 @@ function mArr(key){
 function dArr(section, key){
   const mo=curMonth;
   const arr=(D.D[section]?.[mo]?.[key])||[];
-  if(arr.length||section!=='exp') return arr;
-  // Fallback: when EXP sheet row missing for this month, derive from PSA data
+  if(section!=='exp') return arr;
+  // For exp section: fall back to PSA data whenever exp is shorter than PSA
   const ph=D.D.psa?.[mo]?.psa_hrs||[];
-  if(!ph.length) return [];
-  if(key==='act_cbg') return D.D.psa?.[mo]?.cbg_tot||[];
+  if(!ph.length) return arr;
+  if(arr.length>=ph.length) return arr; // exp data is complete
+  // EXP sheet is incomplete (0 rows or fewer rows than PSA) — derive from PSA
+  if(key==='act_cbg') return D.D.psa?.[mo]?.cbg_tot||arr;
   if(key==='ideal_raw') return ph.map(h=>h!=null?Math.round(h*600*10)/10:null);
   if(key==='ideal_pur') return ph.map(h=>h!=null?Math.round(h*370*10)/10:null);
   if(key==='ideal_cbg') return ph.map(h=>h!=null?Math.round(h*275*10)/10:null);
-  return [];
+  return arr;
 }
 function dDates(section){
   const dates=(D.D[section]?.[curMonth]?.dates)||[];
-  if(dates.length||section!=='exp') return dates;
+  if(section!=='exp') return dates;
+  const psaDates=D.D.psa?.[curMonth]?.dates||[];
+  if(dates.length>=psaDates.length) return dates;
   return D.D.psa?.[curMonth]?.dates||[];
 }
 function healthDArr(field){ return (D.D.health?.[curMonth]?.[field])||[]; }
