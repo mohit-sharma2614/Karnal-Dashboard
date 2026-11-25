@@ -5052,7 +5052,7 @@ function renderS4(){
   // ── Status bar ────────────────────────────────────────────────
   const totPsaHrs=sumA(psaH); const totIdealRaw=sumA(idealRaw);
   const totRbg=sumA(rbgTot); const totPur=sumA(pur); const totActCBG=sumA(actCBG); const totIdealCBG=sumA(idealCBG);
-  const reqPsaHrs=psaH.filter(h=>h!=null).length*20;
+  const reqPsaHrs=psaH.filter(h=>h!=null).length*22;
   const hrsShortfall=reqPsaHrs!=null?totPsaHrs-reqPsaHrs:null;
   const hrsShortPct=reqPsaHrs>0?totPsaHrs/reqPsaHrs*100:null;
   const suctEff=totIdealRaw>0?totRbg/totIdealRaw*100:null;
@@ -5087,7 +5087,7 @@ function renderS4(){
     const purEff=totRbg>0&&totPur>0?(totPur/(totRbg*(370/600))*100):null;
     const purEffV=purEff!=null?purEff.toFixed(1)+'%':'—';
     chainEl.innerHTML=
-      cs('PSA Target Hours','20 hrs/day × operating days',reqH,'hrs','#2563eb')+
+      cs('PSA Target Hours','22 hrs/day × operating days',reqH,'hrs','#2563eb')+
       cs('Hours Shortfall','Required − actual PSA hrs',shortH,'hrs',shortC)+
       cs('Suction Efficiency','Actual RBG ÷ Ideal suction capacity',sEffV,'',sCls(suctEff))+
       cs('Purification Efficiency','Actual purified ÷ Expected from suction',purEffV,'',sCls(purEff));
@@ -5099,10 +5099,10 @@ function renderS4(){
   // Update dynamic chart titles to reflect D1/D2 filter
   ['raw','pur','cbg','eff'].forEach(k=>{const el=document.getElementById('ct_s4_'+k);if(el){const base=el.dataset.base||(el.dataset.base=el.textContent.replace(/ — D[12]$/,''));el.textContent=base+digTag;}});
 
-  // 3-way comparison: PSA target (20 hrs/day) vs Design Ceiling vs Actual
-  const psaTargetArr=psaH.map(()=>20*370);
+  // 3-way comparison: PSA target (22 hrs/day) vs Design Ceiling vs Actual
+  const psaTargetArr=psaH.map(()=>22*370);
   line('c_s4_3way',lbl,[
-    lDS('PSA Target (20 hrs/day × 370)',psaTargetArr,C.blue),
+    lDS('PSA Target (22 hrs/day × 370)',psaTargetArr,C.blue),
     lDS('PSA Design Ceiling (hrs×370)',idealPur,C.grey),
     lDS(`Actual Purified${digTag}`,actP,C.green)
   ]);
@@ -5129,7 +5129,7 @@ function renderS4(){
   const d2gs=mo==='ALL'?mArr('d2_gs_bpp'):dArr('exp','d2_gs_bpp');
   const d1ap=mo==='ALL'?mArr('ap_bpp'):dArr('d1','ap_bpp');
   const d2ap=mo==='ALL'?mArr('d2_ap_bpp'):dArr('d2','ap_bpp');
-  line('c_s4_exp',lbl,[lDS('PSA Target (20 hrs × 370 m³/hr)',psaTargetArr,C.blue),lDS('Actual Purified',actP,C.green)]);
+  line('c_s4_exp',lbl,[lDS('PSA Target (22 hrs × 370 m³/hr)',psaTargetArr,C.blue),lDS('Actual Purified',actP,C.green)]);
 
   // Conversion efficiency % trend (Task 2) — Actual Purified ÷ Actual RBG × 100
   const convEffArr=(mo==='ALL'?MONTHS:dDates('psa')).map((_,i)=>{
