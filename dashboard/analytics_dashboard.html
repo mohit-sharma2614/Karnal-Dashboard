@@ -719,7 +719,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <button class="tb" onclick="show('s4',this)">4 · Purification</button>
       <button class="tb" onclick="show('s5',this)">5 · Compressor</button>
       <button class="tb" onclick="show('si',this)">6 · Intelligence</button>
-      <button class="tb" onclick="show('s6',this)">7 · Manure</button>
+      <button class="tb" onclick="show('s6',this)">7 · Digestate</button>
       <button class="tb" onclick="show('s7',this)">8 · Sales</button>
       <button class="tb" onclick="show('s8',this)">9 · Finance</button>
     </div>
@@ -1229,7 +1229,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 
 <!-- ══ S6 MANURE ══ -->
 <div id="s6" class="pg">
-  <div class="stitle">Manure Section <span id="s6_period" class="mo-badge">All Months</span></div>
+  <div class="stitle">Digestate Section <span id="s6_period" class="mo-badge">All Months</span></div>
   <div id="s6_main_content">
   <div class="kg" style="grid-template-columns:repeat(3,1fr)">
     <div class="kc a"><div class="kl">D1 Total Drain</div><div class="kv a" id="s6_d1d">—</div><div class="ks">m³</div></div>
@@ -3060,13 +3060,13 @@ function _renderOVSections(mo){
      cl:'Monthly Produced vs Dispatched (kg)',
      ch:()=>bar('ov_ch_s5',lbls,[bDS('Produced (kg)',cbgD,C.teal),bDS('Dispatched (kg)',dispD,C.green)]),
      exploreLbl:'Compressor',exploreHint:'CBG dispatch · utilization · trips'},
-    {id:'s6',tab:'s6',clr:'#3f6212',num:'S6',nm:'Manure',person:'Mr. Vivek Kumar',swFlag:'',
+    {id:'s6',tab:'s6',clr:'#3f6212',num:'S6',nm:'Digestate',person:'Mr. Vivek Kumar',swFlag:'',
      st:sOk(tSfom+tLfom>0?100:null,80,50),
      stat:[{l:'On Track',c:tSfom+tLfom>0?'g':'a'}],
      mx:[{l:'Total Drain (m³)',v:fmtM3(tDrain).replace(' m³','')},{l:'Drain Achiev. (%)',v:drAchPct!=null?drAchPct.toFixed(1)+'%':'—',vc:drAchPct>=90?'g':drAchPct>=75?'a':'r'},{l:'Total SFOM (MT)',v:fmtMT(tSfom).replace(' MT','')},{l:'Total LFOM (KL)',v:fmtN(Math.round(tLfom))},{l:'Manure Rev (₹)',v:fmtL(manRev)}],
      cl:'Monthly Revenue — SFOM + LFOM (₹L)',
      ch:()=>bar('ov_ch_s6',mo==='ALL'?MONTHS:dDates('d1'),[bDS('SFOM',sfomD,C.lime),bDS('LFOM',lfomD,C.green)]),
-     exploreLbl:'Manure',exploreHint:'Drain · SFOM · LFOM · Revenue'},
+     exploreLbl:'Digestate',exploreHint:'Drain · SFOM · LFOM · Revenue'},
     {id:'s7',tab:'s7',clr:'#b45309',num:'S7',nm:'Sales',person:'Mr. Vivek Kumar',swFlag:'',
      st:sOk(tRev>0?100:null,80,50),
      stat:[{l:drPct>=95?'Veer OK':'Dispatch Lag',c:drPct>=95?'g':'a'},{l:tRev>0?'Adinath OK':'No Revenue',c:tRev>0?'g':'r'}],
@@ -3491,7 +3491,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
   };
 
   // Card builder
-  const _exMap={s1:{lbl:'Feedstock Procurement',hint:'Supply · Mix · Inventory · Utilization'},s2:{lbl:'Lab & Process',hint:'OLR · pH · IA/PA · TS/VS · Temperature'},s3:{lbl:'Production',hint:'Biogas · D1/D2 output · Vent/Flare'},s4:{lbl:'Purification',hint:'PSA efficiency · CH4 purity · hours'},s5:{lbl:'Compressor',hint:'CBG dispatch · utilization · trips'},s6:{lbl:'Manure',hint:'Drain · SFOM · LFOM · Revenue'}};
+  const _exMap={s1:{lbl:'Feedstock Procurement',hint:'Supply · Mix · Inventory · Utilization'},s2:{lbl:'Lab & Process',hint:'OLR · pH · IA/PA · TS/VS · Temperature'},s3:{lbl:'Production',hint:'Biogas · D1/D2 output · Vent/Flare'},s4:{lbl:'Purification',hint:'PSA efficiency · CH4 purity · hours'},s5:{lbl:'Compressor',hint:'CBG dispatch · utilization · trips'},s6:{lbl:'Digestate',hint:'Drain · SFOM · LFOM · Revenue'}};
   const card=(sec,content,sparkVals,sparkColor,sparkLabel)=>{
     // Sparkline section is OUTSIDE flex:1 content so it always sits at the same height across card pairs
     const spkClrEff=sparkColor||sec.clr||'var(--blue)';
@@ -3651,7 +3651,7 @@ function _renderOVSectionsDaInner(da,rec,sg){
   const s5spk=spkFromMo('psa','dispatched');
 
   // S6 Manure
-  const s6={id:'s6',clr:'#3f6212',nm:'Manure',person:'Mr. Vivek Kumar'};
+  const s6={id:'s6',clr:'#3f6212',nm:'Digestate',person:'Mr. Vivek Kumar'};
   const drFeed=f.pm_feed&&drainTot?drainTot/(f.pm_feed*1000)*100:null;
   const s6rows=tbl(['Parameter','D1','D2','Target D1','Target D2'],[
     tblRow('Drain Actual (m³)',fmtM3_(drainD1),fmtM3_(drainD2),fmtM3_(d1r.drain_exp),fmtM3_(d2r.drain_exp)),
