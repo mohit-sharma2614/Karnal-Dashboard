@@ -887,7 +887,13 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
     <div class="strip-card" id="ov_daily_strip_card">
       <div class="strip-hdr">
         <div class="strip-title" id="ov_dstrip_title">Last 7 Days — Daily CBG Production vs Daily Target (5,400 kg)</div>
-        <div class="strip-meta" id="ov_dstrip_meta"></div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <div class="strip-meta" id="ov_dstrip_meta"></div>
+          <div style="display:flex;gap:4px;flex-shrink:0">
+            <button id="ov_dstrip_bk" onclick="dstripBack()" title="Earlier 7 days" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--text2);border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer;line-height:1.4">&#9664;</button>
+            <button id="ov_dstrip_fwd" onclick="dstripFwd()" title="Later 7 days" style="background:var(--bg3);border:1px solid var(--bdr);color:var(--text2);border-radius:5px;padding:2px 8px;font-size:12px;cursor:pointer;line-height:1.4">&#9654;</button>
+          </div>
+        </div>
       </div>
       <div class="atiles" id="ov_dstrip_tiles"></div>
     </div>
@@ -1803,8 +1809,14 @@ function setMonth(mo,btn){
   try{ sectionRender[curSection]&&sectionRender[curSection](); }catch(e){ console.error('render error',curSection,e); }
 }
 
+let _dstripOff=0; // how many days the 7-day window is shifted back from the anchor
+
+function dstripBack(){_dstripOff++;try{sectionRender[curSection]&&sectionRender[curSection]();}catch(e){}}
+function dstripFwd(){if(_dstripOff>0){_dstripOff--;try{sectionRender[curSection]&&sectionRender[curSection]();}catch(e){}}}
+
 function navDay(mo,dayKey){
   // Navigate directly to a specific day — sets month + day without double-render
+  _dstripOff=0; // reset window offset when jumping to a new day
   curMonth=mo; curDay=dayKey;
   document.querySelectorAll('#month_filter .mb').forEach(b=>b.classList.remove('on'));
   const mb=[...document.querySelectorAll('#month_filter .mb')].find(b=>b.textContent.trim()===mo);
@@ -3107,17 +3119,31 @@ function renderOV(){
       return moA!==moB?moA-moB:dayA-dayB;
     });
     let win7,titleTxt;
+    const totalDays=dayKeys.length;
     if(da!=='ALL'){
       const selIdx=dayKeys.indexOf(da);
-      const start=Math.max(0,selIdx-6);
-      win7=dayKeys.slice(start,selIdx+1);
-      titleTxt=`7 Days up to ${da} — Daily CBG vs Daily Target (5,400 kg)`;
+      const anchor=Math.min(totalDays-1,Math.max(6,selIdx-_dstripOff));
+      const start=Math.max(0,anchor-6);
+      win7=dayKeys.slice(start,anchor+1);
+      const endKey=win7[win7.length-1];
+      titleTxt=_dstripOff===0?`7 Days up to ${da} — Daily CBG vs Daily Target (5,400 kg)`:`7 Days up to ${endKey} — Daily CBG vs Daily Target (5,400 kg)`;
     } else {
-      win7=dayKeys.slice(-7);
-      titleTxt=`Last 7 Days — Daily CBG Production vs Daily Target (5,400 kg)`;
+      const anchor=Math.min(totalDays-1,Math.max(6,totalDays-1-_dstripOff));
+      const start=Math.max(0,anchor-6);
+      win7=dayKeys.slice(start,anchor+1);
+      const endKey=win7[win7.length-1];
+      titleTxt=_dstripOff===0?`Last 7 Days — Daily CBG Production vs Daily Target (5,400 kg)`:`7 Days up to ${endKey} — Daily CBG Production vs Daily Target (5,400 kg)`;
     }
     const dstTitle=document.getElementById('ov_dstrip_title');
     if(dstTitle)dstTitle.textContent=titleTxt;
+    // Update nav button states
+    const bkBtn=document.getElementById('ov_dstrip_bk');
+    const fwdBtn=document.getElementById('ov_dstrip_fwd');
+    const anchorIdx=da!=='ALL'?dayKeys.indexOf(da)-_dstripOff:totalDays-1-_dstripOff;
+    if(bkBtn)bkBtn.disabled=anchorIdx<=6;
+    if(fwdBtn)fwdBtn.disabled=_dstripOff<=0;
+    if(bkBtn)bkBtn.style.opacity=anchorIdx<=6?'0.35':'1';
+    if(fwdBtn)fwdBtn.style.opacity=_dstripOff<=0?'0.35':'1';
     const dstTiles=document.getElementById('ov_dstrip_tiles');
     const dstMeta=document.getElementById('ov_dstrip_meta');
     if(!dstTiles)return;
