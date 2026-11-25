@@ -4974,32 +4974,26 @@ function renderS4(){
   const eff1=mo==='ALL'?mArr('d1_eff'):dArr('d1','psa_eff_pct');
   const eff2=mo==='ALL'?mArr('d2_eff'):dArr('d2','psa_eff_pct');
   const ch4=mo==='ALL'?mArr('ch4'):dArr('psa','ch4');
-  const expTot=mo==='ALL'?mArr('exp_tot'):dArr('exp','tot_exp'); // always total for proportioning
-  const d1Exp=mo==='ALL'?mArr('d1_exp'):dArr('exp','d1_exp');
-  const d2Exp=mo==='ALL'?mArr('d2_exp'):dArr('exp','d2_exp');
-  const actPAll=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   const psaH=mo==='ALL'?mArr('psa_hrs'):dArr('psa','psa_hrs');
-  const idealRawAll=mo==='ALL'?mArr('ideal_raw'):dArr('exp','ideal_raw');
-  const idealPurAll=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
-  const idealCBGAll=mo==='ALL'?mArr('ideal_cbg'):dArr('exp','ideal_cbg');
-  const actCBGAll=mo==='ALL'?mArr('act_cbg'):dArr('exp','act_cbg');
   const rbgAll=mo==='ALL'?mArr('rbg_tot'):dArr('psa','rbg_tot');
   const rbgD1=mo==='ALL'?mArr('d1_bg'):dArr('psa','rbg_d1');
   const rbgD2=mo==='ALL'?mArr('d2_bg'):dArr('psa','rbg_d2');
   const cbgD1=mo==='ALL'?mArr('d1_cbg'):dArr('psa','cbg_d1');
   const cbgD2=mo==='ALL'?mArr('d2_cbg'):dArr('psa','cbg_d2');
+  const idealRawAll=psaH.map(h=>h!=null?h*600:null);
+  const idealPurAll=psaH.map(h=>h!=null?h*370:null);
+  const idealCBGAll=psaH.map(h=>h!=null?h*275:null);
+  const actCBGAll=cbgD1.map((v,i)=>(v!=null||cbgD2[i]!=null)?((v||0)+(cbgD2[i]||0)):null);
 
   // ── Apply digester filter ────────────────────────────────────
   // share[i]: fraction of total expected attributed to chosen digester (for proportioning ideals)
-  const digExpRaw = isD1?d1Exp : isD2?d2Exp : expTot;
-  const share = (isD1||isD2) ? digExpRaw.map((e,i)=>{const t=expTot[i];return(t>0&&e!=null)?e/t:null;}) : null;
-  const prop = (arr)=>share ? arr.map((v,i)=>v!=null&&share[i]!=null?v*share[i]:null) : arr;
+  const rbgShare = (isD1||isD2) ? rbgAll.map((t,i)=>{const d=isD1?rbgD1[i]:rbgD2[i];return(t>0&&d!=null)?d/t:null;}) : null;
+  const prop = (arr)=>rbgShare ? arr.map((v,i)=>v!=null&&rbgShare[i]!=null?v*rbgShare[i]:null) : arr;
 
-  const expT = digExpRaw;
   const rbgTot = isD1?rbgD1 : isD2?rbgD2 : rbgAll;
   const actCBG = isD1?cbgD1 : isD2?cbgD2 : actCBGAll;
   const pur = prop(purAll);
-  const actP = prop(actPAll);
+  const actP = pur;
   const idealRaw = prop(idealRawAll);
   const idealPur = prop(idealPurAll);
   const idealCBG = prop(idealCBGAll);
@@ -5056,9 +5050,9 @@ function renderS4(){
   }
 
   // ── Status bar ────────────────────────────────────────────────
-  const totPsaHrs=sumA(psaH); const totExpT=sumA(expT); const totIdealRaw=sumA(idealRaw);
+  const totPsaHrs=sumA(psaH); const totIdealRaw=sumA(idealRaw);
   const totRbg=sumA(rbgTot); const totPur=sumA(pur); const totActCBG=sumA(actCBG); const totIdealCBG=sumA(idealCBG);
-  const reqPsaHrs=totExpT>0?totExpT/370:null;
+  const reqPsaHrs=psaH.filter(h=>h!=null).length*20;
   const hrsShortfall=reqPsaHrs!=null?totPsaHrs-reqPsaHrs:null;
   const hrsShortPct=reqPsaHrs>0?totPsaHrs/reqPsaHrs*100:null;
   const suctEff=totIdealRaw>0?totRbg/totIdealRaw*100:null;
@@ -5093,31 +5087,32 @@ function renderS4(){
     const purEff=totRbg>0&&totPur>0?(totPur/(totRbg*(370/600))*100):null;
     const purEffV=purEff!=null?purEff.toFixed(1)+'%':'—';
     chainEl.innerHTML=
-      cs('Required PSA Hrs for CBG Target','Feed expected ÷ 370 m³/hr',reqH,'hrs','#2563eb')+
+      cs('PSA Target Hours','20 hrs/day × operating days',reqH,'hrs','#2563eb')+
       cs('Hours Shortfall','Required − actual PSA hrs',shortH,'hrs',shortC)+
       cs('Suction Efficiency','Actual RBG ÷ Ideal suction capacity',sEffV,'',sCls(suctEff))+
       cs('Purification Efficiency','Actual purified ÷ Expected from suction',purEffV,'',sCls(purEff));
   }
 
   const lbl=mo==='ALL'?MONTHS:dDates('psa');
-  const lblE=mo==='ALL'?MONTHS:dDates('exp');
+  const lblE=mo==='ALL'?MONTHS:dDates('psa');
   const digTag=isD1?' — D1':isD2?' — D2':'';
   // Update dynamic chart titles to reflect D1/D2 filter
   ['raw','pur','cbg','eff'].forEach(k=>{const el=document.getElementById('ct_s4_'+k);if(el){const base=el.dataset.base||(el.dataset.base=el.textContent.replace(/ — D[12]$/,''));el.textContent=base+digTag;}});
 
-  // 3-way comparison: Feedstock Expected vs PSA Ideal vs Actual
-  line('c_s4_3way',lblE,[
+  // 3-way comparison: PSA target (20 hrs/day) vs Design Ceiling vs Actual
+  const psaTargetArr=psaH.map(()=>20*370);
+  line('c_s4_3way',lbl,[
+    lDS('PSA Target (20 hrs/day × 370)',psaTargetArr,C.blue),
     lDS('PSA Design Ceiling (hrs×370)',idealPur,C.grey),
-    lDS(`Feedstock Expected${digTag}`,expT,C.blue),
     lDS(`Actual Purified${digTag}`,actP,C.green)
   ]);
 
   // Ideal Raw (600 m³/hr) vs Actual Raw Biogas
   line('c_s4_raw',lbl,[lDS('Ideal Raw (600×hrs)',idealRaw,C.amber),lDS(`Actual RBG${digTag}`,rbgTot,C.cyan)]);
   // Ideal Purified (370 m³/hr) vs Actual Purified
-  line('c_s4_pur',lblE,[lDS('Ideal Purified (370×hrs)',idealPur,C.amber),lDS(`Actual Purified${digTag}`,actP,C.green)]);
+  line('c_s4_pur',lbl,[lDS('Ideal Purified (370×hrs)',idealPur,C.amber),lDS(`Actual Purified${digTag}`,actP,C.green)]);
   // Ideal CBG (275 kg/hr) vs Actual CBG
-  line('c_s4_cbg',lblE,[lDS('Ideal CBG (275×hrs)',idealCBG,C.amber),lDS(`Actual CBG${digTag}`,actCBG,C.green)]);
+  line('c_s4_cbg',lbl,[lDS('Ideal CBG (275×hrs)',idealCBG,C.amber),lDS(`Actual CBG${digTag}`,actCBG,C.green)]);
   // CH4
   bar('c_s4_ch4',lbl,[bDS('CH4 %',ch4.map(v=>v?v>1?v:v*100:0),C.green)]);
   // PSA Efficiency — show only relevant line in D1/D2 mode
@@ -5134,7 +5129,7 @@ function renderS4(){
   const d2gs=mo==='ALL'?mArr('d2_gs_bpp'):dArr('exp','d2_gs_bpp');
   const d1ap=mo==='ALL'?mArr('ap_bpp'):dArr('d1','ap_bpp');
   const d2ap=mo==='ALL'?mArr('d2_ap_bpp'):dArr('d2','ap_bpp');
-  line('c_s4_exp',lblE,[lDS('Feedstock Expected (BPP)',expT,C.blue),lDS('Actual Purified',actP,C.green)]);
+  line('c_s4_exp',lbl,[lDS('PSA Target (20 hrs × 370 m³/hr)',psaTargetArr,C.blue),lDS('Actual Purified',actP,C.green)]);
 
   // Conversion efficiency % trend (Task 2) — Actual Purified ÷ Actual RBG × 100
   const convEffArr=(mo==='ALL'?MONTHS:dDates('psa')).map((_,i)=>{
