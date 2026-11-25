@@ -3266,18 +3266,17 @@ function renderOV(){
   const rbgDaysArr=mo==='ALL'?mArr('rbg_days'):dArr('d1','bg_total').map(v=>v!=null&&v>0?1:0);
   const rbgDaysM=rbgDaysArr.reduce((s,v)=>s+(v||0),0)||1;
   const rbgPct=(rbgD1M+rbgD2M)>0?(rbgD1M+rbgD2M)/(13200*rbgDaysM)*100:null;
-  // Feedstock %: total MT fed ÷ (working days × 450 MT design basis)
-  const feedTotArr=mo==='ALL'?mArr('feed_total'):dArr('feed','feed_total');
-  const tFeed=sumA(feedTotArr);
-  const feedDays=feedTotArr.filter(v=>v!=null&&v>0).length||rbgDaysM;
-  const fsPct=tFeed>0?Math.min(120,tFeed/(feedDays*450)*100):null;
+  // Feedstock %: actual feed (D1+D2) ÷ planned feed (D1+D2)
+  const tFeedAct=sumA(mo==='ALL'?mArr('d1_feed'):dArr('d1','feed_act'))+sumA(mo==='ALL'?mArr('d2_feed'):dArr('d2','feed_act'));
+  const tFeedExp=sumA(mo==='ALL'?mArr('d1_feed_exp'):dArr('d1','feed_exp'))+sumA(mo==='ALL'?mArr('d2_feed_exp'):dArr('d2','feed_exp'));
+  const fsPct=tFeedExp>0?Math.min(120,tFeedAct/tFeedExp*100):null;
   // PBG %: actual purified ÷ ideal purified
   const actPurArr=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
   const idlPurArr=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
   const tIdlPur=sumA(idlPurArr);
   const pbgPct=tIdlPur>0?Math.min(120,sumA(actPurArr)/tIdlPur*100):null;
   // Digestate drain actual ÷ planned
-  const tDrnAct=sumA(mo==='ALL'?mArr('d1_drain_ac'):dArr('d1','drain_ac'))+sumA(mo==='ALL'?mArr('d2_drain_ac'):dArr('d2','drain_ac'));
+  const tDrnAct=sumA(mo==='ALL'?mArr('d1_drain'):dArr('d1','drain_ac'))+sumA(mo==='ALL'?mArr('d2_drain'):dArr('d2','drain_ac'));
   const tDrnExp=sumA(mo==='ALL'?mArr('d1_drain_exp'):dArr('d1','drain_exp'))+sumA(mo==='ALL'?mArr('d2_drain_exp'):dArr('d2','drain_exp'));
   const dgPct=tDrnExp>0?Math.min(120,tDrnAct/tDrnExp*100):(tDrnAct>0?80:null);
   // Uptime: PSA hrs ÷ (working days × 24)
