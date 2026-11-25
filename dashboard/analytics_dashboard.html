@@ -3191,16 +3191,26 @@ function renderOV(){
     const dUpt=dp.comp_hrs&&dp.psa_hrs&&dp.psa_hrs>0?dp.comp_hrs/dp.psa_hrs*100:null;
     const dDay=TGT.cbg_day||5400;
     const dAch=dDisp&&dDay>0?dDisp/dDay*100:null;
-    // Plant Health: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (PSA col R÷0.4583×100)
+    // Plant Health: 6 components — Feed | RBG | PBG | Compressor | Digestate | Uptime
     const dRbgRaw=(d1r.bg_total||0)+(d2r.bg_total||0);
     const dRbgPct=dRbgRaw>0?dRbgRaw/13200*100:null;
-    const dPsaEff=dp.psa_eff_day!=null?(dp.psa_eff_day/0.4583)*100:null;
+    const dFsRaw=(f.feed_total||0)||((d1r.feed_act||0)+(d2r.feed_act||0));
+    const dFsPct=dFsRaw>0?Math.min(120,dFsRaw/450*100):null;
+    const dPbgPct=ex.ideal_pur>0?Math.min(120,(ex.act_pur||0)/ex.ideal_pur*100):null;
+    const dCompPct=dp.psa_hrs>0?Math.min(100,(dp.comp_hrs||0)/dp.psa_hrs*100):null;
+    const dDgExp=(d1r.drain_exp||0)+(d2r.drain_exp||0);
+    const dDgAct=(d1r.drain_ac||0)+(d2r.drain_ac||0);
+    const dDgPct=dDgExp>0?Math.min(120,dDgAct/dDgExp*100):(dDgAct>0?80:null);
+    const dUptPct=Math.min(100,(dp.psa_hrs||0)/24*100)||null;
     const dc=[
+      {l:'Feed',v:dFsPct,ok:dFsPct>=90?1:dFsPct>=75?0:-1},
       {l:'RBG',v:dRbgPct,ok:dRbgPct>=85?1:dRbgPct>=70?0:-1},
-      {l:'CBG',v:dAch,ok:dAch>=90?1:dAch>=75?0:-1},
-      {l:'PSA Eff',v:dPsaEff,ok:dPsaEff>=90?1:dPsaEff>=70?0:-1}
+      {l:'PBG',v:dPbgPct,ok:dPbgPct>=85?1:dPbgPct>=70?0:-1},
+      {l:'Compr.',v:dCompPct,ok:dCompPct>=85?1:dCompPct>=70?0:-1},
+      {l:'Dgest.',v:dDgPct,ok:dDgPct>=80?1:dDgPct>=60?0:-1},
+      {l:'Uptime',v:dUptPct,ok:dUptPct>=90?1:dUptPct>=70?0:-1},
     ];
-    const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.25,.45,.30][i])*100,0));
+    const dHS=Math.round(dc.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*([.15,.20,.15,.20,.10,.20][i])*100,0));
     _fillOVHealthRing(dHS,da+' 2026',dc,null);
     const CBG_RATE=70.68; // ₹70.68/kg
     const dCapRev=Math.round(dDay*CBG_RATE);
@@ -3250,31 +3260,46 @@ function renderOV(){
   const _cpkProd=mo==='ALL'?D.kpis.ytd_cbg:(D.M.cbg?.[MONTHS.indexOf(mo)]||0);
   const cpkVal=_cpkProd>0?totalCost/_cpkProd:null;
 
-  // Health ring — 3 components: RBG (D1.AK+D2.AK÷13200) | CBG (dispatched÷contract) | PSA Eff (PSA col R÷0.4583×100)
+  // Health ring — 6 components: Feed | RBG | PBG | Compressor | Digestate | Uptime
   const rbgD1M=sumA(mo==='ALL'?mArr('d1_bg_total'):dArr('d1','bg_total'));
   const rbgD2M=sumA(mo==='ALL'?mArr('d2_bg_total'):dArr('d2','bg_total'));
-  // Count actual working days (not months) for correct denominator
   const rbgDaysArr=mo==='ALL'?mArr('rbg_days'):dArr('d1','bg_total').map(v=>v!=null&&v>0?1:0);
   const rbgDaysM=rbgDaysArr.reduce((s,v)=>s+(v||0),0)||1;
   const rbgPct=(rbgD1M+rbgD2M)>0?(rbgD1M+rbgD2M)/(13200*rbgDaysM)*100:null;
-  // PSA Eff: PSA sheet col R (psa_eff_day) ÷ 0.4583 × 100
-  const psaEffDayAvg=av(mo==='ALL'?mArr('psa_eff_day'):dArr('psa','psa_eff_day'));
-  const psaEffPct=psaEffDayAvg!=null?(psaEffDayAvg/0.4583)*100:null;
+  // Feedstock %: total MT fed ÷ (working days × 450 MT design basis)
+  const feedTotArr=mo==='ALL'?mArr('feed_total'):dArr('feed','feed_total');
+  const tFeed=sumA(feedTotArr);
+  const feedDays=feedTotArr.filter(v=>v!=null&&v>0).length||rbgDaysM;
+  const fsPct=tFeed>0?Math.min(120,tFeed/(feedDays*450)*100):null;
+  // PBG %: actual purified ÷ ideal purified
+  const actPurArr=mo==='ALL'?mArr('act_pur'):dArr('exp','act_pur');
+  const idlPurArr=mo==='ALL'?mArr('ideal_pur'):dArr('exp','ideal_pur');
+  const tIdlPur=sumA(idlPurArr);
+  const pbgPct=tIdlPur>0?Math.min(120,sumA(actPurArr)/tIdlPur*100):null;
+  // Digestate drain actual ÷ planned
+  const tDrnAct=sumA(mo==='ALL'?mArr('d1_drain_ac'):dArr('d1','drain_ac'))+sumA(mo==='ALL'?mArr('d2_drain_ac'):dArr('d2','drain_ac'));
+  const tDrnExp=sumA(mo==='ALL'?mArr('d1_drain_exp'):dArr('d1','drain_exp'))+sumA(mo==='ALL'?mArr('d2_drain_exp'):dArr('d2','drain_exp'));
+  const dgPct=tDrnExp>0?Math.min(120,tDrnAct/tDrnExp*100):(tDrnAct>0?80:null);
+  // Uptime: PSA hrs ÷ (working days × 24)
+  const uptimePct=rbgDaysM>0?Math.min(100,tPH/(rbgDaysM*24)*100):null;
   const hComps=[
+    {l:'Feed',v:fsPct,ok:fsPct>=90?1:fsPct>=75?0:-1},
     {l:'RBG',v:rbgPct,ok:rbgPct>=85?1:rbgPct>=70?0:-1},
-    {l:'CBG',v:achPct,ok:achPct>=90?1:achPct>=75?0:-1},
-    {l:'PSA Eff',v:psaEffPct,ok:psaEffPct>=90?1:psaEffPct>=70?0:-1},
+    {l:'PBG',v:pbgPct,ok:pbgPct>=85?1:pbgPct>=70?0:-1},
+    {l:'Compr.',v:uptPct,ok:uptPct>=85?1:uptPct>=70?0:-1},
+    {l:'Dgest.',v:dgPct,ok:dgPct>=80?1:dgPct>=60?0:-1},
+    {l:'Uptime',v:uptimePct,ok:uptimePct>=90?1:uptimePct>=70?0:-1},
   ];
-  const wts=[.25,.45,.30];
+  const wts=[.15,.20,.15,.20,.10,.20];
   const hs=Math.round(hComps.reduce((s,c,i)=>s+Math.min(100,c.v||0)/100*wts[i]*100,0));
   const hPeriod=mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
-  // 7-period sparkline: real 3-component health score per month, window ending at selected month
+  // 7-period sparkline: approximate health trend per month using available monthly arrays
   const _spkCbg=D.M.cbg||[],_spkRbg=D.M.rbg_tot||[],_spkPsa=D.M.psa_eff_day||[];
   const hsPerMo=MONTHS.map((m,i)=>{
     const r=_spkRbg[i]!=null?_spkRbg[i]/(13200*(MDAYS[m]||30))*100:0;
     const c=_spkCbg[i]!=null?_spkCbg[i]/TGT.cbg_month*100:0;
     const p=_spkPsa[i]!=null?(_spkPsa[i]/0.4583)*100:0;
-    return Math.round(Math.min(100,r)*0.25+Math.min(100,c)*0.45+Math.min(100,p)*0.30);
+    return Math.round(Math.min(100,r)*0.33+Math.min(100,c)*0.34+Math.min(100,p)*0.33);
   });
   const _spkEnd=mo==='ALL'?hsPerMo.length-1:MONTHS.indexOf(mo);
   const spkRaw=_spkEnd>=0?hsPerMo.slice(Math.max(0,_spkEnd-6),_spkEnd+1).filter(v=>v>0):[];
