@@ -3098,6 +3098,53 @@ function renderOV(){
   // Period badge
   document.getElementById('ov_period').textContent=isDa?da+' 2026':mo==='ALL'?(MONTHS.length>0?MONTHS[0]+' – '+MONTHS[MONTHS.length-1]+' 2026':'All Months'):mo+' 2026';
 
+  // ── Daily 7-Day Context Strip (runs in ALL views) ──────────
+  (function(){
+    const moOrder=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dayKeys=Object.keys(D.days).sort((a,b)=>{
+      const [da2,ma]=a.split('-'),moA=moOrder.indexOf(ma),dayA=parseInt(da2);
+      const [db2,mb]=b.split('-'),moB=moOrder.indexOf(mb),dayB=parseInt(db2);
+      return moA!==moB?moA-moB:dayA-dayB;
+    });
+    let win7,titleTxt;
+    if(da!=='ALL'){
+      const selIdx=dayKeys.indexOf(da);
+      const start=Math.max(0,selIdx-6);
+      win7=dayKeys.slice(start,selIdx+1);
+      titleTxt=`7 Days up to ${da} — Daily CBG vs Daily Target (5,400 kg)`;
+    } else {
+      win7=dayKeys.slice(-7);
+      titleTxt=`Last 7 Days — Daily CBG Production vs Daily Target (5,400 kg)`;
+    }
+    const dstTitle=document.getElementById('ov_dstrip_title');
+    if(dstTitle)dstTitle.textContent=titleTxt;
+    const dstTiles=document.getElementById('ov_dstrip_tiles');
+    const dstMeta=document.getElementById('ov_dstrip_meta');
+    if(!dstTiles)return;
+    const tDay=TGT.cbg_day||5400;
+    const dVals=win7.map(k=>({key:k,v:D.days[k]?.psa?.act_cbg||0}));
+    const posD=dVals.filter(x=>x.v>0);
+    const avgD=posD.length?Math.round(posD.reduce((s,x)=>s+x.v/tDay*100,0)/posD.length):0;
+    const bestD=posD.length?posD.reduce((b,x)=>x.v>b.v?x:b,posD[0]):null;
+    const worstD=posD.length?posD.reduce((w,x)=>x.v<w.v?x:w,posD[0]):null;
+    if(dstMeta)dstMeta.textContent=posD.length?`Avg: ${avgD}% · Best: ${bestD?.key??'—'} · Worst: ${worstD?.key??'—'}`:'';
+    dstTiles.innerHTML=win7.map(k=>{
+      const v=D.days[k]?.psa?.act_cbg||0;
+      const p=v>0?Math.round(v/tDay*100):null;
+      const bg=p==null?'var(--bg3)':p>=95?'#166534':p>=85?'#16a34a':p>=75?'#d97706':p>=65?'#c2410c':'#dc2626';
+      const fg=p==null?'var(--text3)':'#fff';
+      const dayMo=D.days[k]?.mo||k.split('-')[1];
+      const [dd,mm]=k.split('-');
+      const dispK=v>0?(Math.round(v/100)/10).toFixed(1)+'k':'';
+      const selDay=(da===k)?';outline:2px solid var(--blue);outline-offset:1px':'';
+      return`<div class="atm" style="background:${bg};color:${fg}${selDay}" onclick="navDay('${dayMo}','${k}')">
+        <div class="atm-m">${dd} ${mm}</div>
+        <div class="atm-p">${p!=null?p+'%':'—'}</div>
+        <div class="atm-k">${dispK}</div>
+      </div>`;
+    }).join('');
+  })();
+
   // ── DAY VIEW ───────────────────────────────────────────────
   if(isDa){
     const mw=document.getElementById('ov_mo_wrap');if(mw)mw.style.display='';
@@ -3250,54 +3297,6 @@ function renderOV(){
       </div>`;
     }).join('');
   }
-
-  // ── Daily 7-Day Context Strip ─────────────────────────────
-  (function(){
-    const moOrder=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    const dayKeys=Object.keys(D.days).sort((a,b)=>{
-      const [da2,ma]=a.split('-'),moA=moOrder.indexOf(ma),dayA=parseInt(da2);
-      const [db2,mb]=b.split('-'),moB=moOrder.indexOf(mb),dayB=parseInt(db2);
-      return moA!==moB?moA-moB:dayA-dayB;
-    });
-    // Window: if a day is selected, show 7 days ending on that day; else show last 7 overall
-    let win7, titleTxt;
-    if(da!=='ALL'){
-      const selIdx=dayKeys.indexOf(da);
-      const start=Math.max(0,selIdx-6);
-      win7=dayKeys.slice(start,selIdx+1);
-      titleTxt=`7 Days up to ${da} — Daily CBG vs Daily Target (5,400 kg)`;
-    } else {
-      win7=dayKeys.slice(-7);
-      titleTxt=`Last 7 Days — Daily CBG Production vs Daily Target (5,400 kg)`;
-    }
-    const dstTitle=document.getElementById('ov_dstrip_title');
-    if(dstTitle)dstTitle.textContent=titleTxt;
-    const dstTiles=document.getElementById('ov_dstrip_tiles');
-    const dstMeta=document.getElementById('ov_dstrip_meta');
-    if(!dstTiles)return;
-    const tDay=TGT.cbg_day||5400;
-    const dVals=win7.map(k=>({key:k,v:D.days[k]?.psa?.act_cbg||0}));
-    const posD=dVals.filter(x=>x.v>0);
-    const avgD=posD.length?Math.round(posD.reduce((s,x)=>s+x.v/tDay*100,0)/posD.length):0;
-    const bestD=posD.length?posD.reduce((b,x)=>x.v>b.v?x:b,posD[0]):null;
-    const worstD=posD.length?posD.reduce((w,x)=>x.v<w.v?x:w,posD[0]):null;
-    if(dstMeta)dstMeta.textContent=posD.length?`Avg: ${avgD}% · Best: ${bestD?.key??'—'} · Worst: ${worstD?.key??'—'}`:'';
-    dstTiles.innerHTML=win7.map(k=>{
-      const v=D.days[k]?.psa?.act_cbg||0;
-      const p=v>0?Math.round(v/tDay*100):null;
-      const bg=p==null?'var(--bg3)':p>=95?'#166534':p>=85?'#16a34a':p>=75?'#d97706':p>=65?'#c2410c':'#dc2626';
-      const fg=p==null?'var(--text3)':'#fff';
-      const dayMo=D.days[k]?.mo||k.split('-')[1];
-      const [dd,mm]=k.split('-');
-      const dispK=v>0?(Math.round(v/100)/10).toFixed(1)+'k':'';
-      const selDay=(da===k)?';outline:2px solid var(--blue);outline-offset:1px':'';
-      return`<div class="atm" style="background:${bg};color:${fg}${selDay}" onclick="navDay('${dayMo}','${k}')">
-        <div class="atm-m">${dd} ${mm}</div>
-        <div class="atm-p">${p!=null?p+'%':'—'}</div>
-        <div class="atm-k">${dispK}</div>
-      </div>`;
-    }).join('');
-  })();
 
   // Highlights — Best/Worst Month (YTD) or Best/Worst Day (month selected)
   if(mo==='ALL'){
