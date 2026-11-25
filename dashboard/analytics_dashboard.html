@@ -293,7 +293,7 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
 #ov .hcc-bar{margin-top:4px;height:2px;background:var(--ink7);border-radius:1px;overflow:hidden}
 #ov .hcc-fill{height:100%;border-radius:1px}
 /* KPI PANEL */
-#ov .kpi-panel{background:var(--ov-white);display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+#ov .kpi-panel{background:var(--ov-white);display:grid;grid-template-columns:repeat(5,1fr);gap:0}
 #ov .kpi{padding:18px 18px 16px;border-right:1px solid var(--ink7);border-bottom:1px solid var(--ink7);position:relative;transition:background .12s}
 #ov .kpi:hover{background:var(--ink8)}
 #ov .kpi:nth-child(4n){border-right:none}
@@ -870,6 +870,8 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       <div class="kpi"><div class="kpi-bar" id="ov_k6_bar"></div><div class="kpi-label" id="ov_k6_lbl"></div><div class="kpi-value" id="ov_k6_val">—</div><div class="kpi-sub" id="ov_k6_sub"></div><div class="kpi-delta" id="ov_k6_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k7_bar"></div><div class="kpi-label" id="ov_k7_lbl"></div><div class="kpi-value" id="ov_k7_val">—</div><div class="kpi-sub" id="ov_k7_sub"></div><div class="kpi-delta" id="ov_k7_dlt" style="display:none"></div></div>
       <div class="kpi"><div class="kpi-bar" id="ov_k8_bar"></div><div class="kpi-label" id="ov_k8_lbl"></div><div class="kpi-value" id="ov_k8_val">—</div><div class="kpi-sub" id="ov_k8_sub"></div><div class="kpi-delta" id="ov_k8_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k9_bar"></div><div class="kpi-label" id="ov_k9_lbl"></div><div class="kpi-value" id="ov_k9_val">—</div><div class="kpi-sub" id="ov_k9_sub"></div><div class="kpi-delta" id="ov_k9_dlt" style="display:none"></div></div>
+      <div class="kpi"><div class="kpi-bar" id="ov_k10_bar"></div><div class="kpi-label" id="ov_k10_lbl"></div><div class="kpi-value" id="ov_k10_val">—</div><div class="kpi-sub" id="ov_k10_sub"></div><div class="kpi-delta" id="ov_k10_dlt" style="display:none"></div></div>
     </div>
   </div>
 
@@ -3241,6 +3243,8 @@ function renderOV(){
       {bar:'#0e7490',l:'Actual Energy Revenue',v:dActRev!=null?fmtR(dActRev):'—',s:'',dc:dActRev!=null&&dCapRev>0?dActRev/dCapRev>=0.9?'g':dActRev/dCapRev>=0.75?'a':'r':null},
       {bar:'#c67c00',l:'Total Production Cost',v:dCost!=null?fmtR(dCost):'—',s:''},
       {bar:'#1b8a4a',l:'Production Cost',v:dCpk!=null?'₹'+dCpk.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',dc:dCpk&&dCpk<=TGT.cost_kg?'g':dCpk&&dCpk<=TGT.cost_kg*1.2?'a':'r'},
+      {bar:'#94a3b8',l:'In Progress',v:'—',s:'Coming soon'},
+      {bar:'#94a3b8',l:'In Progress',v:'—',s:'Coming soon'},
     ]);
     // Render section cards with daily data
     _renderOVSectionsDa(da,rec);
@@ -3339,6 +3343,8 @@ function renderOV(){
     {bar:'#0e7490',l:'Actual Energy Revenue',v:moActRev!=null?fmtR(moActRev):'—',s:'',d:moRevRatio!=null?Math.round(moRevRatio*100)+'% of capacity revenue':null,dc:moRevRatio>=0.9?'g':moRevRatio>=0.75?'a':'r'},
     {bar:'#c67c00',l:'Total Production Cost',v:fmtR(totalCost),s:''},
     {bar:'#1b8a4a',l:'Production Cost',v:cpkVal!=null?'₹'+cpkVal.toFixed(1)+'/kg':'—',s:'Target: ≤₹'+TGT.cost_kg+'/kg',d:cpkVal!=null&&cpkVal<=TGT.cost_kg?'Within target':'▲ Above target',dc:cpkVal&&cpkVal<=TGT.cost_kg?'g':'r'},
+    {bar:'#94a3b8',l:'In Progress',v:'—',s:'Coming soon'},
+    {bar:'#94a3b8',l:'In Progress',v:'—',s:'Coming soon'},
   ]);
 
   // Strip
