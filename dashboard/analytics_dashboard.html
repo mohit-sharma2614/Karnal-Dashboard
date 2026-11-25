@@ -883,6 +883,14 @@ body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,san
       </div>
       <div class="atiles" id="ov_strip_tiles"></div>
     </div>
+    <!-- Last 7 Days Daily Strip -->
+    <div class="strip-card" id="ov_daily_strip_card">
+      <div class="strip-hdr">
+        <div class="strip-title">Last 7 Days — Daily CBG Production vs Daily Target (5,400 kg)</div>
+        <div class="strip-meta" id="ov_dstrip_meta"></div>
+      </div>
+      <div class="atiles" id="ov_dstrip_tiles"></div>
+    </div>
     <!-- Best / Worst Highlights -->
     <div class="hl-row">
       <div class="hlc hlc-best">
@@ -1793,6 +1801,24 @@ function setMonth(mo,btn){
     sel.value='';
   }
   try{ sectionRender[curSection]&&sectionRender[curSection](); }catch(e){ console.error('render error',curSection,e); }
+}
+
+function navDay(mo,dayKey){
+  // Navigate directly to a specific day — sets month + day without double-render
+  curMonth=mo; curDay=dayKey;
+  document.querySelectorAll('#month_filter .mb').forEach(b=>b.classList.remove('on'));
+  const mb=[...document.querySelectorAll('#month_filter .mb')].find(b=>b.textContent.trim()===mo);
+  if(mb)mb.classList.add('on');else document.getElementById('mo_ALL')?.classList.add('on');
+  document.querySelectorAll('.mo-badge').forEach(b=>b.textContent=dayKey+' '+mo.slice(0,3));
+  const wrap=document.getElementById('day_wrap');if(wrap)wrap.style.display='flex';
+  const sel=document.getElementById('day_sel');
+  if(sel){
+    const allDates=Object.keys(D.days).filter(d=>D.days[d].mo===mo).sort((a,b)=>parseInt(a)-parseInt(b));
+    sel.innerHTML=allDates.map(d=>`<option value="${d}">${d}</option>`).join('');
+    sel.value=dayKey;
+  }
+  document.getElementById('day_all_btn')?.classList.remove('on');
+  try{sectionRender[curSection]&&sectionRender[curSection]();}catch(e){console.error('navDay render error',e);}
 }
 
 function setDay(d,btn){
@@ -3078,6 +3104,7 @@ function renderOV(){
     const dw=document.getElementById('ov_day_wrap');if(dw)dw.style.display='none';
     // Hide strip and highlights in day view, show only section grid
     const stripEl=document.querySelector('#ov_mo_wrap .strip-card');if(stripEl)stripEl.style.display='none';
+    const dstripEl=document.getElementById('ov_daily_strip_card');if(dstripEl)dstripEl.style.display='none';
     const hlEl=document.querySelector('#ov_mo_wrap .hl-row');if(hlEl)hlEl.style.display='none';
     const slEl=document.querySelector('#ov_mo_wrap .ov-slabel');if(slEl)slEl.style.display='';
     const rec=D.days[da]||{};
@@ -3126,6 +3153,7 @@ function renderOV(){
   const dw3=document.getElementById('ov_day_wrap');if(dw3)dw3.style.display='none';
   // Restore strip and highlights (may have been hidden in day view)
   const stripEl2=document.querySelector('#ov_mo_wrap .strip-card');if(stripEl2)stripEl2.style.display='';
+  const dstripEl2=document.getElementById('ov_daily_strip_card');if(dstripEl2)dstripEl2.style.display='';
   const hlEl2=document.querySelector('#ov_mo_wrap .hl-row');if(hlEl2)hlEl2.style.display='';
 
   const dispD=mo==='ALL'?mArr('dispatched'):dArr('psa','dispatched');
@@ -3222,6 +3250,41 @@ function renderOV(){
       </div>`;
     }).join('');
   }
+
+  // ── Daily Last 7 Days Strip ────────────────────────────────
+  (function(){
+    const moOrder=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const dayKeys=Object.keys(D.days).sort((a,b)=>{
+      const [da,ma]=a.split('-'),moA=moOrder.indexOf(ma),dayA=parseInt(da);
+      const [db,mb]=b.split('-'),moB=moOrder.indexOf(mb),dayB=parseInt(db);
+      return moA!==moB?moA-moB:dayA-dayB;
+    });
+    const last7=dayKeys.slice(-7);
+    const dstTiles=document.getElementById('ov_dstrip_tiles');
+    const dstMeta=document.getElementById('ov_dstrip_meta');
+    if(!dstTiles)return;
+    const tDay=TGT.cbg_day||5400;
+    const dVals=last7.map(k=>({key:k,v:D.days[k]?.psa?.act_cbg||0}));
+    const posD=dVals.filter(x=>x.v>0);
+    const avgD=posD.length?Math.round(posD.reduce((s,x)=>s+x.v/tDay*100,0)/posD.length):0;
+    const bestD=posD.length?posD.reduce((b,x)=>x.v>b.v?x:b,posD[0]):null;
+    const worstD=posD.length?posD.reduce((w,x)=>x.v<w.v?x:w,posD[0]):null;
+    if(dstMeta)dstMeta.textContent=posD.length?`Avg: ${avgD}% · Best: ${bestD?.key??'—'} · Worst: ${worstD?.key??'—'}`:'';
+    dstTiles.innerHTML=last7.map(k=>{
+      const v=D.days[k]?.psa?.act_cbg||0;
+      const p=v>0?Math.round(v/tDay*100):null;
+      const bg=p==null?'var(--bg3)':p>=95?'#166534':p>=85?'#16a34a':p>=75?'#d97706':p>=65?'#c2410c':'#dc2626';
+      const fg=p==null?'var(--text3)':'#fff';
+      const dayMo=D.days[k]?.mo||k.split('-')[1];
+      const [dd,mm]=k.split('-');
+      const dispK=v>0?(Math.round(v/100)/10).toFixed(1)+'k':'';
+      return`<div class="atm" style="background:${bg};color:${fg}" onclick="navDay('${dayMo}','${k}')">
+        <div class="atm-m">${dd} ${mm}</div>
+        <div class="atm-p">${p!=null?p+'%':'—'}</div>
+        <div class="atm-k">${dispK}</div>
+      </div>`;
+    }).join('');
+  })();
 
   // Highlights — Best/Worst Month (YTD) or Best/Worst Day (month selected)
   if(mo==='ALL'){
