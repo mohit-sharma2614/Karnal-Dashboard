@@ -3102,9 +3102,9 @@ function renderOV(){
   if(isDa){
     const mw=document.getElementById('ov_mo_wrap');if(mw)mw.style.display='';
     const dw=document.getElementById('ov_day_wrap');if(dw)dw.style.display='none';
-    // Hide strip and highlights in day view, show only section grid
+    // Hide monthly strip and highlights in day view; keep daily strip visible for day navigation
     const stripEl=document.querySelector('#ov_mo_wrap .strip-card');if(stripEl)stripEl.style.display='none';
-    const dstripEl=document.getElementById('ov_daily_strip_card');if(dstripEl)dstripEl.style.display='none';
+    const dstripEl=document.getElementById('ov_daily_strip_card');if(dstripEl)dstripEl.style.display='';
     const hlEl=document.querySelector('#ov_mo_wrap .hl-row');if(hlEl)hlEl.style.display='none';
     const slEl=document.querySelector('#ov_mo_wrap .ov-slabel');if(slEl)slEl.style.display='';
     const rec=D.days[da]||{};
@@ -3278,7 +3278,8 @@ function renderOV(){
       const dayMo=D.days[k]?.mo||k.split('-')[1];
       const [dd,mm]=k.split('-');
       const dispK=v>0?(Math.round(v/100)/10).toFixed(1)+'k':'';
-      return`<div class="atm" style="background:${bg};color:${fg}" onclick="navDay('${dayMo}','${k}')">
+      const selDay=(curDay===k)?';outline:2px solid var(--blue);outline-offset:1px':'';
+      return`<div class="atm" style="background:${bg};color:${fg}${selDay}" onclick="navDay('${dayMo}','${k}')">
         <div class="atm-m">${dd} ${mm}</div>
         <div class="atm-p">${p!=null?p+'%':'—'}</div>
         <div class="atm-k">${dispK}</div>
